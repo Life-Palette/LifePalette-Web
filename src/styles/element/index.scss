@@ -1,0 +1,20 @@
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+	$colors: (
+		'primary': (
+			'base': #448efb,
+		),
+		'success': (
+			'base': #1ab394,
+		),
+		'danger': (
+			'base': #f23f2b,
+		),
+    'info': (
+      'base': #8b9aa3,
+    ),
+	)
+);
+// 如果只是按需导入，则可以忽略以下内容。
+// 如果你想导入所有样式:
+@use 'element-plus/theme-chalk/src/index.scss' as *;
+

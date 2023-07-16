@@ -1,0 +1,21 @@
+<svg class="login-type-switch-qrcode" width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline;">
+                        <path d="M50 0H0L54 54V4C54 1.79086 52.2091 0 50 0Z" fill="#7098FE"></path>
+                        <g clip-path="url(#clip0_2391_111115)">
+                        <mask id="mask0_2391_111115" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="54" height="54">
+                        <path d="M50 0H0L54 54V4C54 1.79086 52.2091 0 50 0Z" fill="#5B89FE">
+                        </path></mask>
+                        <g mask="url(#mask0_2391_111115)">
+                        <path d="M31.3333 8H22V17.3333H31.3333V8Z" stroke="white" stroke-width="3" stroke-linejoin="round"></path>
+                        <path d="M31.3333 22.671H22V32.0044H31.3333V22.671Z" stroke="white" stroke-width="3" stroke-linejoin="round"></path>
+                        <path d="M46.0011 8H36.6677V17.3333H46.0011V8Z" stroke="white" stroke-width="3" stroke-linejoin="round"></path>
+                        <path d="M36.9707 22.6704V32.0037" stroke="white" stroke-width="2.8" stroke-linecap="round"></path>
+                        <path d="M41.3342 22.6704V32.0037" stroke="white" stroke-width="2.8" stroke-linecap="round"></path>
+                        <path d="M45.698 22.6704V32.0037" stroke="white" stroke-width="2.8" stroke-linecap="round"></path>
+                        </g>
+                        </g>
+                        <defs>
+                        <clipPath id="clip0_2391_111115">
+                        <rect width="32" height="32" fill="white" transform="translate(18 4)">
+                        </rect></clipPath>
+                        </defs>
+                    </svg>
