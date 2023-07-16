@@ -10,7 +10,7 @@
 
 **中文** | [English](./README.md)
 
-- [预览](https://)
+- [预览](https://lifepalette.netlify.app/#/index)
 
 ## 🚀 Origin
 

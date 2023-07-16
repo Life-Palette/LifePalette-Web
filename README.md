@@ -10,13 +10,13 @@
 
 **English** | [中文](./README.zh-CN.md)
 
-- [Preview](https://)
+- [Preview](https://lifepalette.netlify.app/#/index)
 
 ## 🚀 Origin
 
 - 🎈 Record your memories and craft your own masterpiece of life
 
-## 🦄 Features
+## 🦄 Function
 
 
 - ⚡ **QR Login**: Use nestjs as backend, and integrate QR login
@@ -25,7 +25,7 @@
 - 🥏 **Dynamic release**: Release pictures, text and videos
   -🚩 **Personal information modification**: To be developed...
 
-  ## 特性
+  ## Features
 
 - ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite](https://github.com/vitejs/vite), [pnpm](https://pnpm.io/)
 
