@@ -68,3 +68,27 @@ export const register = (data) => {
     }
   );
 };
+
+// 获取用户信息
+export const getMyInfo = () => {
+  return http.request(
+    "get",
+    "/auth/current",
+    {  },
+    {
+      isNeedToken: true, // 是否需要token
+    }
+  );
+};
+
+// 发生验证码
+export const updateUserInfo = (data) => {
+  return http.request(
+    "post",
+    "/auth/updateUserInfo",
+    { data },
+    {
+      isNeedToken: true, 
+    }
+  );
+};

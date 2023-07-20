@@ -93,6 +93,10 @@
       </section>
     </div>
   </el-dialog>
+  <LoadingUpload
+    v-model:percent="upPercent"
+    v-model:isShow="showUploadLoading"
+  />
 </template>
 
 <script setup>
@@ -129,30 +133,27 @@ const formData = reactive({
   tagIds: [],
 });
 
+const upPercent = ref(0);
+const showUploadLoading = ref(false);
+
 onChange(async (file) => {
   // loading
-  const loading = ElLoading.service({
-    lock: true,
-    text: "上传中...",
-    background: "rgba(0, 0, 0, 0.7)",
-  });
-  console.log("开始上传", loading);
+  upPercent.value = 0;
+  showUploadLoading.value = true;
   for (let i = 0; i < file.length; i++) {
     const { code, msg, result } = await uploadFile(file[i], (progress) => {
-      // console.log("上传进度", progress, loading);
+      console.log("上传进度", progress);
       const { percent } = progress;
-      // loading.text = `上传中...${progress}%`;
-      loading.setText(`上传中...${percent}%`);
+      upPercent.value = percent;
     });
     if (code === 200) {
       console.log("文件上传成功", result);
       fileList.value.push(result);
-      loading.close();
     } else {
       ElMessage.error(msg);
-      loading.close();
     }
   }
+  showUploadLoading.value = false;
 });
 
 // 创建话题

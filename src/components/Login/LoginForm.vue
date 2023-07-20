@@ -5,7 +5,7 @@
       isRegist ? "Regist" : "Thanks for using :)"
     }}</span>
     <div class="flex-1 flex items-center justify-center text-6xl">
-      {{ isRegist ? "🐻‍❄️" : "🐇" }}
+      {{ isRegist ? "🐻" : "🐇" }}
     </div>
 
     <template v-if="isRegist">

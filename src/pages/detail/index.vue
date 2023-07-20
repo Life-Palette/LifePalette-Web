@@ -3,6 +3,7 @@ import { Starport } from "vue-starport";
 import StarportCard from "~/components/StarportCard.vue";
 import { topicFindById } from "~/api/topic";
 import { commentCreate, commentFindById } from "~/api/comment";
+import { likeCreate, likeFindById } from "~/api/like";
 import { formatTime } from "~/utils";
 const route = useRoute();
 const router = useRouter();
@@ -73,6 +74,19 @@ const comList = ref([]);
 const comNum = computed(() => {
   return comList.value.length || 0;
 });
+
+const handleLike = async () => {
+  const params = {
+    topicId: deId.value,
+  };
+  const { code, msg, result } = ({} = await likeCreate(params));
+  if (code === 200) {
+    console.log("点赞成功", result);
+    // getLikeData();
+  } else {
+    console.log("点赞失败", msg);
+  }
+};
 </script>
 
 <template>
@@ -136,7 +150,7 @@ const comNum = computed(() => {
           <!-- 基本信息 -->
           <div class="flex gap-4 text-[#333]">
             <!-- 点赞 -->
-            <div class="flex gap-2 items-end">
+            <div class="flex gap-2 items-end" @click="handleLike">
               <div class="i-carbon-favorite text-xl"></div>
               <div class="text-sm">{{ 0 }}</div>
             </div>

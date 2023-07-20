@@ -8,7 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Comment: typeof import('./src/components/Comment.vue')['default']
-    copy: typeof import('./src/components/Slider copy.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElCarousel: typeof import('element-plus/es')['ElCarousel']
     ElCarouselItem: typeof import('element-plus/es')['ElCarouselItem']
@@ -17,11 +16,13 @@ declare module 'vue' {
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
-    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElImage: typeof import('element-plus/es')['ElImage']
+    LoadingUpload: typeof import('./src/components/LoadingUpload.vue')['default']
+    Loginabout: typeof import('./src/components/Login/Loginabout.vue')['default']
     LoginDialog: typeof import('./src/components/Login/LoginDialog.vue')['default']
     LoginForm: typeof import('./src/components/Login/LoginForm.vue')['default']
     LoginQr: typeof import('./src/components/Login/LoginQr.vue')['default']
+    Lottie: typeof import('./src/components/Lottie.vue')['default']
     Post: typeof import('./src/components/post/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
