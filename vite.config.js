@@ -10,6 +10,8 @@ import { viteMockServe } from "vite-plugin-mock";
 import legacy from "@vitejs/plugin-legacy";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
+import vueJsx from "@vitejs/plugin-vue-jsx";
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
@@ -20,6 +22,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    vueJsx(), 
     legacy({
       targets: ["defaults", "not IE 11"],
       // legacyPolyfills: false
@@ -62,8 +65,8 @@ export default defineConfig({
     // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
     proxy: {
       "^/api/.*": {
-        // target: "http://192.168.3.13:3001/api",
-        target: "https://test.wktest.cn:3001/api",
+        target: "http://192.168.3.13:3001/api",
+        // target: "https://test.wktest.cn:3001/api",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },

@@ -6,7 +6,7 @@
 const domainLsit = [
   // 测试服
   {
-    baseServer: "https://test.wktest.cn:3001/api", //开发服务 0
+    baseServer: "/api", //开发服务 0
     otherServer: "https://test.wktest.cn:3001/api", //开发服务器 1
   },
   // 正式服

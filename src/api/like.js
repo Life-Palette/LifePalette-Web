@@ -22,3 +22,14 @@ export const likeCreate = (data) => {
     }
   );
 };
+// 取消点赞
+export const likeDelete = (data) => {
+  return http.request(
+    "delete",
+    `/like`,
+    { data },
+    {
+      isNeedToken: true, // 是否需要token
+    }
+  );
+};

@@ -5,8 +5,8 @@ import ImgNoData from "~/assets/image/noData/33.svg";
 const emit = defineEmits(["update:comList"]);
 const props = defineProps({
   id: {
-    type: Boolean,
-    default: true,
+    type: [String, Number],
+    default: 0,
   },
   comList: {
     type: Array,

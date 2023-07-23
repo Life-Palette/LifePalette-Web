@@ -75,7 +75,9 @@ const videoRef = ref(null);
     <el-image
       class="w-full h-full transition-all duration-900"
       fit="cover"
-      :src="data.file"
+      :preview-src-list="[data.file]"
+      preview-teleported
+      :src="isDetail ? data.file : data.thumbnail"
     >
       <template #placeholder>
         <div class="image-slot">Loading<span class="dot">...</span></div>

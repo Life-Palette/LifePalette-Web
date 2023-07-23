@@ -1,10 +1,17 @@
 <script setup>
 import { Starport } from "vue-starport";
 import StarportCard from "~/components/StarportCard.vue";
+import BaseLike from "~/components/Base/Like.vue";
 import { topicFindById } from "~/api/topic";
 import { commentCreate, commentFindById } from "~/api/comment";
-import { likeCreate, likeFindById } from "~/api/like";
+import { likeCreate, likeFindById, likeDelete } from "~/api/like";
 import { formatTime } from "~/utils";
+import { ElMessage } from "element-plus";
+import { useUserStore } from "~/store/user";
+const userStore = useUserStore();
+
+const { userInfo } = storeToRefs(userStore);
+
 const route = useRoute();
 const router = useRouter();
 const deId = ref("");
@@ -15,8 +22,11 @@ const commentContent = ref("");
 const fileList = ref([]);
 // 获取内容详情
 const getDataDe = async () => {
-  const id = deId.value;
-  const { code, msg, result } = ({} = await topicFindById(id));
+  const parsms = {
+    topicId: deId.value,
+  };
+  isLogin.value && (parsms.userId = userInfo.value.id);
+  const { code, msg, result } = ({} = await topicFindById(parsms));
   if (code === 200) {
     console.log("获取内容详情成功", result);
     dataDe.value = result;
@@ -41,6 +51,7 @@ onMounted(() => {
   deId.value = id;
   isInitDone.value = true;
   getDataDe();
+  getLikeData();
   // getCommentData();
 });
 
@@ -79,24 +90,79 @@ const handleLike = async () => {
   const params = {
     topicId: deId.value,
   };
-  const { code, msg, result } = ({} = await likeCreate(params));
+  const requestApi = dataDe.value.like ? likeDelete : likeCreate;
+  const { code, msg, result } = ({} = await requestApi(params));
   if (code === 200) {
     console.log("点赞成功", result);
+
     // getLikeData();
+    if (dataDe.value.like) {
+      dataDe.value.like = false;
+      likeList.value = likeList.value.filter(
+        (item) => item.userId !== userInfo.value.id
+      );
+    } else {
+      dataDe.value.like = true;
+      likeList.value.push({
+        userId: userInfo.value.id,
+        topicId: deId.value,
+      });
+      ElMessage.success("点赞成功");
+    }
   } else {
     console.log("点赞失败", msg);
+    ElMessage.error("点赞失败");
   }
 };
+// 是否登录
+const isLogin = computed(() => {
+  return userInfo.value?.name;
+});
+// 获取点赞信息
+const likeList = ref([]);
+const getLikeData = async () => {
+  const { code, msg, result } = ({} = await likeFindById({
+    topicId: deId.value,
+  }));
+  if (code === 200) {
+    console.log("获取点赞信息成功", result);
+    likeList.value = result || [];
+  } else {
+    console.log("获取点赞信息失败", msg);
+  }
+};
+// 标签信息
+const tagDe = computed(() => {
+  const tagNameList = dataDe.value?.tags || [];
+  return tagNameList.map((item) => `#${item.title}`).join(" ");
+});
+
+const currentPlayIndex = ref(0);
+const handleSwiperChange = (index) => {
+  // console.log("index", index);
+  currentPlayIndex.value = index;
+};
+const currentPlayInfo = computed(() => {
+  return `${currentPlayIndex.value + 1}/${fileList.value.length}`;
+});
+
 </script>
 
 <template>
   <div class="h-full w-full gap-5 flex px-10 pt-10 pb-2 box-border">
     <div class="conten-box">
-      <div class="img-con flex-1">
+      <div class="img-con flex-1 relative">
+        <div v-if="fileList.length > 0" class="fraction">
+          {{ currentPlayInfo }}
+        </div>
         <Starport :port="'my-id' + deId" style="height: 100%">
-          <div class="h-full">
-            <el-carousel :autoplay="false">
-              <el-carousel-item v-for="(item, index) in fileList" :key="index">
+          <div class="h-full relative">
+            <el-carousel :autoplay="false" @change="handleSwiperChange">
+              <el-carousel-item
+               
+                v-for="(item, index) in fileList"
+                :key="index"
+              >
                 <StarportCard :data="item" isDetail />
               </el-carousel-item>
             </el-carousel>
@@ -121,22 +187,30 @@ const handleLike = async () => {
         </section>
         <!-- 标题 -->
         <section class="title-part flex-1 overflow-auto flex flex-col">
+          <!-- 标题 -->
           <div class="title-desc py-5">
             {{ dataDe.title }}
           </div>
+          <!-- 内容 -->
           <div class="title-content text-start text-[#333] py-5">
             {{ dataDe.content }}
           </div>
+          <!-- 标签 -->
+          <div class="title-content text-lg text-start text-[#13386c] py-5">
+            {{ tagDe }}
+          </div>
+          <!-- 时间 -->
           <div
             class="title-content text-sm text-start text-[rgb(51,51,51,0.6)] py-5"
           >
             {{ formatTime(dataDe.createdAt, "YYYY-MM-DD HH:mm") }}
           </div>
+
           <div class="w-full box-border">
             <div class="bg-[rgb(0,0,0,0.1)] h-[1px] w-full"></div>
           </div>
           <!-- 标签列表 -->
-          <div class="flex-1 overflow-auto">
+          <div class="flex-1">
             <Comment
               ref="commentRef"
               v-model:comList="comList"
@@ -150,15 +224,23 @@ const handleLike = async () => {
           <!-- 基本信息 -->
           <div class="flex gap-4 text-[#333]">
             <!-- 点赞 -->
-            <div class="flex gap-2 items-end" @click="handleLike">
-              <div class="i-carbon-favorite text-xl"></div>
-              <div class="text-sm">{{ 0 }}</div>
+            <div class="flex gap-2 items-end">
+              <!-- <div
+                v-if="dataDe.like"
+                class="i-carbon-favorite-filled text-[#ff4d4f] text-xl"
+              ></div>
+              <div v-else class="i-carbon-favorite text-xl"></div> -->
+              <BaseLike
+                v-model:isLikePro="dataDe.like"
+                @likeChange="handleLike"
+              />
+              <div class="text-sm">{{ likeList.length }}</div>
             </div>
             <!-- 收藏 -->
-            <div class="flex gap-2 items-end">
+            <!-- <div class="flex gap-2 items-end">
               <div class="i-carbon-star text-xl"></div>
               <div class="text-sm">{{ 0 }}</div>
-            </div>
+            </div> -->
             <!-- 评论 -->
             <div class="flex gap-2 items-end">
               <div class="i-carbon-chat text-xl"></div>
@@ -351,5 +433,24 @@ const handleLike = async () => {
 
 .overlay__btn-emoji {
   margin-left: 0.375rem;
+}
+.fraction {
+  position: absolute;
+  right: 28px;
+  top: 24px;
+  padding: 6px 14px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 12px;
+  z-index: 2;
+  color: #fff;
+  background: rgbs(64, 64, 64, 0.25);
+  -webkit-backdrop-filter: saturate(150%) blur(10px);
+  backdrop-filter: saturate(150%) blur(10px);
+  // opacity: 0;
+  transition: all 0.3s;
+  // z-index: 99;
 }
 </style>

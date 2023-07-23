@@ -9,3 +9,22 @@ body,
 html.dark {
   background: #121212;
 }
+:root {
+  --theme-color: #f8f8f8;
+  --test-color: red;
+  --pal-button-text-color: #333;
+  --pal-button-bg-color: var(--theme-color);
+  --pal-button-border-color: #4c4d4f;
+  --pal-border-radius-base: 10px;
+  --pal-font-size-base: 14px;
+  --pal-border: 1px solid var(--theme-color);
+}
+html.dark {
+  --theme-color: #333;
+  --pal-button-text-color: #fff;
+  --pal-button-bg-color: var(--theme-color);
+  --pal-button-border-color: #4c4d4f;
+  --pal-border-radius-base: 10px;
+  --pal-font-size-base: 14px;
+  --pal-border: 1px solid var(--theme-color);
+}

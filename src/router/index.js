@@ -1,6 +1,6 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from "vue-router";
 // component: () => import('@/layout/layout.vue'),
-import Layout from '~/layout/layout.vue'
+import Layout from "~/layout/layout.vue";
 
 const baseRouters = [
   // {
@@ -34,64 +34,80 @@ const baseRouters = [
   //     },
   //   ],
   // },
-]
+];
 const routes = [
   {
-    path: '/',
-    name: 'base',
-    redirect: '/index',
+    path: "/",
+    name: "base",
+    redirect: "/index",
     component: Layout,
     meta: {
-      title: '首页',
+      title: "首页",
     },
     children: [
       {
-        path: '/index',
-        name: 'Index',
+        path: "/index",
+        name: "Index",
         component: () =>
-          import(/* webpackChunkName: "Index" */ '~/pages/home/index.vue'),
+          import(/* webpackChunkName: "Index" */ "~/pages/home/index.vue"),
         meta: {
-          title: '首页',
+          title: "首页",
           keepAlive: false,
         },
       },
       {
-        path: '/mine',
-        name: 'Mine',
+        path: "/mine",
+        name: "Mine",
         component: () =>
-          import(/* webpackChunkName: "Mine" */ '~/pages/mine/index.vue'),
+          import(/* webpackChunkName: "Mine" */ "~/pages/mine/index.vue"),
         meta: {
-          title: '我的',
+          title: "我的",
           keepAlive: false,
         },
       },
       {
-        path: '/detail/:id',
-        name: 'Detail',
+        path: "/detail/:id",
+        name: "Detail",
         component: () =>
-          import(/* webpackChunkName: "Detail" */ '~/pages/detail/index.vue'),
+          import(/* webpackChunkName: "Detail" */ "~/pages/detail/index.vue"),
         meta: {
-          title: '详情',
+          title: "详情",
           keepAlive: false,
         },
       },
       {
-        path: '/qr',
-        name: 'qr',
+        path: "/qr",
+        name: "qr",
         component: () =>
-          import(/* webpackChunkName: "qr" */ '~/pages/QRCode/index.vue'),
+          import(/* webpackChunkName: "qr" */ "~/pages/QRCode/index.vue"),
         meta: {
-          title: '首页',
+          title: "首页",
           keepAlive: false,
         },
       },
+      // {
+      //   path: "/test",
+      //   name: "test",
+      //   component: () =>
+      //     import(/* webpackChunkName: "test" */ "~/pages/test/index.vue"),
+      //   meta: {
+      //     title: "测试",
+      //     keepAlive: false,
+      //   },
+      // },
     ],
   },
-]
+  {
+    path: "/test",
+    name: "test",
+    component: () =>
+      import(/* webpackChunkName: "test" */ "~/pages/test/index.vue"),
+  },
+];
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [...baseRouters, ...routes],
-})
+});
 
-export { routes, router }
+export { routes, router };

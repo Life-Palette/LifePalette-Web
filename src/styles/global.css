@@ -1,0 +1,21 @@
+:root {
+  --test-color: red;
+}
+.pal-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  height: 32px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--color);
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  transition: 0.1s;
+  user-select: none;
+  vertical-align: middle;
+  -webkit-appearance: none;
+  padding: 8px 15px;
+}

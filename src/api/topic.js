@@ -12,11 +12,11 @@ export const topicFindAll = (params) => {
     }
   );
 };
-export const topicFindById = (id) => {
+export const topicFindById = (params) => {
   return http.request(
     "get",
-    `/topic/${id}`,
-    {},
+    `/topic/${params.topicId}`,
+    { params },
     {
       isNeedToken: false, // 是否需要token
     }
