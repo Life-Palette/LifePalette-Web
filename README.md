@@ -1,22 +1,31 @@
-<p align='center'>
-vue3-template-js <b>vite + v3 +js</b><sup><em>(speed)</em></sup><br>
+<p align="center">
+  <br>
+  <img width="400" src="./src/assets/image/logo/logo.svg" alt="logo of vue-awesome repository">
+  <br>
+  <br>
 </p>
 
-<br>
+<!-- <h1 align="center">LifePalette</h1> -->
+<p align="center">🐻Record your memories and craft your own masterpiece of life</p>
 
-<p align='center'>
-<a href="https://starter-web.netlify.app/">Live Demo</a>
-</p>
+**English** | [中文](./README.zh-CN.md)
 
-<br>
+- [Preview](https://lifepalette.netlify.app/#/index)
 
-<!-- <p align='center'>
-<b>English</b> | <a href="">简体中文</a>
-</p> -->
+## 🚀 Origin
 
-<br>
+- 🎈 Record your memories and craft your own masterpiece of life
 
-## Features
+## 🦄 Function
+
+
+- ⚡ **QR Login**: Use nestjs as backend, and integrate QR login
+- 🐱 **Ali oss file upload**: File upload based on `ali-oss` [Node.js](https://help.aliyun.com/document_detail/32067.html?spm=a2c4g.32070.0.0.607a55afYXWVU3) implementation
+- 🎈 **SMS verification**: Send and verify SMS through `Ali Da Yu`
+- 🥏 **Dynamic release**: Release pictures, text and videos
+  -🚩 **Personal information modification**: To be developed...
+
+  ## Features
 
 - ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite](https://github.com/vitejs/vite), [pnpm](https://pnpm.io/)
 
@@ -35,23 +44,3 @@ vue3-template-js <b>vite + v3 +js</b><sup><em>(speed)</em></sup><br>
 - 🎨 [Element Plus](https://element-plus.org/) - a Vue 3.0 UI library
 
 <br>
-
-## Usage
-
-### Development
-
-Just run and visit http://localhost:9527
-
-```bash
-pnpm dev
-```
-
-### Build
-
-To build the App, run
-
-```bash
-pnpm build
-```
-
-And you will see the generated file in `dist` that ready to be served.
