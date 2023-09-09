@@ -9,7 +9,7 @@ import { Starport } from "vue-starport";
 import StarportCard from "~/components/StarportCard.vue";
 import ListSwiper from "~/components/List/ListSwiper.vue";
 import LottieNoData from "~/components/Lottie/NoData.vue";
-import Skeleton from "~/components/skeleton/index.jsx";
+import Skeleton from "~/components/Skeleton";
 import CardSwiper from "~/components/Card/SwiperCard.vue";
 import { formatTime } from "~/utils";
 import {
