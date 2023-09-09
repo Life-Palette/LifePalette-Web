@@ -267,7 +267,10 @@ const getTagDe = (tags) => {
               >
                 <div class="w-80 min-h-50 item-box">
                   <div class="img-cover max-h-100 flex-1">
-                    <Starport :port="'my-id' + item.id" class="w-full h-full">
+                    <Starport
+                      :port="'my-id' + item.id"
+                      class="w-full h-full transition-all duration-800"
+                    >
                       <StarportCard :data="item.files[0]" />
                     </Starport>
                   </div>

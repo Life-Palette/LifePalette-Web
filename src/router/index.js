@@ -85,6 +85,16 @@ const routes = [
           keepAlive: false,
         },
       },
+      {
+        path: "/chat",
+        name: "chat",
+        component: () =>
+          import(/* webpackChunkName: "chat" */ "~/pages/chat/index.vue"),
+        meta: {
+          title: "聊天",
+          keepAlive: false,
+        },
+      },
       // {
       //   path: "/test",
       //   name: "test",

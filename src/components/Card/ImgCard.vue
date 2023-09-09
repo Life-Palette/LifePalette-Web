@@ -1,6 +1,20 @@
 <template>
   <div class="card-box" v-if="coverUrl">
-    <img :src="coverUrl" class="mian-img max-w-[80%] " />
+    <el-image
+      class="w-full "
+      fit="contain"
+      :src="coverUrl"
+      :preview-src-list="[coverUrl]"
+    >
+      <template #placeholder>
+        <div class="image-slot">Loading<span class="dot">...</span></div>
+      </template>
+      <template #error>
+        <div class="image-slot min-h-20 flex justify-center items-center">
+          加载失败
+        </div>
+      </template>
+    </el-image>
     <div class="bg-cover-box">
       <img class="bg-cover-img mian-img" :src="coverUrl" />
       <div class="cover-box"></div>
@@ -14,12 +28,18 @@ const props = defineProps({
     type: Object,
     default: () => {},
   },
+  src: {
+    type: String,
+    default: "",
+  },
 });
-console.log();
 
 const coverUrl = computed(() => {
+  if (props.src) {
+    return props.src;
+  }
   const fileTemp = props.data || {};
- 
+
   const { fileType, file, thumbnail = "", cover = "IMAGE" } = fileTemp || {};
   if (fileType === "IMAGE") {
     return file || "";
@@ -29,7 +49,6 @@ const coverUrl = computed(() => {
 });
 onMounted(() => {
   // console.log(props.data);
-  // 创建
 });
 </script>
 
@@ -43,12 +62,13 @@ onMounted(() => {
   position: relative;
   width: 100%;
   z-index: 0;
-  max-height: 100vh;
-  height: 100vh;
+
+  height: 100%;
   .mian-img {
-    align-self: flex-start;
+    // align-self: flex-start;
     height: 100%;
-    object-fit: cover;
+    // width: 100%;
+    object-fit: contain;
   }
   .bg-cover-box {
     bottom: 0;

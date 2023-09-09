@@ -28,3 +28,20 @@ html.dark {
   --pal-font-size-base: 14px;
   --pal-border: 1px solid var(--theme-color);
 }
+
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+
+.debug [data-starport-craft] {
+  background: #0805;
+}
+.debug [data-starport-proxy]:not([data-starport-landed]) {
+  background: #8005;
+}

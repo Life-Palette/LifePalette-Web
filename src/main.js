@@ -14,6 +14,11 @@ import './styles/main.css'
 // import '@unocss/reset/tailwind.css'
 import 'uno.css'
 import { VueMasonryPlugin } from 'vue-masonry';
+import FloatingVue from 'floating-vue'
+import 'floating-vue/dist/style.css'
+import Toast from "vue-toastification";
+// Import the CSS or use your own!
+import "vue-toastification/dist/index.css";
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
@@ -23,5 +28,7 @@ app.use(MotionPlugin)
 app.use(pinia)
 app.use(router)
 app.use(VueMasonryPlugin)
+app.use(FloatingVue)
+app.use(Toast)
 
 app.mount('#app')

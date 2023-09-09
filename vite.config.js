@@ -22,7 +22,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    vueJsx(), 
+    vueJsx(),
     legacy({
       targets: ["defaults", "not IE 11"],
       // legacyPolyfills: false
@@ -65,7 +65,7 @@ export default defineConfig({
     // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
     proxy: {
       "^/api/.*": {
-        target: "http://192.168.3.13:3001/api",
+        target: "http://localhost:3001/api",
         // target: "https://test.wktest.cn:3001/api",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),

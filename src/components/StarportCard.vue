@@ -1,4 +1,5 @@
 <script setup>
+  import ImgCard from "~/components/Card/ImgCard.vue";
 const props = defineProps({
   fileUrl: {
     type: String,
@@ -55,7 +56,7 @@ const videoRef = ref(null);
 
     <template v-else>
       <div class="relative w-full h-full">
-        <el-image
+        <!-- <el-image
           class="w-full h-full transition-all duration-900"
           fit="cover"
           :src="data.cover"
@@ -63,7 +64,8 @@ const videoRef = ref(null);
           <template #placeholder>
             <div class="image-slot">Loading<span class="dot">...</span></div>
           </template>
-        </el-image>
+        </el-image> -->
+         <ImgCard :data="data" />
         <div class="play-icon">
           <div class="i-carbon-play-filled-alt text-[#fff] text-sm"></div>
         </div>
@@ -72,7 +74,7 @@ const videoRef = ref(null);
   </template>
   <!-- 图片 -->
   <template v-else>
-    <el-image
+    <!-- <el-image
       class="w-full h-full transition-all duration-900"
       fit="cover"
       :preview-src-list="[data.file]"
@@ -87,7 +89,8 @@ const videoRef = ref(null);
           加载失败
         </div>
       </template>
-    </el-image>
+    </el-image> -->
+     <ImgCard :src="fileUrl" :data="data" />
   </template>
 </template>
 

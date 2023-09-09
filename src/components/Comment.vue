@@ -51,11 +51,7 @@ defineExpose({
     <template v-if="hasData">
       <div class="comment-item w-full box-border" v-for="item in commentList" :key="item.id">
         <div class="comment-item__left">
-          <img
-            class="comment-item__left-avatar"
-            :src="item?.User?.avatar"
-            alt=""
-          />
+          <img class="comment-item__left-avatar" :src="item?.User?.avatar" alt="" />
         </div>
         <div class="comment-item__right">
           <div class="comment-item__right-top">
@@ -78,7 +74,7 @@ defineExpose({
 
     <!-- 无数据 -->
     <template v-else>
-      <div class="no-data h-60 w-60">
+      <div class="animation_lkpkpzdn h-60 w-60">
         <img :src="ImgNoData" class="w-full h-full" alt="" />
         <p>快来成为评论第一人吧！</p>
       </div>
@@ -91,37 +87,45 @@ defineExpose({
 ::-webkit-scrollbar {
   display: none;
 }
+
 .comment-item {
   display: flex;
   padding: 20px 10px;
 
   position: relative;
+
   .comment-item__left {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     overflow: hidden;
+
     .comment-item__left-avatar {
       width: 100%;
       height: 100%;
     }
   }
+
   .comment-item__right {
     flex: 1;
     padding-left: 10px;
+
     .comment-item__right-top {
       display: flex;
       justify-content: space-between;
+
       .comment-item__right-top-name {
         font-size: 16px;
         font-weight: bold;
         color: rgba(51, 51, 51, 0.6);
       }
+
       .comment-item__right-top-time {
         font-size: 12px;
         color: #999;
       }
     }
+
     .comment-item__right-content {
       text-align: start;
       font-size: 14px;
@@ -130,5 +134,4 @@ defineExpose({
       word-break: break-all;
     }
   }
-}
-</style>
+}</style>

@@ -130,25 +130,29 @@ const handleLogin = async () => {
     mobile: loginForm.value.username,
     password: loginForm.value.password,
   };
-  const { code, msg, result } = ({} = await userStore.handLogin(params));
-  if (code === 200) {
-    ElMessage.success("登录成功");
-    emit("closeDialog");
-  } else {
-    // ElMessage.error(msg);
-    console.log("登录失败", msg);
-    //    判断msg是否为数组
-    if (Array.isArray(msg)) {
-      //   msg.forEach((item) => {
-      //     ElMessage.error(item);
-      //   });
-      const msgDes = msg.length > 0 ? msg[0]?.message : "登录失败";
-      ElMessage.error(msgDes);
+  try {
+    const { code, msg, result } = ({} = await userStore.handLogin(params));
+    if (code === 200) {
+      ElMessage.success("登录成功");
+      emit("closeDialog");
     } else {
-      ElMessage.error("登录失败");
+      // ElMessage.error(msg);
+      console.log("登录失败", msg);
+      //    判断msg是否为数组
+      if (Array.isArray(msg)) {
+        //   msg.forEach((item) => {
+        //     ElMessage.error(item);
+        //   });
+        const msgDes = msg.length > 0 ? msg[0]?.message : "登录失败";
+        ElMessage.error(msgDes);
+      } else {
+        ElMessage.error("登录失败");
+      }
     }
+    loginLoading.value = false;
+  } catch (error) {
+    loginLoading.value = false;
   }
-  loginLoading.value = false;
 };
 // 表单校验
 const valForm = () => {

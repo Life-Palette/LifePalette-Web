@@ -8,11 +8,13 @@ const domainLsit = [
   {
     baseServer: "/api", //开发服务 0
     otherServer: "https://test.wktest.cn:3001/api", //开发服务器 1
+    websocket: "ws://localhost:3003",
   },
   // 正式服
   {
     baseServer: "https://test.wktest.cn:3001/api", //开发服务 0
     otherServer: "https://test.wktest.cn:3001/api", //开发服务器 1
+    websocket: "ws://192.168.3.13:3003",
   },
 ];
 

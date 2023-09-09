@@ -8,26 +8,15 @@
     <div class="w-full box-border flex px-5 con-h">
       <Slider />
       <div class="flex-1"></div>
-      <StarportCarrier>
-        <!-- <router-view v-slot="{ Component }">
-          <transition name="move" mode="out-in">
-            <keep-alive>
-              <component
-                v-if="$route.meta.keepAlive"
-                :is="Component"
-                :key="$route.name"
-              ></component>
-            </keep-alive>
-          </transition>
-          <transition name="move" mode="out-in">
-            <component
-              v-if="!$route.meta.keepAlive"
-              :is="Component"
-              :key="$route.name"
-            ></component>
-          </transition>
-        </router-view> -->
+      <!-- <StarportCarrier>
         <router-view />
+      </StarportCarrier> -->
+      <StarportCarrier>
+        <RouterView v-slot="{ Component }">
+          <transition name="page-fade">
+            <component :is="Component" />
+          </transition>
+        </RouterView>
       </StarportCarrier>
     </div>
     <!-- <div><TheFooter /></div> -->

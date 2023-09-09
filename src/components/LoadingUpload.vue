@@ -8,8 +8,9 @@
 </template>
 
 <script setup>
-import lottieUpload from "~/assets/lottie/upload.json";
-const emit = defineEmits(["update:percent","update:isShow"]);
+// import lottieUpload from "~/assets/lottie/upload.json";
+import lottieUpload from "~/assets/lottie/animation_lkpkpzdn.json";
+const emit = defineEmits(["update:percent", "update:isShow"]);
 const props = defineProps({
   percent: {
     type: [Number, String],
@@ -37,7 +38,8 @@ const props = defineProps({
   bottom: 0;
   left: 0;
   position: fixed;
-  .upload-text{
+
+  .upload-text {
     margin-top: 2em;
     margin-left: 2em;
     color: #fff;

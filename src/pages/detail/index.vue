@@ -5,6 +5,7 @@ import BaseLike from "~/components/Base/Like.vue";
 import { topicFindById } from "~/api/topic";
 import { commentCreate, commentFindById } from "~/api/comment";
 import { likeCreate, likeFindById, likeDelete } from "~/api/like";
+import { messageCreate } from "~/api/message";
 import { formatTime } from "~/utils";
 import { ElMessage } from "element-plus";
 import { useUserStore } from "~/store/user";
@@ -18,6 +19,7 @@ const deId = ref("");
 const dataDe = ref({});
 
 const commentContent = ref("");
+const tempFileUrl = ref("");
 
 const fileList = ref([]);
 // 获取内容详情
@@ -30,8 +32,10 @@ const getDataDe = async () => {
   if (code === 200) {
     console.log("获取内容详情成功", result);
     dataDe.value = result;
-    fileList.value = result?.files || [];
-    console.log("fileList.value", fileList.value);
+    setTimeout(() => {
+      fileList.value = result?.files || [];
+      console.log("fileList.value", fileList.value);
+    }, 500);
   } else {
     console.log("获取内容详情失败", msg);
   }
@@ -46,8 +50,16 @@ const onSlideChange = () => {
 const isInitDone = ref(false);
 onMounted(() => {
   isInitDone.value = false;
-  const { id, imgCover } = route.params;
-  fileList.value = [{ file: imgCover }];
+  const { id } = route.params;
+  const { imgCover } = route.query;
+  // fileList.value = [{ file: imgCover, fileType: "IMAGE", thumbnail: imgCover }];
+  fileList.value = [
+    {
+      file: imgCover,
+      fileType: "IMAGE",
+      thumbnail: imgCover,
+    },
+  ];
   deId.value = id;
   isInitDone.value = true;
   getDataDe();
@@ -73,6 +85,21 @@ const handleSendComment = async () => {
     console.log("获取内容详情失败", msg);
   }
   sendLoading.value = false;
+};
+// 消息创建
+const handleMessageCreate = async () => {
+  const params = {
+    receiverId: dataDe.value.userId,
+    content: "点赞了你的文章",
+    objId: deId.value,
+    type:'like'
+  };
+  const { code, msg, result } = ({} = await messageCreate(params));
+  if (code === 200) {
+    console.log("消息创建成功", result);
+  } else {
+    console.log("消息创建失败", msg);
+  }
 };
 
 const commentRef = ref(null);
@@ -108,6 +135,8 @@ const handleLike = async () => {
         topicId: deId.value,
       });
       ElMessage.success("点赞成功");
+      // 消息创建
+      handleMessageCreate();
     }
   } else {
     console.log("点赞失败", msg);
@@ -145,7 +174,6 @@ const handleSwiperChange = (index) => {
 const currentPlayInfo = computed(() => {
   return `${currentPlayIndex.value + 1}/${fileList.value.length}`;
 });
-
 </script>
 
 <template>
@@ -158,11 +186,7 @@ const currentPlayInfo = computed(() => {
         <Starport :port="'my-id' + deId" style="height: 100%">
           <div class="h-full relative">
             <el-carousel :autoplay="false" @change="handleSwiperChange">
-              <el-carousel-item
-               
-                v-for="(item, index) in fileList"
-                :key="index"
-              >
+              <el-carousel-item v-for="(item, index) in fileList" :key="index">
                 <StarportCard :data="item" isDetail />
               </el-carousel-item>
             </el-carousel>

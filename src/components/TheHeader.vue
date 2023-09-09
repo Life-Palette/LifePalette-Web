@@ -3,6 +3,8 @@ import ImgLogo from "~/assets/image/logo/logo.svg";
 import { useUserStore } from "~/store/user";
 import { ElMessage } from "element-plus";
 import LoginDialog from "./Login/LoginDialog.vue";
+// import PopperNews from "~/components/Popper/News.vue";
+import PopperNews from "~/components/Popper/index.vue";
 const userStore = useUserStore();
 
 const { userInfo } = storeToRefs(userStore);
@@ -31,6 +33,13 @@ const loginLoading = ref(false);
 const handleLogin = async () => {
   isShowDialog.value = true;
 };
+
+const newsRef = ref(null);
+const newClick = () => {
+  if (newsRef.value) {
+    console.log("🌈----------newClick ");
+  }
+};
 </script>
 
 <template>
@@ -40,7 +49,7 @@ const handleLogin = async () => {
   >
     <div v-motion-roll-bottom h-full font-bold text="2xl">
       <!-- Wow🌟! -->
-      <img :src="ImgLogo" class="w-full h-full  scale-300 ml-4"   />
+      <img :src="ImgLogo" class="w-full h-full scale-300 ml-4" />
     </div>
     <div flex-1></div>
     <div class="flex h-full items-center gap-5">
@@ -59,6 +68,10 @@ const handleLogin = async () => {
         target="_blank"
         title="GitHub"
       />
+      <!-- 消息 -->
+      <template v-if="isLogin">
+        <PopperNews />
+      </template>
     </div>
     <!-- 头像 -->
     <div class="flex items-center ml-5 cursor-pointer" v-loading="loginLoading">

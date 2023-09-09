@@ -34,11 +34,9 @@ export const useUserStore = defineStore(
               }
               resolve(data);
             } else {
-              console.log("登录失败", msg);
+              // console.log("登录失败", data);
               // console.log("result", data);
-              const { response = {} } = data || {};
-              // console.log("response", response.data);
-              resolve(response?.data);
+              resolve(data?.data);
             }
           })
           .catch((error) => {
