@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
-import 'dayjs/locale/zh-cn';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import "dayjs/locale/zh-cn";
+import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime); // 相对时间
-dayjs.locale('zh-cn'); // 使用本地化语言
+dayjs.locale("zh-cn"); // 使用本地化语言
 
 // 时间格式化
 export const formatTime = (
@@ -19,9 +19,8 @@ export const formatTime = (
 };
 // 时间格式化，多久前，eg:1分钟前,1小时前,1天前,
 export const formatTimeBefore = (time) => {
-  
   if (!time) return "";
-  return dayjs(time).fromNow().replace(' ', '');
+  return dayjs(time).fromNow().replace(" ", "");
 };
 
 /** 获取本地存储 */
@@ -44,7 +43,7 @@ export const removeLocalStorage = (key) => {
 // SessionStorage
 /** 获取本地存储 */
 export const getSessionStorage = (key) => {
-  if (sessionStorage.getItem(key) !== null) {
+  if (!!sessionStorage.getItem(key) && sessionStorage.getItem(key) !== null) {
     return JSON.parse(sessionStorage.getItem(key));
   }
 };

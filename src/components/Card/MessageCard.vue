@@ -4,10 +4,7 @@
       {{ formatChatTime(data?.createdAt) }}
     </p>
     <div :class="[isMyMessage ? 'my-msg' : 'other-msg', 'message']">
-      <div
-        class="avatar"
-        
-      >
+      <div class="avatar">
         <el-avatar
           round
           width="100%"
@@ -18,19 +15,20 @@
       </div>
 
       <div v-if="isFileMsg">
-        <div
-          v-for="(item, index) in fileList"
-          :key="index"
-          class="msg-file"
-          @click="showImg(item)"
-        >
-          <el-image width="100%" height="100%" fit="cover" :src="item.file" />
+        <div class="msg-file">
+          <el-image
+            preview-teleported
+            :preview-src-list="[fileUrl]"
+            height="100%"
+            fit="contain"
+            :src="fileUrl"
+          />
         </div>
       </div>
       <!-- 文件信息 -->
-      <div v-else class="msg-box">
+      <div v-else class="msg-box" >
         <!-- 文本信息 -->
-        <div class="msg-text">{{ data.content }}</div>
+        <div class="msg-text" v-message="data.content"></div>
       </div>
     </div>
   </div>
@@ -58,13 +56,13 @@ onMounted(() => {});
 const isMyMessage = computed(() => {
   return props.data?.userId == userInfo.value.id;
 });
-// 文件列表
-const fileList = computed(() => {
-  return props.data?.leaveMessageFileList || [];
+// 文件地址
+const fileUrl = computed(() => {
+  return props.data?.file?.file || "";
 });
 // 是否文件
 const isFileMsg = computed(() => {
-  return fileList.value.length > 0;
+  return !!props.data?.file;
 });
 const showImg = (item) => {
   console.log(item);
@@ -77,7 +75,6 @@ const showImg = (item) => {
   box-sizing: border-box;
 
   .send-time {
-   
     font-style: normal;
     font-weight: 400;
     font-size: 18px;
@@ -97,12 +94,10 @@ const showImg = (item) => {
       height: 53px;
     }
     .msg-file {
-      display: flex;
-      flex-wrap: wrap;
       box-sizing: border-box;
       border-radius: 10px;
       overflow: hidden;
-      height: 100px;
+      // height: 300px;
       // width: 100%;
       max-width: 500px;
       margin-bottom: 50px;
@@ -115,7 +110,6 @@ const showImg = (item) => {
       padding: 8px 12px;
       // min-height: 50px;
       .msg-text {
-       
         font-style: normal;
         font-weight: 400;
         font-size: 20px;

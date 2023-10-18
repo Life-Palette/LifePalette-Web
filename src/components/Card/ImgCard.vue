@@ -1,9 +1,10 @@
 <template>
   <div class="card-box" v-if="coverUrl">
     <el-image
-      class="w-full "
+      class="w-full"
       fit="contain"
       :src="coverUrl"
+      preview-teleported
       :preview-src-list="[coverUrl]"
     >
       <template #placeholder>

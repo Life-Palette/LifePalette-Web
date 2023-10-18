@@ -9,7 +9,7 @@ import { Starport } from "vue-starport";
 import StarportCard from "~/components/StarportCard.vue";
 import ListSwiper from "~/components/List/ListSwiper.vue";
 import LottieNoData from "~/components/Lottie/NoData.vue";
-import Skeleton from "~/components/Skeleton";
+import Skeleton from "~/components/Skeleton/index.jsx";
 import CardSwiper from "~/components/Card/SwiperCard.vue";
 import { formatTime } from "~/utils";
 import {
@@ -159,30 +159,32 @@ const getTagDe = (tags) => {
   <div class="h-full w-full gap-0 flex flex-col">
     <!-- <h1>Hello Start demo!</h1> -->
 
-    <!-- 标签列表 -->
-    <div class="flex flex-wrap gap- px-10 relative items-center">
-      <div
-        class="relative flex items-center justify-center box-border rounded-md overflow-hidden cursor-pointer tag-list"
-        v-for="(item, index) in tagList"
-        :key="index"
-        @click="handleClick(item)"
-      >
+    <div class="flex mt-8 mb-4 <md:flex-col   ">
+      <!-- 标签列表 -->
+      <div class="flex gap-1 px-10 relative items-center box-border overflow-auto  ">
         <div
-          :class="[
-            tagId === item.id
-              ? isDark
-                ? 'tag-item-active-dark'
-                : 'tag-item-active '
-              : '',
-            isDark ? 'tag-item-dark' : 'tag-item',
-          ]"
+          class="relative flex items-center justify-center box-border rounded-md cursor-pointer whitespace-nowrap tag-list"
+          v-for="(item, index) in tagList"
+          :key="index"
+          @click="handleClick(item)"
         >
-          {{ item.title }}
+          <div
+            :class="[
+              tagId === item.id
+                ? isDark
+                  ? 'tag-item-active-dark'
+                  : 'tag-item-active '
+                : '',
+              isDark ? 'tag-item-dark' : 'tag-item',
+            ]"
+          >
+            {{ item.title }}
+          </div>
         </div>
       </div>
       <!-- 测试图标 -->
       <div
-        class="absolute right-0 bottom-6 flex items-center gap-1 cursor-pointer hover:text-blue"
+        class="flex flex-1 items-center gap-1 cursor-pointer whitespace-nowrap justify-end  <md:my-1 <md:display-none hover:text-blue"
         @click="isSwiperLayout = !isSwiperLayout"
       >
         {{ isSwiperLayout ? "列表模式" : "卡片模式" }}
@@ -265,7 +267,7 @@ const getTagDe = (tags) => {
                 @click="goDe(item)"
                 v-for="(item, index) in topicList"
               >
-                <div class="w-80 min-h-50 item-box">
+                <div class="w-80 <md:w-65 min-h-50 item-box">
                   <div class="img-cover max-h-100 flex-1">
                     <Starport
                       :port="'my-id' + item.id"
@@ -334,8 +336,8 @@ const getTagDe = (tags) => {
 .tag-list {
   display: flex;
   // padding: 20px 0;
-  padding-top: 30px;
-  padding-bottom: 10px;
+  // padding-top: 30px;
+  // padding-bottom: 10px;
   .tag-item {
     font-size: 16px;
     color: rgba(51, 51, 51, 0.8);

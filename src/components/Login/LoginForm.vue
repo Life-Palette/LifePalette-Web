@@ -92,6 +92,7 @@
 import { useUserStore } from "~/store/user";
 import { ElMessage } from "element-plus";
 import { sendCode, register } from "~/api/admin";
+import { POSITION, TYPE, useToast } from "vue-toastification";
 const userStore = useUserStore();
 const emit = defineEmits(["closeDialog", "startRegist", "update:isRegist"]);
 const props = defineProps({
@@ -122,6 +123,7 @@ const loginForm = ref({
   password: "",
 });
 const loginLoading = ref(false);
+const toast = useToast();
 const handleLogin = async () => {
   // 表单校验
   if (!valForm() || loginLoading.value) return;
@@ -133,20 +135,26 @@ const handleLogin = async () => {
   try {
     const { code, msg, result } = ({} = await userStore.handLogin(params));
     if (code === 200) {
-      ElMessage.success("登录成功");
+      toast("登录成功", {
+        type: TYPE.SUCCESS,
+        position: POSITION.TOP_RIGHT,
+      });
       emit("closeDialog");
     } else {
-      // ElMessage.error(msg);
       console.log("登录失败", msg);
       //    判断msg是否为数组
       if (Array.isArray(msg)) {
-        //   msg.forEach((item) => {
-        //     ElMessage.error(item);
-        //   });
         const msgDes = msg.length > 0 ? msg[0]?.message : "登录失败";
-        ElMessage.error(msgDes);
+
+        toast(msgDes, {
+          type: TYPE.ERROR,
+          position: POSITION.TOP_RIGHT,
+        });
       } else {
-        ElMessage.error("登录失败");
+        toast("登录失败", {
+          type: TYPE.ERROR,
+          position: POSITION.TOP_RIGHT,
+        });
       }
     }
     loginLoading.value = false;
@@ -219,7 +227,6 @@ const getCode = async () => {
   const { code, result, msg } = await sendCode(dataParams);
   if (code === 200 && result) {
     console.log("获取验证码成功", result);
-
     ElMessage.success("验证码发送成功");
     hasGetCode.value = true;
     startCountDown();

@@ -16,9 +16,7 @@ const pageSize = ref(10);
 // 🌈 数据请求
 const getDataLoading = ref(false);
 const getMessageUnreadCount = async () => {
-  const params = {
-    
-  };
+  const params = {};
   const { code, msg, result = [] } = ({} = await messageUnreadCount(params));
   if (code === 200 && result) {
     const { count = 0 } = result;
@@ -26,40 +24,75 @@ const getMessageUnreadCount = async () => {
   } else {
   }
 };
-const getData = async () => {
+const getData = async (type) => {
+  console.log("🐠-----type-----", type);
   if (getDataLoading.value) return;
   getDataLoading.value = true;
   const params = {
-    page,
+    page: page.value,
     size: pageSize.value,
     sort: "createdAt,desc",
+    type,
   };
   const { code, msg, result = [] } = ({} = await messageFindAll(params));
   if (code === 200 && result) {
     const { data = [], meta = {} } = result;
-    const dataTemp = data.map((item) => {
-      const { sendUserInfo, content, createdAt, objInfo, type } = item;
-      const cover =
-        objInfo?.files.length > 0 ? objInfo?.files[0].thumbnail : "";
-      return {
-        ...item,
-        avatar: "",
-        cover,
-        title: `${sendUserInfo.name}${content}`,
-        datetime: formatTimeBefore(createdAt),
-        description: "",
-        // type: "1",
-      };
-    });
-    notices.value[0].list = dataTemp || [];
-    // dataTemp
+    handleNotice(data);
   } else {
   }
   getDataLoading.value = false;
 };
-onMounted(() => {
+
+// 消息处理
+const handleNotice = (data) => {
+  let dataTemp;
+  const type = data[0]?.type;
+  switch (type) {
+    case "like":
+      dataTemp = data.map((item) => {
+        const { sendUserInfo, content, createdAt, objInfo, type } = item;
+        const cover =
+          objInfo?.files.length > 0 ? objInfo?.files[0].thumbnail : "";
+        return {
+          ...item,
+          avatar:
+            "https://gw.alipayobjects.com/zos/rmsportal/GvqBnKhFgObvnSGkDsje.png",
+          cover,
+          title: `${sendUserInfo?.name}${content}`,
+          datetime: formatTimeBefore(createdAt),
+          description: "",
+          // type: "1",
+        };
+      });
+      notices.value[0].list = dataTemp || [];
+      break;
+    case "system":
+      dataTemp = data.map((item) => {
+        const { sendUserInfo, content, createdAt, objInfo, type } = item;
+        const cover =
+          objInfo?.files.length > 0 ? objInfo?.files[0].thumbnail : "";
+        return {
+          ...item,
+          avatar:
+            "https://gw.alipayobjects.com/zos/rmsportal/GvqBnKhFgObvnSGkDsje.png",
+          cover,
+          title: `系统通知`,
+          datetime: formatTimeBefore(createdAt),
+          description: content,
+          // type: "1",
+        };
+      });
+      notices.value[1].list = dataTemp || [];
+      break;
+    default:
+      break;
+  }
+};
+
+onMounted(async () => {
   getMessageUnreadCount();
-  getData();
+  await getData();
+  await getData("system");
 });
 </script>
 

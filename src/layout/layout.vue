@@ -5,12 +5,12 @@
     class="w-full h-screen flex flex-col overscroll-auto"
   >
     <div class="sticky top-0 z-999"><TheHeader /></div>
-    <div class="w-full box-border flex px-5 con-h">
-      <Slider />
-      <div class="flex-1"></div>
-      <!-- <StarportCarrier>
-        <router-view />
-      </StarportCarrier> -->
+    <div class="w-full box-border flex px-5 con-h <md:!h-auto">
+      <div class="<md:display-none">
+        <Slider />
+        <div class="flex-1"></div>
+      </div>
+
       <StarportCarrier>
         <RouterView v-slot="{ Component }">
           <transition name="page-fade">
@@ -19,7 +19,6 @@
         </RouterView>
       </StarportCarrier>
     </div>
-    <!-- <div><TheFooter /></div> -->
   </div>
 </template>
 <script setup>

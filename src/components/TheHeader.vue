@@ -45,7 +45,7 @@ const newClick = () => {
 <template>
   <div
     :class="isDark ? 'header-dark' : 'header-normal'"
-    class="h-[55px] w-full flex items-center box-border px-[40px] z-999"
+    class="h-[55px] w-full flex items-center box-border px-[40px] z-999 overflow-hidden"
   >
     <div v-motion-roll-bottom h-full font-bold text="2xl">
       <!-- Wow🌟! -->

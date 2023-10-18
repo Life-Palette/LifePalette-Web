@@ -116,6 +116,7 @@ class PureHttp {
               if (access_token) {
                 const now = new Date().getTime();
                 const expired = parseInt("" + expires) - now <= 0;
+                // console.log('🍪-----expired-----', expired);
                 if (expired) {
                   if (!PureHttp.isRefreshing) {
                     PureHttp.isRefreshing = true;
@@ -193,7 +194,30 @@ class PureHttp {
       },
       (error) => {
         console.log("error", error);
-        // console.log("error", error.response);
+        // console.log("error", error.response.data);
+        const statusCode = error?.response?.data?.statusCode;
+        // console.log('🐠-----statusCode-----', statusCode);
+        if (statusCode === 401) {
+          // console.log("🐠-----401-----", !PureHttp.isRefreshing);
+          if (!PureHttp.isRefreshing) {
+            PureHttp.isRefreshing = true;
+            const token = getToken();
+            const { refresh_token } = token || {};
+            // token过期刷新
+            useUserStore()
+              .handRefreshToken({ refreshToken: refresh_token })
+              .then((res) => {
+                const { access_token } = res.result || {};
+                const token = access_token;
+                config.headers["Authorization"] = formatToken(token);
+                PureHttp.requests.forEach((cb) => cb(token));
+                PureHttp.requests = [];
+              })
+              .finally(() => {
+                PureHttp.isRefreshing = false;
+              });
+          }
+        }
 
         // 关闭进度条动画
         if (!PureHttp.isApiError) {

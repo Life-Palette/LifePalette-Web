@@ -14,11 +14,12 @@ const domainLsit = [
   {
     baseServer: "https://test.wktest.cn:3001/api", //开发服务 0
     otherServer: "https://test.wktest.cn:3001/api", //开发服务器 1
-    websocket: "ws://192.168.3.13:3003",
+    websocket: "ws://test.wktest.cn:3003",
   },
 ];
 
 // vue
+// const ServerNumber = 1
 const ServerNumber = import.meta.env.VITE_APP_SERVER_ID
   ? import.meta.env.VITE_APP_SERVER_ID
   : 0;

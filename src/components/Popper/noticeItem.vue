@@ -137,6 +137,7 @@ function hoverDescription(event, description) {
   .notice-container-avatar {
     margin-right: 16px;
     background: #fff;
+    flex-shrink: 0;
   }
   .notice-container-cover {
     margin-right: 16px;
@@ -150,6 +151,7 @@ function hoverDescription(event, description) {
     flex: 1;
     flex-direction: column;
     justify-content: space-between;
+    cursor: pointer;
 
     .notice-text-title {
       display: flex;

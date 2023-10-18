@@ -177,9 +177,9 @@ const currentPlayInfo = computed(() => {
 </script>
 
 <template>
-  <div class="h-full w-full gap-5 flex px-10 pt-10 pb-2 box-border">
-    <div class="conten-box">
-      <div class="img-con flex-1 relative">
+  <div class="h-full w-full gap-5 flex px-10 <md:px-1 pt-10 pb-2 box-border">
+    <div class="conten-box  <md:flex-col">
+      <div class="img-con flex-1 relative <md:h-80 <md:flex-initial ">
         <div v-if="fileList.length > 0" class="fraction">
           {{ currentPlayInfo }}
         </div>
@@ -193,7 +193,7 @@ const currentPlayInfo = computed(() => {
           </div>
         </Starport>
       </div>
-      <div class="de-content flex-1 bg-[#fff]">
+      <div class="de-content flex-1 bg-[#fff] ">
         <!-- 用户信息 -->
         <section>
           <div class="content-user">
@@ -210,7 +210,7 @@ const currentPlayInfo = computed(() => {
           </div>
         </section>
         <!-- 标题 -->
-        <section class="title-part flex-1 overflow-auto flex flex-col">
+        <section class="title-part flex-1 overflow-auto <md:overflow-initial flex flex-col">
           <!-- 标题 -->
           <div class="title-desc py-5">
             {{ dataDe.title }}
