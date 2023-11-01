@@ -11,6 +11,7 @@
 **English** | [中文](./README.zh-CN.md)
 
 - [Preview](https://lifepalette.netlify.app/#/index)
+- [Preview2](http://47.108.192.147:10086/#/index)
 
 ## 🚀 Origin
 
