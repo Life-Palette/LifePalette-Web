@@ -2,7 +2,6 @@ import { ref, computed } from "vue";
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { getLogin, refreshTokenApi } from "~/api/admin";
 import { setToken, getToken, removeToken, formatToken } from "~/utils/auth";
-import { POSITION, TYPE, useToast } from "vue-toastification";
 
 export const useUserStore = defineStore(
   "user",
@@ -13,7 +12,6 @@ export const useUserStore = defineStore(
       count.value++;
     };
     const setUserInfo = (data) => {
-      // console.log('🍧-----setUserInfo-----', data);
       userInfo.value = data;
     };
     /** 登录 */
@@ -36,9 +34,11 @@ export const useUserStore = defineStore(
               }
               resolve(data);
             } else {
-              // console.log("登录失败", data);
+              console.log("登录失败", msg);
               // console.log("result", data);
-              resolve(data?.data);
+              const { response = {} } = data || {};
+              // console.log("response", response.data);
+              resolve(response?.data);
             }
           })
           .catch((error) => {
@@ -59,15 +59,6 @@ export const useUserStore = defineStore(
               resolve(data);
             } else {
               console.log("刷新token失败", msg);
-              const toast = useToast();
-              toast("😯登录信息过期了!", {
-                type: TYPE.WARNING,
-                position: POSITION.TOP_RIGHT,
-              });
-              setTimeout(() => {
-                logout();
-                window.open("/", "_self");
-              }, 1500);
             }
           })
           .catch((error) => {

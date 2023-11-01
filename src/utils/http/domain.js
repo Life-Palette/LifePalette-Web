@@ -8,18 +8,15 @@ const domainLsit = [
   {
     baseServer: "/api", //开发服务 0
     otherServer: "https://test.wktest.cn:3001/api", //开发服务器 1
-    websocket: "ws://localhost:3003",
   },
   // 正式服
   {
     baseServer: "https://test.wktest.cn:3001/api", //开发服务 0
     otherServer: "https://test.wktest.cn:3001/api", //开发服务器 1
-    websocket: "ws://test.wktest.cn:3003",
   },
 ];
 
 // vue
-// const ServerNumber = 1
 const ServerNumber = import.meta.env.VITE_APP_SERVER_ID
   ? import.meta.env.VITE_APP_SERVER_ID
   : 0;

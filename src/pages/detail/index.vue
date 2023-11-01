@@ -5,7 +5,6 @@ import BaseLike from "~/components/Base/Like.vue";
 import { topicFindById } from "~/api/topic";
 import { commentCreate, commentFindById } from "~/api/comment";
 import { likeCreate, likeFindById, likeDelete } from "~/api/like";
-import { messageCreate } from "~/api/message";
 import { formatTime } from "~/utils";
 import { ElMessage } from "element-plus";
 import { useUserStore } from "~/store/user";
@@ -86,21 +85,6 @@ const handleSendComment = async () => {
   }
   sendLoading.value = false;
 };
-// 消息创建
-const handleMessageCreate = async () => {
-  const params = {
-    receiverId: dataDe.value.userId,
-    content: "点赞了你的文章",
-    objId: deId.value,
-    type:'like'
-  };
-  const { code, msg, result } = ({} = await messageCreate(params));
-  if (code === 200) {
-    console.log("消息创建成功", result);
-  } else {
-    console.log("消息创建失败", msg);
-  }
-};
 
 const commentRef = ref(null);
 // 获取评论
@@ -135,8 +119,6 @@ const handleLike = async () => {
         topicId: deId.value,
       });
       ElMessage.success("点赞成功");
-      // 消息创建
-      handleMessageCreate();
     }
   } else {
     console.log("点赞失败", msg);
@@ -177,9 +159,9 @@ const currentPlayInfo = computed(() => {
 </script>
 
 <template>
-  <div class="h-full w-full gap-5 flex px-10 <md:px-1 pt-10 pb-2 box-border">
-    <div class="conten-box  <md:flex-col">
-      <div class="img-con flex-1 relative <md:h-80 <md:flex-initial ">
+  <div class="h-full w-full gap-5 flex px-10 pt-10 pb-2 box-border">
+    <div class="conten-box">
+      <div class="img-con flex-1 relative">
         <div v-if="fileList.length > 0" class="fraction">
           {{ currentPlayInfo }}
         </div>
@@ -193,7 +175,7 @@ const currentPlayInfo = computed(() => {
           </div>
         </Starport>
       </div>
-      <div class="de-content flex-1 bg-[#fff] ">
+      <div class="de-content flex-1 bg-[#fff]">
         <!-- 用户信息 -->
         <section>
           <div class="content-user">
@@ -210,7 +192,7 @@ const currentPlayInfo = computed(() => {
           </div>
         </section>
         <!-- 标题 -->
-        <section class="title-part flex-1 overflow-auto <md:overflow-initial flex flex-col">
+        <section class="title-part flex-1 overflow-auto flex flex-col">
           <!-- 标题 -->
           <div class="title-desc py-5">
             {{ dataDe.title }}

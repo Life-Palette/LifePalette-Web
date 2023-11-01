@@ -13,53 +13,29 @@
             <input type="text" name="" required="">
             <label>性别</label>
           </div>
+
+           <!-- <div class="my-2 flex items-center text-sm">
+              <el-radio-group v-model="Sexradio" class="ml-4">
+                <el-radio label="1">男</el-radio>
+                <el-radio label="2">女</el-radio>
+              </el-radio-group>
+            </div> -->
+
           <div></div>
-
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>职业</label>
-          </div>
-
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>所在地</label>
-          </div>
-
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>邮箱</label>
-          </div>
           <div class="user-box">
             <input type="text" name="" required="" v-model="Personal">
             <label>个性签名</label>
           </div>
         </form>
-        
-        <div class="butt">
-          <section class="post-up">
-          <button @click="close" class="overlay__btn overlay__btn--colors">
-            <span>取消</span>
-            <span class="overlay__btn-emoji">💕</span>
-          </button>
-        </section>
-        
-      <span class="gap"></span>
-
-      <section class="post-btn">
-          <button @click="updateUserInfoFunc" class="overlay__btn overlay__btn--colors">
-            <span>发布</span>
-            <span class="overlay__btn-emoji">💕</span>
-          </button>
-        </section>
-
-        </div>
+        <div><button @click="close">取消</button></div>
+        <div><button @click="updateUserInfoFunc">确定</button></div>
       </div>
     </div>
   </el-dialog>
 </template>
   
 <script setup>
-import { updateUserInfo } from "~/api/admin";
+import {updateUserInfo } from "~/api/admin";
 
 const dialogVisible = ref(true);
 const Myname = ref('')
@@ -71,16 +47,16 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  userInfo: {
-    type: Object,
-    default: () => { }
+  userInfo:{
+    type:Object,
+    default: ()=>{}
   }
 });
 
-const emit = defineEmits(["update:isShowDialog", 'update:userInfo']);
+const emit = defineEmits(["update:isShowDialog",'update:userInfo']);
 
 
-const closeDialog = () => {
+const closeDialog = () => {   
   emit("update:isShowDialog", false);
 };
 
@@ -98,7 +74,7 @@ const updateUserInfoFunc = async () => {
   ));
   if (code === 200) {
     console.log("更新用户信息成功", result);
-    emit('update:userInfo', result)
+    emit('update:userInfo',result)
 
     ElMessage.success("更新用户信息成功");
   } else {
@@ -112,8 +88,8 @@ const close = () => {     // 关闭
   dialogVisible.value = false
 }
 onMounted(() => {
-  console.log("props.userInfo------------", props.userInfo)
-  const { name } = props.userInfo
+  console.log("props.userInfo------------",props.userInfo)
+  const {name} = props.userInfo
   Myname.value = name
 })
 </script>
@@ -144,7 +120,7 @@ onMounted(() => {
   width: 100%;
   padding: 10px 0;
   font-size: 16px;
-  color: #020100;
+  color: #e4b51a;
   margin-bottom: 30px;
   border: none;
   border-bottom: 1px solid #fff;
@@ -187,77 +163,6 @@ onMounted(() => {
 //   margin-top: 40px;
 //   letter-spacing: 4px
 // }
-.butt{
-  display: flex;
-  .post-btn {
-    width: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    .overlay__btn {
-      margin-top: 6px;
-      width: 100%;
-      height: 2.5rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.875rem;
-      font-weight: 600;
-
-      background: hsl(276, 100%, 9%);
-      color: hsl(0, 0%, 100%);
-      border: none;
-      border-radius: 0.5rem;
-      transition: transform 450ms ease;
-    }
-
-    .overlay__btn:hover {
-      transform: scale(1.05);
-      cursor: pointer;
-    }
-
-    .overlay__btn-emoji {
-      margin-left: 0.375rem;
-    }
-  }
-  .gap{
-  width: 25px;
-}
-  .post-up {
-    width: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    .overlay__btn {
-      margin-top: 6px;
-      width: 100%;
-      height: 2.5rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.875rem;
-      font-weight: 600;
-
-      // background: hsl(276, 100%, 9%);
-      background-color:hsla(276,100%,64%,0.2);
-      color: hsl(0, 0%, 100%);
-      border: none;
-      border-radius: 0.5rem;
-      transition: transform 450ms ease;
-    }
-
-    .overlay__btn:hover {
-      transform: scale(1.05);
-      cursor: pointer;
-    }
-
-    .overlay__btn-emoji {
-      margin-left: 0.375rem;
-    }
-  }
-}
-
-
 </style>
   
  

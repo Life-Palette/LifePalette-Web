@@ -28,13 +28,6 @@ const sliderList = ref([
     path: "/mine",
     icon: "i-carbon-person",
   },
-  {
-    name: "聊天室",
-    // path: "/home/my",
-    path: "/chat",
-    desc: "beta",
-    icon: "i-carbon-chat-bot",
-  },
 ]);
 
 const showTabList = computed(() => {
@@ -75,10 +68,6 @@ const clickTab = (item, index) => {
         >
           <div class="slider__icon" :class="item.icon">🐇</div>
           <div class="slider__name">{{ item.name }}</div>
-
-          <el-tag v-if="item.desc" class="mx-1" round>
-            {{ item.desc }}
-          </el-tag>
         </router-link>
       </div>
     </div>

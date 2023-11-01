@@ -15,7 +15,6 @@ const props = defineProps({
     default: () => {},
   },
 });
-console.log();
 
 const coverUrl = computed(() => {
   const fileTemp = props.data || {};
@@ -29,7 +28,6 @@ const coverUrl = computed(() => {
 });
 onMounted(() => {
   // console.log(props.data);
-  // 创建
 });
 </script>
 
