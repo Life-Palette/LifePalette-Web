@@ -1,47 +1,55 @@
-html,
-body,
-#app {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+@import './md.css';
+
 
 html.dark {
-  background: #121212;
-}
-:root {
-  --theme-color: #f8f8f8;
-  --test-color: red;
-  --pal-button-text-color: #333;
-  --pal-button-bg-color: var(--theme-color);
-  --pal-button-border-color: #4c4d4f;
-  --pal-border-radius-base: 10px;
-  --pal-font-size-base: 14px;
-  --pal-border: 1px solid var(--theme-color);
-}
-html.dark {
-  --theme-color: #333;
-  --pal-button-text-color: #fff;
-  --pal-button-bg-color: var(--theme-color);
-  --pal-button-border-color: #4c4d4f;
-  --pal-border-radius-base: 10px;
-  --pal-font-size-base: 14px;
-  --pal-border: 1px solid var(--theme-color);
+	background: #121212  !important;
 }
 
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: opacity 0.3s ease;
+.prose {
+	scroll-behavior: smooth;
 }
 
-.page-fade-enter-from,
-.page-fade-leave-to {
-  opacity: 0;
+#nprogress {
+	pointer-events: none;
 }
 
-.debug [data-starport-craft] {
-  background: #0805;
+#nprogress .bar {
+	@apply bg-blue-700 bg-opacity-75;
+
+	background: repeating-linear-gradient(90deg, #00dc82 0, #34cdfe 50%, #0047e1);
+	position: fixed;
+	z-index: 1031;
+	top: 0;
+	left: 0;
+
+	width: 100%;
+	height: 2px;
 }
-.debug [data-starport-proxy]:not([data-starport-landed]) {
-  background: #8005;
+
+/*
+* 全局滚动条
+*/
+::-webkit-scrollbar {
+	width: 8px;
+	height: 11px;
+	background-color: rgb(246, 247, 248);
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: rgb(233, 236, 239);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background-color: rgb(246, 247, 248);
+	border-radius: 10px;
+}
+
+html.dark ::-webkit-scrollbar,
+html.dark ::-webkit-scrollbar-track {
+	background-color: #212529;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+	background-color: #343a40;
 }

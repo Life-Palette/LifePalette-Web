@@ -1,24 +1,11 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
 dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.nitro
+.output
+env.d.ts
+node_modules
+.eslintcache
+components.d.ts
+type-router.d.ts
+auto-imports.d.ts
+.eslintrc-auto-import.json
+vite.config.ts.timestamp*

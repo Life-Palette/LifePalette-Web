@@ -1,0 +1,33 @@
+/* 样式动画 */
+@keyframes lazyImgAnimate {
+	0% {
+		filter: blur(40px);
+	}
+	25% {
+		filter: blur(30px);
+	}
+	50% {
+		filter: blur(20px);
+	}
+	100% {
+		filter: blur(0px);
+	}
+}
+@keyframes lazyImgBgAnimate {
+	0% {
+		backgroundfilter: blur(40px);
+	}
+	25% {
+		backgroundfilter: blur(30px);
+	}
+	50% {
+		backgroundfilter: blur(20px);
+	}
+	100% {
+		backgroundfilter: blur(0px);
+	}
+}
+.tt {
+	background: red;
+	transition: lazyImgAnimate 10s;
+}
