@@ -1,7 +1,7 @@
 {
   "name": "lp",
-  "version": "0.0.11",
-  "description": "LP",
+  "version": "0.0.12",
+  "description": "Record your memories and craft your own masterpiece of life",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -129,7 +129,7 @@
     "vue-demi": "npm:vue-demi@latest"
   },
   "repository": {
-    "url": "https://github.com/IceyWu/cloud-template"
+    "url": "https://github.com/Life-Palette/LifePalette-Web"
   },
   "author": "IceyWu <https://github.com/IceyWu/>",
   "browserslist": [
