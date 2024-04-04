@@ -92,7 +92,6 @@
 import { useUserStore } from '~/stores/user'
 import { ElMessage } from 'element-plus'
 import { sendCode, register } from '~/api/admin'
-import { POSITION, TYPE, useToast } from 'vue-toastification'
 const userStore = useUserStore()
 const emit = defineEmits(['closeDialog', 'startRegist', 'update:isRegist'])
 const props = defineProps({
@@ -123,7 +122,6 @@ const loginForm = ref({
 	password: '',
 })
 const loginLoading = ref(false)
-const toast = useToast()
 const handleLogin = async () => {
 	// 表单校验
 	if (!valForm() || loginLoading.value) return
@@ -135,10 +133,7 @@ const handleLogin = async () => {
 	try {
 		const { code, msg, result } = ({} = await userStore.handLogin(params))
 		if (code === 200) {
-			toast('登录成功', {
-				type: TYPE.SUCCESS,
-				position: POSITION.TOP_RIGHT,
-			})
+			toast.success('登录成功')
 			emit('closeDialog')
 		} else {
 			console.log('登录失败', msg)
@@ -146,19 +141,14 @@ const handleLogin = async () => {
 			if (Array.isArray(msg)) {
 				const msgDes = msg.length > 0 ? msg[0]?.message : '登录失败'
 
-				toast(msgDes, {
-					type: TYPE.ERROR,
-					position: POSITION.TOP_RIGHT,
-				})
+				toast.error(msgDes)
 			} else {
-				toast('登录失败', {
-					type: TYPE.ERROR,
-					position: POSITION.TOP_RIGHT,
-				})
+				toast.error('登录失败')
 			}
 		}
 		loginLoading.value = false
 	} catch (error) {
+		toast.warning('登录失败,账号或密码错误🐻‍❄️')
 		loginLoading.value = false
 	}
 }

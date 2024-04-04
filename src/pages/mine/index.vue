@@ -13,81 +13,44 @@ import ImgBackground from '~/assets/image/icons/sakura.jpg'
 // import Sexgirl from "~/assets/image/icons.girl.png"
 import Loginabout from '~/components/Login/Loginabout.vue'
 import UserBottom from './components/UserBottom.vue'
-import { uploadFile } from '~/utils/upload'
+// import { uploadFile } from '~/utils/upload'
+import { uploadFile } from '~/utils/uploadAli'
 import { useUserStore } from '~/stores/user'
 import { uploadBase } from '~/api/ossUpload'
+import { isObject } from '@iceywu/utils'
 const userStore = useUserStore()
+const { userInfo } = storeToRefs(userStore)
 const sex = ref('未知')
 const isRegist = ref(false)
 
-const Background = ref()
-// const backgroundBg = computed(()=>{
-// const {background} = userInfo.value
-//   return background || ImgBackground
-// })
-
-// const { getPhoto,  } = useFileDialog({    //更换背景
-//   accept: "image/*",
-// });
-
-const { files, open, reset, onChange } = useFileDialog({
-	//更换头像
-	accept: 'image/*',
-})
-const upPercent = ref(0)
-const showUploadLoading = ref(false)
-onChange(async (file) => {
-	// loading
-	upPercent.value = 0
-	showUploadLoading.value = true
-	for (let i = 0; i < file.length; i++) {
-		const data = new FormData()
-		data.append('file', file[i])
-		const { code, msg, result } = await await uploadBase(data)
-		if (code === 200) {
-			console.log('文件上传成功', result)
-			showUploadLoading.value = false
-			const { url } = result
-			console.log('文件上传成功', url)
-			await updateUserInfoFunc(url)
-			getMyInfoFunc(0)
-		} else {
-			ElMessage.error(msg)
-		}
-	}
-	showUploadLoading.value = false
+const backgroundUrl = computed(() => {
+	const { backgroundInfo, background } = userInfo.value as any
+	return isObject(backgroundInfo) ? backgroundInfo?.url : background
 })
 
 onMounted(() => {
 	getMyInfoFunc()
-	console.log(Background.value)
 })
 const navRef1 = ref(null)
 
-const userInfo = ref({})
 //获取用户信息
 const getMyInfoFunc = async () => {
 	const params = {}
 	const { code, msg, result } = ({} = await getMyInfo())
 	if (code === 200) {
-		console.log('获取标签列表成功', result)
-		userInfo.value = result || {}
 		userStore.setUserInfo(result)
-		console.log('🌳-----result-----', result)
-		const Background = result.background
-		return Background
 	} else {
-		console.log('获取标签列表失败', msg)
 	}
 }
 
 // 更新用户信息
 const updateLoading = ref(false)
-const updateUserInfoFunc = async (url) => {
+const updateUserInfoFunc = async (fileMd5: string) => {
 	if (updateLoading.value) return
 	updateLoading.value = true
 	const params = {
-		background: url,
+		// backgroundInfoFileMd5: fileMd5,
+		// avatarFileMd5:
 		// name: "suan",
 		// avatar,
 		// // github: null,
@@ -96,19 +59,24 @@ const updateUserInfoFunc = async (url) => {
 		// // gitee: null,
 		// // qq: "3128006406@qq.com",
 	}
+	// if(editTarget.value === 'background'){
+	// 	params['backgroundInfoFileMd5'] = fileMd5
+	// }
+	// if(editTarget.value === 'avatar'){
+	// 	params['avatarFileMd5'] = fileMd5
+	// }
+	params[editTarget.value] = fileMd5
+	// console.log('🐳-----params-----', params);
+	// return
 	const { code, msg, result } = ({} = await updateUserInfo(params).catch(
 		(err) => {
-			console.log('err', err)
 			updateLoading.value = false
 			ElMessage.error('更新用户信息失败')
 		},
 	))
 	if (code === 200) {
-		console.log('更新用户信息成功', result)
-
 		ElMessage.success('更新用户信息成功')
 	} else {
-		console.log('更新用户信息失败', msg)
 		ElMessage.error('更新用户信息失败')
 	}
 	updateLoading.value = false
@@ -173,9 +141,9 @@ const navList = ref([
 // const params = {};
 //  const { code, msg, result = [] } = ({} = await updateUserInfo(params));
 //  if (code === 0 && result) {
-//  console.log('---数据请求成功---', result);
+
 //  } else {
-//    console.log('---数据请求失败---', msg);
+
 //  }
 //      getDataLoading.value = false;
 //  };
@@ -183,14 +151,17 @@ const navList = ref([
 // 编辑
 const edit = () => {
 	isShowDialog.value = true
-	console.log(1)
 }
 const isShowDialog = ref(false)
 const userBackground = computed(() => {
 	return (
-		userInfo.value.background ||
-		'https://assets.codepen.io/605876/miami-sunrise.jpeg'
+		backgroundUrl.value || 'https://assets.codepen.io/605876/miami-sunrise.jpeg'
 	)
+})
+
+const userheadUpload = computed(() => {
+	const { avatarInfo, avatar } = userInfo.value as any
+	return isObject(avatarInfo) ? avatarInfo?.url : avatar
 })
 const clipperData = {
 	type: 'browserLogo', // 该参数可根据实际要求修改类型
@@ -198,14 +169,25 @@ const clipperData = {
 	previewWidth: 100, // 预览宽度
 }
 const onConfirm = async (data: any) => {
-	console.log('onConfirm', data)
-	const { url } = data
-	// console.log('文件上传成功', url)
-	await updateUserInfoFunc(url)
+	console.log('🐳-----data-----', data)
+
+	const { fileMd5 } = data
+
+	await updateUserInfoFunc(fileMd5)
 	getMyInfoFunc()
 }
+const editTarget = ref(null)
 const clipperRef = ref(null)
 const openUpload = () => {
+	editTarget.value = 'backgroundInfoFileMd5'
+	if (clipperRef.value) {
+		clipperRef.value.uploadFile()
+	}
+}
+// 头像上传
+// const headphoto =ref(null)
+const headUpload = () => {
+	editTarget.value = 'avatarFileMd5'
 	if (clipperRef.value) {
 		clipperRef.value.uploadFile()
 	}
@@ -228,13 +210,12 @@ const openUpload = () => {
 			<div class="header__cover"></div>
 		</header>
 		<div class="intro z-99">
-			<img :src="userInfo.avatar" alt="" class="avatar" />
+			<!-- <img :src="userInfo?.avatar" alt="" class="avatar" @click="headUpload"/> -->
+			<img :src="userheadUpload" alt="" class="avatar" @click="headUpload" />
 			<div class="title-wrapper">
 				<div class="title">
-					<p class="user-name">@{{ userInfo.name }}</p>
+					<p class="user-name">@{{ userInfo?.name }}</p>
 					<p class="desc">Jhey ʕ •ᴥ•ʔ</p>
-					<!-- <h1>Jhey ʕ •ᴥ•ʔ</h1>
-					<h4>@{{ userInfo.name }}</h4> -->
 				</div>
 			</div>
 		</div>

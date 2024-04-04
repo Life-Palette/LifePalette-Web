@@ -2,7 +2,7 @@
 	<div v-if="coverUrl" class="card-box">
 		<img :src="coverUrl" class="mian-img max-w-[80%]" />
 		<div class="bg-cover-box">
-			<img class="bg-cover-img mian-img" :src="coverUrl" />
+			<img class="mian-img bg-cover-img" :src="coverUrl" />
 			<div class="cover-box"></div>
 		</div>
 	</div>

@@ -54,26 +54,26 @@ export default defineComponent({
 							? {
 									src: props.src,
 									srcset: props.srcset,
-							  }
+								}
 							: {
 									style: {
 										backgroundImage: `url(${props.src})`,
 										backgroundSize: 'cover',
 									},
-							  }),
-				  })
+								}),
+					})
 				: h(domTag, {
 						...attrs,
 						...(isImgMode
 							? {
 									src: placeholderSrc.value,
-							  }
+								}
 							: {
 									style: {
 										backgroundImage: `url(${placeholderSrc.value})`,
 										backgroundSize: 'cover',
 									},
-							  }),
-				  })
+								}),
+					})
 	},
 })

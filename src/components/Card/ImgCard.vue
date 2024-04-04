@@ -1,6 +1,10 @@
 <template>
 	<div v-if="coverUrl" class="card-box">
-		<LazyImg :pre-src="coverUrl.preSrc" :src="coverUrl.src"></LazyImg>
+		<LazyImg
+			:pre-src="coverUrl.preSrc"
+			:src="coverUrl.src"
+			:video-src="coverUrl.videoSrc"
+		></LazyImg>
 	</div>
 </template>
 
@@ -22,14 +26,16 @@ const coverUrl = computed(() => {
 	}
 	const fileTemp = props.data || {}
 
-	const { fileType, file, cover, thumbnail } = fileTemp || {}
+	const { fileType, file, cover, thumbnail, videoSrc = '' } = fileTemp || {}
 	if (fileType === 'IMAGE') {
 		const preSrc = file + '?x-oss-process=image/resize,l_50'
 		// const src = file + '?x-oss-process=image/resize,l_400'
-		const src = file
+		// const src = file
+		const src = file + '?x-oss-process=image/resize,l_400'
 		return {
 			src,
 			preSrc,
+			videoSrc,
 		}
 	} else if (fileType === 'VIDEO') {
 		// const preSrc = cover + '?x-oss-process=image/resize,l_500'
@@ -41,6 +47,7 @@ const coverUrl = computed(() => {
 		return {
 			src: srcT,
 			preSrc: srcT,
+			videoSrc,
 		}
 	}
 })
@@ -59,7 +66,7 @@ onMounted(() => {
 	overflow: hidden;
 	position: relative;
 	width: 100%;
-	z-index: 0;
+	z-index: 9999;
 
 	.mian-img {
 		// align-self: flex-start;

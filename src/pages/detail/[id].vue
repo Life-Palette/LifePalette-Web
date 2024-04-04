@@ -1,14 +1,16 @@
 <script setup>
+import PostForm from '~/components/post/index.vue'
 import { Starport } from 'vue-starport'
 import StarportCard from '~/components/StarportCard.vue'
 import BaseLike from '~/components/Base/Like.vue'
-import { topicFindById } from '~/api/topic'
+import { topicFindById ,topicDelete} from '~/api/topic'
 import { commentCreate, commentFindById } from '~/api/comment'
 import { likeCreate, likeFindById, likeDelete } from '~/api/like'
 import { messageCreate } from '~/api/message'
 import { formatTime } from '~/utils'
-import { ElMessage } from 'element-plus'
 import { useUserStore } from '~/stores/user'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { to } from '@iceywu/utils'
 const userStore = useUserStore()
 
 const { userInfo } = storeToRefs(userStore)
@@ -22,6 +24,10 @@ const commentContent = ref('')
 const tempFileUrl = ref('')
 
 const fileList = ref([])
+const isShowEdit = computed(() => {
+	const { User } = dataDe.value
+	return userInfo.value.id == User?.id
+})
 // 获取内容详情
 const getDataDe = async () => {
 	const parsms = {
@@ -190,9 +196,71 @@ const fileSrc = computed(() => {
 		}
 	})
 })
+const isShowDialog = ref(false)
+const handleEdit = () => {
+	isShowDialog.value = true
+}
+// 删除
+const open = (id) => {
+  ElMessageBox.confirm(
+    '确定删除吗',
+    {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+		getDelete(id)
+     
+    })
+    .catch(() => {
+    	ElMessage({
+        type: 'info',
+        message: '取消删除',
+      })
+    })
+}
+
+// 🌈 接口数据请求
+const getDataLoading = ref(false);
+const getDelete = async (id) => {
+  if (getDataLoading.value) return;
+  getDataLoading.value = true;
+  const params = {id};
+  // to is a function form (@iceywu/utils)
+  const [err, res] = await to(topicDelete(params));
+  if (res) {
+	console.log('🌈-----接口请求成功-----');
+	const { code, msg, data = [] } = res || {};
+	if (code === 200 && data) {
+		ElMessage({
+        type: 'success',
+        message: '删除成功',
+      })
+	  router.back()
+	  console.log('😊-----数据获取成功-----', data);
+	} else {
+		ElMessage({
+        type: 'info',
+        message: '删除失败',
+      })
+	  console.log('😒-----数据获取失败-----', msg);
+	}
+  }
+  if (err) {
+	console.log('❗-----接口请求失败-----');
+  }
+  getDataLoading.value = false;
+};
 </script>
 
 <template>
+	<PostForm
+		v-if="isShowDialog"
+		v-model:isShowDialog="isShowDialog"
+		:data="dataDe"
+	/>
 	<div class="box-border h-full w-full flex gap-5 px-10 pb-2 pt-10 <md:px-1">
 		<el-image-viewer
 			v-if="showViewer"
@@ -233,6 +301,13 @@ const fileSrc = computed(() => {
 							:src="dataDe?.User?.avatar"
 						/>
 						<div class="user-name">{{ dataDe?.User?.name }}</div>
+						<div class="flex-1"></div>
+						<div class="i-carbon-trash-can cursor-pointer text-xl mr-2"  @click="open(dataDe?.id)" v-if="isShowEdit"></div>
+						<div
+							v-if="isShowEdit"
+							class="i-carbon-edit cursor-pointer text-xl"
+							@click="handleEdit"
+						></div>
 					</div>
 				</section>
 				<!-- 标题 -->

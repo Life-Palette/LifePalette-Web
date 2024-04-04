@@ -5,6 +5,7 @@
 		title="Tips"
 		width="350px"
 		top="40vh"
+		:z-index="99999"
 		@close="closeDialog"
 	>
 		<div class="content">

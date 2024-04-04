@@ -41,7 +41,7 @@ export function setToken(data: any) {
 	expires > 0
 		? Cookies.set(TokenKey, cookieString, {
 				expires: expires / 86400000,
-		  })
+			})
 		: Cookies.set(TokenKey, cookieString)
 	// setSessionStorage
 

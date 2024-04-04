@@ -73,6 +73,7 @@ import { VueCropper } from 'vue-cropper'
 import { ref, watch, reactive } from 'vue'
 // import TipsDialog from '~/components/TipsDialog/TipsDialog.vue' // 封装的dialog组件
 import { ElMessage } from 'element-plus'
+import { uploadFile as uploadFileFunc } from '~/utils/uploadAli'
 // import { commonApi } from '../../api' // 封装的api
 const dialogVisible = ref<boolean>(false) // dialog的显示与隐藏
 const emits = defineEmits(['confirm']) // 自定义事件
@@ -196,8 +197,11 @@ const {
 } = useFileDialog({
 	accept: 'image/*,video/*',
 })
+const tempFileName = ref('')
 onChange((files: any) => {
 	const file = files[0]
+
+	tempFileName.value = file.name
 	const URL = window.URL || window.webkitURL
 	// 上传图片前置钩子，用于判断限制类型用
 	if (beforeUploadEvent(file)) {
@@ -208,13 +212,15 @@ onChange((files: any) => {
 
 /* 上传成功方法 */
 const cropperSuccess = async (dataFile: File) => {
-	const fileFormData = new FormData()
-	fileFormData.append('file', dataFile)
-	const { code, msg, result } = await uploadBase(fileFormData)
-	if (code === 200) {
-		return result
-	} else {
-	}
+	// const fileFormData = new FormData()
+	// fileFormData.append('file', dataFile)
+	// const { code, msg, result } = await uploadBase(fileFormData)
+	// if (code === 200) {
+	// 	return result
+	// } else {
+	// }
+	const result = await uploadFileFunc(dataFile, (res) => {})
+	return result
 }
 // base64转图片文件
 const dataURLtoFile = (dataUrl: string, filename: string) => {
@@ -232,7 +238,7 @@ const uploadLoading = ref<boolean>(false)
 // 上传图片（点击保存按钮）
 const onConfirm = () => {
 	cropperRef.value.getCropData(async (data: string) => {
-		const dataFile: File = dataURLtoFile(data, 'images.png')
+		const dataFile: File = dataURLtoFile(data, tempFileName.value)
 		uploadLoading.value = true
 		const res = await cropperSuccess(dataFile)
 		uploadLoading.value = false

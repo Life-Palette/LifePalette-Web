@@ -7,7 +7,7 @@ import { Starport } from 'vue-starport'
 import StarportCard from '~/components/StarportCard.vue'
 
 import LottieNoData from '~/components/Lottie/NoData.vue'
-import Skeleton from '~/components/Skeleton/index.jsx'
+import Skeleton from '~/components/Skeleton'
 import CardSwiper from '~/components/Card/SwiperCard.vue'
 import { formatTime } from '~/utils'
 import {
@@ -21,6 +21,7 @@ import {
 
 // Import Swiper Vue.js components
 import { Swiper, SwiperSlide } from 'swiper/vue'
+import { breakpointsTailwind } from '@vueuse/core'
 
 // Import Swiper styles
 import 'swiper/css'
@@ -31,9 +32,9 @@ import 'swiper/css/mousewheel'
 import 'swiper/css/keyboard'
 import 'swiper/css/mousewheel'
 
-import { Waterfall } from 'vue-waterfall-plugin-next'
-import 'vue-waterfall-plugin-next/dist/style.css'
+import InfiniteLoading from 'v3-infinite-loading'
 import { Result, listParams } from 'presets/types/axios'
+import { to } from '@iceywu/utils'
 
 interface tagItem {
 	id: number | null
@@ -55,7 +56,14 @@ const onSwiper = (swiper: any) => {
 const onSlideChange = () => {
 	console.log('slide change')
 }
-
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const cols = computed(() => {
+	if (breakpoints.isGreaterOrEqual('xl')) return 5
+	if (breakpoints.xl.value) return 4
+	if (breakpoints.lg.value) return 3
+	if (breakpoints.md.value) return 1
+	return 1
+})
 const modules = [Navigation, Scrollbar, A11y, Keyboard, Mousewheel]
 const userStore = useUserStore()
 const router = useRouter()
@@ -64,7 +72,7 @@ const isSwiperLayout = ref(false)
 
 onMounted(async () => {
 	await getTagData()
-	await getTopicList()
+	await getConData()
 })
 const tagList = ref<Partial<tagItem>[]>([])
 const getTagData = async () => {
@@ -74,7 +82,7 @@ const getTagData = async () => {
 	const { code, msg, result } = ({} = await tagFindAll(params))
 
 	if (code === 200) {
-		console.log('get api test成功', result)
+		// console.log('get api test成功', result)
 		const { data = [] } = result
 		tagList.value = data
 		// tagId.value = data[0].id
@@ -92,35 +100,18 @@ const getTagData = async () => {
 const handleClick = (item: tagItem) => {
 	const { id } = item
 	tagId.value = id
-	getTopicList()
+	initData()
+	getConData()
 }
 // 获取话题列表
 const tagId = ref<number | null>(null)
-const topicList = ref([])
-
-const getDataLoading = ref(false)
-const getTopicList = async () => {
-	getDataLoading.value = true
-	const params: topicListParams = {
-		page: 1,
-		size: 30,
-		sort: 'desc,createdAt',
-	}
-	if (tagId.value) {
-		params.tagId = tagId.value
-	}
-	const { code, msg, result } = ({} = await topicFindAll(params))
-	if (code === 200) {
-		console.log('getTopicList成功', result)
-		const { data = [] } = result
-		topicList.value = data
-	} else {
-		console.log('getTopicList失败', msg)
-	}
-	setTimeout(() => {
-		getDataLoading.value = false
-	}, 500)
-}
+const parts = computed(() => {
+	const result = Array.from({ length: cols.value }, () => [] as any)
+	listObj.value.list.forEach((item, i) => {
+		result[i % cols.value].push(item)
+	})
+	return result
+})
 
 const goDe = (item: any) => {
 	console.log('item', item)
@@ -132,6 +123,68 @@ const goDe = (item: any) => {
 const getTagDe = (tags: any) => {
 	const tagNameList = tags || []
 	return tagNameList.map((item: any) => `#${item.title}`).join(' ')
+}
+/** 加载更多 */
+const handleLoadMore = () => {
+	console.log('🎁-----handleLoadMore-----')
+	getNext()
+}
+const getNext = () => {
+	if (listObj.value.loading || listObj.value.finished) return
+	dataParams.value.page++
+	getConData()
+}
+const initData = () => {
+	dataParams.value = {
+		page: 1,
+		size: 100,
+	}
+	listObj.value.list = []
+	listObj.value.finished = false
+	listObj.value.refreshing = false
+	listObj.value.loading = true
+}
+const listObj = ref({
+	list: [],
+	loading: false,
+	finished: false,
+	refreshing: false,
+})
+const dataParams = ref({
+	page: 1,
+	size: 100,
+})
+const getConData = async (readStatus, target) => {
+	listObj.value.loading = true
+	const params = {
+		page: dataParams.value.page,
+		size: dataParams.value.size,
+		sort: 'desc,createdAt',
+	}
+	if (tagId.value) {
+		params.tagId = tagId.value
+	}
+	const [err, ReData] = ({} = await to(topicFindAll(params)))
+	if (err) {
+		listObj.value.finished = true
+		listObj.value.loading = false
+		return
+	}
+
+	const { code, msg, result } = ReData || {}
+	if (code === 200) {
+		const { data = [], meta = {} } = result
+		const { totalPages } = meta || {}
+		listObj.value.list.push(...data)
+		listObj.value.finished = totalPages <= dataParams.value.page
+		console.log('🐠-----totalPages-----', totalPages, dataParams.value.page)
+		console.log('🍧-----listObj.value.list-----', listObj.value)
+	} else {
+		listObj.value.finished = true
+	}
+	setTimeout(() => {
+		listObj.value.loading = false
+	}, 500)
 }
 </script>
 
@@ -164,7 +217,7 @@ const getTagDe = (tags: any) => {
 			</div>
 			<!-- 测试图标 -->
 			<div
-				class="<md:display-none flex flex-1 cursor-pointer items-center justify-end gap-1 whitespace-nowrap <md:my-1 hover:text-blue"
+				class="flex flex-1 cursor-pointer items-center justify-end gap-1 whitespace-nowrap <md:my-1 <md:hidden hover:text-blue"
 				@click="isSwiperLayout = !isSwiperLayout"
 			>
 				{{ isSwiperLayout ? '列表模式' : '卡片模式' }}
@@ -181,12 +234,12 @@ const getTagDe = (tags: any) => {
 
 		<!-- 内容列表 -->
 		<div
-			v-if="!getDataLoading"
+			v-if="!listObj.loading"
 			class="content-box box-border overflow-auto px-10"
 		>
 			<div class="h-full w-full overflow-auto rounded-md">
 				<!-- 有数据 -->
-				<template v-if="topicList.length > 0">
+				<template v-if="listObj.list.length > 0">
 					<template v-if="isSwiperLayout">
 						<swiper
 							class="h-full"
@@ -200,7 +253,7 @@ const getTagDe = (tags: any) => {
 							@swiper="onSwiper"
 							@slide-change="onSlideChange"
 						>
-							<swiper-slide v-for="(item, index) in topicList" :key="index">
+							<swiper-slide v-for="(item, index) in listObj.list" :key="index">
 								<div
 									class="relative h-full w-full cursor-pointer"
 									@click="goDe(item)"
@@ -237,15 +290,22 @@ const getTagDe = (tags: any) => {
 						</swiper>
 					</template>
 					<template v-else>
-						<div class="container-box">
-							<Waterfall
-								:list="topicList"
-								background-color="transparent"
-								:width="340"
-								:lazyload="false"
+						<el-scrollbar max-height="calc(100vh - 180px)">
+							<div
+								class="container-box"
+								grid="~ cols-1 md:cols-1 lg:cols-3 xl:cols-4 2xl:cols-5 gap-4"
 							>
-								<template #item="{ item }">
-									<div class="item-box min-h-50" @click="goDe(item)">
+								<div
+									v-for="(items, idx) of parts"
+									:key="idx"
+									flex="~ col gap-4"
+								>
+									<div
+										v-for="(item, idx2) of items"
+										:key="idx2"
+										class="item-box min-h-50"
+										@click="goDe(item)"
+									>
 										<!-- 封面 -->
 										<div class="img-cover max-h-100 flex-1">
 											<Starport
@@ -272,9 +332,11 @@ const getTagDe = (tags: any) => {
 											</div>
 										</div>
 									</div>
-								</template>
-							</Waterfall>
-						</div>
+								</div>
+							</div>
+							<!-- 加载更多 -->
+							<InfiniteLoading :firstload="false" @infinite="handleLoadMore" />
+						</el-scrollbar>
 					</template>
 				</template>
 				<!-- 无数据 -->
@@ -284,7 +346,7 @@ const getTagDe = (tags: any) => {
 			</div>
 		</div>
 		<template v-else>
-			<Skeleton :loading="getDataLoading" :grid-cols="4" :count="3">
+			<Skeleton :loading="listObj.loading" :grid-cols="4" :count="3">
 				<template #template>
 					<el-skeleton-item
 						variant="image"

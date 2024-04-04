@@ -11,13 +11,18 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    // "moduleResolution": "node",
     "useDefineForClassFields": true,
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"],
       "@/*": ["src/*"]
-    }
+    },
+		"moduleResolution": "Bundler",
+    "types": [
+      "unplugin-vue-router/client",
+			"vite-plugin-vue-layouts/client",
+    ]
   },
   "include": [
     "srcipts",
@@ -26,7 +31,8 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "./vite.config.ts"
+    "./vite.config.ts",
+		"./typed-router.d.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

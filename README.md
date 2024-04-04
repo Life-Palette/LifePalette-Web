@@ -26,7 +26,7 @@
 - 🥏 **Dynamic release**: Release pictures, text and videos
   -🚩 **Personal information modification**: To be developed...
 
-  ## Features
+## Features
 
 - ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite](https://github.com/vitejs/vite), [pnpm](https://pnpm.io/)
 
@@ -42,6 +42,53 @@
 
 - 🦾 [Api](./src/api) - a simple wrapper for [axios]
 
+<!-- - 🎨 [Element Plus](https://element-plus.org/) - a Vue 3.0 UI library -->
 - 🎨 [Element Plus](https://element-plus.org/) - a Vue 3.0 UI library
+<!-- - 🚀  自动版本更新并生成 `CHANGELOG` -->
+- 🚀 auto version update and generate `CHANGELOG`
+<!-- - 🌈  自动版本更新并生成 `CHANGELOG` -->
+
 
 <br>
+
+
+## Motivation 
+
+Why do this **template**?
+
+1. Save time wasted on configuration for the next development
+2. Combine mainstream plug-ins to integrate modern development architecture and improve development efficiency
+
+<br />
+
+<!-- ## 启发 🐃
+
+该模板受 **[vitesse](https://github.com/antfu/vitesse)** 启发，如果你有 `SSG`
+的场景，推荐你使用 **[vitesse](https://github.com/antfu/vitesse)**。 -->
+
+## Inspiration 
+
+This template is inspired by **[tov-template](https://github.com/dishait/tov-template)**
+
+<br />
+
+
+## Usage
+
+### Development
+
+Just run and visit http://localhost:9527
+
+```bash
+pnpm dev
+```
+
+### Build
+
+To build the App, run
+
+```bash
+pnpm build
+```
+
+And you will see the generated file in `dist` that ready to be served.

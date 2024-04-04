@@ -15,6 +15,8 @@ import NProgress from '../progress'
 import { getToken, formatToken } from '@/utils/auth'
 // import { useUserStoreHook } from "@/store/modules/user";
 import baseUrl from './base.js'
+import { useUserStore } from '~/stores/user'
+const userStore = useUserStore()
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
@@ -126,7 +128,7 @@ class PureHttp {
 							} else {
 								resolve(config)
 							}
-					  })
+						})
 					: config
 			},
 			(error) => {
@@ -146,11 +148,11 @@ class PureHttp {
 					NProgress.done()
 				}
 				const { code } = response.data
-				// console.log('🌵-----response-----', response)
+
 				// 业务异常code名单
 				if (PureHttp.errorCodes.includes(code)) {
 					PureHttp.isApiError = true
-					console.log('请求异常，请稍后再试')
+
 					return response
 					// return Promise.reject(response)
 				}
@@ -168,7 +170,27 @@ class PureHttp {
 			(error: PureHttpError) => {
 				const $error = error
 				$error.isCancelRequest = Axios.isCancel($error)
-				// const statusCode = error?.response?.data?.statusCode;
+				const statusCode = error?.response?.data?.code
+				if (statusCode === 401) {
+					if (!PureHttp.isRefreshing) {
+						PureHttp.isRefreshing = true
+						const token = getToken()
+						const { refresh_token } = token || {}
+						// token过期刷新
+						useUserStore()
+							.handRefreshToken({ refreshToken: refresh_token })
+							.then((res) => {
+								const { access_token } = res.result || {}
+								const token = access_token
+								// config.headers['Authorization'] = formatToken(token)
+								PureHttp.requests.forEach((cb) => cb(token))
+								PureHttp.requests = []
+							})
+							.finally(() => {
+								PureHttp.isRefreshing = false
+							})
+					}
+				}
 				// 关闭进度条动画
 				NProgress.done()
 				// 所有的响应异常 区分来源为取消请求/非取消请求

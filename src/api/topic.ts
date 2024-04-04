@@ -29,11 +29,33 @@ export const topicFindById = (params: any) => {
 	)
 }
 
-// 文件上传
-export const topicCreate = (data) => {
+// 话题创建
+export const topicCreate = (data: any) => {
 	return http.request(
 		'post',
 		`/topic`,
+		{ data },
+		{
+			isNeedToken: true, // 是否需要token
+		},
+	)
+}
+// 话题编辑
+export const topicEdit = (data: any) => {
+	return http.request(
+		'patch',
+		`/topic/${data.id}`,
+		{ data },
+		{
+			isNeedToken: true, // 是否需要token
+		},
+	)
+}
+// 话题删除 {id:1}
+export const topicDelete = (data: any) => {
+	return http.request(
+		'delete',
+		`/topic/${data.id}`,
 		{ data },
 		{
 			isNeedToken: true, // 是否需要token

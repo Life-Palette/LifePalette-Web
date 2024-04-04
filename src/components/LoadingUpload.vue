@@ -1,7 +1,7 @@
 <template>
 	<Teleport to="body">
 		<div v-if="isShow" class="loading-box flex flex-col">
-			<div class="upload-text">{{ `上传中...${percent}%` }}</div>
+			<div class="upload-text">{{ `${text}${percent}%` }}</div>
 			<Lottie width="25em" height="25em" :json-data="lottieUpload" />
 		</div>
 	</Teleport>
@@ -19,6 +19,10 @@ const props = defineProps({
 	isShow: {
 		type: Boolean,
 		default: false,
+	},
+	text: {
+		type: String,
+		default: '上传中...',
 	},
 })
 </script>

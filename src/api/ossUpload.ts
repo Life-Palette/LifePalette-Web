@@ -1,5 +1,38 @@
 import { http } from '~/utils/http'
 
+// 获取上传授权
+export const getSign = (params) => {
+	return http.request(
+		'get',
+		`/alioss`,
+		{ params },
+		{
+			isNeedToken: true, // 是否需要token
+		},
+	)
+}
+// 文件保存
+export const saveFile = (data: any) => {
+	return http.request(
+		'post',
+		`/alioss/saveFile`,
+		{ data },
+		{
+			isNeedToken: true, // 是否需要token
+		},
+	)
+}
+// 文件编辑
+export const fileUpdate = (data: any) => {
+	return http.request(
+		'patch',
+		`/file/${data.id}`,
+		{ data },
+		{
+			isNeedToken: true,
+		},
+	)
+}
 // 获取分片id
 export const getUploadId = (params) => {
 	return http.request(

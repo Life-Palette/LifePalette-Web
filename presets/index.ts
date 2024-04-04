@@ -23,7 +23,7 @@ import {
 import Components from 'unplugin-vue-components/vite'
 import Markdown from 'unplugin-vue-markdown/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
-import Router from 'unplugin-vue-router/vite'
+import VueRouter from 'unplugin-vue-router/vite'
 
 import { AutoGenerateImports, vue3Presets } from 'vite-auto-import-resolvers'
 import Compression from 'vite-plugin-compression'
@@ -32,15 +32,22 @@ import { viteMockServe as Mock } from 'vite-plugin-mock'
 import Removelog from 'vite-plugin-removelog'
 import Modules from 'vite-plugin-use-modules'
 import VueDevTools from 'vite-plugin-vue-devtools'
-import Layouts from 'vite-plugin-vue-meta-layouts'
+import Layouts from 'vite-plugin-vue-layouts'
 
 import I18N from '@intlify/unplugin-vue-i18n/vite'
-import Legacy from '@vitejs/plugin-legacy'
+import Legacy from 'vite-plugin-legacy-swc'
 import Vue from '@vitejs/plugin-vue'
 import Jsx from '@vitejs/plugin-vue-jsx'
 
 // 内置插件
-import { Alias, Lightningcss, Restart, Warmup, Layers } from './plugins'
+import {
+	Alias,
+	Lightningcss,
+	Restart,
+	Warmup,
+	Layers,
+	Optimize,
+} from './plugins'
 import { defaultBuildTargets, detectResolvers, useEnv } from './shared/detect'
 import { r } from './shared/path'
 import type { PluginOption } from 'vite'
@@ -68,6 +75,10 @@ export default function () {
 		 */
 		Lightningcss(),
 		/**
+		 * 启动优化
+		 */
+		Optimize(),
+		/**
 		 * 环境变量类型提示
 		 * https://github.com/dishait/vite-plugin-env-types
 		 */
@@ -82,7 +93,7 @@ export default function () {
 		 * 文件路由
 		 * https://github.com/posva/unplugin-vue-router
 		 */
-		Router({
+		VueRouter({
 			routesFolder: r('src/pages'),
 			dts: r('presets/types/type-router.d.ts'),
 			extensions: ['.md', '.vue', '.tsx', '.jsx'],
@@ -105,10 +116,10 @@ export default function () {
 		}),
 		/**
 		 * 布局系统
-		 * https://github.com/dishait/vite-plugin-vue-meta-layouts
+		 * https://github.com/dishait/vite-plugin-vue-layouts
 		 */
 		Layouts({
-			skipTopLevelRouteLayout: true,
+			// skipTopLevelRouteLayout: true,
 		}),
 		/**
 		 * mock 服务
@@ -243,7 +254,12 @@ export default function () {
 						include: [...vue3Presets],
 						exclude: ['vue-router'],
 					}),
+
 					VueRouterAutoImports,
+					{
+						// add any other imports you were relying on
+						'vue-router/auto': ['useLink'],
+					},
 				],
 				resolvers: detectResolvers({
 					onlyExist: [

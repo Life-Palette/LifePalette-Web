@@ -6,7 +6,7 @@
 	>
 		<div class="sticky top-0 z-999"><TheHeader /></div>
 		<div class="con-h box-border w-full flex px-5 <md:!h-auto">
-			<div class="<md:display-none">
+			<div class="<md:hidden">
 				<Slider />
 				<div class="flex-1"></div>
 			</div>

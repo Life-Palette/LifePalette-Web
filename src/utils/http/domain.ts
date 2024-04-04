@@ -6,7 +6,8 @@
 const domainLsit = [
 	// 测试服
 	{
-		baseServer: 'http://localhost:3001/api', //开发服务 0
+		baseServer: 'https://test.wktest.cn:3001/api', //开发服务 0
+		// baseServer: 'http://localhost:3001/api', //开发服务 0
 		otherServer: 'https://test.wktest.cn:3001/api', //开发服务器 1
 		websocket: 'ws://localhost:3003',
 	},
