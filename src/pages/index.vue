@@ -7,7 +7,7 @@ import { Starport } from 'vue-starport'
 import StarportCard from '~/components/StarportCard.vue'
 
 import LottieNoData from '~/components/Lottie/NoData.vue'
-import Skeleton from '~/components/Skeleton'
+import Skeleton from '~/components/skeleton'
 import CardSwiper from '~/components/Card/SwiperCard.vue'
 import { formatTime } from '~/utils'
 import {
