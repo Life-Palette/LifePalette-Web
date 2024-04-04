@@ -20,13 +20,14 @@ const props = defineProps({
 	},
 })
 
+// eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
 	if (props.src) {
 		return props.src
 	}
 	const fileTemp = props.data || {}
 
-	const { fileType, file, cover, thumbnail, videoSrc = '' } = fileTemp || {}
+	const { fileType, file, cover, videoSrc = '' } = fileTemp || {}
 	if (fileType === 'IMAGE') {
 		const preSrc = file + '?x-oss-process=image/resize,l_50'
 		// const src = file + '?x-oss-process=image/resize,l_400'

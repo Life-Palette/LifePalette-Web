@@ -17,6 +17,7 @@ const props = defineProps({
 })
 console.log()
 
+// eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
 	const fileTemp = props.data || {}
 

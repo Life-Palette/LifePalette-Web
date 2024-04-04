@@ -12,6 +12,7 @@ export default defineComponent({
 		blurhash: {
 			type: String,
 			required: false,
+			default: '',
 		},
 		src: {
 			type: String,
@@ -20,6 +21,7 @@ export default defineComponent({
 		srcset: {
 			type: String,
 			required: false,
+			default: '',
 		},
 	},
 	setup(props, { attrs }) {

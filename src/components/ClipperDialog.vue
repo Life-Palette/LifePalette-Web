@@ -118,7 +118,7 @@ const props = withDefaults(defineProps<IProps>(), {
 	allowTypeList: () => ['jpg', 'png', 'jpeg'],
 	limitSize: 1,
 	fixedNumber: () => [3, 1],
-	// fixedNumberAider: () => [3, 1],
+	fixedNumberAider: () => [],
 	previewWidth: 228,
 	title: 'LOGO裁剪',
 })

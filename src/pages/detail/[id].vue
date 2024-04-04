@@ -3,7 +3,7 @@ import PostForm from '~/components/post/index.vue'
 import { Starport } from 'vue-starport'
 import StarportCard from '~/components/StarportCard.vue'
 import BaseLike from '~/components/Base/Like.vue'
-import { topicFindById ,topicDelete} from '~/api/topic'
+import { topicFindById, topicDelete } from '~/api/topic'
 import { commentCreate, commentFindById } from '~/api/comment'
 import { likeCreate, likeFindById, likeDelete } from '~/api/like'
 import { messageCreate } from '~/api/message'
@@ -202,57 +202,53 @@ const handleEdit = () => {
 }
 // 删除
 const open = (id) => {
-  ElMessageBox.confirm(
-    '确定删除吗',
-    {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  )
-    .then(() => {
-		getDelete(id)
-     
-    })
-    .catch(() => {
-    	ElMessage({
-        type: 'info',
-        message: '取消删除',
-      })
-    })
+	ElMessageBox.confirm('确定删除吗', {
+		confirmButtonText: '删除',
+		cancelButtonText: '取消',
+		type: 'warning',
+	})
+		.then(() => {
+			getDelete(id)
+		})
+		.catch(() => {
+			ElMessage({
+				type: 'info',
+				message: '取消删除',
+			})
+		})
 }
 
 // 🌈 接口数据请求
-const getDataLoading = ref(false);
+const getDataLoading = ref(false)
 const getDelete = async (id) => {
-  if (getDataLoading.value) return;
-  getDataLoading.value = true;
-  const params = {id};
-  // to is a function form (@iceywu/utils)
-  const [err, res] = await to(topicDelete(params));
-  if (res) {
-	console.log('🌈-----接口请求成功-----');
-	const { code, msg, data = [] } = res || {};
-	if (code === 200 && data) {
-		ElMessage({
-        type: 'success',
-        message: '删除成功',
-      })
-	  router.back()
-	  console.log('😊-----数据获取成功-----', data);
-	} else {
-		ElMessage({
-        type: 'info',
-        message: '删除失败',
-      })
-	  console.log('😒-----数据获取失败-----', msg);
+	if (getDataLoading.value) return
+	getDataLoading.value = true
+	const params = { id }
+	// to is a function form (@iceywu/utils)
+	const [err, res] = await to(topicDelete(params))
+	if (res) {
+		console.log('🌈-----接口请求成功-----')
+		const { code, msg, data = [] } = res || {}
+		if (code === 200 && data) {
+			ElMessage({
+				type: 'success',
+				message: '删除成功',
+			})
+			router.back()
+			console.log('😊-----数据获取成功-----', data)
+		} else {
+			ElMessage({
+				type: 'info',
+				message: '删除失败',
+			})
+			console.log('😒-----数据获取失败-----', msg)
+		}
 	}
-  }
-  if (err) {
-	console.log('❗-----接口请求失败-----');
-  }
-  getDataLoading.value = false;
-};
+	if (err) {
+		console.log('❗-----接口请求失败-----')
+	}
+	getDataLoading.value = false
+}
 </script>
 
 <template>
@@ -302,7 +298,11 @@ const getDelete = async (id) => {
 						/>
 						<div class="user-name">{{ dataDe?.User?.name }}</div>
 						<div class="flex-1"></div>
-						<div class="i-carbon-trash-can cursor-pointer text-xl mr-2"  @click="open(dataDe?.id)" v-if="isShowEdit"></div>
+						<div
+							v-if="isShowEdit"
+							class="i-carbon-trash-can mr-2 cursor-pointer text-xl"
+							@click="open(dataDe?.id)"
+						></div>
 						<div
 							v-if="isShowEdit"
 							class="i-carbon-edit cursor-pointer text-xl"

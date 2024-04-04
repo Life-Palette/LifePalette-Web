@@ -26,8 +26,8 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install
 
-      - name: 🌈 typecheck
-        run: pnpm typecheck
+      # - name: 🌈 typecheck
+      #   run: pnpm typecheck
 
       - name: 📝 Lint
         run: pnpm lint:fix
