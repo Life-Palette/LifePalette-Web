@@ -24,13 +24,18 @@
 - 🐱 **Ali oss file upload**: File upload based on `ali-oss` [Node.js](https://help.aliyun.com/document_detail/32067.html?spm=a2c4g.32070.0.0.607a55afYXWVU3) implementation
 - 🎈 **SMS verification**: Send and verify SMS through `Ali Da Yu`
 - 🥏 **Dynamic release**: Release pictures, text and videos
-  -🚩 **Personal information modification**: To be developed...
+
+- 🚩 **Personal information modification**: To be developed...
+
+- 📦 **livephoto**: Show live photos
 
 ## Features
 
 - ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite](https://github.com/vitejs/vite), [pnpm](https://pnpm.io/)
 
 - 📦 [Components auto importing](./src/components)
+
+- 🐻‍❄️ [livephoto](https://developer.apple.com/live-photos)
 
 - 🍍 [State Management via Pinia](https://pinia.vuejs.org/)
 
