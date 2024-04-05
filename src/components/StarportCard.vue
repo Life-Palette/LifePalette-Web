@@ -13,6 +13,10 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	isShowPreSrc: {
+		type: Boolean,
+		default: true,
+	},
 })
 
 onMounted(() => {
@@ -68,7 +72,7 @@ const videoRef = ref(null)
 		</template>
 		<!-- 图片 -->
 		<template v-else>
-			<ImgCard :src="fileUrl" :data="data" />
+			<ImgCard :is-show-pre-src="isShowPreSrc" :src="fileUrl" :data="data" />
 		</template>
 	</div>
 </template>

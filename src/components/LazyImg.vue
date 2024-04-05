@@ -57,7 +57,15 @@ const onLoadPreImg = () => {
 	isLoading.value = false
 	startDecreaseBlurNumber()
 }
-onMounted(() => {})
+onMounted(() => {
+	if (!props.preSrc) {
+		isLoading.value = false
+		isShowPreImg.value = false
+	} else {
+		isLoading.value = true
+		isShowPreImg.value = true
+	}
+})
 const livePhotoRef = ref()
 const initLivePhoto = async () => {
 	await nextTick()

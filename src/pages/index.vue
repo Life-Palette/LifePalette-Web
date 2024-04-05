@@ -303,7 +303,7 @@ const getConData = async (readStatus, target) => {
 									<div
 										v-for="(item, idx2) of items"
 										:key="idx2"
-										class="item-box min-h-50"
+										class="item-box min-h-80"
 										@click="goDe(item)"
 									>
 										<!-- 封面 -->

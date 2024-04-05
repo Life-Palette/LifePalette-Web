@@ -1,6 +1,6 @@
 <template>
 	<div v-if="coverUrl" class="card-box">
-		<img :src="coverUrl" class="mian-img max-w-[80%]" />
+		<ImgCard :data="data" :is-show-pre-src="false" class="max-w-[80%]" />
 		<div class="bg-cover-box">
 			<img class="mian-img bg-cover-img" :src="coverUrl" />
 			<div class="cover-box"></div>
@@ -9,6 +9,7 @@
 </template>
 
 <script setup>
+import ImgCard from '~/components/Card/ImgCard.vue'
 const props = defineProps({
 	data: {
 		type: Object,

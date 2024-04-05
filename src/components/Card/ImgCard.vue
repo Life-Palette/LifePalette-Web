@@ -1,8 +1,9 @@
 <template>
 	<div v-if="coverUrl" class="card-box">
+		<!-- {{ coverUrl.videoSrc }} -->
 		<LazyImg
-			:pre-src="coverUrl.preSrc"
-			:src="coverUrl.src"
+			:pre-src="isShowPreSrc ? coverUrl.preSrc : null"
+			:src="isShowPreSrc ? coverUrl.src : coverUrl.baseSrc"
 			:video-src="coverUrl.videoSrc"
 		></LazyImg>
 	</div>
@@ -17,6 +18,10 @@ const props = defineProps({
 	src: {
 		type: String,
 		default: '',
+	},
+	isShowPreSrc: {
+		type: Boolean,
+		default: true,
 	},
 })
 
@@ -35,6 +40,7 @@ const coverUrl = computed(() => {
 		const src = file + '?x-oss-process=image/resize,l_400'
 		return {
 			src,
+			baseSrc: file,
 			preSrc,
 			videoSrc,
 		}
@@ -47,6 +53,7 @@ const coverUrl = computed(() => {
 			`${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
 		return {
 			src: srcT,
+			baseSrc: srcT,
 			preSrc: srcT,
 			videoSrc,
 		}

@@ -11,6 +11,7 @@ import { formatTime } from '~/utils'
 import { useUserStore } from '~/stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { to } from '@iceywu/utils'
+import { ElCarousel, ElCarouselItem } from 'element-plus'
 const userStore = useUserStore()
 
 const { userInfo } = storeToRefs(userStore)
@@ -264,22 +265,38 @@ const getDelete = async (id) => {
 			:url-list="fileSrc"
 			@close="() => (showViewer = false)"
 		/>
-		<div class="conten-box <md:flex-col">
-			<div class="img-con relative flex-1 <md:h-80 <md:flex-initial">
+		<div class="conten-box <xl:flex-col">
+			<div
+				style="flex-shrink: 0"
+				class="img-con relative flex-1 flex-shrink-0 <xl:h-80 <xl:w-full <xl:flex-initial"
+			>
 				<div v-if="fileList.length > 0" class="fraction">
 					{{ currentPlayInfo }}
 				</div>
 				<Starport :port="'my-id' + deId" style="height: 100%">
 					<div class="relative h-full">
-						<el-carousel :autoplay="false" @change="handleSwiperChange">
-							<el-carousel-item v-for="(item, index) in fileList" :key="index">
+						<component
+							:is="fileList.length > 1 ? ElCarousel : 'div'"
+							:disabled="true"
+							:autoplay="false"
+							class="h-full w-full"
+							motion-blur
+							@change="handleSwiperChange"
+						>
+							<component
+								:is="fileList.length > 1 ? ElCarouselItem : 'div'"
+								v-for="(item, index) in fileList"
+								:key="index"
+								class="h-full w-full"
+							>
 								<StarportCard
 									:data="item"
 									is-detail
+									:is-show-pre-src="false"
 									@click="previewisShow(item, index)"
 								/>
-							</el-carousel-item>
-						</el-carousel>
+							</component>
+						</component>
 					</div>
 				</Starport>
 			</div>
@@ -445,7 +462,7 @@ const getDelete = async (id) => {
 		position: absolute;
 		top: 10px;
 		left: 10px;
-		z-index: 99;
+		z-index: 99999;
 		display: flex;
 		justify-content: center;
 		align-items: center;
