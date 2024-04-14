@@ -16,25 +16,44 @@
 
 			<div v-if="isFileMsg">
 				<div class="msg-file">
-					<el-image
-						preview-teleported
-						:preview-src-list="[fileUrl]"
-						height="100%"
-						fit="contain"
-						:src="fileUrl"
-					/>
+					<template v-if="fileData.type === 'video'">
+						<video
+							:src="fileData.url"
+							controls
+							width="100%"
+							height="100%"
+							:poster="
+								fileData.url +
+								'?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast'
+							"
+						/>
+					</template>
+					<template v-else-if="fileData.type === 'image'">
+						<el-image
+							preview-teleported
+							:preview-src-list="[fileData.url]"
+							height="100%"
+							fit="contain"
+							:src="fileData.url"
+						/>
+						<!-- <LazyImg :src="fileData.url"></LazyImg> -->
+					</template>
+					<template v-else>
+						<div>其他文件</div>
+					</template>
 				</div>
 			</div>
 			<!-- 文件信息 -->
 			<div v-else class="msg-box">
+				<div v-html="handleLinkData(data.content)" class="msg-text"></div>
 				<!-- 文本信息 -->
-				<div v-message="data.content" class="msg-text"></div>
+				<!-- <div v-message="data.content" class="msg-text"></div> -->
 			</div>
 		</div>
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useUserStore } from '~/stores/user'
 import { formatChatTime } from '~/utils'
 const userStore = useUserStore()
@@ -52,13 +71,60 @@ const props = defineProps({
 })
 onMounted(() => {})
 
+const handleLinkData = function (values: string) {
+	let str = values
+	const reg =
+		/(https?|http|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/g
+	let url = values.match(reg)
+	if (url) {
+		url.forEach((item: string) => {
+			str = str.replace(item, `<a href="${item}" target="_blank">${item}</a>`)
+		})
+	}
+	return str
+}
+
 // 是否是本人的消息
 const isMyMessage = computed(() => {
 	return props.data?.userId == userInfo.value.id
 })
 // 文件地址
-const fileUrl = computed(() => {
-	return props.data?.file?.file || ''
+const fileData = computed(() => {
+	// 	{
+	//     "id": 7,
+	//     "url": "http://nest-js.oss-accelerate.aliyuncs.com/nestTest/noId/dy1.mp4",
+	//     "name": "dy1.mp4",
+	//     "path": "/nestTest/noId",
+	//     "size": 904754,
+	//     "type": "video/mp4",
+	//     "userId": 1,
+	//     "fileMd5": "0eedcb4ad72a352dd2231a2204c703e8",
+	//     "blurhash": null,
+	//     "videoSrc": null,
+	//     "createdAt": "2024-04-14T01:57:09.965Z",
+	//     "updatedAt": "2024-04-14T01:57:09.965Z"
+	// }
+	// return props.data?.file?.url || ''
+
+	const { type, url } = props.data?.file || {}
+	// 获取type前缀
+	const prefix = type.split('/')[0]
+	if (prefix === 'image') {
+		return {
+			type: 'image',
+			url,
+		}
+	} else if (prefix === 'video') {
+		return {
+			type: 'video',
+			url,
+		}
+	} else {
+		return {
+			type: 'file',
+			url,
+		}
+	}
 })
 // 是否文件
 const isFileMsg = computed(() => {

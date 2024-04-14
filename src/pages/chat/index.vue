@@ -81,7 +81,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
 import MessageCard from '~/components/Card/MessageCard.vue'
 import { apiServer } from '~/utils/http/domain'
-import { uploadFile } from '~/utils/upload'
+import { uploadFile } from '~/utils/uploadAli'
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 const upPercent = ref(0)
@@ -99,28 +99,23 @@ onChange(async (file) => {
 	upPercent.value = 0
 	showUploadLoading.value = true
 	for (let i = 0; i < file.length; i++) {
-		const { code, msg, result } = await uploadFile(file[i], (progress) => {
+		const result = await uploadFile(file[i], (progress) => {
 			console.log('上传进度', progress)
 			const { percent } = progress
 			upPercent.value = percent
 		})
-		if (code === 200) {
-			console.log('文件上传成功', result)
-			const msg = {
-				event: 'chat',
-				data: {
-					userId: myId.value, // 替换为接收者ID
-					roomId: roomId.value, // 替换为接收者ID
-					file: result,
-					type: 'file',
-				},
-			}
-			const sendCon = JSON.stringify(msg)
-			send(sendCon)
-			goBottom()
-		} else {
-			ElMessage.error(msg)
+		const msg = {
+			event: 'chat',
+			data: {
+				userId: myId.value, // 替换为接收者ID
+				roomId: roomId.value, // 替换为接收者ID
+				file: result,
+				type: 'file',
+			},
 		}
+		const sendCon = JSON.stringify(msg)
+		send(sendCon)
+		goBottom()
 	}
 	showUploadLoading.value = false
 })
