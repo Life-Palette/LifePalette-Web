@@ -156,4 +156,9 @@ async function initLivePhoto() {
 		}
 	}
 }
+.lpk-live-photo-renderer{
+	canvas{
+		object-fit: cover;
+	}
+}
 </style>

@@ -4,6 +4,7 @@
   "version": "0.0.12",
   "description": "Record your memories and craft your own masterpiece of life",
   "author": "IceyWu <https://github.com/IceyWu/>",
+	"packageManager": "pnpm@9.1.2",
   "repository": {
     "url": "https://github.com/Life-Palette/LifePalette-Web"
   },
