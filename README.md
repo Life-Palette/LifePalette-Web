@@ -20,7 +20,6 @@
 
 ## 🦄 Function
 
-
 - ⚡ **QR Login**: Use nestjs as backend, and integrate QR login
 - 🐱 **Ali oss file upload**: File upload based on `ali-oss` [Node.js](https://help.aliyun.com/document_detail/32067.html?spm=a2c4g.32070.0.0.607a55afYXWVU3) implementation
 - 🎈 **SMS verification**: Send and verify SMS through `Ali Da Yu`
@@ -54,11 +53,9 @@
 - 🚀 auto version update and generate `CHANGELOG`
 <!-- - 🌈  自动版本更新并生成 `CHANGELOG` -->
 
-
 <br>
 
-
-## Motivation 
+## Motivation
 
 Why do this **template**?
 
@@ -72,12 +69,11 @@ Why do this **template**?
 该模板受 **[vitesse](https://github.com/antfu/vitesse)** 启发，如果你有 `SSG`
 的场景，推荐你使用 **[vitesse](https://github.com/antfu/vitesse)**。 -->
 
-## Inspiration 
+## Inspiration
 
 This template is inspired by **[tov-template](https://github.com/dishait/tov-template)**
 
 <br />
-
 
 ## Usage
 

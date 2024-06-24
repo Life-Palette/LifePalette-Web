@@ -1,69 +1,70 @@
-<template>
-	<div v-if="coverUrl" class="card-box">
-		<!-- {{ coverUrl.videoSrc }} -->
-		<LazyImg
-			:pre-src="isShowPreSrc ? coverUrl.preSrc : null"
-			:src="isShowPreSrc ? coverUrl.src : coverUrl.baseSrc"
-			:video-src="coverUrl.videoSrc"
-		></LazyImg>
-	</div>
-</template>
-
 <script setup>
 const props = defineProps({
-	data: {
-		type: Object,
-		default: () => {},
-	},
-	src: {
-		type: String,
-		default: '',
-	},
-	isShowPreSrc: {
-		type: Boolean,
-		default: true,
-	},
+  data: {
+    type: Object,
+    default: () => {},
+  },
+  src: {
+    type: String,
+    default: '',
+  },
+  isShowPreSrc: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 // eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
-	if (props.src) {
-		return props.src
-	}
-	const fileTemp = props.data || {}
+  if (props.src) {
+    return props.src
+  }
+  const fileTemp = props.data || {}
 
-	const { fileType, file, cover, videoSrc = '' } = fileTemp || {}
-	if (fileType === 'IMAGE') {
-		const preSrc = file + '?x-oss-process=image/resize,l_50'
-		// const src = file + '?x-oss-process=image/resize,l_400'
-		// const src = file
-		const src = file + '?x-oss-process=image/resize,l_400'
-		return {
-			src,
-			baseSrc: file,
-			preSrc,
-			videoSrc,
-		}
-	} else if (fileType === 'VIDEO') {
-		// const preSrc = cover + '?x-oss-process=image/resize,l_500'
-		// console.log('🐬-----cover-----', cover);
-		// const srcT = cover + '?x-oss-process=image/resize,l_450'
-		const srcT =
-			cover ||
-			`${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-		return {
-			src: srcT,
-			baseSrc: srcT,
-			preSrc: srcT,
-			videoSrc,
-		}
-	}
+  const { fileType, file, cover, videoSrc = '' } = fileTemp || {}
+  if (fileType === 'IMAGE') {
+    const preSrc = `${file}?x-oss-process=image/resize,l_50`
+    // const src = file + '?x-oss-process=image/resize,l_400'
+    // const src = file
+    const src = `${file}?x-oss-process=image/resize,l_400`
+    return {
+      src,
+      baseSrc: file,
+      preSrc,
+      videoSrc,
+    }
+  }
+  else if (fileType === 'VIDEO') {
+    // const preSrc = cover + '?x-oss-process=image/resize,l_500'
+    // console.log('🐬-----cover-----', cover);
+    // const srcT = cover + '?x-oss-process=image/resize,l_450'
+    const srcT
+			= cover
+			|| `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
+    return {
+      src: srcT,
+      baseSrc: srcT,
+      preSrc: srcT,
+      videoSrc,
+    }
+  }
 })
 onMounted(() => {
-	// coverUrl.value && console.log(coverUrl.value)
-	// console.log(props.data);
+  // coverUrl.value && console.log(coverUrl.value)
+  // console.log(props.data);
 })
 </script>
+
+<template>
+  <div v-if="coverUrl" class="card-box">
+    <!-- {{ coverUrl.videoSrc }} -->
+    <LazyImg
+      :pre-src="isShowPreSrc ? coverUrl.preSrc : null"
+      :src="isShowPreSrc ? coverUrl.src : coverUrl.baseSrc"
+      :video-src="coverUrl.videoSrc"
+    />
+  </div>
+</template>
 
 <style lang="less" scoped>
 .card-box {

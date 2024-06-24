@@ -1,118 +1,121 @@
 <script setup lang="ts">
 import * as LivePhotosKit from 'livephotoskit'
+
 interface Props {
-	src: string
-	preSrc?: string
-	alt?: string
-	videoSrc?: string
-	width?: string | number
-	height?: string | number
-	lazyload?: 'lazy' | 'eager'
-	isImgMode?: boolean
-	isNeedLivePhoto?: boolean
+  src: string
+  preSrc?: string
+  alt?: string
+  videoSrc?: string
+  width?: string | number
+  height?: string | number
+  lazyload?: 'lazy' | 'eager'
+  isImgMode?: boolean
+  isNeedLivePhoto?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
-	preSrc: '',
-	alt: '',
-	videoSrc: '',
-	lazyload: 'lazy',
-	width: '100%',
-	height: '100%',
-	isNeedLivePhoto: true,
+  preSrc: '',
+  alt: '',
+  videoSrc: '',
+  lazyload: 'lazy',
+  width: '100%',
+  height: '100%',
+  isNeedLivePhoto: true,
 })
 const isLoading = ref(true)
 const blurNumber = ref(30)
-const onLoad = (e: any) => {
-	const eObj = e.target
-	const { isNeedLivePhoto, videoSrc } = props
-	setTimeout(() => {
-		eObj.style.opacity = 1
-		isShowPreImg.value = false
-		if (isNeedLivePhoto && videoSrc) {
-			initLivePhoto()
-		}
-	}, 700)
+function onLoad(e: any) {
+  const eObj = e.target
+  const { isNeedLivePhoto, videoSrc } = props
+  setTimeout(() => {
+    eObj.style.opacity = 1
+    isShowPreImg.value = false
+    if (isNeedLivePhoto && videoSrc) {
+      initLivePhoto()
+    }
+  }, 700)
 }
 const isShowPreImg = ref(true)
 // 递减
-const decreaseBlurNumber = () => {
-	if (blurNumber.value > 0) {
-		blurNumber.value -= 2
-	} else {
-		clearInterval(IntervalObj.value)
-	}
+function decreaseBlurNumber() {
+  if (blurNumber.value > 0) {
+    blurNumber.value -= 2
+  }
+  else {
+    clearInterval(IntervalObj.value)
+  }
 }
 const IntervalObj = ref<any>(null)
 // 开始递减mein
-const startDecreaseBlurNumber = () => {
-	if (IntervalObj.value) {
-		clearInterval(IntervalObj.value)
-	}
-	IntervalObj.value = setInterval(() => {
-		decreaseBlurNumber()
-	}, 100)
+function startDecreaseBlurNumber() {
+  if (IntervalObj.value) {
+    clearInterval(IntervalObj.value)
+  }
+  IntervalObj.value = setInterval(() => {
+    decreaseBlurNumber()
+  }, 100)
 }
-const onLoadPreImg = () => {
-	isShowPreImg.value = true
-	isLoading.value = false
-	startDecreaseBlurNumber()
+function onLoadPreImg() {
+  isShowPreImg.value = true
+  isLoading.value = false
+  startDecreaseBlurNumber()
 }
 onMounted(() => {
-	if (!props.preSrc) {
-		isLoading.value = false
-		isShowPreImg.value = false
-	} else {
-		isLoading.value = true
-		isShowPreImg.value = true
-	}
+  if (!props.preSrc) {
+    isLoading.value = false
+    isShowPreImg.value = false
+  }
+  else {
+    isLoading.value = true
+    isShowPreImg.value = true
+  }
 })
 const livePhotoRef = ref()
-const initLivePhoto = async () => {
-	await nextTick()
-	const { src, videoSrc } = props
-	const player = LivePhotosKit.Player(livePhotoRef.value)
-	player.photoSrc = src
-	player.videoSrc = videoSrc
+async function initLivePhoto() {
+  await nextTick()
+  const { src, videoSrc } = props
+  const player = LivePhotosKit.Player(livePhotoRef.value)
+  player.photoSrc = src
+  player.videoSrc = videoSrc
 }
 </script>
 
 <template>
-	<div
-		class="relative cursor-pointer overflow-hidden"
-		:style="{
-			height: height,
-			width: width,
-		}"
-	>
-		<div
-			v-show="isLoading"
-			class="leff-0 absolute top-0 z-9 h-full w-full bg-[#f5f7fa] dark:bg-[#262727]"
-		></div>
-		<img
-			v-show="isShowPreImg"
-			:style="{
-				filter: 'blur(' + blurNumber + 'px)',
-				height: height,
-				width: width,
-			}"
-			class="img-base previw-img"
-			:src="preSrc"
-			:loading="lazyload"
-			@load="onLoadPreImg"
-		/>
+  <div
+    class="relative cursor-pointer overflow-hidden"
+    :style="{
+      height,
+      width,
+    }"
+  >
+    <div
+      v-show="isLoading"
+      class="leff-0 absolute top-0 z-9 h-full w-full bg-[#f5f7fa] dark:bg-[#262727]"
+    />
+    <img
+      v-show="isShowPreImg"
+      :style="{
+        filter: `blur(${blurNumber}px)`,
+        height,
+        width,
+      }"
+      class="img-base previw-img"
+      :src="preSrc"
+      :loading="lazyload"
+      @load="onLoadPreImg"
+    >
 
-		<img
-			ref="livePhotoRef"
-			class="img-base loaded-img"
-			:style="{
-				height: height,
-				width: width,
-			}"
-			:loading="lazyload"
-			:src="src"
-			@load="onLoad"
-		/>
-	</div>
+    <img
+      ref="livePhotoRef"
+      class="img-base loaded-img"
+      :style="{
+        height,
+        width,
+      }"
+      :loading="lazyload"
+      :src="src"
+      @load="onLoad"
+    >
+  </div>
 </template>
 
 <style lang="less" scoped>
@@ -131,6 +134,7 @@ const initLivePhoto = async () => {
 	opacity: 0;
 }
 </style>
+
 <style>
 .lpk-live-photo-player {
 	.lpk-badge {

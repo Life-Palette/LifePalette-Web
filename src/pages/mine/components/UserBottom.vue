@@ -1,117 +1,45 @@
-<template>
-	<div class="w-full flex flex-col items-center">
-		<div class="mb-4 mt-8 flex <md:flex-col">
-			<!-- 标签列表 -->
-			<div
-				class="relative box-border flex items-center gap-1 overflow-auto px-10"
-			>
-				<div
-					v-for="(item, index) in tagList"
-					:key="index"
-					class="tag-list relative box-border flex cursor-pointer items-center justify-center whitespace-nowrap rounded-md"
-					@click="handleClick(item)"
-				>
-					<div
-						:class="[
-							chooseTabId === item.id
-								? isDark
-									? 'tag-item-active-dark'
-									: 'tag-item-active '
-								: '',
-							isDark ? 'tag-item-dark' : 'tag-item',
-						]"
-					>
-						{{ item.title }}
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- 作品列表 -->
-		<template v-if="true">
-			<div class="container-box w-full">
-				<Waterfall
-					:list="topicList"
-					background-color="transparent"
-					:width="340"
-					:lazyload="false"
-				>
-					<template #item="{ item }">
-						<div class="item-box min-h-50">
-							<!-- 封面 -->
-							<div class="img-cover max-h-100 flex-1">
-								<Starport
-									:port="'my-id' + item.id"
-									class="h-full w-full transition-all duration-800"
-								>
-									<StarportCard :data="item.files[0]" />
-								</Starport>
-							</div>
-							<!-- 描述 -->
-							<div class="content-desc">
-								<div class="content-desc-title">{{ item.title }}</div>
-								<div class="content-user">
-									<img
-										class="img-avatar"
-										block
-										h-full
-										w-full
-										bg-gray-400:20
-										object-cover
-										:src="item.User.avatar"
-									/>
-									<div class="user-name">{{ item.User.name }}</div>
-								</div>
-							</div>
-						</div>
-					</template>
-				</Waterfall>
-			</div>
-		</template>
-	</div>
-</template>
-
 <script setup lang="ts">
 import { Waterfall } from 'vue-waterfall-plugin-next'
 import 'vue-waterfall-plugin-next/dist/style.css'
 import { Starport } from 'vue-starport'
+import type { listParams } from 'presets/types/axios'
 import StarportCard from '~/components/StarportCard.vue'
 import { findLikeByUserId } from '~/api/like'
 import { topicFindAll } from '~/api/topic'
-import { Result, listParams } from 'presets/types/axios'
 import { useUserStore } from '~/stores/user'
+
 interface tagItem {
-	id: number | null
-	title: string
-	cover?: string
-	thumbnailPath?: string
-	createdAt?: string
-	updatedAt?: string
-	coverPath?: string
-	thumbnail?: string
+  id: number | null
+  title: string
+  cover?: string
+  thumbnailPath?: string
+  createdAt?: string
+  updatedAt?: string
+  coverPath?: string
+  thumbnail?: string
 }
 interface topicListParams extends listParams {
-	tagId?: number
-	userId?: number
+  tagId?: number
+  userId?: number
 }
 const tagList = ref<Partial<tagItem>[]>([
-	{
-		id: 1,
-		title: '全部',
-	},
-	{
-		id: 2,
-		title: '点赞',
-	},
+  {
+    id: 1,
+    title: '全部',
+  },
+  {
+    id: 2,
+    title: '点赞',
+  },
 ])
 
 const chooseTabId = ref<number | null>(1)
-const handleClick = (item: tagItem) => {
-	chooseTabId.value = item.id
-	getTopicList()
+function handleClick(item: tagItem) {
+  chooseTabId.value = item.id
+  getTopicList()
 }
 onMounted(async () => {
-	await getTopicList()
+  await getTopicList()
 })
 // 获取话题列表
 const tagId = ref<number | null>(null)
@@ -120,41 +48,120 @@ const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 
 const getDataLoading = ref(false)
-const getTopicList = async () => {
-	getDataLoading.value = true
-	const params: topicListParams = {
-		page: 1,
-		size: 30,
-		sort: 'desc,createdAt',
-		userId: userInfo.value.id,
-	}
-	const requestApi = chooseTabId.value === 1 ? topicFindAll : findLikeByUserId
-	// if (tagId.value) {
-	// 	params.tagId = tagId.value
-	// }
-	const { code, msg, result } = ({} = await requestApi(params))
-	if (code === 200) {
-		console.log('getTopicList成功', result)
-		const { data = [] } = result
-		if (chooseTabId.value === 1) {
-			topicList.value = data
-		} else {
-			topicList.value = data.map((item: any) => {
-				return {
-					...item,
-					...item.topic,
-				}
-			})
-		}
-		console.log('🎉-----topicList.value-----', topicList.value)
-	} else {
-		console.log('getTopicList失败', msg)
-	}
-	setTimeout(() => {
-		getDataLoading.value = false
-	}, 500)
+async function getTopicList() {
+  getDataLoading.value = true
+  const params: topicListParams = {
+    page: 1,
+    size: 30,
+    sort: 'desc,createdAt',
+    userId: userInfo.value.id,
+  }
+  const requestApi = chooseTabId.value === 1 ? topicFindAll : findLikeByUserId
+  // if (tagId.value) {
+  // 	params.tagId = tagId.value
+  // }
+  const { code, msg, result } = ({} = await requestApi(params))
+  if (code === 200) {
+    console.log('getTopicList成功', result)
+    const { data = [] } = result
+    if (chooseTabId.value === 1) {
+      topicList.value = data
+    }
+    else {
+      topicList.value = data.map((item: any) => {
+        return {
+          ...item,
+          ...item.topic,
+        }
+      })
+    }
+    console.log('🎉-----topicList.value-----', topicList.value)
+  }
+  else {
+    console.log('getTopicList失败', msg)
+  }
+  setTimeout(() => {
+    getDataLoading.value = false
+  }, 500)
 }
 </script>
+
+<template>
+  <div class="w-full flex flex-col items-center">
+    <div class="mb-4 mt-8 flex <md:flex-col">
+      <!-- 标签列表 -->
+      <div
+        class="relative box-border flex items-center gap-1 overflow-auto px-10"
+      >
+        <div
+          v-for="(item, index) in tagList"
+          :key="index"
+          class="tag-list relative box-border flex cursor-pointer items-center justify-center whitespace-nowrap rounded-md"
+          @click="handleClick(item)"
+        >
+          <div
+            :class="[
+              chooseTabId === item.id
+                ? isDark
+                  ? 'tag-item-active-dark'
+                  : 'tag-item-active '
+                : '',
+              isDark ? 'tag-item-dark' : 'tag-item',
+            ]"
+          >
+            {{ item.title }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 作品列表 -->
+    <template v-if="true">
+      <div class="container-box w-full">
+        <Waterfall
+          :list="topicList"
+          background-color="transparent"
+          :width="340"
+          :lazyload="false"
+        >
+          <template #item="{ item }">
+            <div class="item-box min-h-50">
+              <!-- 封面 -->
+              <div class="img-cover max-h-100 flex-1">
+                <Starport
+                  :port="`my-id${item.id}`"
+                  class="h-full w-full transition-all duration-800"
+                >
+                  <StarportCard :data="item.files[0]" />
+                </Starport>
+              </div>
+              <!-- 描述 -->
+              <div class="content-desc">
+                <div class="content-desc-title">
+                  {{ item.title }}
+                </div>
+                <div class="content-user">
+                  <img
+                    class="img-avatar"
+                    block
+                    h-full
+                    w-full
+                    bg-gray-400:20
+                    object-cover
+                    :src="item.User.avatar"
+                  >
+                  <div class="user-name">
+                    {{ item.User.name }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </Waterfall>
+      </div>
+    </template>
+  </div>
+</template>
 
 <style lang="less" scoped>
 .tag-list {

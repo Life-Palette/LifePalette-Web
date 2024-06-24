@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { ElMessage } from 'element-plus'
+import { isObject } from '@iceywu/utils'
+import UserBottom from './components/UserBottom.vue'
+import { getMyInfo, updateUserInfo } from '~/api/admin'
 import ImgIcon1 from '~/assets/image/icons/home.png'
 import ImgIcon2 from '~/assets/image/icons/trends.png'
 import ImgIcon3 from '~/assets/image/icons/contribute.png'
@@ -8,128 +10,126 @@ import ImgIcon4 from '~/assets/image/icons/setof.png'
 import ImgIcon5 from '~/assets/image/icons/collect.png'
 import ImgIcon6 from '~/assets/image/icons/subscribe.png'
 import ImgIcon7 from '~/assets/image/icons/setup.png'
-import ImgBackground from '~/assets/image/icons/sakura.jpg'
 // import Sexman from "~/assets/image/icons.man.png"
 // import Sexgirl from "~/assets/image/icons.girl.png"
-import Loginabout from '~/components/Login/Loginabout.vue'
-import UserBottom from './components/UserBottom.vue'
 // import { uploadFile } from '~/utils/upload'
-import { uploadFile } from '~/utils/uploadAli'
 import { useUserStore } from '~/stores/user'
-import { uploadBase } from '~/api/ossUpload'
-import { isObject } from '@iceywu/utils'
+
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 const sex = ref('未知')
 const isRegist = ref(false)
 
 const backgroundUrl = computed(() => {
-	const { backgroundInfo, background } = userInfo.value as any
-	return isObject(backgroundInfo) ? backgroundInfo?.url : background
+  const { backgroundInfo, background } = userInfo.value as any
+  return isObject(backgroundInfo) ? backgroundInfo?.url : background
 })
 
 onMounted(() => {
-	getMyInfoFunc()
+  getMyInfoFunc()
 })
 const navRef1 = ref(null)
 
-//获取用户信息
-const getMyInfoFunc = async () => {
-	const params = {}
-	const { code, msg, result } = ({} = await getMyInfo())
-	if (code === 200) {
-		userStore.setUserInfo(result)
-	} else {
-	}
+// 获取用户信息
+async function getMyInfoFunc() {
+  const params = {}
+  const { code, msg, result } = ({} = await getMyInfo())
+  if (code === 200) {
+    userStore.setUserInfo(result)
+  }
+  else {
+  }
 }
 
 // 更新用户信息
 const updateLoading = ref(false)
-const updateUserInfoFunc = async (fileMd5: string) => {
-	if (updateLoading.value) return
-	updateLoading.value = true
-	const params = {
-		// backgroundInfoFileMd5: fileMd5,
-		// avatarFileMd5:
-		// name: "suan",
-		// avatar,
-		// // github: null,
-		// // wakatime: null,
-		// // wechat: null,
-		// // gitee: null,
-		// // qq: "3128006406@qq.com",
-	}
-	// if(editTarget.value === 'background'){
-	// 	params['backgroundInfoFileMd5'] = fileMd5
-	// }
-	// if(editTarget.value === 'avatar'){
-	// 	params['avatarFileMd5'] = fileMd5
-	// }
-	params[editTarget.value] = fileMd5
-	// console.log('🐳-----params-----', params);
-	// return
-	const { code, msg, result } = ({} = await updateUserInfo(params).catch(
-		(err) => {
-			updateLoading.value = false
-			ElMessage.error('更新用户信息失败')
-		},
-	))
-	if (code === 200) {
-		ElMessage.success('更新用户信息成功')
-	} else {
-		ElMessage.error('更新用户信息失败')
-	}
-	updateLoading.value = false
+async function updateUserInfoFunc(fileMd5: string) {
+  if (updateLoading.value)
+    return
+  updateLoading.value = true
+  const params = {
+    // backgroundInfoFileMd5: fileMd5,
+    // avatarFileMd5:
+    // name: "suan",
+    // avatar,
+    // // github: null,
+    // // wakatime: null,
+    // // wechat: null,
+    // // gitee: null,
+    // // qq: "3128006406@qq.com",
+  }
+  // if(editTarget.value === 'background'){
+  // 	params['backgroundInfoFileMd5'] = fileMd5
+  // }
+  // if(editTarget.value === 'avatar'){
+  // 	params['avatarFileMd5'] = fileMd5
+  // }
+  params[editTarget.value] = fileMd5
+  // console.log('🐳-----params-----', params);
+  // return
+  const { code, msg, result } = ({} = await updateUserInfo(params).catch(
+    (err) => {
+      updateLoading.value = false
+      ElMessage.error('更新用户信息失败')
+    },
+  ))
+  if (code === 200) {
+    ElMessage.success('更新用户信息成功')
+  }
+  else {
+    ElMessage.error('更新用户信息失败')
+  }
+  updateLoading.value = false
 }
 const chooseNav = computed(() => {
-	return navList.value[activeIndex.value]
+  return navList.value[activeIndex.value]
 })
 const navLeft = computed(() => {
-	// activeIndex之前所有的宽度
-	let left = 0
-	for (let i = 0; i < activeIndex.value; i++) {
-		left += navList.value[i].width
-	}
-	return left
+  // activeIndex之前所有的宽度
+  let left = 0
+  for (let i = 0; i < activeIndex.value; i++) {
+    left += navList.value[i].width
+  }
+  return left
 })
 const activeIndex = ref(0)
 
 const navList = ref([
-	{
-		name: '主页',
-		width: 80,
-		svg: ImgIcon1,
-	},
-	{
-		name: '动态',
-		width: 80,
-		svg: ImgIcon2,
-	},
-	{
-		name: '投稿',
-		width: 80,
-		svg: ImgIcon3,
-	},
-	{
-		name: '合集和列表',
-		width: 180,
-		svg: ImgIcon4,
-	},
-	{
-		name: '收藏',
-		width: 80,
-		svg: ImgIcon5,
-	},
-	{
-		name: '订阅',
-		width: 80,
-		svg: ImgIcon6,
-	},
-	{
-		name: '设置',
-		width: 80,
-		svg: ImgIcon7,
-	},
+  {
+    name: '主页',
+    width: 80,
+    svg: ImgIcon1,
+  },
+  {
+    name: '动态',
+    width: 80,
+    svg: ImgIcon2,
+  },
+  {
+    name: '投稿',
+    width: 80,
+    svg: ImgIcon3,
+  },
+  {
+    name: '合集和列表',
+    width: 180,
+    svg: ImgIcon4,
+  },
+  {
+    name: '收藏',
+    width: 80,
+    svg: ImgIcon5,
+  },
+  {
+    name: '订阅',
+    width: 80,
+    svg: ImgIcon6,
+  },
+  {
+    name: '设置',
+    width: 80,
+    svg: ImgIcon7,
+  },
 ])
 
 // 上传背景图
@@ -149,80 +149,84 @@ const navList = ref([
 //  };
 // updateUserInfo
 // 编辑
-const edit = () => {
-	isShowDialog.value = true
+function edit() {
+  isShowDialog.value = true
 }
 const isShowDialog = ref(false)
 const userBackground = computed(() => {
-	return (
-		backgroundUrl.value || 'https://assets.codepen.io/605876/miami-sunrise.jpeg'
-	)
+  return (
+    backgroundUrl.value || 'https://assets.codepen.io/605876/miami-sunrise.jpeg'
+  )
 })
 
 const userheadUpload = computed(() => {
-	const { avatarInfo, avatar } = userInfo.value as any
-	return isObject(avatarInfo) ? avatarInfo?.url : avatar
+  const { avatarInfo, avatar } = userInfo.value as any
+  return isObject(avatarInfo) ? avatarInfo?.url : avatar
 })
 const clipperData = {
-	type: 'browserLogo', // 该参数可根据实际要求修改类型
-	allowTypeList: ['png', 'jpg', 'jpeg', 'peeee'], // 允许上传的图片格式
-	previewWidth: 100, // 预览宽度
+  type: 'browserLogo', // 该参数可根据实际要求修改类型
+  allowTypeList: ['png', 'jpg', 'jpeg', 'peeee'], // 允许上传的图片格式
+  previewWidth: 100, // 预览宽度
 }
-const onConfirm = async (data: any) => {
-	console.log('🐳-----data-----', data)
+async function onConfirm(data: any) {
+  console.log('🐳-----data-----', data)
 
-	const { fileMd5 } = data
+  const { fileMd5 } = data
 
-	await updateUserInfoFunc(fileMd5)
-	getMyInfoFunc()
+  await updateUserInfoFunc(fileMd5)
+  getMyInfoFunc()
 }
 const editTarget = ref(null)
 const clipperRef = ref(null)
-const openUpload = () => {
-	editTarget.value = 'backgroundInfoFileMd5'
-	if (clipperRef.value) {
-		clipperRef.value.uploadFile()
-	}
+function openUpload() {
+  editTarget.value = 'backgroundInfoFileMd5'
+  if (clipperRef.value) {
+    clipperRef.value.uploadFile()
+  }
 }
 // 头像上传
 // const headphoto =ref(null)
-const headUpload = () => {
-	editTarget.value = 'avatarFileMd5'
-	if (clipperRef.value) {
-		clipperRef.value.uploadFile()
-	}
+function headUpload() {
+  editTarget.value = 'avatarFileMd5'
+  if (clipperRef.value) {
+    clipperRef.value.uploadFile()
+  }
 }
 </script>
 
 <template>
-	<clipperDialog
-		ref="clipperRef"
-		:type="clipperData.type"
-		:allow-type-list="clipperData.allowTypeList"
-		:limit-size="clipperData.limitSize"
-		:preview-width="clipperData.previewWidth"
-		@confirm="onConfirm"
-	/>
-	<div class="test h-full w-full">
-		<header class="header-box z-99 cursor-pointer" @click="openUpload">
-			<!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
-			<img :src="userBackground" alt="" class="backdrop" />
-			<div class="header__cover"></div>
-		</header>
-		<div class="intro z-99">
-			<!-- <img :src="userInfo?.avatar" alt="" class="avatar" @click="headUpload"/> -->
-			<img :src="userheadUpload" alt="" class="avatar" @click="headUpload" />
-			<div class="title-wrapper">
-				<div class="title">
-					<p class="user-name">@{{ userInfo?.name }}</p>
-					<p class="desc">Jhey ʕ •ᴥ•ʔ</p>
-				</div>
-			</div>
-		</div>
-		<main class="z-1 w-full">
-			<UserBottom />
-		</main>
-	</div>
+  <clipperDialog
+    ref="clipperRef"
+    :type="clipperData.type"
+    :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize"
+    :preview-width="clipperData.previewWidth"
+    @confirm="onConfirm"
+  />
+  <div class="test h-full w-full">
+    <header class="header-box z-99 cursor-pointer" @click="openUpload">
+      <!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
+      <img :src="userBackground" alt="" class="backdrop">
+      <div class="header__cover" />
+    </header>
+    <div class="intro z-99">
+      <!-- <img :src="userInfo?.avatar" alt="" class="avatar" @click="headUpload"/> -->
+      <img :src="userheadUpload" alt="" class="avatar" @click="headUpload">
+      <div class="title-wrapper">
+        <div class="title">
+          <p class="user-name">
+            @{{ userInfo?.name }}
+          </p>
+          <p class="desc">
+            Jhey ʕ •ᴥ•ʔ
+          </p>
+        </div>
+      </div>
+    </div>
+    <main class="z-1 w-full">
+      <UserBottom />
+    </main>
+  </div>
 </template>
 
 <style lang="less" scoped>

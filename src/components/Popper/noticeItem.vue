@@ -1,11 +1,11 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { nextTick, ref } from 'vue'
 
 const props = defineProps({
-	noticeItem: {
-		type: Object,
-		default: () => {},
-	},
+  noticeItem: {
+    type: Object,
+    default: () => {},
+  },
 })
 
 const titleRef = ref(null)
@@ -14,99 +14,99 @@ const descriptionRef = ref(null)
 const descriptionTooltip = ref(false)
 
 function hoverTitle() {
-	nextTick(() => {
-		titleRef.value?.scrollWidth > titleRef.value?.clientWidth
-			? (titleTooltip.value = true)
-			: (titleTooltip.value = false)
-	})
+  nextTick(() => {
+    titleRef.value?.scrollWidth > titleRef.value?.clientWidth
+      ? (titleTooltip.value = true)
+      : (titleTooltip.value = false)
+  })
 }
 
 function hoverDescription(event, description) {
-	// currentWidth 为文本在页面中所占的宽度，创建标签，加入到页面，获取currentWidth ,最后在移除
-	const tempTag = document.createElement('span')
-	tempTag.innerText = description
-	tempTag.className = 'getDescriptionWidth'
-	document.querySelector('body').appendChild(tempTag)
-	const currentWidth = document.querySelector(
-		'.getDescriptionWidth',
-	).offsetWidth
-	document.querySelector('.getDescriptionWidth').remove()
+  // currentWidth 为文本在页面中所占的宽度，创建标签，加入到页面，获取currentWidth ,最后在移除
+  const tempTag = document.createElement('span')
+  tempTag.innerText = description
+  tempTag.className = 'getDescriptionWidth'
+  document.querySelector('body').appendChild(tempTag)
+  const currentWidth = document.querySelector(
+    '.getDescriptionWidth',
+  ).offsetWidth
+  document.querySelector('.getDescriptionWidth').remove()
 
-	// cellWidth为容器的宽度
-	const cellWidth = event.target.offsetWidth
+  // cellWidth为容器的宽度
+  const cellWidth = event.target.offsetWidth
 
-	// 当文本宽度大于容器宽度两倍时，代表文本显示超过两行
-	currentWidth > 2 * cellWidth
-		? (descriptionTooltip.value = true)
-		: (descriptionTooltip.value = false)
+  // 当文本宽度大于容器宽度两倍时，代表文本显示超过两行
+  currentWidth > 2 * cellWidth
+    ? (descriptionTooltip.value = true)
+    : (descriptionTooltip.value = false)
 }
 </script>
 
 <template>
-	<div
-		class="notice-container border-b-[1px] border-[#f0f0f0] border-b-solid dark:border-[#303030]"
-	>
-		<el-avatar
-			v-if="props.noticeItem.avatar"
-			:size="30"
-			:src="props.noticeItem.avatar"
-			class="notice-container-avatar"
-		/>
-		<div class="notice-container-text">
-			<div class="notice-text-title text-[#000000d9] dark:text-white">
-				<el-tooltip
-					popper-class="notice-title-popper"
-					:disabled="!titleTooltip"
-					:content="props.noticeItem.title"
-					placement="top-start"
-				>
-					<div
-						ref="titleRef"
-						class="notice-title-content"
-						@mouseover="hoverTitle"
-					>
-						{{ props.noticeItem.title }}
-					</div>
-				</el-tooltip>
-				<el-tag
-					v-if="props.noticeItem?.extra"
-					:type="props.noticeItem?.status"
-					size="small"
-					class="notice-title-extra"
-				>
-					{{ props.noticeItem?.extra }}
-				</el-tag>
-			</div>
+  <div
+    class="notice-container border-b-[1px] border-[#f0f0f0] border-b-solid dark:border-[#303030]"
+  >
+    <el-avatar
+      v-if="props.noticeItem.avatar"
+      :size="30"
+      :src="props.noticeItem.avatar"
+      class="notice-container-avatar"
+    />
+    <div class="notice-container-text">
+      <div class="notice-text-title text-[#000000d9] dark:text-white">
+        <el-tooltip
+          popper-class="notice-title-popper"
+          :disabled="!titleTooltip"
+          :content="props.noticeItem.title"
+          placement="top-start"
+        >
+          <div
+            ref="titleRef"
+            class="notice-title-content"
+            @mouseover="hoverTitle"
+          >
+            {{ props.noticeItem.title }}
+          </div>
+        </el-tooltip>
+        <el-tag
+          v-if="props.noticeItem?.extra"
+          :type="props.noticeItem?.status"
+          size="small"
+          class="notice-title-extra"
+        >
+          {{ props.noticeItem?.extra }}
+        </el-tag>
+      </div>
 
-			<el-tooltip
-				popper-class="notice-title-popper"
-				:disabled="!descriptionTooltip"
-				:content="props.noticeItem.description"
-				placement="top-start"
-			>
-				<div
-					ref="descriptionRef"
-					class="notice-text-description"
-					@mouseover="hoverDescription($event, props.noticeItem.description)"
-				>
-					{{ props.noticeItem.description }}
-				</div>
-			</el-tooltip>
-			<div class="notice-text-datetime text-[#00000073] dark:text-white">
-				{{ props.noticeItem.datetime }}
-			</div>
-		</div>
+      <el-tooltip
+        popper-class="notice-title-popper"
+        :disabled="!descriptionTooltip"
+        :content="props.noticeItem.description"
+        placement="top-start"
+      >
+        <div
+          ref="descriptionRef"
+          class="notice-text-description"
+          @mouseover="hoverDescription($event, props.noticeItem.description)"
+        >
+          {{ props.noticeItem.description }}
+        </div>
+      </el-tooltip>
+      <div class="notice-text-datetime text-[#00000073] dark:text-white">
+        {{ props.noticeItem.datetime }}
+      </div>
+    </div>
 
-		<div v-if="props.noticeItem.cover" class="notice-container-cover">
-			<el-image
-				style="width: 100%; height: 100%"
-				:src="props.noticeItem.cover"
-				fit="cover"
-			/>
-		</div>
-		<!-- 未读标识 -->
-		<div v-if="!props.noticeItem.isRead" class="notice-container-unread"></div>
-	</div>
+    <div v-if="props.noticeItem.cover" class="notice-container-cover">
+      <el-image
+        style="width: 100%; height: 100%"
+        :src="props.noticeItem.cover"
+        fit="cover"
+      />
+    </div>
+    <!-- 未读标识 -->
+    <div v-if="!props.noticeItem.isRead" class="notice-container-unread" />
+  </div>
 </template>
 
 <style>
@@ -114,6 +114,7 @@ function hoverDescription(event, description) {
 	max-width: 238px;
 }
 </style>
+
 <style scoped lang="less">
 .notice-container {
 	display: flex;

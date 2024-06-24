@@ -23,5 +23,5 @@ export const IN_PROD = import.meta.env.PROD
  * 不带尾部 / 的 BASE_URL
  */
 export const BASE_URL_WITHOUT_TAIL = import.meta.env.BASE_URL.endsWith('/')
-	? import.meta.env.BASE_URL.slice(0, -1)
-	: import.meta.env.BASE_URL
+  ? import.meta.env.BASE_URL.slice(0, -1)
+  : import.meta.env.BASE_URL

@@ -1,132 +1,133 @@
-<template>
-	<el-dialog
-		v-model="dialogVisible"
-		append-to-body
-		title="Tips"
-		width="350px"
-		top="40vh"
-		:z-index="99999"
-		@close="closeDialog"
-	>
-		<div class="content">
-			<div class="login-box">
-				<div class="My-title">编辑个人资料</div>
-				<form>
-					<div class="user-box">
-						<input v-model="Myname" type="text" name="" required="" />
-						<label>姓名</label>
-					</div>
-
-					<div class="user-box">
-						<input type="text" name="" required="" />
-						<label>性别</label>
-					</div>
-					<div></div>
-
-					<div class="user-box">
-						<input type="text" name="" required="" />
-						<label>职业</label>
-					</div>
-
-					<div class="user-box">
-						<input type="text" name="" required="" />
-						<label>所在地</label>
-					</div>
-
-					<div class="user-box">
-						<input type="text" name="" required="" />
-						<label>邮箱</label>
-					</div>
-					<div class="user-box">
-						<input v-model="Personal" type="text" name="" required="" />
-						<label>个性签名</label>
-					</div>
-				</form>
-
-				<div class="butt">
-					<section class="post-up">
-						<button class="overlay__btn overlay__btn--colors" @click="close">
-							<span>取消</span>
-							<span class="overlay__btn-emoji">💕</span>
-						</button>
-					</section>
-
-					<span class="gap"></span>
-
-					<section class="post-btn">
-						<button
-							class="overlay__btn overlay__btn--colors"
-							@click="updateUserInfoFunc"
-						>
-							<span>发布</span>
-							<span class="overlay__btn-emoji">💕</span>
-						</button>
-					</section>
-				</div>
-			</div>
-		</div>
-	</el-dialog>
-</template>
-
 <script setup>
 import { updateUserInfo } from '~/api/admin'
 
+const props = defineProps({
+  isShowDialog: {
+    type: Boolean,
+    default: true,
+  },
+  userInfo: {
+    type: Object,
+    default: () => {},
+  },
+})
+const emit = defineEmits(['update:isShowDialog', 'update:userInfo'])
 const dialogVisible = ref(true)
 const Myname = ref('')
 // const Sexradio = ref('1')
 const Personal = ref('')
 
-const props = defineProps({
-	isShowDialog: {
-		type: Boolean,
-		default: true,
-	},
-	userInfo: {
-		type: Object,
-		default: () => {},
-	},
-})
-
-const emit = defineEmits(['update:isShowDialog', 'update:userInfo'])
-
-const closeDialog = () => {
-	emit('update:isShowDialog', false)
+function closeDialog() {
+  emit('update:isShowDialog', false)
 }
 
 // 修改信息
-const updateUserInfoFunc = async () => {
-	const params = {
-		name: Myname.value,
-		// sex:  Sexradio.value,
-	}
-	const { code, msg, result } = ({} = await updateUserInfo(params).catch(
-		(err) => {
-			console.log('err', err)
-			ElMessage.error('更新用户信息失败')
-		},
-	))
-	if (code === 200) {
-		console.log('更新用户信息成功', result)
-		emit('update:userInfo', result)
+async function updateUserInfoFunc() {
+  const params = {
+    name: Myname.value,
+    // sex:  Sexradio.value,
+  }
+  const { code, msg, result } = ({} = await updateUserInfo(params).catch(
+    (err) => {
+      console.log('err', err)
+      ElMessage.error('更新用户信息失败')
+    },
+  ))
+  if (code === 200) {
+    console.log('更新用户信息成功', result)
+    emit('update:userInfo', result)
 
-		ElMessage.success('更新用户信息成功')
-	} else {
-		console.log('更新用户信息失败', msg)
-		ElMessage.error('更新用户信息失败')
-	}
-	close()
+    ElMessage.success('更新用户信息成功')
+  }
+  else {
+    console.log('更新用户信息失败', msg)
+    ElMessage.error('更新用户信息失败')
+  }
+  close()
 }
 
-const close = () => {
-	// 关闭
-	dialogVisible.value = false
+function close() {
+  // 关闭
+  dialogVisible.value = false
 }
 onMounted(() => {
-	console.log('props.userInfo------------', props.userInfo)
-	const { name } = props.userInfo
-	Myname.value = name
+  console.log('props.userInfo------------', props.userInfo)
+  const { name } = props.userInfo
+  Myname.value = name
 })
 </script>
+
+<template>
+  <el-dialog
+    v-model="dialogVisible"
+    append-to-body
+    title="Tips"
+    width="350px"
+    top="40vh"
+    :z-index="99999"
+    @close="closeDialog"
+  >
+    <div class="content">
+      <div class="login-box">
+        <div class="My-title">
+          编辑个人资料
+        </div>
+        <form>
+          <div class="user-box">
+            <input v-model="Myname" type="text" name="" required="">
+            <label>姓名</label>
+          </div>
+
+          <div class="user-box">
+            <input type="text" name="" required="">
+            <label>性别</label>
+          </div>
+          <div />
+
+          <div class="user-box">
+            <input type="text" name="" required="">
+            <label>职业</label>
+          </div>
+
+          <div class="user-box">
+            <input type="text" name="" required="">
+            <label>所在地</label>
+          </div>
+
+          <div class="user-box">
+            <input type="text" name="" required="">
+            <label>邮箱</label>
+          </div>
+          <div class="user-box">
+            <input v-model="Personal" type="text" name="" required="">
+            <label>个性签名</label>
+          </div>
+        </form>
+
+        <div class="butt">
+          <section class="post-up">
+            <button class="overlay__btn overlay__btn--colors" @click="close">
+              <span>取消</span>
+              <span class="overlay__btn-emoji">💕</span>
+            </button>
+          </section>
+
+          <span class="gap" />
+
+          <section class="post-btn">
+            <button
+              class="overlay__btn overlay__btn--colors"
+              @click="updateUserInfoFunc"
+            >
+              <span>发布</span>
+              <span class="overlay__btn-emoji">💕</span>
+            </button>
+          </section>
+        </div>
+      </div>
+    </div>
+  </el-dialog>
+</template>
 
 <style lang="less" scoped>
 .login-box {

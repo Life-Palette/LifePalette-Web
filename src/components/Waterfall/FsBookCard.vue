@@ -1,3 +1,17 @@
+<script setup lang="ts">
+interface ICardDetail {
+  bgColor: string
+  title: string
+  author: string
+  cover?: string
+  imageHeight: number
+  [key: string]: any
+}
+const props = defineProps<{
+  detail: ICardDetail
+}>()
+</script>
+
 <template>
   <div class="fs-book-card-container">
     <div
@@ -8,33 +22,23 @@
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }"
-    ></div>
+    />
     <div class="fs-book-card-footer">
-      <div class="title">{{ props.detail.title }}</div>
+      <div class="title">
+        {{ props.detail.title }}
+      </div>
       <div class="author">
         <div class="author-info">
           <div class="avatar" />
           <span class="name">{{ props.detail.author }}</span>
         </div>
-        <div class="like">100</div>
+        <div class="like">
+          100
+        </div>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-interface ICardDetail {
-  bgColor: string;
-  title: string;
-  author: string;
-  cover?: string;
-  imageHeight: number;
-  [key: string]: any;
-}
-const props = defineProps<{
-  detail: ICardDetail;
-}>();
-</script>
 
 <style scoped lang="scss">
 .fs-book-card {
@@ -48,7 +52,7 @@ const props = defineProps<{
     height: v-bind("`${props.detail.imageHeight}px`");
     border: 1px solid #eee;
     border-radius: 20px;
-    // background-color: v-bind("props.detail.bgColor"); 
+    // background-color: v-bind("props.detail.bgColor");
   }
   &-footer {
     padding: 12px;

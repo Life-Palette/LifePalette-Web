@@ -1,39 +1,41 @@
-<template>
-	<div v-if="coverUrl" class="card-box">
-		<ImgCard :data="data" :is-show-pre-src="false" class="max-w-[80%]" />
-		<div class="bg-cover-box">
-			<img class="mian-img bg-cover-img" :src="coverUrl" />
-			<div class="cover-box"></div>
-		</div>
-	</div>
-</template>
-
 <script setup>
 import ImgCard from '~/components/Card/ImgCard.vue'
+
 const props = defineProps({
-	data: {
-		type: Object,
-		default: () => {},
-	},
+  data: {
+    type: Object,
+    default: () => {},
+  },
 })
 console.log()
 
 // eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
-	const fileTemp = props.data || {}
+  const fileTemp = props.data || {}
 
-	const { fileType, file, cover = 'IMAGE' } = fileTemp || {}
-	if (fileType === 'IMAGE') {
-		return file || ''
-	} else if (fileType === 'VIDEO') {
-		return cover || ''
-	}
+  const { fileType, file, cover = 'IMAGE' } = fileTemp || {}
+  if (fileType === 'IMAGE') {
+    return file || ''
+  }
+  else if (fileType === 'VIDEO') {
+    return cover || ''
+  }
 })
 onMounted(() => {
-	// console.log(props.data);
-	// 创建
+  // console.log(props.data);
+  // 创建
 })
 </script>
+
+<template>
+  <div v-if="coverUrl" class="card-box">
+    <ImgCard :data="data" :is-show-pre-src="false" class="max-w-[80%]" />
+    <div class="bg-cover-box">
+      <img class="mian-img bg-cover-img" :src="coverUrl">
+      <div class="cover-box" />
+    </div>
+  </div>
+</template>
 
 <style lang="less" scoped>
 .card-box {

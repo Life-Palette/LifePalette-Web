@@ -1,31 +1,33 @@
-<template>
-	<Teleport to="body">
-		<div v-if="isShow" class="loading-box flex flex-col">
-			<div class="upload-text">{{ `${text}${percent}%` }}</div>
-			<Lottie width="25em" height="25em" :json-data="lottieUpload" />
-		</div>
-	</Teleport>
-</template>
-
 <script setup>
 // import lottieUpload from "~/assets/lottie/upload.json";
 import lottieUpload from '~/assets/lottie/animation_lkpkpzdn.json'
 // const emit = defineEmits(['update:percent', 'update:isShow'])
 const props = defineProps({
-	percent: {
-		type: [Number, String],
-		default: 0,
-	},
-	isShow: {
-		type: Boolean,
-		default: false,
-	},
-	text: {
-		type: String,
-		default: '上传中...',
-	},
+  percent: {
+    type: [Number, String],
+    default: 0,
+  },
+  isShow: {
+    type: Boolean,
+    default: false,
+  },
+  text: {
+    type: String,
+    default: '上传中...',
+  },
 })
 </script>
+
+<template>
+  <Teleport to="body">
+    <div v-if="isShow" class="loading-box flex flex-col">
+      <div class="upload-text">
+        {{ `${text}${percent}%` }}
+      </div>
+      <Lottie width="25em" height="25em" :json-data="lottieUpload" />
+    </div>
+  </Teleport>
+</template>
 
 <style lang="less" scoped>
 .loading-box {

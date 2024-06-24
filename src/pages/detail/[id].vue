@@ -1,17 +1,17 @@
 <script setup>
-import PostForm from '~/components/post/index.vue'
 import { Starport } from 'vue-starport'
+import { ElCarousel, ElCarouselItem, ElMessage, ElMessageBox } from 'element-plus'
+import { to } from '@iceywu/utils'
+import PostForm from '~/components/post/index.vue'
 import StarportCard from '~/components/StarportCard.vue'
 import BaseLike from '~/components/Base/Like.vue'
-import { topicFindById, topicDelete } from '~/api/topic'
-import { commentCreate, commentFindById } from '~/api/comment'
-import { likeCreate, likeFindById, likeDelete } from '~/api/like'
+import { topicDelete, topicFindById } from '~/api/topic'
+import { commentCreate } from '~/api/comment'
+import { likeCreate, likeDelete, likeFindById } from '~/api/like'
 import { messageCreate } from '~/api/message'
 import { formatTime } from '~/utils'
 import { useUserStore } from '~/stores/user'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { to } from '@iceywu/utils'
-import { ElCarousel, ElCarouselItem } from 'element-plus'
+
 const userStore = useUserStore()
 
 const { userInfo } = storeToRefs(userStore)
@@ -26,405 +26,422 @@ const tempFileUrl = ref('')
 
 const fileList = ref([])
 const isShowEdit = computed(() => {
-	const { User } = dataDe.value
-	return userInfo.value.id == User?.id
+  const { User } = dataDe.value
+  return userInfo.value.id == User?.id
 })
 // 获取内容详情
-const getDataDe = async () => {
-	const parsms = {
-		topicId: deId.value,
-	}
-	isLogin.value && (parsms.userId = userInfo.value.id)
-	const { code, msg, result } = ({} = await topicFindById(parsms))
-	if (code === 200) {
-		console.log('获取内容详情成功', result)
-		dataDe.value = result
-		setTimeout(() => {
-			fileList.value = result?.files || []
-			console.log('fileList.value', fileList.value)
-		}, 500)
-	} else {
-		console.log('获取内容详情失败', msg)
-	}
+async function getDataDe() {
+  const parsms = {
+    topicId: deId.value,
+  }
+  isLogin.value && (parsms.userId = userInfo.value.id)
+  const { code, msg, result } = ({} = await topicFindById(parsms))
+  if (code === 200) {
+    console.log('获取内容详情成功', result)
+    dataDe.value = result
+    setTimeout(() => {
+      fileList.value = result?.files || []
+      console.log('fileList.value', fileList.value)
+    }, 500)
+  }
+  else {
+    console.log('获取内容详情失败', msg)
+  }
 }
 
-const onSwiper = (swiper) => {
-	console.log(swiper)
+function onSwiper(swiper) {
+  console.log(swiper)
 }
-const onSlideChange = () => {
-	console.log('slide change')
+function onSlideChange() {
+  console.log('slide change')
 }
 const isInitDone = ref(false)
 onMounted(() => {
-	isInitDone.value = false
-	const { id } = route.params
-	const { imgCover } = route.query
-	// fileList.value = [{ file: imgCover, fileType: "IMAGE", thumbnail: imgCover }];
-	fileList.value = [
-		{
-			file: imgCover,
-			fileType: 'IMAGE',
-			thumbnail: imgCover,
-		},
-	]
-	deId.value = id
-	isInitDone.value = true
-	getDataDe()
-	getLikeData()
-	// getCommentData();
+  isInitDone.value = false
+  const { id } = route.params
+  const { imgCover } = route.query
+  // fileList.value = [{ file: imgCover, fileType: "IMAGE", thumbnail: imgCover }];
+  fileList.value = [
+    {
+      file: imgCover,
+      fileType: 'IMAGE',
+      thumbnail: imgCover,
+    },
+  ]
+  deId.value = id
+  isInitDone.value = true
+  getDataDe()
+  getLikeData()
+  // getCommentData();
 })
 
 // 发送评论
 const sendLoading = ref(false)
-const handleSendComment = async () => {
-	if (!commentContent.value || sendLoading.value) return
-	sendLoading.value = true
-	const params = {
-		content: commentContent.value,
-		topicId: deId.value,
-	}
-	const { code, msg, result } = ({} = await commentCreate(params))
-	if (code === 200) {
-		console.log('获取内容详情成功', result)
-		commentContent.value = ''
-		getCommentData()
-	} else {
-		console.log('获取内容详情失败', msg)
-	}
-	sendLoading.value = false
+async function handleSendComment() {
+  if (!commentContent.value || sendLoading.value)
+    return
+  sendLoading.value = true
+  const params = {
+    content: commentContent.value,
+    topicId: deId.value,
+  }
+  const { code, msg, result } = ({} = await commentCreate(params))
+  if (code === 200) {
+    console.log('获取内容详情成功', result)
+    commentContent.value = ''
+    getCommentData()
+  }
+  else {
+    console.log('获取内容详情失败', msg)
+  }
+  sendLoading.value = false
 }
 // 消息创建
-const handleMessageCreate = async () => {
-	const params = {
-		receiverId: dataDe.value.userId,
-		content: '点赞了你的文章',
-		objId: deId.value,
-		type: 'like',
-	}
-	const { code, msg, result } = ({} = await messageCreate(params))
-	if (code === 200) {
-		console.log('消息创建成功', result)
-	} else {
-		console.log('消息创建失败', msg)
-	}
+async function handleMessageCreate() {
+  const params = {
+    receiverId: dataDe.value.userId,
+    content: '点赞了你的文章',
+    objId: deId.value,
+    type: 'like',
+  }
+  const { code, msg, result } = ({} = await messageCreate(params))
+  if (code === 200) {
+    console.log('消息创建成功', result)
+  }
+  else {
+    console.log('消息创建失败', msg)
+  }
 }
 
 const commentRef = ref(null)
 // 获取评论
-const getCommentData = async () => {
-	if (!commentRef.value) return
-	await commentRef.value.getCommentData()
+async function getCommentData() {
+  if (!commentRef.value)
+    return
+  await commentRef.value.getCommentData()
 }
 const comList = ref([])
 const comNum = computed(() => {
-	return comList.value.length || 0
+  return comList.value.length || 0
 })
 
-const handleLike = async () => {
-	const params = {
-		topicId: deId.value,
-	}
-	const requestApi = dataDe.value.like ? likeDelete : likeCreate
-	const { code, msg, result } = ({} = await requestApi(params))
-	if (code === 200) {
-		console.log('点赞成功', result)
+async function handleLike() {
+  const params = {
+    topicId: deId.value,
+  }
+  const requestApi = dataDe.value.like ? likeDelete : likeCreate
+  const { code, msg, result } = ({} = await requestApi(params))
+  if (code === 200) {
+    console.log('点赞成功', result)
 
-		// getLikeData();
-		if (dataDe.value.like) {
-			dataDe.value.like = false
-			likeList.value = likeList.value.filter(
-				(item) => item.userId !== userInfo.value.id,
-			)
-		} else {
-			dataDe.value.like = true
-			likeList.value.push({
-				userId: userInfo.value.id,
-				topicId: deId.value,
-			})
-			ElMessage.success('点赞成功')
-			// 消息创建
-			handleMessageCreate()
-		}
-	} else {
-		console.log('点赞失败', msg)
-		ElMessage.error('点赞失败')
-	}
+    // getLikeData();
+    if (dataDe.value.like) {
+      dataDe.value.like = false
+      likeList.value = likeList.value.filter(
+        item => item.userId !== userInfo.value.id,
+      )
+    }
+    else {
+      dataDe.value.like = true
+      likeList.value.push({
+        userId: userInfo.value.id,
+        topicId: deId.value,
+      })
+      ElMessage.success('点赞成功')
+      // 消息创建
+      handleMessageCreate()
+    }
+  }
+  else {
+    console.log('点赞失败', msg)
+    ElMessage.error('点赞失败')
+  }
 }
 // 是否登录
 const isLogin = computed(() => {
-	return userInfo.value?.name
+  return userInfo.value?.name
 })
 // 获取点赞信息
 const likeList = ref([])
-const getLikeData = async () => {
-	const { code, msg, result } = ({} = await likeFindById({
-		topicId: deId.value,
-	}))
-	if (code === 200) {
-		console.log('获取点赞信息成功', result)
-		likeList.value = result || []
-	} else {
-		console.log('获取点赞信息失败', msg)
-	}
+async function getLikeData() {
+  const { code, msg, result } = ({} = await likeFindById({
+    topicId: deId.value,
+  }))
+  if (code === 200) {
+    console.log('获取点赞信息成功', result)
+    likeList.value = result || []
+  }
+  else {
+    console.log('获取点赞信息失败', msg)
+  }
 }
 // 标签信息
 const tagDe = computed(() => {
-	const tagNameList = dataDe.value?.tags || []
-	return tagNameList.map((item) => `#${item.title}`).join(' ')
+  const tagNameList = dataDe.value?.tags || []
+  return tagNameList.map(item => `#${item.title}`).join(' ')
 })
 
 const currentPlayIndex = ref(0)
-const handleSwiperChange = (index) => {
-	// console.log("index", index);
-	currentPlayIndex.value = index
+function handleSwiperChange(index) {
+  // console.log("index", index);
+  currentPlayIndex.value = index
 }
 const currentPlayInfo = computed(() => {
-	return `${currentPlayIndex.value + 1}/${fileList.value.length}`
+  return `${currentPlayIndex.value + 1}/${fileList.value.length}`
 })
 const showViewer = ref(false)
-const previewisShow = (data, index) => {
-	initialIndex.value = index
-	showViewer.value = true
+function previewisShow(data, index) {
+  initialIndex.value = index
+  showViewer.value = true
 }
 const initialIndex = ref(0)
 const fileSrc = computed(() => {
-	// console.log('🦄-----fileList.value-----', fileList.value);
-	return fileList.value.map((item) => {
-		if (item.fileType === 'IMAGE') {
-			return item.file
-		} else if (item.fileType === 'VIDEO') {
-			// return item.cover
-		}
-	})
+  // console.log('🦄-----fileList.value-----', fileList.value);
+  return fileList.value.map((item) => {
+    if (item.fileType === 'IMAGE') {
+      return item.file
+    }
+    else if (item.fileType === 'VIDEO') {
+      // return item.cover
+    }
+  })
 })
 const isShowDialog = ref(false)
-const handleEdit = () => {
-	isShowDialog.value = true
+function handleEdit() {
+  isShowDialog.value = true
 }
 // 删除
-const open = (id) => {
-	ElMessageBox.confirm('确定删除吗', {
-		confirmButtonText: '删除',
-		cancelButtonText: '取消',
-		type: 'warning',
-	})
-		.then(() => {
-			getDelete(id)
-		})
-		.catch(() => {
-			ElMessage({
-				type: 'info',
-				message: '取消删除',
-			})
-		})
+function open(id) {
+  ElMessageBox.confirm('确定删除吗', {
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      getDelete(id)
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消删除',
+      })
+    })
 }
 
 // 🌈 接口数据请求
 const getDataLoading = ref(false)
-const getDelete = async (id) => {
-	if (getDataLoading.value) return
-	getDataLoading.value = true
-	const params = { id }
-	// to is a function form (@iceywu/utils)
-	const [err, res] = await to(topicDelete(params))
-	if (res) {
-		console.log('🌈-----接口请求成功-----')
-		const { code, msg, data = [] } = res || {}
-		if (code === 200 && data) {
-			ElMessage({
-				type: 'success',
-				message: '删除成功',
-			})
-			router.back()
-			console.log('😊-----数据获取成功-----', data)
-		} else {
-			ElMessage({
-				type: 'info',
-				message: '删除失败',
-			})
-			console.log('😒-----数据获取失败-----', msg)
-		}
-	}
-	if (err) {
-		console.log('❗-----接口请求失败-----')
-	}
-	getDataLoading.value = false
+async function getDelete(id) {
+  if (getDataLoading.value)
+    return
+  getDataLoading.value = true
+  const params = { id }
+  // to is a function form (@iceywu/utils)
+  const [err, res] = await to(topicDelete(params))
+  if (res) {
+    console.log('🌈-----接口请求成功-----')
+    const { code, msg, data = [] } = res || {}
+    if (code === 200 && data) {
+      ElMessage({
+        type: 'success',
+        message: '删除成功',
+      })
+      router.back()
+      console.log('😊-----数据获取成功-----', data)
+    }
+    else {
+      ElMessage({
+        type: 'info',
+        message: '删除失败',
+      })
+      console.log('😒-----数据获取失败-----', msg)
+    }
+  }
+  if (err) {
+    console.log('❗-----接口请求失败-----')
+  }
+  getDataLoading.value = false
 }
 </script>
 
 <template>
-	<PostForm
-		v-if="isShowDialog"
-		v-model:isShowDialog="isShowDialog"
-		:data="dataDe"
-	/>
-	<div class="box-border h-full w-full flex gap-5 px-10 pb-2 pt-10 <md:px-1">
-		<el-image-viewer
-			v-if="showViewer"
-			:initial-index="initialIndex"
-			:url-list="fileSrc"
-			@close="() => (showViewer = false)"
-		/>
-		<div class="conten-box <xl:flex-col">
-			<div
-				style="flex-shrink: 0"
-				class="img-con relative flex-1 flex-shrink-0 <xl:h-80 <xl:w-full <xl:flex-initial"
-			>
-				<div v-if="fileList.length > 0" class="fraction">
-					{{ currentPlayInfo }}
-				</div>
-				<Starport :port="'my-id' + deId" style="height: 100%">
-					<div class="relative h-full">
-						<component
-							:is="fileList.length > 1 ? ElCarousel : 'div'"
-							:disabled="true"
-							:autoplay="false"
-							class="h-full w-full"
-							motion-blur
-							@change="handleSwiperChange"
-						>
-							<component
-								:is="fileList.length > 1 ? ElCarouselItem : 'div'"
-								v-for="(item, index) in fileList"
-								:key="index"
-								class="h-full w-full"
-							>
-								<StarportCard
-									:data="item"
-									is-detail
-									:is-show-pre-src="false"
-									@click="previewisShow(item, index)"
-								/>
-							</component>
-						</component>
-					</div>
-				</Starport>
-			</div>
-			<div class="de-content flex-1 bg-[#fff]">
-				<!-- 用户信息 -->
-				<section>
-					<div class="content-user">
-						<img
-							class="img-avatar"
-							block
-							h-full
-							w-full
-							bg-gray-400:20
-							object-cover
-							:src="dataDe?.User?.avatar"
-						/>
-						<div class="user-name">{{ dataDe?.User?.name }}</div>
-						<div class="flex-1"></div>
-						<div
-							v-if="isShowEdit"
-							class="i-carbon-trash-can mr-2 cursor-pointer text-xl"
-							@click="open(dataDe?.id)"
-						></div>
-						<div
-							v-if="isShowEdit"
-							class="i-carbon-edit cursor-pointer text-xl"
-							@click="handleEdit"
-						></div>
-					</div>
-				</section>
-				<!-- 标题 -->
-				<section
-					class="title-part flex flex-1 flex-col overflow-auto <md:overflow-initial"
-				>
-					<!-- 标题 -->
-					<div class="title-desc py-5">
-						{{ dataDe.title }}
-					</div>
-					<!-- 内容 -->
-					<div class="title-content py-5 text-start text-[#333]">
-						{{ dataDe.content }}
-					</div>
-					<!-- 标签 -->
-					<div class="title-content py-5 text-start text-lg text-[#13386c]">
-						{{ tagDe }}
-					</div>
-					<!-- 时间 -->
-					<div
-						class="title-content py-5 text-start text-sm text-[rgb(51,51,51,0.6)]"
-					>
-						{{ formatTime(dataDe.createdAt, 'YYYY-MM-DD HH:mm') }}
-					</div>
+  <PostForm
+    v-if="isShowDialog"
+    v-model:isShowDialog="isShowDialog"
+    :data="dataDe"
+  />
+  <div class="box-border h-full w-full flex gap-5 px-10 pb-2 pt-10 <md:px-1">
+    <el-image-viewer
+      v-if="showViewer"
+      :initial-index="initialIndex"
+      :url-list="fileSrc"
+      @close="() => (showViewer = false)"
+    />
+    <div class="conten-box <xl:flex-col">
+      <div
+        style="flex-shrink: 0"
+        class="img-con relative flex-1 flex-shrink-0 <xl:h-80 <xl:w-full <xl:flex-initial"
+      >
+        <div v-if="fileList.length > 0" class="fraction">
+          {{ currentPlayInfo }}
+        </div>
+        <Starport :port="`my-id${deId}`" style="height: 100%">
+          <div class="relative h-full">
+            <component
+              :is="fileList.length > 1 ? ElCarousel : 'div'"
+              :disabled="true"
+              :autoplay="false"
+              class="h-full w-full"
+              motion-blur
+              @change="handleSwiperChange"
+            >
+              <component
+                :is="fileList.length > 1 ? ElCarouselItem : 'div'"
+                v-for="(item, index) in fileList"
+                :key="index"
+                class="h-full w-full"
+              >
+                <StarportCard
+                  :data="item"
+                  is-detail
+                  :is-show-pre-src="false"
+                  @click="previewisShow(item, index)"
+                />
+              </component>
+            </component>
+          </div>
+        </Starport>
+      </div>
+      <div class="de-content flex-1 bg-[#fff]">
+        <!-- 用户信息 -->
+        <section>
+          <div class="content-user">
+            <img
+              class="img-avatar"
+              block
+              h-full
+              w-full
+              bg-gray-400:20
+              object-cover
+              :src="dataDe?.User?.avatar"
+            >
+            <div class="user-name">
+              {{ dataDe?.User?.name }}
+            </div>
+            <div class="flex-1" />
+            <div
+              v-if="isShowEdit"
+              class="i-carbon-trash-can mr-2 cursor-pointer text-xl"
+              @click="open(dataDe?.id)"
+            />
+            <div
+              v-if="isShowEdit"
+              class="i-carbon-edit cursor-pointer text-xl"
+              @click="handleEdit"
+            />
+          </div>
+        </section>
+        <!-- 标题 -->
+        <section
+          class="title-part flex flex-1 flex-col overflow-auto <md:overflow-initial"
+        >
+          <!-- 标题 -->
+          <div class="title-desc py-5">
+            {{ dataDe.title }}
+          </div>
+          <!-- 内容 -->
+          <div class="title-content py-5 text-start text-[#333]">
+            {{ dataDe.content }}
+          </div>
+          <!-- 标签 -->
+          <div class="title-content py-5 text-start text-lg text-[#13386c]">
+            {{ tagDe }}
+          </div>
+          <!-- 时间 -->
+          <div
+            class="title-content py-5 text-start text-sm text-[rgb(51,51,51,0.6)]"
+          >
+            {{ formatTime(dataDe.createdAt, 'YYYY-MM-DD HH:mm') }}
+          </div>
 
-					<div class="box-border w-full">
-						<div class="h-[1px] w-full bg-[rgb(0,0,0,0.1)]"></div>
-					</div>
-					<!-- 标签列表 -->
-					<div class="flex-1">
-						<Comment
-							v-if="isInitDone"
-							:id="deId"
-							ref="commentRef"
-							v-model:comList="comList"
-						/>
-					</div>
-				</section>
+          <div class="box-border w-full">
+            <div class="h-[1px] w-full bg-[rgb(0,0,0,0.1)]" />
+          </div>
+          <!-- 标签列表 -->
+          <div class="flex-1">
+            <Comment
+              v-if="isInitDone"
+              :id="deId"
+              ref="commentRef"
+              v-model:comList="comList"
+            />
+          </div>
+        </section>
 
-				<section class="w-full flex flex-col gap-6 bg-white">
-					<!-- 基本信息 -->
-					<div class="flex gap-4 text-[#333]">
-						<!-- 点赞 -->
-						<div class="flex items-end gap-2">
-							<!-- <div
+        <section class="w-full flex flex-col gap-6 bg-white">
+          <!-- 基本信息 -->
+          <div class="flex gap-4 text-[#333]">
+            <!-- 点赞 -->
+            <div class="flex items-end gap-2">
+              <!-- <div
                 v-if="dataDe.like"
                 class="i-carbon-favorite-filled text-[#ff4d4f] text-xl"
               ></div>
               <div v-else class="i-carbon-favorite text-xl"></div> -->
-							<BaseLike
-								v-model:isLikePro="dataDe.like"
-								@like-change="handleLike"
-							/>
-							<div class="text-sm">{{ likeList.length }}</div>
-						</div>
-						<!-- 收藏 -->
-						<!-- <div class="flex gap-2 items-end">
+              <BaseLike
+                v-model:isLikePro="dataDe.like"
+                @like-change="handleLike"
+              />
+              <div class="text-sm">
+                {{ likeList.length }}
+              </div>
+            </div>
+            <!-- 收藏 -->
+            <!-- <div class="flex gap-2 items-end">
               <div class="i-carbon-star text-xl"></div>
               <div class="text-sm">{{ 0 }}</div>
             </div> -->
-						<!-- 评论 -->
-						<div class="flex items-end gap-2">
-							<div class="i-carbon-chat text-xl"></div>
-							<div class="text-sm">{{ comNum }}</div>
-						</div>
-						<div class="flex-"></div>
-					</div>
-					<!-- 评论 -->
+            <!-- 评论 -->
+            <div class="flex items-end gap-2">
+              <div class="i-carbon-chat text-xl" />
+              <div class="text-sm">
+                {{ comNum }}
+              </div>
+            </div>
+            <div class="flex-" />
+          </div>
+          <!-- 评论 -->
 
-					<div class="w-full flex gap-5">
-						<div class="input-wrapper flex-1">
-							<input
-								v-model="commentContent"
-								class="comment-input"
-								type="textarea"
-								placeholder="说点什么..."
-								data-tribute="true"
-							/>
-							<div class="input-buttons">
-								<div
-									class="186, 186)] text-[rgb(186, i-carbon-face-activated-filled"
-								></div>
-							</div>
-						</div>
+          <div class="w-full flex gap-5">
+            <div class="input-wrapper flex-1">
+              <input
+                v-model="commentContent"
+                class="comment-input"
+                type="textarea"
+                placeholder="说点什么..."
+                data-tribute="true"
+              >
+              <div class="input-buttons">
+                <div
+                  class="186, 186)] text-[rgb(186, i-carbon-face-activated-filled"
+                />
+              </div>
+            </div>
 
-						<button
-							class="overlay__btn overlay__btn--colors"
-							@click="handleSendComment"
-						>
-							发送
-						</button>
-					</div>
-				</section>
-			</div>
-			<!-- 返回按钮 -->
-			<div class="close-icon" @click="router.back()">
-				<div class="i-carbon-arrow-left"></div>
-			</div>
-		</div>
-	</div>
+            <button
+              class="overlay__btn overlay__btn--colors"
+              @click="handleSendComment"
+            >
+              发送
+            </button>
+          </div>
+        </section>
+      </div>
+      <!-- 返回按钮 -->
+      <div class="close-icon" @click="router.back()">
+        <div class="i-carbon-arrow-left" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style lang="less" scoped>

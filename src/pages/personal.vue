@@ -1,22 +1,22 @@
 <script setup lang="ts"></script>
 
 <template>
-	<header>
-		<h1>Parallax header</h1>
-		<p>Parallax scroll effect like Twitter. Pure css, javacsript free.</p>
-	</header>
-	<main>
-		<p>
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi, tempora
-			voluptatum porro. Harum odio, sapiente dicta, eum quidem porro atque
-			quisquam impedit officia ullam minus, laudantium vel eaque doloribus rem.
-		</p>
-		<p>
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi, tempora
-			voluptatum porro. Harum odio, sapiente dicta, eum quidem porro atque
-			quisquam impedit officia ullam minus, laudantium vel eaque doloribus rem.
-		</p>
-	</main>
+  <header>
+    <h1>Parallax header</h1>
+    <p>Parallax scroll effect like Twitter. Pure css, javacsript free.</p>
+  </header>
+  <main>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi, tempora
+      voluptatum porro. Harum odio, sapiente dicta, eum quidem porro atque
+      quisquam impedit officia ullam minus, laudantium vel eaque doloribus rem.
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi, tempora
+      voluptatum porro. Harum odio, sapiente dicta, eum quidem porro atque
+      quisquam impedit officia ullam minus, laudantium vel eaque doloribus rem.
+    </p>
+  </main>
 </template>
 
 <style>
@@ -86,6 +86,7 @@ main {
 	z-index: 2;
 }
 </style>
+
 <route lang="json">
 {
 	"meta": {

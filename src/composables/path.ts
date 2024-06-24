@@ -3,5 +3,5 @@
  * @param path 路径
  */
 export function safeResolve(path: string) {
-	return BASE_URL_WITHOUT_TAIL + path
+  return BASE_URL_WITHOUT_TAIL + path
 }

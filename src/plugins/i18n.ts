@@ -2,18 +2,18 @@ import { defu } from 'defu'
 import { createI18n } from 'vue-i18n'
 
 const yamls = import.meta.glob('../../locales/*/**.y(a)?ml', {
-	eager: true,
+  eager: true,
 })
 
 const languages = Object.entries(yamls).map(([key, value]) => {
-	const yaml = key.endsWith('.yaml')
-	key = key.slice(14, yaml ? -5 : -4)
-	// 如果有子模块，则分割
-	if (key.includes('/')) {
-		key = key.split('/')[0]
-	}
-	// @ts-ignore
-	return { [key]: value.default }
+  const yaml = key.endsWith('.yaml')
+  key = key.slice(14, yaml ? -5 : -4)
+  // 如果有子模块，则分割
+  if (key.includes('/')) {
+    key = key.split('/')[0]
+  }
+  // @ts-expect-error
+  return { [key]: value.default }
 })
 
 const messages = defu({}, ...languages)
@@ -23,10 +23,10 @@ const messages = defu({}, ...languages)
 const storageLocale = useStorage('locale', '简体中文')
 
 export const i18n = createI18n({
-	messages,
-	legacy: false,
-	globalInjection: true,
-	allowComposition: true,
+  messages,
+  legacy: false,
+  globalInjection: true,
+  allowComposition: true,
 })
 
 // 同步本地 localStorage 和 i18n

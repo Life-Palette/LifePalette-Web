@@ -1,11 +1,11 @@
 interface ProxyStorage {
-	// eslint-disable-next-line no-unused-vars
-	setItem<T>(k: string, v: T): void
-	// eslint-disable-next-line no-unused-vars
-	getItem<T>(k: string): T
-	// eslint-disable-next-line no-unused-vars
-	removeItem(k: string): void
-	clear(): void
+
+  setItem: <T>(k: string, v: T) => void
+
+  getItem: <T>(k: string) => T
+
+  removeItem: (k: string) => void
+  clear: () => void
 }
 
 // declare class sessionStorageProxy implements ProxyStorage {
@@ -42,19 +42,19 @@ interface ProxyStorage {
 // export {  sessionStorageProxy, storageSession };
 
 export const storageSession: () => ProxyStorage = () => {
-	const storage = window.sessionStorage
-	return {
-		setItem<T>(k: string, v: T): void {
-			storage.setItem(k, JSON.stringify(v))
-		},
-		getItem<T>(k: string): T {
-			return JSON.parse(storage.getItem(k) || '{}')
-		},
-		removeItem(k: string): void {
-			storage.removeItem(k)
-		},
-		clear(): void {
-			storage.clear()
-		},
-	}
+  const storage = window.sessionStorage
+  return {
+    setItem<T>(k: string, v: T): void {
+      storage.setItem(k, JSON.stringify(v))
+    },
+    getItem<T>(k: string): T {
+      return JSON.parse(storage.getItem(k) || '{}')
+    },
+    removeItem(k: string): void {
+      storage.removeItem(k)
+    },
+    clear(): void {
+      storage.clear()
+    },
+  }
 }
