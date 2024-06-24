@@ -21,7 +21,7 @@ jobs:
           node-version: 20
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
 
       - name: 📦 Install dependencies
         run: pnpm install
