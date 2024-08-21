@@ -11,7 +11,7 @@ export interface resultType {
 }
 
 export type RequestMethods = Extract<
-	Method,
+  Method,
 	'get' | 'post' | 'put' | 'delete' | 'patch' | 'option' | 'head'
 >
 

@@ -80,15 +80,15 @@ const videoRef = ref(null)
 
 <style lang="less" scoped>
 .play-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: absolute;
-	right: 14px;
-	top: 14px;
-	width: 30px;
-	height: 30px;
-	background: rgba(0, 0, 0, 0.3);
-	border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 30px;
 }
 </style>

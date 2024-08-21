@@ -31,9 +31,9 @@ import { StarportCarrier } from 'vue-starport'
 <style lang="less" scoped>
 // 隐藏滚动条
 ::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 .con-h {
-	height: calc(100vh - 60px);
+  height: calc(100vh - 60px);
 }
 </style>

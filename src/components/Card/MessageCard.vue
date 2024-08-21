@@ -54,7 +54,7 @@ const fileData = computed(() => {
 
   const { type, url } = props.data?.file || {}
   // 获取type前缀
-  const prefix = type.split('/')[0]
+  const prefix = type?.split('/')[0]
   if (prefix === 'image') {
     return {
       type: 'image',
@@ -137,66 +137,66 @@ const isFileMsg = computed(() => {
 
 <style lang="less" scoped>
 .chat-box {
-	// padding: 0px 46px;
-	box-sizing: border-box;
+  // padding: 0px 46px;
+  box-sizing: border-box;
 
-	.send-time {
-		font-style: normal;
-		font-weight: 400;
-		font-size: 18px;
-		text-align: center;
-		color: #b9bcbf;
-		// color: red;
-		margin-bottom: 10px;
-	}
+  .send-time {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    text-align: center;
+    color: #b9bcbf;
+    // color: red;
+    margin-bottom: 10px;
+  }
 
-	.message {
-		display: flex;
-		align-items: flex-start;
-		// background: red;
-		.avatar {
-			flex-shrink: 0;
-			width: 53px;
-			height: 53px;
-		}
-		.msg-file {
-			box-sizing: border-box;
-			border-radius: 10px;
-			overflow: hidden;
-			// height: 300px;
-			// width: 100%;
-			max-width: 500px;
-			margin-bottom: 50px;
-		}
-		.msg-box {
-			box-sizing: border-box;
-			background: #428ffc;
-			border-radius: 8px;
-			color: #ffffff;
-			padding: 8px 12px;
-			// min-height: 50px;
-			.msg-text {
-				font-style: normal;
-				font-weight: 400;
-				font-size: 20px;
-				// line-height: 60px;
-				word-break: break-all;
-			}
-		}
-	}
-	.my-msg {
-		display: flex;
+  .message {
+    display: flex;
+    align-items: flex-start;
+    // background: red;
+    .avatar {
+      flex-shrink: 0;
+      width: 53px;
+      height: 53px;
+    }
+    .msg-file {
+      box-sizing: border-box;
+      border-radius: 10px;
+      overflow: hidden;
+      // height: 300px;
+      // width: 100%;
+      max-width: 500px;
+      margin-bottom: 50px;
+    }
+    .msg-box {
+      box-sizing: border-box;
+      background: #428ffc;
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 8px 12px;
+      // min-height: 50px;
+      .msg-text {
+        font-style: normal;
+        font-weight: 400;
+        font-size: 20px;
+        // line-height: 60px;
+        word-break: break-all;
+      }
+    }
+  }
+  .my-msg {
+    display: flex;
 
-		flex-direction: row-reverse;
-		.avatar {
-			margin-left: 20px;
-		}
-	}
-	.other-msg {
-		display: flex;
-		.avatar {
-			margin-right: 20px;
-		}
-	}
+    flex-direction: row-reverse;
+    .avatar {
+      margin-left: 20px;
+    }
+  }
+  .other-msg {
+    display: flex;
+    .avatar {
+      margin-right: 20px;
+    }
+  }
 }
 </style>

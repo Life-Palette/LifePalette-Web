@@ -447,173 +447,173 @@ async function getDelete(id) {
 <style lang="less" scoped>
 // 隐藏滚动条
 ::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 .conten-box {
-	height: 100%;
-	width: 100%;
-	background: rgba(255, 255, 255, 0.775);
-	box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
-	border-radius: 15px;
-	border: 1px solid rgba(255, 255, 255, 0.125);
-	//   高斯模糊
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	box-sizing: border-box;
-	overflow: hidden;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.775);
+  box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  //   高斯模糊
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  overflow: hidden;
 
-	display: flex;
-	position: relative;
-	.img-con {
-		border-radius: 15px;
-		overflow: hidden;
-	}
-	.de-content {
-		box-sizing: border-box;
-		padding: 20px 24px;
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-	.close-icon {
-		position: absolute;
-		top: 10px;
-		left: 10px;
-		z-index: 99999;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border-radius: 100%;
-		width: 40px;
-		height: 40px;
-		border-radius: 40px;
-		background: #fff;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		box-shadow:
-			0 1px 2px rgba(0, 0, 0, 0.025),
-			0 2px 8px rgba(0, 0, 0, 0.05);
-		cursor: pointer;
-		transition: all 0.3s;
-		// color: var(--color-secondary-label);
-	}
+  display: flex;
+  position: relative;
+  .img-con {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  .de-content {
+    box-sizing: border-box;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.025),
+      0 2px 8px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    // color: var(--color-secondary-label);
+  }
 }
 :deep(.el-carousel) {
-	height: 100%;
-	.el-carousel__container {
-		height: 100%;
-	}
+  height: 100%;
+  .el-carousel__container {
+    height: 100%;
+  }
 }
 
 // 用户信息
 .content-user {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	.img-avatar {
-		width: 30px;
-		height: 30px;
-		border-radius: 20px;
-		border: 0.5px solid #e6e6e6;
-	}
-	.user-name {
-		color: #666;
-		font-size: 16px;
-	}
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  .img-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    border: 0.5px solid #e6e6e6;
+  }
+  .user-name {
+    color: #666;
+    font-size: 16px;
+  }
 }
 // 标题
 .title-part {
-	margin: 0 10px;
-	.title-desc {
-		text-align: left;
-		font-weight: 600;
-		font-size: 20px;
-		line-height: 32px;
-		color: #333;
-	}
+  margin: 0 10px;
+  .title-desc {
+    text-align: left;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 32px;
+    color: #333;
+  }
 }
 .input-wrapper {
-	display: flex;
-	position: relative;
-	width: 100%;
-	flex-shrink: 0;
-	transition: flex 0.3s;
+  display: flex;
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  transition: flex 0.3s;
 
-	.comment-input {
-		box-sizing: border-box;
-		padding: 12px 92px 12px 36px;
+  .comment-input {
+    box-sizing: border-box;
+    padding: 12px 92px 12px 36px;
 
-		background-repeat: no-repeat;
-		background-size: 16px 16px;
-		background-position: 16px 12px;
-		width: 100%;
-		height: 40px;
-		line-height: 16px;
-		background: #f5f5f5;
-		caret-color: #5b92e1;
-		border-radius: 22px;
-		border: none;
-		outline: none;
-		// resize: none;
-	}
-	.input-buttons {
-		position: absolute;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding: 0 10px;
-		.i-carbon-send {
-			font-size: 20px;
-			color: #5b92e1;
-			cursor: pointer;
-		}
-	}
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    background-position: 16px 12px;
+    width: 100%;
+    height: 40px;
+    line-height: 16px;
+    background: #f5f5f5;
+    caret-color: #5b92e1;
+    border-radius: 22px;
+    border: none;
+    outline: none;
+    // resize: none;
+  }
+  .input-buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    .i-carbon-send {
+      font-size: 20px;
+      color: #5b92e1;
+      cursor: pointer;
+    }
+  }
 }
 .overlay__btn {
-	width: 100px;
-	margin-top: 6px;
+  width: 100px;
+  margin-top: 6px;
 
-	height: 2.5rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 0.875rem;
-	font-weight: 600;
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
 
-	background: hsl(276, 100%, 9%);
-	color: hsl(0, 0%, 100%);
-	border: none;
-	border-radius: 0.5rem;
-	transition: transform 450ms ease;
+  background: hsl(276, 100%, 9%);
+  color: hsl(0, 0%, 100%);
+  border: none;
+  border-radius: 0.5rem;
+  transition: transform 450ms ease;
 }
 
 .overlay__btn:hover {
-	transform: scale(1.05);
-	cursor: pointer;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 .overlay__btn-emoji {
-	margin-left: 0.375rem;
+  margin-left: 0.375rem;
 }
 .fraction {
-	position: absolute;
-	right: 28px;
-	top: 24px;
-	padding: 6px 14px;
-	text-align: center;
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-	border-radius: 12px;
-	z-index: 2;
-	color: #fff;
-	background: rgbs(64, 64, 64, 0.25);
-	-webkit-backdrop-filter: saturate(150%) blur(10px);
-	backdrop-filter: saturate(150%) blur(10px);
-	// opacity: 0;
-	transition: all 0.3s;
-	// z-index: 99;
+  position: absolute;
+  right: 28px;
+  top: 24px;
+  padding: 6px 14px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 12px;
+  z-index: 2;
+  color: #fff;
+  background: rgbs(64, 64, 64, 0.25);
+  -webkit-backdrop-filter: saturate(150%) blur(10px);
+  backdrop-filter: saturate(150%) blur(10px);
+  // opacity: 0;
+  transition: all 0.3s;
+  // z-index: 99;
 }
 </style>

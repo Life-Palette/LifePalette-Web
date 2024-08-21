@@ -1,6 +1,6 @@
 import { init } from 'ityped'
 
-export default (strings: string[]) => {
+export default (strings: string[], callBack?: any) => {
   const typedRef = ref<Element>()
 
   onMounted(() => {
@@ -8,6 +8,7 @@ export default (strings: string[]) => {
       strings,
       showCursor: false,
       disableBackTyping: true,
+      onFinished: callBack,
     })
   })
   return typedRef

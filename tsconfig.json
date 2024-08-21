@@ -14,11 +14,11 @@
       "@/*": ["src/*"]
     },
     "resolveJsonModule": true,
-    "strict": true,
     "types": [
       "unplugin-vue-router/client",
       "vite-plugin-vue-layouts/client"
     ],
+    "strict": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "isolatedModules": true,

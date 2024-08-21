@@ -131,58 +131,58 @@ onMounted(() => {
 
 <style lang="less" scoped>
 .login-box {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 500px;
-	padding: 40px;
-	transform: translate(-50%, -50%);
-	background: rgba(255, 255, 255, 0.775);
-	box-sizing: border-box;
-	box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
-	border-radius: 10px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 500px;
+  padding: 40px;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.775);
+  box-sizing: border-box;
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+  border-radius: 10px;
 }
 
 .My-title {
-	margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 
 .login-box .user-box {
-	position: relative;
+  position: relative;
 }
 
 .login-box .user-box input {
-	width: 100%;
-	padding: 10px 0;
-	font-size: 16px;
-	color: #020100;
-	margin-bottom: 30px;
-	border: none;
-	border-bottom: 1px solid #fff;
-	outline: none;
-	background: transparent;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #020100;
+  margin-bottom: 30px;
+  border: none;
+  border-bottom: 1px solid #fff;
+  outline: none;
+  background: transparent;
 }
 
 .login-box .user-box label {
-	position: absolute;
-	top: 0;
-	left: 0;
-	padding: 10px 0;
-	font-size: 16px;
-	color: #e26c1d;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #e26c1d;
 
-	pointer-events: none;
-	transition: 0.5s;
+  pointer-events: none;
+  transition: 0.5s;
 }
 
 .login-box .user-box input:focus ~ label,
 .login-box .user-box input:valid ~ label {
-	top: -30px;
-	left: 0;
-	color: #b8bdba;
-	color: #606266;
-	font-size: 20px;
-	font-weight: 900;
+  top: -30px;
+  left: 0;
+  color: #b8bdba;
+  color: #606266;
+  font-size: 20px;
+  font-weight: 900;
 }
 
 // .login-box form a {
@@ -199,72 +199,72 @@ onMounted(() => {
 //   letter-spacing: 4px
 // }
 .butt {
-	display: flex;
-	.post-btn {
-		width: 50%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		.overlay__btn {
-			margin-top: 6px;
-			width: 100%;
-			height: 2.5rem;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			font-size: 0.875rem;
-			font-weight: 600;
+  display: flex;
+  .post-btn {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .overlay__btn {
+      margin-top: 6px;
+      width: 100%;
+      height: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 600;
 
-			background: hsl(276, 100%, 9%);
-			color: hsl(0, 0%, 100%);
-			border: none;
-			border-radius: 0.5rem;
-			transition: transform 450ms ease;
-		}
+      background: hsl(276, 100%, 9%);
+      color: hsl(0, 0%, 100%);
+      border: none;
+      border-radius: 0.5rem;
+      transition: transform 450ms ease;
+    }
 
-		.overlay__btn:hover {
-			transform: scale(1.05);
-			cursor: pointer;
-		}
+    .overlay__btn:hover {
+      transform: scale(1.05);
+      cursor: pointer;
+    }
 
-		.overlay__btn-emoji {
-			margin-left: 0.375rem;
-		}
-	}
-	.gap {
-		width: 25px;
-	}
-	.post-up {
-		width: 50%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		.overlay__btn {
-			margin-top: 6px;
-			width: 100%;
-			height: 2.5rem;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			font-size: 0.875rem;
-			font-weight: 600;
+    .overlay__btn-emoji {
+      margin-left: 0.375rem;
+    }
+  }
+  .gap {
+    width: 25px;
+  }
+  .post-up {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .overlay__btn {
+      margin-top: 6px;
+      width: 100%;
+      height: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.875rem;
+      font-weight: 600;
 
-			// background: hsl(276, 100%, 9%);
-			background-color: hsla(276, 100%, 64%, 0.2);
-			color: hsl(0, 0%, 100%);
-			border: none;
-			border-radius: 0.5rem;
-			transition: transform 450ms ease;
-		}
+      // background: hsl(276, 100%, 9%);
+      background-color: hsla(276, 100%, 64%, 0.2);
+      color: hsl(0, 0%, 100%);
+      border: none;
+      border-radius: 0.5rem;
+      transition: transform 450ms ease;
+    }
 
-		.overlay__btn:hover {
-			transform: scale(1.05);
-			cursor: pointer;
-		}
+    .overlay__btn:hover {
+      transform: scale(1.05);
+      cursor: pointer;
+    }
 
-		.overlay__btn-emoji {
-			margin-left: 0.375rem;
-		}
-	}
+    .overlay__btn-emoji {
+      margin-left: 0.375rem;
+    }
+  }
 }
 </style>

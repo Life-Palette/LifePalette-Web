@@ -67,47 +67,47 @@ function closeDialog() {
 
 <style lang="less" scoped>
 .form-box {
-	// height: 450px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	box-sizing: border-box;
-	gap: 10px;
-	width: 350px;
-	padding: 30px 30px;
-	background: rgba(255, 255, 255, 0.775);
-	box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
-	border-radius: 15px;
-	border: 1px solid rgba(255, 255, 255, 0.125);
-	//   高斯模糊
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	position: relative;
-	overflow: hidden;
-	.corner {
-		cursor: pointer;
-		position: absolute;
-		top: 0px;
-		right: 0px;
-		width: 40px;
-		height: 40px;
-		box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
-		img {
-			width: 100%;
-			height: 100%;
-		}
-	}
+  // height: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 10px;
+  width: 350px;
+  padding: 30px 30px;
+  background: rgba(255, 255, 255, 0.775);
+  box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  //   高斯模糊
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  .corner {
+    cursor: pointer;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 </style>
 
 <style lang="less">
 .no-dlg-bg-class {
-	background: none !important;
-	.el-dialog__header {
-		display: none;
-	}
-	.el-dialog__body {
-		padding: 0;
-	}
+  background: none !important;
+  .el-dialog__header {
+    display: none;
+  }
+  .el-dialog__body {
+    padding: 0;
+  }
 }
 </style>

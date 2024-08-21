@@ -94,72 +94,72 @@ function clickTab(item, index) {
 
 <style lang="less" scoped>
 .slider {
-	width: 14rem;
-	height: 100%;
-	// background-color: #fff;
+  width: 14rem;
+  height: 100%;
+  // background-color: #fff;
 
-	box-sizing: border-box;
-	padding-top: 35px;
+  box-sizing: border-box;
+  padding-top: 35px;
 
-	.slider__list {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-		.slider__item {
-			// height: 100px;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			// align-items: center;
-			display: flex;
-			width: 100%;
-			height: 48px;
-			cursor: pointer;
-			border-radius: 999px;
-			box-sizing: border-box;
-			padding: 0 16px;
-			color: #333;
-			&:hover {
-				background: #f8f8f8;
-			}
-			// &-active {
-			//   // background: #f8f8f8;
-			//   &-dark {
-			//     background: #333;
-			//   }
-			// }
-			&-dark {
-				// background: #333 !important;
-				.slider__name {
-					color: #fff !important;
-				}
+  .slider__list {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    .slider__item {
+      // height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      // align-items: center;
+      display: flex;
+      width: 100%;
+      height: 48px;
+      cursor: pointer;
+      border-radius: 999px;
+      box-sizing: border-box;
+      padding: 0 16px;
+      color: #333;
+      &:hover {
+        background: #f8f8f8;
+      }
+      // &-active {
+      //   // background: #f8f8f8;
+      //   &-dark {
+      //     background: #333;
+      //   }
+      // }
+      &-dark {
+        // background: #333 !important;
+        .slider__name {
+          color: #fff !important;
+        }
 
-				&:hover {
-					background: #333 !important;
-				}
-			}
+        &:hover {
+          background: #333 !important;
+        }
+      }
 
-			.slider__link {
-				display: flex;
-				gap: 10px;
-				// justify-content: center;
-				align-items: center;
-				// 去除a标签下划线
-				text-decoration: none;
-				.slider__icon {
-					font-size: 20px;
-					// width: 40px;
-					// height: 40px;
-					// margin-bottom: 5px;
-				}
-				.slider__name {
-					white-space: nowrap;
-					font-size: 16px;
-				}
-			}
-		}
-	}
+      .slider__link {
+        display: flex;
+        gap: 10px;
+        // justify-content: center;
+        align-items: center;
+        // 去除a标签下划线
+        text-decoration: none;
+        .slider__icon {
+          font-size: 20px;
+          // width: 40px;
+          // height: 40px;
+          // margin-bottom: 5px;
+        }
+        .slider__name {
+          white-space: nowrap;
+          font-size: 16px;
+        }
+      }
+    }
+  }
 }
 </style>

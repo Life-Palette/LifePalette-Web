@@ -96,54 +96,54 @@ defineExpose({
 <style lang="less" scoped>
 // 隐藏滚动条
 ::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 .comment-item {
-	display: flex;
-	padding: 20px 10px;
+  display: flex;
+  padding: 20px 10px;
 
-	position: relative;
+  position: relative;
 
-	.comment-item__left {
-		width: 50px;
-		height: 50px;
-		border-radius: 50%;
-		overflow: hidden;
+  .comment-item__left {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
 
-		.comment-item__left-avatar {
-			width: 100%;
-			height: 100%;
-		}
-	}
+    .comment-item__left-avatar {
+      width: 100%;
+      height: 100%;
+    }
+  }
 
-	.comment-item__right {
-		flex: 1;
-		padding-left: 10px;
+  .comment-item__right {
+    flex: 1;
+    padding-left: 10px;
 
-		.comment-item__right-top {
-			display: flex;
-			justify-content: space-between;
+    .comment-item__right-top {
+      display: flex;
+      justify-content: space-between;
 
-			.comment-item__right-top-name {
-				font-size: 16px;
-				font-weight: bold;
-				color: rgba(51, 51, 51, 0.6);
-			}
+      .comment-item__right-top-name {
+        font-size: 16px;
+        font-weight: bold;
+        color: rgba(51, 51, 51, 0.6);
+      }
 
-			.comment-item__right-top-time {
-				font-size: 12px;
-				color: #999;
-			}
-		}
+      .comment-item__right-top-time {
+        font-size: 12px;
+        color: #999;
+      }
+    }
 
-		.comment-item__right-content {
-			text-align: start;
-			font-size: 14px;
-			color: #333;
-			margin-top: 10px;
-			word-break: break-all;
-		}
-	}
+    .comment-item__right-content {
+      text-align: start;
+      font-size: 14px;
+      color: #333;
+      margin-top: 10px;
+      word-break: break-all;
+    }
+  }
 }
 </style>

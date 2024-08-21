@@ -107,17 +107,17 @@ class PureHttp {
                 if (!PureHttp.isRefreshing) {
                   PureHttp.isRefreshing = true
                   // token过期刷新
-                  // useUserStoreHook()
-                  //   .handRefreshToken({ refreshToken: data.refreshToken })
-                  //   .then(res => {
-                  //     const token = res.data.accessToken;
-                  //     config.headers["Authorization"] = formatToken(token);
-                  //     PureHttp.requests.forEach(cb => cb(token));
-                  //     PureHttp.requests = [];
-                  //   })
-                  //   .finally(() => {
-                  //     PureHttp.isRefreshing = false;
-                  //   });
+                  userStore
+                    .handRefreshToken({ refreshToken: data.refreshToken })
+                    .then((res) => {
+                      const token = res.data.accessToken
+                      config.headers.Authorization = formatToken(token)
+                      PureHttp.requests.forEach(cb => cb(token))
+                      PureHttp.requests = []
+                    })
+                    .finally(() => {
+                      PureHttp.isRefreshing = false
+                    })
                 }
                 // const newCOnfig = PureHttp.retryOriginalRequest(config)
                 resolve(PureHttp.retryOriginalRequest(config))
@@ -181,7 +181,7 @@ class PureHttp {
             const token = getToken()
             const { refresh_token } = token || {}
             // token过期刷新
-            useUserStore()
+						userStore
               .handRefreshToken({ refreshToken: refresh_token })
               .then((res) => {
                 const { access_token } = res.result || {}

@@ -35,7 +35,7 @@ import VueDevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts'
 
 import I18N from '@intlify/unplugin-vue-i18n/vite'
-import Legacy from 'vite-plugin-legacy-swc'
+import Legacy from '@vitejs/plugin-legacy'
 import Vue from '@vitejs/plugin-vue'
 import Jsx from '@vitejs/plugin-vue-jsx'
 
@@ -106,11 +106,10 @@ export default function () {
       auto: true,
       // 内部使用虚拟模块，运行在前端，所以不需要 r 重写路径
       target: 'src/plugins',
-    }),
-    /**
-     * vue 官方插件，用来解析 sfc 单文件组件
-     * https://www.npmjs.com/package/@vitejs/plugin-vue
-     */
+    }), /**
+         * vue 官方插件，用来解析 sfc 单文件组件
+         * https://www.npmjs.com/package/@vitejs/plugin-vue
+         */
     Vue({
       include: [/\.vue$/, /\.md$/],
     }),
@@ -184,7 +183,6 @@ export default function () {
      * https://github.com/vbenjs/vite-plugin-compression
      */
     Compression({
-      // @ts-expect-error
       algorithm: env.VITE_APP_COMPRESSINON_ALGORITHM,
     }),
     /**
@@ -259,6 +257,9 @@ export default function () {
           {
             // add any other imports you were relying on
             'vue-router/auto': ['useLink'],
+          },
+          {
+            '@iceywu/utils': ['to', 'list', 'sleep', 'consolePlus'],
           },
         ],
         resolvers: detectResolvers({

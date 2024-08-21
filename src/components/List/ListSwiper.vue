@@ -70,7 +70,7 @@ const modules = [Navigation, Scrollbar, A11y, Keyboard, Mousewheel]
 
 <style lang="less" scoped>
 .box-width {
-	// width: calc(100% - 800px);
-	width: 800px;
+  // width: calc(100% - 800px);
+  width: 800px;
 }
 </style>

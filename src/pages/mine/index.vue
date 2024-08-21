@@ -230,192 +230,193 @@ function headUpload() {
 </template>
 
 <style lang="less" scoped>
-@import 'https://unpkg.com/normalize.css';
-@import 'https://unpkg.com/open-props/normalize.min.css';
-@import 'https://unpkg.com/open-props/open-props.min.css';
+// @import 'https://unpkg.com/normalize.css';
+// @import 'https://unpkg.com/open-props/normalize.min.css';
+// @import 'https://unpkg.com/open-props/open-props.min.css';
 
 :root {
-	--aspect-ratio: 4 / 1;
-	--header-scroll: calc(max(100vw / 4, 200px));
-	/*   --header-scroll: 300px; */
-	--title-height: 300px;
-	--shared-range: calc((var(--header-scroll) - var(--title-height)))
-		calc((var(--header-scroll) + (var(--title-height) * 2)));
-	--cover-range: calc(var(--header-scroll) - (var(--title-height)))
-		calc(var(--header-scroll) * 1);
-	--title-range: calc((var(--header-scroll) - (var(--title-height) * 2)))
-		calc((var(--header-scroll) - (var(--title-height) * -0.25)));
-	--avatar-range: calc((var(--header-scroll) - (var(--title-height) * 1.5)))
-			calc((var(--header-scroll) + (var(--title-height) * 0.95))),
-		calc((var(--header-scroll) - (var(--title-height) * 2.5)))
-			calc((var(--header-scroll) + (var(--title-height) * 0.95)));
-	--shadow-range: calc((var(--header-scroll) + var(--title-height)))
-		calc((var(--header-scroll) + (var(--title-height) * 2)));
-	--cover-range: var(--shadow-range);
+  --aspect-ratio: 4 / 1;
+  --header-scroll: calc(max(100vw / 4, 200px));
+  /*   --header-scroll: 300px; */
+  --title-height: 300px;
+  --shared-range: calc((var(--header-scroll) - var(--title-height)))
+    calc((var(--header-scroll) + (var(--title-height) * 2)));
+  --cover-range: calc(var(--header-scroll) - (var(--title-height))) calc(var(--header-scroll) * 1);
+  --title-range: calc((var(--header-scroll) - (var(--title-height) * 2)))
+    calc((var(--header-scroll) - (var(--title-height) * -0.25)));
+  --avatar-range: calc((var(--header-scroll) - (var(--title-height) * 1.5)))
+      calc((var(--header-scroll) + (var(--title-height) * 0.95))),
+    calc((var(--header-scroll) - (var(--title-height) * 2.5)))
+      calc((var(--header-scroll) + (var(--title-height) * 0.95)));
+  --shadow-range: calc((var(--header-scroll) + var(--title-height)))
+    calc((var(--header-scroll) + (var(--title-height) * 2)));
+  --cover-range: var(--shadow-range);
 }
 
 .test {
-	background: var(--gray-2);
-	display: grid;
-	min-height: 80vh;
-	justify-items: center;
-	overflow-x: hidden;
-	align-content: start;
-	overflow-y: auto;
+  background: var(--gray-2);
+  display: grid;
+  min-height: 80vh;
+  justify-items: center;
+  overflow-x: hidden;
+  align-content: start;
+  overflow-y: auto;
 }
 .header-box {
-	background: var(--surface-2);
-	background-size: cover;
-	max-width: 100%;
-	width: var(--size-md);
-	aspect-ratio: var(--aspect-ratio);
-	height: 16em;
-	position: relative;
-	width: 100%;
-	position: sticky;
-	// top: calc((var(--header-scroll) * -1) + var(--title-height));
-	top: -8.8em;
-	transition: all 0.4s ease;
-	&:hover {
-		// filter: blur(5px);
-		height: 24em;
-	}
+  background: var(--surface-2);
+  background-size: cover;
+  max-width: 100%;
+  width: var(--size-md);
+  aspect-ratio: var(--aspect-ratio);
+  height: 16em;
+  position: relative;
+  width: 100%;
+  position: sticky;
+  // top: calc((var(--header-scroll) * -1) + var(--title-height));
+  top: -8.8em;
+  transition: all 0.4s ease;
+  &:hover {
+    // filter: blur(5px);
+    height: 24em;
+  }
 }
 
 .header__wrap {
-	position: relative;
-	view-timeline-name: --header;
+  position: relative;
+  view-timeline-name: --header;
 }
 
 .header__cover {
-	position: absolute;
-	inset: 0;
-	background: hsl(0 0% 0% / 0.25);
-	opacity: 0;
-	backdrop-filter: blur(10px);
-	animation: fade-in both linear;
-	animation-timeline: scroll();
-	animation-range: var(--cover-range);
+  position: absolute;
+  inset: 0;
+  background: hsl(0 0% 0% / 0.25);
+  opacity: 0;
+  backdrop-filter: blur(10px);
+  animation: fade-in both linear;
+  animation-timeline: scroll();
+  animation-range: var(--cover-range);
 }
 
 @keyframes fade-in {
-	to {
-		opacity: 1;
-	}
+  to {
+    opacity: 1;
+  }
 }
 
 .backdrop {
-	height: 100%;
-	width: 100%;
-	object-fit: cover;
-	clip-path: inset(0 0 0 0);
-	animation: fade-in-bg both linear;
-	animation-timeline: scroll();
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  clip-path: inset(0 0 0 0);
+  animation: fade-in-bg both linear;
+  animation-timeline: scroll();
 }
 @keyframes fade-in-bg {
-	0%,
-	60% {
-		filter: blur(0px);
-	}
+  0%,
+  60% {
+    filter: blur(0px);
+  }
 
-	to {
-		filter: blur(100px);
-	}
+  to {
+    filter: blur(100px);
+  }
 }
 
 .avatar {
-	width: var(--size-12);
-	aspect-ratio: 1;
-	border-radius: 50%;
-	border: var(--size-2) solid var(--gray-2);
-	position: absolute;
-	top: 0%;
-	left: var(--size-4);
-	translate: 0 -100%;
-	transform-origin: 0% 50%;
-	animation:
-		scale-down both ease-out,
-		look-down both steps(20);
-	animation-timeline: scroll();
-	animation-range: var(--avatar-range);
-	/*     calc((var(--header-scroll) * 0.25) calc((var(--header-scroll) + (var(--title-height) * 2.2))); */
-	z-index: 2;
-	object-position: 0 0;
-	object-fit: cover;
-	background: linear-gradient(hsl(10 80% 50%), hsl(280 80% 50%));
+  // width: var(--size-6);
+	width: 200px;
+  height: 200px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: var(--size-2) solid var(--gray-2);
+  position: absolute;
+  top: 0%;
+  left: var(--size-4);
+  translate: 0 -100%;
+  transform-origin: 0% 50%;
+  animation:
+    scale-down both ease-out,
+    look-down both steps(20);
+  animation-timeline: scroll();
+  animation-range: var(--avatar-range);
+  /*     calc((var(--header-scroll) * 0.25) calc((var(--header-scroll) + (var(--title-height) * 2.2))); */
+  z-index: 2;
+  object-position: 0 0;
+  object-fit: cover;
+  background: linear-gradient(hsl(10 80% 50%), hsl(280 80% 50%));
 }
 @keyframes scale-down {
-	to {
-		scale: 0.35;
-		top: 50%;
-		translate: 0 -50%;
-	}
+  to {
+    scale: 0.35;
+    top: 50%;
+    translate: 0 -50%;
+  }
 }
 
 @keyframes look-down {
-	to {
-		object-position: 100% 0;
-	}
+  to {
+    object-position: 100% 0;
+  }
 }
 
 .intro {
-	max-width: 100vw;
-	width: var(--size-md);
-	position: sticky;
-	top: 0;
-	margin-top: calc(var(--size-12) * 0.5);
+  max-width: 100vw;
+  width: var(--size-md);
+  position: sticky;
+  top: 0;
+  margin-top: calc(var(--size-12) * 0.5);
 }
 
 .title {
-	color: var(--gray-11);
-	width: var(--size-md);
-	max-width: 100vw;
-	height: var(--title-height);
-	gap: var(--size-2);
-	padding: var(--size-4);
-	animation: slide both ease;
-	animation-timeline: scroll();
-	animation-range: var(--title-range);
-	p {
-		text-align: start;
-	}
-	.user-name {
-		font-size: var(--size-6);
-		font-weight: 700;
-		margin-bottom: 20px;
-	}
-	.desc {
-		font-size: var(--size-4);
-		font-weight: 400;
-	}
+  color: var(--gray-11);
+  width: var(--size-md);
+  max-width: 100vw;
+  height: var(--title-height);
+  gap: var(--size-2);
+  padding: var(--size-4);
+  animation: slide both ease;
+  animation-timeline: scroll();
+  animation-range: var(--title-range);
+  p {
+    text-align: start;
+  }
+  .user-name {
+    font-size: var(--size-6);
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .desc {
+    font-size: var(--size-4);
+    font-weight: 400;
+  }
 }
 
 @keyframes slide {
-	0%,
-	45% {
-		color: var(--gray-11);
-	}
-	to {
-		color: var(--gray-1);
-		translate: calc(var(--size-12) * 0.5) 0;
-	}
+  0%,
+  45% {
+    color: var(--gray-11);
+  }
+  to {
+    color: var(--gray-1);
+    translate: calc(var(--size-12) * 0.5) 0;
+  }
 }
 
 .title-wrapper {
-	position: relative;
-	width: 100vw;
-	left: 50%;
-	transform: translateX(-50%);
-	display: grid;
-	justify-content: center;
-	animation: shadow both;
-	animation-timeline: scroll();
-	animation-range: var(--shadow-range);
+  position: relative;
+  width: 100vw;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-content: center;
+  animation: shadow both;
+  animation-timeline: scroll();
+  animation-range: var(--shadow-range);
 }
 
 @keyframes shadow {
-	to {
-		box-shadow: var(--shadow-4);
-	}
+  to {
+    box-shadow: var(--shadow-4);
+  }
 }
 </style>

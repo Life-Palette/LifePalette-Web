@@ -32,10 +32,10 @@ defineExpose({
 
 <style lang="less" scoped>
 .getPhoto {
-	&-content {
-		&-title {
-			color: #000;
-		}
-	}
+  &-content {
+    &-title {
+      color: #000;
+    }
+  }
 }
 </style>

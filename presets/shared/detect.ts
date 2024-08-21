@@ -62,6 +62,7 @@ export function useEnv() {
     VITE_APP_MOCK_IN_PRODUCTION,
     VITE_APP_DIR_API_AUTO_IMPORT,
     VITE_APP_COMPRESSINON_ALGORITHM,
+    VITE_BASE_URL,
   } = loadEnv(detectMode(), '.')
 
   return {
@@ -72,5 +73,6 @@ export function useEnv() {
     VITE_APP_API_AUTO_IMPORT: stringToBoolean(VITE_APP_API_AUTO_IMPORT),
     VITE_APP_MOCK_IN_PRODUCTION: stringToBoolean(VITE_APP_MOCK_IN_PRODUCTION),
     VITE_APP_DIR_API_AUTO_IMPORT: stringToBoolean(VITE_APP_DIR_API_AUTO_IMPORT),
+    VITE_BASE_URL,
   }
 }

@@ -137,52 +137,50 @@ function newClick() {
 
 <style lang="less" scoped>
 .header-normal {
-	background-image: radial-gradient(transparent 1px, #fff 1px);
+  background-image: radial-gradient(transparent 1px, #fff 1px);
 
-	background-size: 4px 4px;
-	backdrop-filter: saturate(50%) blur(4px);
-	border-bottom: 1px solid #dcdfe6;
+  background-size: 4px 4px;
+  backdrop-filter: saturate(50%) blur(4px);
+  border-bottom: 1px solid #dcdfe6;
 }
 .header-dark {
-	background-image: radial-gradient(transparent 1px, #141414 1px);
-	background-size: 4px 4px;
-	backdrop-filter: saturate(50%) blur(4px);
+  background-image: radial-gradient(transparent 1px, #141414 1px);
+  background-size: 4px 4px;
+  backdrop-filter: saturate(50%) blur(4px);
 
-	border-bottom: 1px solid #4c4d4f;
+  border-bottom: 1px solid #4c4d4f;
 }
 
 :focus {
-	outline: 0 !important;
+  outline: 0 !important;
 }
 
 .w-50 {
-	width: 400px;
-	height: 40px;
+  width: 400px;
+  height: 40px;
 
-	.el-input__inner {
-		border: none;
-	}
-	:deep(.el-input__wrapper) {
-		border-radius: 9999px;
-		font-size: 16px;
-		padding-left: 20px;
-	}
-	:deep(.el-input__icon) {
-		width: 20px !important;
-		margin-right: 10px;
-	}
-	:deep(.el-icon svg) {
-		height: 2em;
-		width: 2em;
-		color: rgba(51, 51, 51, 0.8);
-	}
+  .el-input__inner {
+    border: none;
+  }
+  :deep(.el-input__wrapper) {
+    border-radius: 9999px;
+    font-size: 16px;
+    padding-left: 20px;
+  }
+  :deep(.el-input__icon) {
+    width: 20px !important;
+    margin-right: 10px;
+  }
+  :deep(.el-icon svg) {
+    height: 2em;
+    width: 2em;
+    color: rgba(51, 51, 51, 0.8);
+  }
 }
 :deep(.el-input__wrapper.is-focus) {
-	box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color))
-		inset;
+  box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color)) inset;
 }
 :deep(.el-input__wrapper:hover) {
-	box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color))
-		inset;
+  box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color)) inset;
 }
 </style>
