@@ -70,91 +70,91 @@ watch(
 
 <style lang="less" scoped>
 .con-like {
-	--red: rgb(250, 50, 80);
-	position: relative;
-	width: 1.5em;
-	height: 1.5em;
-	&:hover {
-		transform: scale(1.1);
-		animation: 0.6s;
-	}
+  --red: rgb(250, 50, 80);
+  position: relative;
+  width: 1.5em;
+  height: 1.5em;
+  &:hover {
+    transform: scale(1.1);
+    animation: 0.6s;
+  }
 }
 
 .con-like .like {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	opacity: 0;
-	z-index: 999;
-	cursor: pointer;
-	left: 0;
-	top: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 999;
+  cursor: pointer;
+  left: 0;
+  top: 0;
 }
 
 .con-like .checkmark {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .con-like .outline-part,
 .con-like .filled {
-	fill: var(--red);
-	position: absolute;
+  fill: var(--red);
+  position: absolute;
 }
 
 .con-like .filled {
-	animation: kfr-filled 0.8s;
-	display: none;
+  animation: kfr-filled 0.8s;
+  display: none;
 }
 
 .con-like .celebrate {
-	position: absolute;
-	animation: kfr-celebrate 0.6s;
-	animation-fill-mode: forwards;
-	display: none;
+  position: absolute;
+  animation: kfr-celebrate 0.6s;
+  animation-fill-mode: forwards;
+  display: none;
 }
 
 .con-like .poly {
-	stroke: var(--red);
-	fill: var(--red);
+  stroke: var(--red);
+  fill: var(--red);
 }
 
 .con-like .like:checked ~ .checkmark .filled {
-	display: block;
+  display: block;
 }
 
 .con-like .like:checked ~ .checkmark .celebrate {
-	display: block;
+  display: block;
 }
 
 @keyframes kfr-filled {
-	0% {
-		opacity: 0;
-		transform: scale(0);
-	}
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
 
-	50% {
-		opacity: 1;
-		transform: scale(1.2);
-	}
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 
 @keyframes kfr-celebrate {
-	0% {
-		transform: scale(0);
-	}
+  0% {
+    transform: scale(0);
+  }
 
-	50% {
-		opacity: 0.8;
-	}
+  50% {
+    opacity: 0.8;
+  }
 
-	100% {
-		transform: scale(1.2);
-		opacity: 0;
-		display: none;
-	}
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+    display: none;
+  }
 }
 </style>

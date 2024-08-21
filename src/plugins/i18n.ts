@@ -12,7 +12,6 @@ const languages = Object.entries(yamls).map(([key, value]) => {
   if (key.includes('/')) {
     key = key.split('/')[0]
   }
-  // @ts-expect-error
   return { [key]: value.default }
 })
 

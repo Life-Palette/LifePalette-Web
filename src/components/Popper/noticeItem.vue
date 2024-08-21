@@ -111,89 +111,89 @@ function hoverDescription(event, description) {
 
 <style>
 .notice-title-popper {
-	max-width: 238px;
+  max-width: 238px;
 }
 </style>
 
 <style scoped lang="less">
 .notice-container {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	padding: 12px 0;
-	box-sizing: border-box;
-	position: relative;
-	.notice-container-unread {
-		width: 8px;
-		height: 8px;
-		background-color: #ff4d4f;
-		border-radius: 50%;
-		position: absolute;
-		right: 0;
-		top: 0;
-	}
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px 0;
+  box-sizing: border-box;
+  position: relative;
+  .notice-container-unread {
+    width: 8px;
+    height: 8px;
+    background-color: #ff4d4f;
+    border-radius: 50%;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 
-	// border-bottom: 1px solid #f0f0f0;
+  // border-bottom: 1px solid #f0f0f0;
 
-	.notice-container-avatar {
-		margin-right: 16px;
-		background: #fff;
-		flex-shrink: 0;
-	}
-	.notice-container-cover {
-		margin-right: 16px;
-		background: #fff;
-		width: 100px;
-		height: 50px;
-	}
+  .notice-container-avatar {
+    margin-right: 16px;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .notice-container-cover {
+    margin-right: 16px;
+    background: #fff;
+    width: 100px;
+    height: 50px;
+  }
 
-	.notice-container-text {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		justify-content: space-between;
-		cursor: pointer;
+  .notice-container-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
 
-		.notice-text-title {
-			display: flex;
-			margin-bottom: 8px;
-			font-size: 14px;
-			font-weight: 400;
-			line-height: 1.5715;
-			cursor: pointer;
+    .notice-text-title {
+      display: flex;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5715;
+      cursor: pointer;
 
-			.notice-title-content {
-				flex: 1;
-				width: 200px;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
+      .notice-title-content {
+        flex: 1;
+        width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
 
-			.notice-title-extra {
-				float: right;
-				margin-top: -1.5px;
-				font-weight: 400;
-			}
-		}
+      .notice-title-extra {
+        float: right;
+        margin-top: -1.5px;
+        font-weight: 400;
+      }
+    }
 
-		.notice-text-description,
-		.notice-text-datetime {
-			font-size: 12px;
-			line-height: 1.5715;
-		}
+    .notice-text-description,
+    .notice-text-datetime {
+      font-size: 12px;
+      line-height: 1.5715;
+    }
 
-		.notice-text-description {
-			display: -webkit-box;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
-		}
+    .notice-text-description {
+      display: -webkit-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
 
-		.notice-text-datetime {
-			margin-top: 4px;
-		}
-	}
+    .notice-text-datetime {
+      margin-top: 4px;
+    }
+  }
 }
 </style>

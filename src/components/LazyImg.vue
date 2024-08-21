@@ -120,45 +120,45 @@ async function initLivePhoto() {
 
 <style lang="less" scoped>
 .img-base {
-	z-index: 1;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	object-position: center;
-	// transition: all 0.3s ease-in-out;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  // transition: all 0.3s ease-in-out;
 }
 .previw-img {
-	filter: blur(40px);
+  filter: blur(40px);
 }
 .loaded-img {
-	opacity: 0;
+  opacity: 0;
 }
 </style>
 
 <style>
 .lpk-live-photo-player {
-	.lpk-badge {
-		top: 15px !important;
-		left: 15px !important;
-		z-index: 999999 !important;
-	}
-	.lpk-live-photo-renderer {
-		height: 100% !important;
-		width: 100% !important;
-		top: 0 !important;
-		left: 0 !important;
-		box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
-		-webkit-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
-		-moz-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
-		.lpk-video {
-			height: calc(100% + 20px) !important;
-			width: calc(100% + 20px) !important;
-		}
-	}
+  .lpk-badge {
+    top: 15px !important;
+    left: 15px !important;
+    z-index: 999999 !important;
+  }
+  .lpk-live-photo-renderer {
+    height: 100% !important;
+    width: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+    .lpk-video {
+      height: calc(100% + 20px) !important;
+      width: calc(100% + 20px) !important;
+    }
+  }
 }
-.lpk-live-photo-renderer{
-	canvas{
-		object-fit: cover;
-	}
+.lpk-live-photo-renderer {
+  canvas {
+    object-fit: cover;
+  }
 }
 </style>

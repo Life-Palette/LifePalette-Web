@@ -48,6 +48,7 @@
 - 🦾 [Api](./src/api) - a simple wrapper for [axios]
 
 <!-- - 🎨 [Element Plus](https://element-plus.org/) - a Vue 3.0 UI library -->
+
 - 🎨 [Element Plus](https://element-plus.org/) - a Vue 3.0 UI library
 <!-- - 🚀  自动版本更新并生成 `CHANGELOG` -->
 - 🚀 auto version update and generate `CHANGELOG`

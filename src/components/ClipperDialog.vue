@@ -290,34 +290,34 @@ defineExpose({
 
 <style lang="less" scoped>
 .cropper {
-	width: 100%;
-	height: 50vh;
-	display: flex;
-	overflow: hidden;
-	.cropper_left {
-		display: flex;
-		flex-direction: column;
-		.reupload_box {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			margin-top: 10px;
-			.reupload_text {
-				color: var(--primary-color);
-				cursor: pointer;
-			}
-			.rotate_right {
-				margin-left: 16px;
-				cursor: pointer;
-			}
-		}
-	}
-	.cropper_right {
-		flex: 1;
-		margin-left: 44px;
-		.preview_text {
-			margin-bottom: 12px;
-		}
-	}
+  width: 100%;
+  height: 50vh;
+  display: flex;
+  overflow: hidden;
+  .cropper_left {
+    display: flex;
+    flex-direction: column;
+    .reupload_box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      .reupload_text {
+        color: var(--primary-color);
+        cursor: pointer;
+      }
+      .rotate_right {
+        margin-left: 16px;
+        cursor: pointer;
+      }
+    }
+  }
+  .cropper_right {
+    flex: 1;
+    margin-left: 44px;
+    .preview_text {
+      margin-bottom: 12px;
+    }
+  }
 }
 </style>

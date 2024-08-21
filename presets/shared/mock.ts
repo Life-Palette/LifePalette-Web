@@ -1,8 +1,3 @@
-// @ts-nocheck
-/**
- * issue: https://github.com/vbenjs/vite-plugin-mock/issues/47
- * fix: https://github.com/vbenjs/vite-plugin-mock/issues/47#issuecomment-982724613
- */
 import Mock from 'mockjs'
 
 export function createFetchSever(mockList: any[]) {
@@ -27,13 +22,13 @@ function __param2Obj__(url: string) {
     return {}
   }
   return JSON.parse(
-    `{"${
-			 decodeURIComponent(search)
-			  .replace(/"/g, '\\"')
-			  .replace(/&/g, '","')
-			  .replace(/=/g, '":"')
-			  .replace(/\+/g, ' ')
-			 }"}`,
+		`{"${
+			decodeURIComponent(search)
+				.replace(/"/g, '\\"')
+				.replace(/&/g, '","')
+				.replace(/=/g, '":"')
+				.replace(/\+/g, ' ')
+			}"}`,
   )
 }
 

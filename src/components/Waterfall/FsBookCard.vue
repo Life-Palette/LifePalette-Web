@@ -49,7 +49,7 @@ const props = defineProps<{
   }
   &-image {
     width: 100%;
-    height: v-bind("`${props.detail.imageHeight}px`");
+    height: v-bind('`${props.detail.imageHeight}px`');
     border: 1px solid #eee;
     border-radius: 20px;
     // background-color: v-bind("props.detail.bgColor");
@@ -85,7 +85,7 @@ const props = defineProps<{
           height: 20px;
           border-radius: 20px;
           border: 1px solid rgba(0, 0, 0, 0.08);
-          background-color: v-bind("props.detail.bgColor");
+          background-color: v-bind('props.detail.bgColor');
         }
         .name {
           width: 80%;

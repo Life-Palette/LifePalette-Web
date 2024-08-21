@@ -68,45 +68,45 @@ onMounted(() => {
 
 <style lang="less" scoped>
 .card-box {
-	align-items: center;
-	display: flex;
-	height: 100%;
-	justify-content: center;
-	overflow: hidden;
-	position: relative;
-	width: 100%;
-	z-index: 9999;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  z-index: 9999;
 
-	.mian-img {
-		// align-self: flex-start;
-		height: 100%;
-		// width: 100%;
-		object-fit: contain;
-	}
+  .mian-img {
+    // align-self: flex-start;
+    height: 100%;
+    // width: 100%;
+    object-fit: contain;
+  }
 
-	.bg-cover-box {
-		bottom: 0;
-		left: 0;
-		overflow: hidden;
-		position: absolute;
-		right: 0;
-		top: 0;
-		z-index: -1;
+  .bg-cover-box {
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
 
-		.bg-cover-img {
-			filter: blur(60px);
-			height: 100%;
-			width: 100%;
-		}
+    .bg-cover-img {
+      filter: blur(60px);
+      height: 100%;
+      width: 100%;
+    }
 
-		.cover-box {
-			background-color: var(--player-background);
-			bottom: 0;
-			left: 0;
-			position: absolute;
-			right: 0;
-			top: 0;
-		}
-	}
+    .cover-box {
+      background-color: var(--player-background);
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
 }
 </style>

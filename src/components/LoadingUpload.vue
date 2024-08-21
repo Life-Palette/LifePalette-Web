@@ -31,26 +31,26 @@ const props = defineProps({
 
 <style lang="less" scoped>
 .loading-box {
-	height: 100vh;
-	width: 100vw;
-	background-color: rgba(0, 0, 0, 0.7);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 99999;
-	margin: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	position: fixed;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  margin: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: fixed;
 
-	.upload-text {
-		margin-top: 2em;
-		margin-left: 2em;
-		color: #fff;
-		font-size: 1.5em;
-		margin-bottom: 1em;
-	}
+  .upload-text {
+    margin-top: 2em;
+    margin-left: 2em;
+    color: #fff;
+    font-size: 1.5em;
+    margin-bottom: 1em;
+  }
 }
 </style>

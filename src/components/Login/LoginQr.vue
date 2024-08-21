@@ -318,87 +318,87 @@ function clearQrTimer() {
 
 <style lang="less" scoped>
 .login-content-code {
-	.desc-title {
-		display: flex;
-		justify-content: center;
-		font-weight: 500;
-		font-size: 24px;
-		line-height: 32px;
-		color: #232d47;
-		font-family: 'PingFang SC';
-	}
-	.desc-subtitle {
-		display: flex;
-		justify-content: center;
-		font-size: 14px;
-		line-height: 22px;
-		color: #232d47;
-		margin-top: 12px;
-		margin-bottom: 12px;
-		span {
-			color: #5b89fe;
-			line-height: 22px;
-			cursor: pointer;
-		}
-	}
+  .desc-title {
+    display: flex;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 32px;
+    color: #232d47;
+    font-family: 'PingFang SC';
+  }
+  .desc-subtitle {
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 22px;
+    color: #232d47;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    span {
+      color: #5b89fe;
+      line-height: 22px;
+      cursor: pointer;
+    }
+  }
 
-	.qr-cover {
-		border-radius: 7px;
-		overflow: hidden;
-		height: 300px;
-		// width: 160px;
-		// height: 160px;
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		-webkit-box-pack: center;
-		justify-content: center;
-		-webkit-box-align: center;
-		align-items: center;
-		.qr-coner-1 {
-			z-index: 1;
-			position: absolute;
-			height: 16px;
-			width: 16px;
-			top: 0px;
-			left: 0px;
-			border-left: 3px solid rgb(91, 146, 225);
-			border-top: 3px solid rgb(91, 146, 225);
-			border-top-left-radius: 8px;
-		}
-		.qr-coner-2 {
-			z-index: 1;
-			position: absolute;
-			height: 16px;
-			width: 16px;
-			top: 0px;
-			right: 0px;
-			border-right: 3px solid rgb(91, 146, 225);
-			border-top: 3px solid rgb(91, 146, 225);
-			border-top-right-radius: 8px;
-		}
-		.qr-coner-3 {
-			z-index: 1;
-			position: absolute;
-			height: 16px;
-			width: 16px;
-			bottom: 0px;
-			right: 0px;
-			border-right: 3px solid rgb(91, 146, 225);
-			border-bottom: 3px solid rgb(91, 146, 225);
-			border-bottom-right-radius: 8px;
-		}
-		.qr-coner-4 {
-			z-index: 1;
-			position: absolute;
-			height: 16px;
-			width: 16px;
-			bottom: 0px;
-			left: 0px;
-			border-left: 3px solid rgb(91, 146, 225);
-			border-bottom: 3px solid rgb(91, 146, 225);
-			border-bottom-left-radius: 8px;
-		}
-	}
+  .qr-cover {
+    border-radius: 7px;
+    overflow: hidden;
+    height: 300px;
+    // width: 160px;
+    // height: 160px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    align-items: center;
+    .qr-coner-1 {
+      z-index: 1;
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      top: 0px;
+      left: 0px;
+      border-left: 3px solid rgb(91, 146, 225);
+      border-top: 3px solid rgb(91, 146, 225);
+      border-top-left-radius: 8px;
+    }
+    .qr-coner-2 {
+      z-index: 1;
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      top: 0px;
+      right: 0px;
+      border-right: 3px solid rgb(91, 146, 225);
+      border-top: 3px solid rgb(91, 146, 225);
+      border-top-right-radius: 8px;
+    }
+    .qr-coner-3 {
+      z-index: 1;
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      bottom: 0px;
+      right: 0px;
+      border-right: 3px solid rgb(91, 146, 225);
+      border-bottom: 3px solid rgb(91, 146, 225);
+      border-bottom-right-radius: 8px;
+    }
+    .qr-coner-4 {
+      z-index: 1;
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      bottom: 0px;
+      left: 0px;
+      border-left: 3px solid rgb(91, 146, 225);
+      border-bottom: 3px solid rgb(91, 146, 225);
+      border-bottom-left-radius: 8px;
+    }
+  }
 }
 </style>

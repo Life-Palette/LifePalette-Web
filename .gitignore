@@ -7,5 +7,5 @@ node_modules
 components.d.ts
 type-router.d.ts
 auto-imports.d.ts
-# .eslintrc-auto-import.json
+.eslintrc-auto-import.json
 vite.config.ts.timestamp*

@@ -82,7 +82,7 @@ export default defineComponent({
                 filter: `blur(${blurNumber.value}px)`,
               },
               onLoad: onLoadPreImg,
-					  }
+            }
           : {
               style: {
                 width: props.width,
@@ -92,7 +92,7 @@ export default defineComponent({
                 // transition: 'all 0.4s',
                 // backgroundFilter: `blur(${blurNumber.value}px)`,
               },
-					  }),
+            }),
       })
     }
     // 加载完成
@@ -108,7 +108,7 @@ export default defineComponent({
                 height: props.height,
                 filter: `blur(${blurNumber.value}px)`,
               },
-					  }
+            }
           : {
               style: {
                 width: props.width,
@@ -118,7 +118,7 @@ export default defineComponent({
                 // transition: 'all 0.4s',
                 // backgroundFilter: `blur(${blurNumber.value}px)`,
               },
-					  }),
+            }),
       })
     }
     // 未加载
@@ -133,8 +133,8 @@ export default defineComponent({
       <div
         class="relative overflow-hidden"
         style={{
-				  width: props.width,
-				  height: props.height,
+          width: props.width,
+          height: props.height,
         }}
       >
         111-

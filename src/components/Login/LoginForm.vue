@@ -283,26 +283,26 @@ function handleRigist() {
 
 <style lang="less" scoped>
 .title {
-	color: black;
-	font-weight: bold;
-	text-align: center;
-	font-size: 20px;
-	margin-bottom: 4px;
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 4px;
 }
 
 .sub {
-	text-align: center;
-	color: black;
-	font-size: 14px;
-	width: 100%;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  width: 100%;
 }
 
 .sub.mb {
-	margin-bottom: 1px;
+  margin-bottom: 1px;
 }
 
 .sub a {
-	color: rgb(23, 111, 211);
+  color: rgb(23, 111, 211);
 }
 
 // .input,
@@ -328,47 +328,47 @@ function handleRigist() {
 // }
 
 .input {
-	box-sizing: border-box;
-	border: 1px solid transparent;
-	cursor: pointer;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  cursor: pointer;
 
-	outline: none;
-	width: 100%;
-	padding: 16px 10px;
-	background-color: rgb(247, 243, 243);
+  outline: none;
+  width: 100%;
+  padding: 16px 10px;
+  background-color: rgb(247, 243, 243);
 
-	border-radius: 10px;
-	box-shadow:
-		12.5px 12.5px 10px rgba(0, 0, 0, 0.015),
-		100px 100px 80px rgba(0, 0, 0, 0.03);
-	&:focus {
-		border: 1px solid rgb(23, 111, 211);
-	}
+  border-radius: 10px;
+  box-shadow:
+    12.5px 12.5px 10px rgba(0, 0, 0, 0.015),
+    100px 100px 80px rgba(0, 0, 0, 0.03);
+  &:focus {
+    border: 1px solid rgb(23, 111, 211);
+  }
 }
 
 .overlay__btn {
-	margin-top: 6px;
-	width: 100%;
-	height: 2.5rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 0.875rem;
-	font-weight: 600;
+  margin-top: 6px;
+  width: 100%;
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
 
-	background: hsl(276, 100%, 9%);
-	color: hsl(0, 0%, 100%);
-	border: none;
-	border-radius: 0.5rem;
-	transition: transform 450ms ease;
+  background: hsl(276, 100%, 9%);
+  color: hsl(0, 0%, 100%);
+  border: none;
+  border-radius: 0.5rem;
+  transition: transform 450ms ease;
 }
 
 .overlay__btn:hover {
-	transform: scale(1.05);
-	cursor: pointer;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 .overlay__btn-emoji {
-	margin-left: 0.375rem;
+  margin-left: 0.375rem;
 }
 </style>

@@ -6,7 +6,7 @@ import { useUserStore } from '~/stores/user'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
 import MessageCard from '~/components/Card/MessageCard.vue'
-import { apiServer } from '~/utils/http/domain'
+import { baseUrl } from '~/utils/http/base'
 import { uploadFile } from '~/utils/uploadAli'
 
 const userStore = useUserStore()
@@ -88,7 +88,7 @@ function wsOnMessage(ws, msgCo) {
   //
 }
 const { status, data, send, open, close, ws } = useWebSocket(
-  apiServer.websocket,
+  baseUrl.websocket,
   {
     onMessage: wsOnMessage,
   },
@@ -265,24 +265,24 @@ onMounted(async () => {
 
 <style lang="less" scoped>
 .chat-view {
-	// height: 400px;
-	height: calc(100vh - 400px);
-	// height: 100%;
-	// background: red;
-	width: 100%;
-	overflow-y: auto;
-	box-sizing: border-box;
-	padding: 10px 10px;
-	background: #f5f5f5;
-	border-radius: 10px;
-	.chat-item {
-		min-height: 80px;
-		// background: blue;
-		box-sizing: border-box;
-		padding-bottom: 20px;
-		&:last-child {
-			// padding-bottom: 10px;
-		}
-	}
+  // height: 400px;
+  height: calc(100vh - 400px);
+  // height: 100%;
+  // background: red;
+  width: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 10px 10px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  .chat-item {
+    min-height: 80px;
+    // background: blue;
+    box-sizing: border-box;
+    padding-bottom: 20px;
+    &:last-child {
+      // padding-bottom: 10px;
+    }
+  }
 }
 </style>

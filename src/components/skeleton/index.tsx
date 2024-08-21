@@ -69,7 +69,7 @@ export default defineComponent({
             key={i}
           >
             {{
-						  template: () => slots.template?.(),
+              template: () => slots.template?.(),
             }}
           </ElSkeleton>,
         )
