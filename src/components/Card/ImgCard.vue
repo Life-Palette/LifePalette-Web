@@ -75,7 +75,7 @@ onMounted(() => {
   overflow: hidden;
   position: relative;
   width: 100%;
-  z-index: 9999;
+  z-index: 999;
 
   .mian-img {
     // align-self: flex-start;

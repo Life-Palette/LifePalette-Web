@@ -28,7 +28,7 @@ export function apiPost(data) {
 export function getLogin(data) {
   return http.request(
     'post',
-    '/auth/login',
+    '/auth/loginV2',
     { data },
     {
       isNeedToken: false, // 是否需要token

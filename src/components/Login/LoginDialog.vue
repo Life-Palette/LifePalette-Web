@@ -31,7 +31,7 @@ function closeDialog() {
     title="Tips"
     width="350px"
     top="20vh"
-    :z-index="99999"
+    :z-index="999"
     class="no-dlg-bg-class"
     @close="closeDialog"
   >

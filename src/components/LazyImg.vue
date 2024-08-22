@@ -140,7 +140,7 @@ async function initLivePhoto() {
   .lpk-badge {
     top: 15px !important;
     left: 15px !important;
-    z-index: 999999 !important;
+    z-index: 999 !important;
   }
   .lpk-live-photo-renderer {
     height: 100% !important;
