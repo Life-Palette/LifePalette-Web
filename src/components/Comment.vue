@@ -2,6 +2,7 @@
 import { commentFindById } from '~/api/comment'
 import { formatTime } from '~/utils'
 import ImgNoData from '~/assets/image/noData/33.svg'
+import { getUserAvatar } from '~/utils/tools'
 
 const props = defineProps({
   id: {
@@ -60,7 +61,7 @@ defineExpose({
         <div class="comment-item__left">
           <img
             class="comment-item__left-avatar"
-            :src="item?.User?.avatar"
+            :src="getUserAvatar(item.User)"
             alt=""
           >
         </div>

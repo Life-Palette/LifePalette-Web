@@ -7,6 +7,7 @@ import StarportCard from '~/components/StarportCard.vue'
 import { findLikeByUserId } from '~/api/like'
 import { topicFindAll } from '~/api/topic'
 import { useUserStore } from '~/stores/user'
+import { getUserAvatar } from '~/utils/tools'
 
 interface tagItem {
   id: number | null
@@ -117,7 +118,7 @@ async function getTopicList() {
 
     <!-- 作品列表 -->
     <template v-if="true">
-      <div class="container-box w-full">
+      <div class="container-box w-[60vw]">
         <Waterfall
           :list="topicList"
           background-color="transparent"
@@ -148,7 +149,7 @@ async function getTopicList() {
                     w-full
                     bg-gray-400:20
                     object-cover
-                    :src="item.User.avatar"
+                     :src="getUserAvatar(item.User)"
                   >
                   <div class="user-name">
                     {{ item.User.name }}

@@ -22,6 +22,7 @@ import LottieNoData from '~/components/Lottie/NoData.vue'
 import Skeleton from '~/components/skeleton'
 import CardSwiper from '~/components/Card/SwiperCard.vue'
 import { formatTime } from '~/utils'
+import { getUserAvatar } from '~/utils/tools'
 
 // Import Swiper Vue.js components
 
@@ -331,7 +332,7 @@ async function getConData(readStatus, target) {
                           w-full
                           bg-gray-400:20
                           object-cover
-                          :src="item.User.avatar"
+                          :src="getUserAvatar(item.User)"
                         >
                         <div class="user-name">
                           {{ item.User.name }}

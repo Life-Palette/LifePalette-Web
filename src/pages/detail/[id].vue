@@ -11,6 +11,7 @@ import { likeCreate, likeDelete, likeFindById } from '~/api/like'
 import { messageCreate } from '~/api/message'
 import { formatTime } from '~/utils'
 import { useUserStore } from '~/stores/user'
+import { getUserAvatar } from '~/utils/tools'
 
 const userStore = useUserStore()
 
@@ -322,7 +323,7 @@ async function getDelete(id) {
               w-full
               bg-gray-400:20
               object-cover
-              :src="dataDe?.User?.avatar"
+              :src="getUserAvatar(dataDe.User)"
             >
             <div class="user-name">
               {{ dataDe?.User?.name }}
