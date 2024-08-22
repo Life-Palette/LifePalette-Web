@@ -38,7 +38,7 @@ async function handleLogin() {
     return
   loginLoading.value = true
   const params = {
-    mobile: loginForm.value.username,
+    account: loginForm.value.username,
     password: loginForm.value.password,
   }
   try {
@@ -246,7 +246,7 @@ function handleRigist() {
         type="text"
         maxlength="11"
         class="input"
-        placeholder="请输入手机号"
+        placeholder="请输入手机号或LP账号"
       >
 
       <input
