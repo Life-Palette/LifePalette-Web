@@ -311,7 +311,7 @@ async function getDelete(id) {
           </div>
         </Starport>
       </div>
-      <div class="de-content flex-1 bg-[#fff]">
+      <div class="de-content overflow-auto flex-1 bg-[#fff]">
         <!-- 用户信息 -->
         <section>
           <div class="content-user">
