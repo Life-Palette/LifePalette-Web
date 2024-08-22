@@ -1,59 +1,33 @@
 <script setup>
 import { updateUserInfo } from '~/api/admin'
+import { to, compareObjects } from '@iceywu/utils'
+import { useUserStore } from '~/stores/user'
 
-const props = defineProps({
-  isShowDialog: {
-    type: Boolean,
-    default: true,
-  },
-  userInfo: {
-    type: Object,
-    default: () => {},
-  },
-})
-const emit = defineEmits(['update:isShowDialog', 'update:userInfo'])
-const dialogVisible = ref(true)
-const Myname = ref('')
-// const Sexradio = ref('1')
-const Personal = ref('')
+const userStore = useUserStore()
+const { userInfo } = storeToRefs(userStore)
 
-function closeDialog() {
-  emit('update:isShowDialog', false)
-}
+const userInfoTemp = ref(userInfo.value)
+
+const dialogVisible = defineModel(false)
 
 // 修改信息
 async function updateUserInfoFunc() {
-  const params = {
-    name: Myname.value,
-    // sex:  Sexradio.value,
-  }
-  const { code, msg, result } = ({} = await updateUserInfo(params).catch(
-    (err) => {
-      console.log('err', err)
-      ElMessage.error('更新用户信息失败')
-    },
-  ))
-  if (code === 200) {
-    console.log('更新用户信息成功', result)
-    emit('update:userInfo', result)
-
-    ElMessage.success('更新用户信息成功')
-  }
-  else {
-    console.log('更新用户信息失败', msg)
-    ElMessage.error('更新用户信息失败')
-  }
-  close()
+  const params = compareObjects(userInfo.value, userInfoTemp.value)
+  const [err, suData] = await to(updateUserInfo(params))
+  const { code, msg, result } = suData || {}
+    if (code === 200) {
+      toast.success('修改成功')
+    }
+else {
+      toast.error('修改失败')
+    }
+    dialogVisible.value = false
 }
-
 function close() {
-  // 关闭
   dialogVisible.value = false
 }
 onMounted(() => {
-  console.log('props.userInfo------------', props.userInfo)
-  const { name } = props.userInfo
-  Myname.value = name
+  // console.log('🍪-----userInfoTemp.value-----', userInfoTemp.value)
 })
 </script>
 
@@ -65,8 +39,8 @@ onMounted(() => {
     width="350px"
     top="40vh"
     :z-index="999"
-    @close="closeDialog"
-  >
+    @close="dialogVisible = false"
+>
     <div class="content">
       <div class="login-box">
         <div class="My-title">
@@ -74,7 +48,11 @@ onMounted(() => {
         </div>
         <form>
           <div class="user-box">
-            <input v-model="Myname" type="text" name="" required="">
+            <input v-model="userInfoTemp.userId" type="text" name="" required="">
+            <label>账号</label>
+          </div>
+          <div class="user-box">
+            <input v-model="userInfoTemp.name" type="text" name="" required="">
             <label>姓名</label>
           </div>
 
@@ -99,7 +77,7 @@ onMounted(() => {
             <label>邮箱</label>
           </div>
           <div class="user-box">
-            <input v-model="Personal" type="text" name="" required="">
+            <input v-model="userInfoTemp.signature" type="text" name="" required="">
             <label>个性签名</label>
           </div>
         </form>
@@ -119,7 +97,7 @@ onMounted(() => {
               class="overlay__btn overlay__btn--colors"
               @click="updateUserInfoFunc"
             >
-              <span>发布</span>
+              <span>修改</span>
               <span class="overlay__btn-emoji">💕</span>
             </button>
           </section>

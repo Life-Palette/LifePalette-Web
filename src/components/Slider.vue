@@ -27,6 +27,7 @@ const sliderList = ref([
     name: '我的',
     // path: "/home/my",
     path: '/mine',
+    desc: 'alpha',
     icon: 'i-carbon-person',
   },
   {

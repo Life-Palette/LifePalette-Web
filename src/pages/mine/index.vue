@@ -2,6 +2,7 @@
 import { ElMessage } from 'element-plus'
 import { isObject } from '@iceywu/utils'
 import UserBottom from './components/UserBottom.vue'
+import Loginabout from '@/components/Login/Loginabout.vue'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import ImgIcon1 from '~/assets/image/icons/home.png'
 import ImgIcon2 from '~/assets/image/icons/trends.png'
@@ -207,6 +208,7 @@ function headUpload() {
     <header class="header-box z-99 cursor-pointer" @click="openUpload">
       <!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
       <img :src="userBackground" alt="" class="backdrop">
+      <div class="edit-info" @click.stop="edit">编辑个人资料</div>
       <div class="header__cover" />
     </header>
     <div class="intro z-99">
@@ -214,7 +216,7 @@ function headUpload() {
       <img :src="userheadUpload" alt="" class="avatar" @click="headUpload">
       <div class="title-wrapper">
         <div class="title">
-          <p class="user-name">
+          <p class="user-name" >
             @{{ userInfo?.name }}
           </p>
           <p class="desc">
@@ -226,6 +228,9 @@ function headUpload() {
     <main class="z-1 w-full">
       <UserBottom />
     </main>
+    <div>
+      <Loginabout v-if="isShowDialog" v-model="isShowDialog" />
+    </div>
   </div>
 </template>
 
@@ -279,6 +284,15 @@ function headUpload() {
     // filter: blur(5px);
     height: 24em;
   }
+  .edit-info{
+  position:absolute;
+  right:319px;
+  bottom: 30px;
+  border-radius: 4px;
+  border: 1px solid #e8d4c9;
+  padding: 7px 12px;
+  z-index: 999 !important;
+}
 }
 
 .header__wrap {
