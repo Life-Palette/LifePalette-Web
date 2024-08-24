@@ -193,45 +193,44 @@ function headUpload() {
     clipperRef.value.uploadFile()
   }
 }
+// 编辑资料
+const showEditInfo = ref(false)
 </script>
 
 <template>
-  <clipperDialog
-    ref="clipperRef"
-    :type="clipperData.type"
-    :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize"
-    :preview-width="clipperData.previewWidth"
-    @confirm="onConfirm"
-  />
-  <div class="test h-full w-full">
-    <header class="header-box z-99 cursor-pointer" @click="openUpload">
-      <!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
-      <img :src="userBackground" alt="" class="backdrop">
-      <div class="edit-info" @click.stop="edit">编辑个人资料</div>
-      <div class="header__cover" />
-    </header>
-    <div class="intro z-99">
-      <!-- <img :src="userInfo?.avatar" alt="" class="avatar" @click="headUpload"/> -->
-      <img :src="userheadUpload" alt="" class="avatar" @click="headUpload">
-      <div class="title-wrapper">
-        <div class="title">
-          <p class="user-name" >
-            @{{ userInfo?.name }}
-          </p>
-          <p class="desc">
-            Jhey ʕ •ᴥ•ʔ
-          </p>
-        </div>
-      </div>
-    </div>
-    <main class="z-1 w-full">
-      <UserBottom />
-    </main>
-    <div>
-      <Loginabout v-if="isShowDialog" v-model="isShowDialog" />
-    </div>
-  </div>
+	<clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+	<div class="test h-full w-full">
+		<header class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEditInfo = true"
+			@mouseleave="showEditInfo = false">
+			<!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
+			<img :src="userBackground" alt="" class="backdrop">
+			<transition name="fade">
+				<div class="edit-info" @click.stop="edit" v-show="showEditInfo">编辑个人资料</div>
+			</transition>
+			<div class="header__cover" />
+		</header>
+		<div class="intro z-99">
+			<!-- <img :src="userInfo?.avatar" alt="" class="avatar" @click="headUpload"/> -->
+			<img :src="userheadUpload" alt="" class="avatar" @click="headUpload">
+			<div class="title-wrapper">
+				<div class="title">
+					<p class="user-name">
+						@{{ userInfo?.name }}
+					</p>
+					<p class="desc">
+						Jhey ʕ •ᴥ•ʔ
+					</p>
+				</div>
+			</div>
+		</div>
+		<main class="z-1 w-full">
+			<UserBottom />
+		</main>
+		<div>
+			<Loginabout v-if="isShowDialog" v-model="isShowDialog" />
+		</div>
+	</div>
 </template>
 
 <style lang="less" scoped>
@@ -292,7 +291,23 @@ function headUpload() {
   border: 1px solid #e8d4c9;
   padding: 7px 12px;
   z-index: 999 !important;
-}
+  opacity: 1;
+  }
+  
+//   v2过渡类名
+// .fade-enter,
+// .fade-leave-to
+// /* .fade-leave-active in <2.1.8 */
+
+// v3过渡类名
+  .fade-enter-from,
+  .fade-leave-to{
+	opacity: 0;; //初始透明
+  }
+  .fade-enter-active,
+  .fade-leave-active{
+	transition: opacity .4s ease;
+  }
 }
 
 .header__wrap {
@@ -402,6 +417,7 @@ function headUpload() {
   .desc {
     font-size: var(--size-4);
     font-weight: 400;
+	cursor: pointer;
   }
 }
 
