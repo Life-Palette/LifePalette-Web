@@ -86,7 +86,7 @@ export async function uploadFile(file: File,	callback: any,	ops: uploadOptions =
         }).then(async (res: any) => {
           if (res.status === 200) {
             const fileUrl = `${ossData.baseHost}/${key}`
-            const fileType = file.type.split('/')[0].toUpperCase()
+            const fileType = file.type?.split('/')[0].toUpperCase()
             const saveParams = {
               fileUrl,
               fileMd5: md5,

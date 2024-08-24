@@ -91,7 +91,7 @@ onChange(async (file) => {
     const { type, url, id, videoSrc } = result
     // type:"image/jpeg"
     // 获取/前面的字符串并转为大写
-    const fileType = type.split('/')[0].toUpperCase()
+    const fileType = type?.split('/')[0].toUpperCase()
     const fileData = {
       id,
       fileType,
