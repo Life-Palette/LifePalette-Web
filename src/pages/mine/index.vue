@@ -198,15 +198,19 @@ const showEditInfo = ref(false)
 </script>
 
 <template>
-	<clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+	<clipperDialog
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
 	<div class="test h-full w-full">
-		<header class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEditInfo = true"
-			@mouseleave="showEditInfo = false">
+		<header
+class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEditInfo = true"
+			@mouseleave="showEditInfo = false"
+>
 			<!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
 			<img :src="userBackground" alt="" class="backdrop">
 			<transition name="fade">
-				<div class="edit-info" @click.stop="edit" v-show="showEditInfo">编辑个人资料</div>
+				<div v-show="showEditInfo" class="edit-info" @click.stop="edit">编辑个人资料</div>
 			</transition>
 			<div class="header__cover" />
 		</header>
@@ -293,7 +297,7 @@ const showEditInfo = ref(false)
   z-index: 999 !important;
   opacity: 1;
   }
-  
+
 //   v2过渡类名
 // .fade-enter,
 // .fade-leave-to

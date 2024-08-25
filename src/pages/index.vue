@@ -191,6 +191,9 @@ async function getConData(readStatus, target) {
     listObj.value.loading = false
   }, 500)
 }
+function goCreate() {
+	router.push('/post')
+}
 </script>
 
 <template>
@@ -198,7 +201,7 @@ async function getConData(readStatus, target) {
     <div class="mb-4 mt-8 flex <md:flex-col">
       <!-- 标签列表 -->
       <div
-        class="relative box-border flex items-center gap-1 overflow-auto px-10"
+        class="relative box-border flex items-center gap-1 overflow-auto px-10 <md:px-1"
       >
         <div
           v-for="(item, index) in tagList"
@@ -240,7 +243,7 @@ async function getConData(readStatus, target) {
     <!-- 内容列表 -->
     <div
       v-if="!listObj.loading"
-      class="content-box box-border overflow-auto px-10"
+      class="content-box box-border overflow-auto px-10 <md:px-1"
     >
       <div class="h-full w-full overflow-auto rounded-md">
         <!-- 有数据 -->
@@ -354,7 +357,7 @@ async function getConData(readStatus, target) {
       </div>
     </div>
     <template v-else>
-      <Skeleton :loading="listObj.loading" :grid-cols="4" :count="3">
+      <Skeleton :loading="listObj.loading" :grid-cols="cols" :count="3">
         <template #template>
           <el-skeleton-item
             variant="image"
@@ -379,6 +382,19 @@ async function getConData(readStatus, target) {
         <template #default />
       </Skeleton>
     </template>
+
+		<!-- 发布按钮 -->
+		<div
+      v-if="!listObj.loading && cols === 1"
+      class="fixed bottom-20 right-10 z-9999"
+      @click="goCreate"
+    >
+      <div
+        class="flex items-center justify-center w-12 h-12 rounded-full bg-bg_color shadow-lg"
+      >
+       <div class="i-carbon-add-large text-xl" />
+      </div>
+    </div>
   </div>
 </template>
 

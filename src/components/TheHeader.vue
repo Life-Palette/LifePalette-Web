@@ -59,7 +59,7 @@ function newClick() {
 				placeholder="搜索更多美好事物~"
 			/> -->
     </div>
-    <div class="h-full flex items-center gap-5">
+    <div class="h-full flex items-center gap-5 <md:hidden">
       <div
         i-carbon-sun
         dark:i-carbon-moon
@@ -81,7 +81,7 @@ function newClick() {
       </template>
     </div>
     <!-- 头像 -->
-    <div v-loading="loginLoading" class="ml-5 flex cursor-pointer items-center">
+    <div v-loading="loginLoading" class="ml-5 flex cursor-pointer items-center z-1000">
       <!-- 已登录 -->
       <template v-if="isLogin">
         <div class="flex items-center border-none">

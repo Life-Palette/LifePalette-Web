@@ -6,7 +6,7 @@ import 'element-plus/dist/index.css'
 
 // 你自定义的 css
 import './styles/main.css'
-
+import { destroyEruda, initEruda } from '@/utils/eruda'
 import { MotionPlugin } from '@vueuse/motion'
 import type { Directive } from 'vue'
 import App from './App.vue'
@@ -21,3 +21,10 @@ Object.keys(directives).forEach((key) => {
 app.use(MotionPlugin)
 
 app.mount('#app')
+
+// initEruda()
+// 监听卸载操作
+window.addEventListener('unmount', () => {
+	destroyEruda()
+	app.unmount()
+})

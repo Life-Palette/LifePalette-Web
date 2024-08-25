@@ -90,6 +90,7 @@ export default defineConfig({
 			craft: 'MonoCraft',
 		},
 		colors: {
+			bg_color: 'var(--el-bg-color)',
 			context: 'rgba(var(--c-context),%alpha)',
 			primary: {
 				DEFAULT: 'rgba(var(--text),%alpha)',
@@ -104,6 +105,7 @@ export default defineConfig({
 				4: 'var(--gc-level-4)',
 			},
 		},
+
 	},
 	presets: [
 		presetAttributify(),

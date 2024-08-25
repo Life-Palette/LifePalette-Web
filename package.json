@@ -38,6 +38,7 @@
     "blurhash": "^2.0.5",
     "dayjs": "^1.11.11",
     "element-plus": "^2.7.6",
+    "eruda": "^3.2.3",
     "js-cookie": "^3.0.5",
     "js-md5": "^0.8.3",
     "livephotoskit": "^1.5.6",
