@@ -30,6 +30,13 @@ const sliderList = ref([
     desc: 'alpha',
     icon: 'i-carbon-person',
   },
+  // {
+  //   name: '我的alpha',
+  //   // path: "/home/my",
+  //   path: '/mine/indexs',
+  //   desc: 'alpha',
+  //   icon: 'i-carbon-person',
+  // },
   {
     name: '聊天室',
     // path: "/home/my",
