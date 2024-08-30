@@ -86,7 +86,7 @@ const userheadUpload = computed(() => {
 const headlist = ref([
 	{
 		name: '关注',
-		number: 121,
+		number: 122,
 	},
 	{
 		name: '粉丝',
