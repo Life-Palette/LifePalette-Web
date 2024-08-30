@@ -3,7 +3,6 @@ import { ElMessage } from 'element-plus'
 import { isObject } from '@iceywu/utils'
 import { useUserStore } from '~/stores/user'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
-import { number } from 'echarts/core'
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
@@ -127,7 +126,7 @@ onMounted(() => {
 					<div class="headright">
 						<div class="headName">䯃</div>
 						<div class="headlist">
-							<div v-for="(item, index) in headlist">
+							<div v-for="(item) in headlist">
 								<div class="headitem">
 									{{ item.name }}
 									<span class="headitems">{{ item.number }}</span>
@@ -281,7 +280,7 @@ onMounted(() => {
 				position: absolute;
 				top: 0;
 				left: 0;
-				right: -120px;
+				right: -140px;
 				bottom: 0;
 				background: linear-gradient(
 					to left,
