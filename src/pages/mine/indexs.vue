@@ -2,6 +2,7 @@
 import { ElMessage } from 'element-plus'
 import { isObject } from '@iceywu/utils'
 import { useUserStore } from '~/stores/user'
+import Loginabout from '@/components/Login/Loginabout.vue'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 
 const userStore = useUserStore()
@@ -98,6 +99,11 @@ const headlist = ref([
 	},
 ])
 
+// 编辑个人信息
+const isShowDialog = ref(false)
+function EditInfo() {
+	isShowDialog.value = true
+}
 onMounted(() => {
 	getMyInfoFunc()
 })
@@ -113,6 +119,8 @@ onMounted(() => {
 		:preview-width="clipperData.previewWidth"
 		@confirm="onConfirm"
 	/>
+	<!-- 编辑个人信息 -->
+	 <Loginabout v-if="true"  v-model="isShowDialog" />
 	<div class="Personal-Center h-full w-full">
 		<div class="Personal-content">
 			<div class="PerCard">
@@ -135,8 +143,8 @@ onMounted(() => {
 						</div>
 						<div class="ifePa">IfePalette: {{ "#154D56F51" }}</div>
 						<div class="sign">
-							{{ "这个人很懒，什么都没有留下..." }}
-							<span class="InforData">编辑个人资料</span>
+							<span class="signtext">{{ "这个人很懒，什么都没有留下..." }}</span>
+							<span class="InforData" @click="EditInfo">编辑个人资料</span>
 						</div>
 					</div>
 				</div>
@@ -227,6 +235,7 @@ onMounted(() => {
 							color: #1d1f2b99;
 							font-size: 16px;
 							margin-right: 15px;
+							//  font-family: PingFang SC, DFPKingGothicGB-Regular, sans-serif;;
 						}
 						.headitems {
 							font-size: 16px;
@@ -242,11 +251,22 @@ onMounted(() => {
 						font-size: 14px;
 						color: #1d1f2b99;
 						margin-top: 22px;
+						display: flex;
+						position: relative;
+						.signtext{
+							display: inline-block;
+							overflow: hidden;
+							text-overflow: ellipsis;
+							white-space: nowrap;
+							width: 300px;
+						}
 						.InforData {
+							position: absolute;
+							right: -120px;
+							bottom: 0;
 							z-index: 2;
 							border-radius: 4px;
 							opacity: 1;
-							margin-left: 70px;
 							&:hover {
 								color: #409eff;
 								cursor: pointer;
