@@ -4,6 +4,7 @@ import { getFileMD5 } from './md5'
 import { compressPNGImage, isPNG } from './upng'
 import { generateBlurhashFromFile } from '~/utils/blurhash'
 import { getSign, saveFile } from '~/api/ossUpload'
+import { getFileType } from '~/utils'
 
 interface uploadOptions {
 	/**
@@ -90,7 +91,9 @@ export async function uploadFile(
 					}).then(async (res: any) => {
 						if (res.status === 200) {
 							const fileUrl = `${ossData.baseHost}/${key}`
-							const fileType = file.type?.split('/')[0].toUpperCase()
+
+							let fileType = file.type?.split('/')[0].toUpperCase()
+
 							const saveParams = {
 								fileUrl,
 								fileMd5: md5,
@@ -99,6 +102,11 @@ export async function uploadFile(
 								name: file.name,
 								dir: ossData.dir,
 								hashCode: '',
+							}
+							if (!fileType) {
+								const fileExtension = fileUrl.split('.').pop()?.toLowerCase()
+								fileType = getFileType(fileUrl).toUpperCase()
+								saveParams.type = ['heic', 'HEIC'].includes(fileExtension) ? 'image/heic' : ''
 							}
 							if (fileType === 'VIDEO') {
 							}

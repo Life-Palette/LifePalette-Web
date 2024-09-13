@@ -124,6 +124,30 @@ export function downloadFile(url, fileName = '未知文件') {
   link.click()
   document.body.removeChild(link)
 }
+export function getFileType(url: string): string {
+  if (!url)
+    return 'other'
+  const fileTypes: { [key: string]: string[] } = {
+    image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'heic', 'heif'],
+    video: ['mp4', 'avi', 'mov'],
+    pdf: ['pdf'],
+    document: ['doc', 'docx', 'txt'],
+    audio: ['mp3', 'wav', 'ogg'],
+    zip: ['zip', 'rar', '7z'],
+    excel: ['xls', 'xlsx', 'csv'],
+    ppt: ['ppt', 'pptx'],
+    code: ['js', 'html', 'css', 'java', 'cpp', 'py'],
+    executable: ['exe', 'msi'],
+    presentation: ['key'],
+  }
+  const fileExtension = url.split('.').pop()?.toLowerCase()
+
+  for (const fileType in fileTypes) {
+    if (fileTypes[fileType].includes(fileExtension!))
+      return fileType
+  }
+  return 'other'
+}
 
 export default {
   getLocalStorage,

@@ -78,7 +78,7 @@ async function beforeUploadFunc(file, data, index) {
 }
 
 const { files, open, reset, onChange } = useFileDialog({
-	accept: 'image/*,video/*',
+	accept: 'image/*,video/*,image/heic,image/heif',
 })
 
 function closeDialog() {
@@ -138,10 +138,7 @@ async function initFileFill(fileListT) {
 		if (prefix.toUpperCase() === 'MOV') {
 			const movIndex = fileListT.findIndex((item2) => {
 				const tempImg = item2.name.split('.')
-				return (
-					tempImg[0] === name
-					&& tempImg[1].toUpperCase() !== 'MOV'
-				)
+				return tempImg[0] === name && tempImg[1].toUpperCase() !== 'MOV'
 			})
 			if (movIndex !== -1) {
 				if (!isEmpty(fileListT[movIndex].videoSrc)) {
@@ -230,7 +227,7 @@ async function handleSave() {
 		if (props.isNeedBack) {
 			router.back()
 		}
-else {
+ else {
 			window.location.reload()
 		}
 	}
@@ -363,7 +360,7 @@ function initExtraData() {
 						<div class="upload-item relative">
 							<!-- 删除按钮 -->
 							<div
-								class="i-carbon-delete absolute right-2 top-2 z-99 cursor-pointer"
+								class="i-carbon-delete absolute right-2 top-2 z-9999 cursor-pointer"
 								@click="deleteItem(index)"
 							/>
 							<!-- live-tag -->
@@ -398,7 +395,7 @@ function initExtraData() {
 							</template>
 							<!-- live photo -->
 							<el-upload
-							v-if="0"
+								v-if="0"
 								ref="uploadRef"
 								class="absolute left-2 top-2 z-99 cursor-pointer"
 								action="#"

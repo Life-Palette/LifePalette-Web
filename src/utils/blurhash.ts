@@ -53,7 +53,7 @@ export function getDataUrlFromArr(
 // 		const tempCtx = tempCanvas.getContext('2d')
 
 // 		img.onload = () => {
-// 			console.log('🌈onload------------------------------>')
+
 // 			// tempCanvas.width = 20
 // 			// tempCanvas.height = 20
 // 			// tempCanvas.width = img.width
@@ -65,7 +65,7 @@ export function getDataUrlFromArr(
 // 				tempCanvas.width,
 // 				tempCanvas.height,
 // 			)
-// 			console.log('🍧-----imageData-----', imageData)
+
 // 			const blurhash = encode(
 // 				imageData.data,
 // 				imageData.width,
@@ -87,18 +87,17 @@ export function generateBlurhashFromFile(file,	maxWidth = 200,	quality = 0.7) {
     img.onload = () => {
       const canvas = document.createElement('canvas')
       let width = img.width
-      console.log('🍭-----img.width-----', img.width, img.height)
+
       let height = img.height
 
       if (width > maxWidth) {
-        const ratio = maxWidth / width
+				const ratio = maxWidth / width
         width = maxWidth
         height = Math.ceil(height * ratio) // Ensure integer height
       }
 
       canvas.width = width
       canvas.height = height
-      console.log('🎉-----height-----', width, height)
 
       const ctx = canvas.getContext('2d')
       ctx.drawImage(img, 0, 0, width, height)
@@ -108,6 +107,9 @@ export function generateBlurhashFromFile(file,	maxWidth = 200,	quality = 0.7) {
 
       resolve(blurhash)
     }
+		img.onerror = (err) => {
+			reject(err)
+		}
 
     img.src = URL.createObjectURL(file)
   })
