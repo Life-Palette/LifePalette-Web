@@ -7,7 +7,6 @@ const props = defineProps({
     default: () => {},
   },
 })
-console.log()
 
 // eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
@@ -15,14 +14,16 @@ const coverUrl = computed(() => {
 
   const { fileType, file, cover = 'IMAGE' } = fileTemp || {}
   if (fileType === 'IMAGE') {
-    return file || ''
+		const fileExtension = file.split('.').pop()?.toLowerCase()
+
+    return ['heic', 'HEIC'].includes(fileExtension) ? `${file}?x-oss-process=image/format,png/resize,l_50` : file
   }
   else if (fileType === 'VIDEO') {
     return cover || ''
   }
 })
 onMounted(() => {
-  // console.log(props.data);
+
   // 创建
 })
 </script>

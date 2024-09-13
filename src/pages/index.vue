@@ -6,6 +6,7 @@ import {
   Mousewheel,
   Navigation,
   Scrollbar,
+	Virtual,
 } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { breakpointsTailwind } from '@vueuse/core'
@@ -66,7 +67,7 @@ const cols = computed(() => {
     return 1
   return 1
 })
-const modules = [Navigation, Scrollbar, A11y, Keyboard, Mousewheel]
+const modules = [Navigation, Scrollbar, A11y, Keyboard, Mousewheel, Virtual]
 const userStore = useUserStore()
 const router = useRouter()
 // 是否开启swiper布局
@@ -258,10 +259,11 @@ function goCreate() {
               :keyboard="{ enabled: true }"
               :mousewheel="{ enabled: true }"
               direction="vertical"
+							virtual
               @swiper="onSwiper"
               @slide-change="onSlideChange"
             >
-              <SwiperSlide v-for="(item, index) in listObj.list" :key="index">
+              <SwiperSlide v-for="(item, index) in listObj.list" :key="index" :virtual-index="index">
                 <div
                   class="relative h-full w-full cursor-pointer"
                   @click="goDe(item)"
