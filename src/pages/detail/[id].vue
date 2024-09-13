@@ -190,6 +190,11 @@ function handleSwiperChange(index) {
 const currentPlayInfo = computed(() => {
   return `${currentPlayIndex.value + 1}/${fileList.value.length}`
 })
+const isLive = computed(() => {
+	const { videoSrc, fileType } = fileList.value[currentPlayIndex.value] || {}
+
+  return fileType === 'IMAGE' && !!videoSrc
+})
 const showViewer = ref(false)
 function previewisShow(data, index) {
   initialIndex.value = index
@@ -197,10 +202,11 @@ function previewisShow(data, index) {
 }
 const initialIndex = ref(0)
 const fileSrc = computed(() => {
-  // console.log('🦄-----fileList.value-----', fileList.value);
   return fileList.value.map((item) => {
     if (item.fileType === 'IMAGE') {
-      return item.file
+			const fileExtension = item.file.split('.').pop()?.toLowerCase()
+
+      return ['heic', 'HEIC'].includes(fileExtension) ? `${item.file}?x-oss-process=image/format,png` : item.file
     }
     else if (item.fileType === 'VIDEO') {
       // return item.cover
@@ -277,7 +283,7 @@ async function getDelete(id) {
       :url-list="fileSrc"
       @close="() => (showViewer = false)"
     />
-    <div class="conten-box <xl:flex-col">
+    <div class="conten-box <2xl:flex-col">
       <div
         style="flex-shrink: 0"
         class="img-con relative flex-1 flex-shrink-0 <xl:h-80 <xl:w-full <xl:flex-initial"
@@ -438,7 +444,11 @@ async function getDelete(id) {
         </section>
       </div>
       <!-- 返回按钮 -->
-      <div class="close-icon" @click="router.back()">
+      <div
+class="close-icon"
+			:class="{ 'mt-10': isLive }"
+			@click="router.back()"
+>
         <div class="i-carbon-arrow-left" />
       </div>
     </div>

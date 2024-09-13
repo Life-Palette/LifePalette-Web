@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { updateUserInfo } from '~/api/admin'
-import { to, compareObjects } from '@iceywu/utils'
-import { useUserStore } from '~/stores/user'
 import { isObject } from '@iceywu/utils'
-
+import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
@@ -198,11 +196,15 @@ async function updateUserInfoFunc(fileMd5: string) {
     </div>
   </el-dialog> -->
 
-  <clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+  <clipperDialog
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
 
-  <el-dialog v-model="dialogVisible" destroy-on-close width="550" align-center
-    :style="{ borderRadius: '25px', height: '600px' }">
+  <el-dialog
+v-model="dialogVisible" destroy-on-close width="550" align-center
+    :style="{ borderRadius: '25px', height: '600px' }"
+>
     <div class="dialog-content">
       <div class="dialog-title">编辑资料</div>
       <div class="dialog-hadImg">
@@ -226,8 +228,6 @@ async function updateUserInfoFunc(fileMd5: string) {
       </div>
     </div>
   </el-dialog>
-
-
 </template>
 
 <style lang="less" scoped>

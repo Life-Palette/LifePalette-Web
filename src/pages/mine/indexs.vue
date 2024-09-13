@@ -120,7 +120,7 @@ onMounted(() => {
 		@confirm="onConfirm"
 	/>
 	<!-- 编辑个人信息 -->
-	 <Loginabout v-if="true"  v-model="isShowDialog" />
+	 <Loginabout v-if="true" v-model="isShowDialog" />
 	<div class="Personal-Center h-full w-full">
 		<div class="Personal-content">
 			<div class="PerCard">

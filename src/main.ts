@@ -6,7 +6,7 @@ import 'element-plus/dist/index.css'
 
 // 你自定义的 css
 import './styles/main.css'
-import { destroyEruda, initEruda } from '@/utils/eruda'
+import { destroyEruda } from '@/utils/eruda'
 import { MotionPlugin } from '@vueuse/motion'
 import type { Directive } from 'vue'
 import App from './App.vue'
