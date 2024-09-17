@@ -198,7 +198,7 @@ function goCreate() {
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col gap-0">
+  <div class="h-full flex flex-col gap-0 flex-1 overflow-auto">
     <div class="mb-4 mt-8 flex <md:flex-col">
       <!-- 标签列表 -->
       <div
@@ -226,7 +226,7 @@ function goCreate() {
       </div>
       <!-- 测试图标 -->
       <div
-        class="flex flex-1 cursor-pointer items-center justify-end gap-1 whitespace-nowrap <md:my-1 <md:hidden hover:text-blue"
+        class="flex flex-1 cursor-pointer items-center justify-end gap-1 whitespace-nowrap <md:my-1 !<md:hidden hover:text-blue"
         @click="isSwiperLayout = !isSwiperLayout"
       >
         {{ isSwiperLayout ? '列表模式' : '卡片模式' }}

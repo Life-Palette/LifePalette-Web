@@ -1,6 +1,4 @@
 <script setup>
-import ImgCard from '~/components/Card/ImgCard.vue'
-
 const props = defineProps({
   fileUrl: {
     type: String,
@@ -64,7 +62,7 @@ const videoRef = ref(null)
 
       <template v-else>
         <div class="relative h-full w-full">
-          <ImgCard :data="data" />
+          <l-p-image :data="data" :is-show-base="isDetail" />
           <div class="play-icon">
             <div class="i-carbon-play-filled-alt text-sm text-[#fff]" />
           </div>
@@ -73,7 +71,7 @@ const videoRef = ref(null)
     </template>
     <!-- 图片 -->
     <template v-else>
-      <ImgCard :is-show-pre-src="isShowPreSrc" :src="fileUrl" :data="data" />
+      <l-p-image :data="data" :is-show-base="isDetail" />
     </template>
   </div>
 </template>

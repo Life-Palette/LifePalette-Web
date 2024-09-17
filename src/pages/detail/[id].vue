@@ -310,7 +310,6 @@ async function getDelete(id) {
                 <StarportCard
                   :data="item"
                   is-detail
-                  :is-show-pre-src="false"
                   @click="previewisShow(item, index)"
                 />
               </component>
