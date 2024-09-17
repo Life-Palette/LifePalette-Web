@@ -11,6 +11,13 @@ declare module 'vue-router' {
   }
 }
 
+// for (const route of fileRoutes) {
+//   if (route.name === '/') {
+//     route.meta ??= {}
+//     route.meta.keepAlive = true
+//   }
+// }
+
 // 重定向 BASE_URL
 // fileRoutes.flat(Infinity).forEach((route) => {
 // 	route.path = safeResolve(route.path)
