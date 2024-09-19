@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
-import { isObject } from '@iceywu/utils'
-import { useUserStore } from '~/stores/user'
 import Loginabout from '@/components/Login/Loginabout.vue'
+import { isObject } from '@iceywu/utils'
+import { ElMessage } from 'element-plus'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
+import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)

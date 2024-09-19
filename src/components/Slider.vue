@@ -97,7 +97,7 @@ function clickTab(item, index) {
       </div>
     </div>
   </div>
-  <PostForm v-if="isShowDialog" v-model:isShowDialog="isShowDialog" />
+  <PostForm v-if="isShowDialog" v-model:is-show-dialog="isShowDialog" />
 </template>
 
 <style lang="less" scoped>

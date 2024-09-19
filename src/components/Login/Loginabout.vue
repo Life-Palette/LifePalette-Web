@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { updateUserInfo } from '~/api/admin'
 import { isObject } from '@iceywu/utils'
+import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()

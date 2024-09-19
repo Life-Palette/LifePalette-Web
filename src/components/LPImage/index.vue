@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import * as LivePhotosKit from 'livephotoskit'
 import { isEmpty } from '@iceywu/utils'
 import { decode } from 'blurhash'
+import * as LivePhotosKit from 'livephotoskit'
 import { getDataUrlFromArr } from '~/utils/blurhash'
 
 interface LPImageProps {

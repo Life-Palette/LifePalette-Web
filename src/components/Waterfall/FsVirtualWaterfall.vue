@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import type { ICardItem, IColumnQueue, IItemRect, IRenderItem, IVirtualWaterFallProps } from './type'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { debounce, rafThrottle } from './tool'
 
 const props = defineProps<IVirtualWaterFallProps>()

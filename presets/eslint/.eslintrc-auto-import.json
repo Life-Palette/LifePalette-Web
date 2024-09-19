@@ -358,6 +358,10 @@
     "watchTriggerable": true,
     "watchWithFilter": true,
     "whenever": true,
-    "useErudaStore": true
+    "useErudaStore": true,
+    "onWatcherCleanup": true,
+    "useId": true,
+    "useModel": true,
+    "useTemplateRef": true
   }
 }

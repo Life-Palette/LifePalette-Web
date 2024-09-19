@@ -1,7 +1,7 @@
 <script setup>
-import LoginDialog from './Login/LoginDialog.vue'
 import ImgLogo from '~/assets/image/logo/logo.svg'
 import { useUserStore } from '~/stores/user'
+import LoginDialog from './Login/LoginDialog.vue'
 // import PopperNews from "~/components/Popper/News.vue";
 import PopperNews from '~/components/Popper/index.vue'
 // import { Search } from '@element-plus/icons-vue'
@@ -131,7 +131,7 @@ function newClick() {
         </div>
       </template>
     </div>
-    <LoginDialog v-if="isShowDialog" v-model:isShowDialog="isShowDialog" />
+    <LoginDialog v-if="isShowDialog" v-model:is-show-dialog="isShowDialog" />
   </div>
 </template>
 

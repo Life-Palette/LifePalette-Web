@@ -15,6 +15,6 @@ const dialogVisible = ref(true)
     :z-index="99999"
     @close="closeDialog"
   >
-  <PostBase v-model:isShowDialog="dialogVisible" />
+  <PostBase v-model:is-show-dialog="dialogVisible" />
   </el-dialog>
 </template>

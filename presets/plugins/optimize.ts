@@ -1,6 +1,6 @@
+import type { Plugin } from 'vite'
 import { createConsola } from 'consola'
 import { gray } from 'kolorist'
-import type { Plugin } from 'vite'
 
 const logger = createConsola().withTag('optimize')
 export function Optimize(): Plugin {

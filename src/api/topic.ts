@@ -1,4 +1,4 @@
-import type { Result, listParams } from 'presets/types/axios'
+import type { listParams, Result } from 'presets/types/axios'
 import { http } from '~/utils/http'
 
 // 继承listParams，并添加自定义参数

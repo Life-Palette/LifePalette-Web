@@ -1,9 +1,9 @@
-import { existsSync } from 'node:fs'
-import { gray } from 'kolorist'
 import type { Plugin } from 'vite'
+import { existsSync } from 'node:fs'
 import { createConsola } from 'consola'
-import { isPackageExists } from 'local-pkg'
+import { gray } from 'kolorist'
 import { browserslistToTargets } from 'lightningcss'
+import { isPackageExists } from 'local-pkg'
 import { defaultBuildTargets } from '../shared/detect'
 
 const name = 'vite-plugin-fire-lightningcss'

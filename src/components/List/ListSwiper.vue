@@ -1,12 +1,12 @@
 <script setup>
 // import Swiper core and required modules
 import {
-  Navigation,
-  // Pagination,
-  Scrollbar,
   A11y,
   Keyboard,
   Mousewheel,
+  Navigation,
+  // Pagination,
+  Scrollbar,
 } from 'swiper/modules'
 
 // Import Swiper Vue.js components

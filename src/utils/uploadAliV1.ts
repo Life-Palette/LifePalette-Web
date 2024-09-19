@@ -1,9 +1,9 @@
-import Axios from 'axios'
 import { to } from '@iceywu/utils'
+import Axios from 'axios'
+import { getSign, saveFile } from '~/api/ossUpload'
+import { generateBlurhashFromFile } from '~/utils/blurhash'
 import { getFileMD5 } from './md5'
 import { compressPNGImage, isPNG } from './upng'
-import { generateBlurhashFromFile } from '~/utils/blurhash'
-import { getSign, saveFile } from '~/api/ossUpload'
 
 interface uploadOptions {
   /**

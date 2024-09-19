@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
-import QRCode from 'qrcode'
 import { ElMessage } from 'element-plus'
+import QRCode from 'qrcode'
 import { qrChangeSate, qrCheck, qrGenerate, qrLogin, qrRefresh } from '~/api/qr'
 import { useUserStore } from '~/stores/user'
 import { setToken } from '~/utils/auth'

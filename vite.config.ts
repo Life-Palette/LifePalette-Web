@@ -7,4 +7,7 @@ import Tov from './presets'
 export default defineConfig({
   // base: env.VITE_BASE_URL,
   plugins: [Tov()],
+	server: {
+		port: 5073,
+	},
 })
