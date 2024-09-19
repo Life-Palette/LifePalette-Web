@@ -3,8 +3,6 @@ import type {
   AxiosRequestConfig,
   // CustomParamsSerializer,
 } from 'axios'
-import Axios from 'axios'
-import NProgress from '../progress'
 import type {
   PureHttpError,
   PureHttpInterceptorsConfig,
@@ -12,9 +10,11 @@ import type {
   PureHttpResponse,
   RequestMethods,
 } from './types.d'
+import { formatToken, getToken } from '@/utils/auth'
+import Axios from 'axios'
+import NProgress from '../progress'
 // import { stringify } from "qs";
 import baseUrl from './base.js'
-import { formatToken, getToken } from '@/utils/auth'
 // import { useUserStoreHook } from "@/store/modules/user";
 import { useUserStore } from '~/stores/user'
 

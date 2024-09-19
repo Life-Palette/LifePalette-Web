@@ -21,4 +21,4 @@ function debounce(fn: Function, delay: number = 300) {
   }
 }
 
-export { rafThrottle, debounce }
+export { debounce, rafThrottle }

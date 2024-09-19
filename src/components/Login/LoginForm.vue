@@ -1,7 +1,7 @@
 <script setup>
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '~/stores/user'
 import { register, sendCode } from '~/api/admin'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
   isRegist: {

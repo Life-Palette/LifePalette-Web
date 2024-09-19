@@ -1,8 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { messageUpdate } from '~/api/message'
 // import { ListItem } from "./data";
 import NoticeItem from './noticeItem.vue'
-import { messageUpdate } from '~/api/message'
 
 const props = defineProps({
   list: {

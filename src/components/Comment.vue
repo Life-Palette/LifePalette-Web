@@ -1,7 +1,7 @@
 <script setup>
 import { commentFindById } from '~/api/comment'
-import { formatTime } from '~/utils'
 import ImgNoData from '~/assets/image/noData/33.svg'
+import { formatTime } from '~/utils'
 import { getUserAvatar } from '~/utils/tools'
 
 const props = defineProps({

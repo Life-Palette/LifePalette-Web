@@ -1,8 +1,8 @@
 <script lang="ts" setup>
+import { reactive, ref, watch } from 'vue'
+import { VueCropper } from 'vue-cropper'
 // 需要引入的库
 import 'vue-cropper/dist/index.css'
-import { VueCropper } from 'vue-cropper'
-import { reactive, ref, watch } from 'vue'
 // import TipsDialog from '~/components/TipsDialog/TipsDialog.vue' // 封装的dialog组件
 import { ElMessage } from 'element-plus'
 import { uploadFile as uploadFileFunc } from '~/utils/uploadAli'

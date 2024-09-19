@@ -1,4 +1,4 @@
-import type { Result, listParams } from 'presets/types/axios'
+import type { listParams, Result } from 'presets/types/axios'
 import { http } from '~/utils/http'
 
 export function tagFindAll(params?: listParams) {

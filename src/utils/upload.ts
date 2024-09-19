@@ -1,5 +1,5 @@
-import { getFileMD5 } from './md5'
 import { completeMul, getUploadId, uploadPart } from '~/api/ossUpload'
+import { getFileMD5 } from './md5'
 
 export async function uploadFile(file, callback) {
   return new Promise((resolve, reject) => {

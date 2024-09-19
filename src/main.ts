@@ -1,15 +1,15 @@
+import type { Directive } from 'vue' // unocss reset
+import { destroyEruda } from '@/utils/eruda'
+import { MotionPlugin } from '@vueuse/motion'
+import App from './App.vue'
+
 // https://unocss.dev/ 原子 css 库
-import '@unocss/reset/tailwind-compat.css' // unocss reset
+import '@unocss/reset/tailwind-compat.css'
 import 'virtual:uno.css'
 import 'virtual:unocss-devtools'
 import 'element-plus/dist/index.css'
-
 // 你自定义的 css
 import './styles/main.css'
-import { destroyEruda } from '@/utils/eruda'
-import { MotionPlugin } from '@vueuse/motion'
-import type { Directive } from 'vue'
-import App from './App.vue'
 // 自定义指令
 import * as directives from '@/directives'
 

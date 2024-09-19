@@ -1,13 +1,13 @@
 <!-- 生成一个聊天页面可以发送消息，可以用element-plus UI,unocss布局 -->
 <script setup>
 import { useWebSocket } from '@vueuse/core'
-import { chatMsgFindAll } from '~/api/chat'
-import { useUserStore } from '~/stores/user'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
+import { chatMsgFindAll } from '~/api/chat'
 import MessageCard from '~/components/Card/MessageCard.vue'
+import { useUserStore } from '~/stores/user'
 import { baseUrl } from '~/utils/http/base'
 import { uploadFile } from '~/utils/uploadAli'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
@@ -258,7 +258,7 @@ onMounted(async () => {
     </div>
     <LoadingUpload
       v-model:percent="upPercent"
-      v-model:isShow="showUploadLoading"
+      v-model:is-show="showUploadLoading"
     />
   </div>
 </template>

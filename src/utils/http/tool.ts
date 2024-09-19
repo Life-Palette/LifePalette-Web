@@ -1,4 +1,4 @@
-import { toPro, isNumber, isObject, isArray } from '@iceywu/utils'
+import { isArray, isNumber, isObject, toPro } from '@iceywu/utils'
 
 export function isRequestSuccess(data: any) {
   if (isNumber(data)) {

@@ -1,11 +1,11 @@
 <script setup>
-import StarportCard from '~/components/StarportCard.vue'
+import { deepClone, isEmpty, to } from '@iceywu/utils'
 import { ElMessage } from 'element-plus'
-import { to, deepClone, isEmpty } from '@iceywu/utils'
 import { fileUpdate } from '~/api/ossUpload'
+import { tagFindAll } from '~/api/tag'
+import StarportCard from '~/components/StarportCard.vue'
 // import { uploadFile } from "~/api/common";
 import { topicCreate, topicEdit } from '~/api/topic'
-import { tagFindAll } from '~/api/tag'
 // import { uploadFile } from '~/utils/upload'
 import { uploadFile } from '~/utils/uploadAli'
 
@@ -476,7 +476,7 @@ function initExtraData() {
 	<LoadingUpload
 		v-model:percent="upPercent"
 		v-model:text="upText"
-		v-model:isShow="showUploadLoading"
+		v-model:is-show="showUploadLoading"
 	/>
 </template>
 

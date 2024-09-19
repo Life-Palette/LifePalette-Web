@@ -1,8 +1,8 @@
-const { resolve } = require('node:path')
 const { existsSync, lstatSync } = require('node:fs')
-const { gray, green } = require('kolorist')
+const { resolve } = require('node:path')
 const { createConsola } = require('consola')
 const { removeSync, emptyDirSync } = require('fs-extra')
+const { gray, green } = require('kolorist')
 
 function slash(path) {
   return path.replace(/\\/g, '/')

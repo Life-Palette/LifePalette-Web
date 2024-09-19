@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from 'vue'
-import { noticesData } from './data'
-import NoticeList from './noticeList.vue'
 import { messageFindAll, messageUnreadCount } from '~/api/message'
 import { formatTimeBefore } from '~/utils'
+import { noticesData } from './data'
+import NoticeList from './noticeList.vue'
 
 const noticesNum = ref(0)
 const notices = ref(noticesData)

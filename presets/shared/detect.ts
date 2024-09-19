@@ -3,11 +3,11 @@
  * @description 自动检测环境并智能生成
  */
 
-import { loadEnv } from 'vite'
-import browserslist from 'browserslist'
-import { detectMode } from 'vite-layers'
-import { isPackageExists } from 'local-pkg'
 import type { ComponentResolver } from 'unplugin-vue-components'
+import browserslist from 'browserslist'
+import { isPackageExists } from 'local-pkg'
+import { loadEnv } from 'vite'
+import { detectMode } from 'vite-layers'
 import { r } from './path'
 
 const { loadConfig: browserslistLoadConfig } = browserslist

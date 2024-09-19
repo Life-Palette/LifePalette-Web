@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
-import 'dayjs/locale/zh-cn'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/zh-cn'
 
 dayjs.extend(relativeTime) // 相对时间
 dayjs.locale('zh-cn') // 使用本地化语言

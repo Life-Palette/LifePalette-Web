@@ -52,7 +52,7 @@ function closeDialog() {
       <!-- 账号密码登录 -->
       <template v-if="isAccountLogin">
         <LoginForm
-          v-model:isRegist="isRegist"
+          v-model:is-regist="isRegist"
           @start-regist="startRegist"
           @close-dialog="closeDialog"
         />
