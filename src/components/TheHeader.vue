@@ -1,47 +1,47 @@
 <script setup>
-import ImgLogo from "~/assets/image/logo/logo.svg";
-import { useUserStore } from "~/stores/user";
-import LoginDialog from "./Login/LoginDialog.vue";
+import ImgLogo from '~/assets/image/logo/logo.svg'
+import { useUserStore } from '~/stores/user'
+import LoginDialog from './Login/LoginDialog.vue'
 // import PopperNews from "~/components/Popper/News.vue";
-import PopperNews from "~/components/Popper/index.vue";
+import PopperNews from '~/components/Popper/index.vue'
 // import { Search } from '@element-plus/icons-vue'
-const userStore = useUserStore();
+const userStore = useUserStore()
 
-const { userInfo } = storeToRefs(userStore);
+const { userInfo } = storeToRefs(userStore)
 
-onMounted(() => {});
+onMounted(() => {})
 
-const isShowDialog = ref(false);
-const input1 = ref("");
+const isShowDialog = ref(false)
+const input1 = ref('')
 
-const isDropdown = ref(false);
+const isDropdown = ref(false)
 function handleVisible(val) {
-	isDropdown.value = val;
+	isDropdown.value = val
 }
 function handleVisible2(val) {
-	isDropdown.value = val;
+	isDropdown.value = val
 }
 // 退出登录
 function handleLogout() {
-	userStore.logout();
+	userStore.logout()
 }
 // 是否登录
 const isLogin = computed(() => {
-	return userInfo.value?.name;
-});
-const loginLoading = ref(false);
+	return userInfo.value?.name
+})
+const loginLoading = ref(false)
 // login
 async function handleLogin() {
-	isShowDialog.value = true;
+	isShowDialog.value = true
 }
 
-const newsRef = ref(null);
+const newsRef = ref(null)
 function newClick() {
 	if (newsRef.value) {
-		console.log("🌈----------newClick ");
+		console.log('🌈----------newClick ')
 	}
 }
-const isShowDrawer = ref(false);
+const isShowDrawer = ref(false)
 </script>
 
 <template>
@@ -51,7 +51,7 @@ const isShowDrawer = ref(false);
 	>
 		<div v-motion-roll-bottom h-full font-bold text="2xl">
 			<!-- Wow🌟! -->
-			<img :src="ImgLogo" class="ml-4 h-full w-full scale-300" />
+			<img :src="ImgLogo" class="ml-4 h-full w-full scale-300">
 		</div>
 		<div flex-1>
 			<!-- <el-input
