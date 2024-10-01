@@ -12,6 +12,7 @@ interface LPImageProps {
 	lazyload?: 'lazy' | 'eager'
 	isShowBase?: boolean
 	isBlurhashMode?: boolean
+	objectFit?: string
 }
 interface ImgProps {
 	file: string
@@ -24,6 +25,7 @@ interface ImgProps {
 	alt?: string
 	src?: string
 	baseSrc?: string
+
 }
 // imgInfo  props 为LPImageProps与ImgProps的合并
 // interface ImgInfo extends LPImageProps, ImgProps {}
@@ -42,6 +44,7 @@ const { data, isNeedLivePhoto, isBlurhashMode, isShowBase } = withDefaults(
 			blurhash: '',
 		}),
 		lazyload: 'lazy',
+		objectFit: 'cover',
 		width: '100%',
 		height: '100%',
 		isNeedLivePhoto: true,
@@ -202,6 +205,7 @@ const showImgSrc = computed(() => {
 			:style="{
 				height,
 				width,
+				objectFit,
 			}"
 			:loading="lazyload"
 			:src="showImgSrc"
