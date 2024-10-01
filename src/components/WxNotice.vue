@@ -37,6 +37,7 @@ const showWords = ref(`
 	<a class="icon-link" href="https://open.weixin.qq.com/sns/getexpappinfo?appid=wxe04e1c650748514c&path=pages/index.html#wechat-redirect" target="_blank">Life Palette</a> 小程序体验版开放啦，扫描二维码体验!🎉
 	1.支持扫描登录web端
 	2.支持微信直接发送动态（全端同步）
+	（Tip: 因为还没上正式版，所以扫码后需要点击一下申请体验哦！😊）
 `)
 </script>
 
