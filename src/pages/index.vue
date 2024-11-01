@@ -13,6 +13,7 @@ import {
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import InfiniteLoading from 'v3-infinite-loading'
 import { Starport } from 'vue-starport'
+import { ipGet } from '~/api/ip'
 import { tagFindAll } from '~/api/tag'
 import { topicFindAll } from '~/api/topic'
 import CardSwiper from '~/components/Card/SwiperCard.vue'
@@ -76,6 +77,7 @@ const isSwiperLayout = ref(false)
 onMounted(async () => {
   await getTagData()
   await getConData()
+	ipGet()
 })
 const tagList = ref<Partial<tagItem>[]>([])
 async function getTagData() {

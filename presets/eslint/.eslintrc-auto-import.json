@@ -362,6 +362,9 @@
     "onWatcherCleanup": true,
     "useId": true,
     "useModel": true,
-    "useTemplateRef": true
+    "useTemplateRef": true,
+    "ip": true,
+    "ipget": true,
+    "ipGet": true
   }
 }
