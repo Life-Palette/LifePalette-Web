@@ -5,11 +5,17 @@ import LoginDialog from './Login/LoginDialog.vue'
 // import PopperNews from "~/components/Popper/News.vue";
 import PopperNews from '~/components/Popper/index.vue'
 // import { Search } from '@element-plus/icons-vue'
+import { ipGet } from '~/api/ip'
+
 const userStore = useUserStore()
 
 const { userInfo } = storeToRefs(userStore)
 
-onMounted(() => {})
+onMounted(() => {
+	if (isLogin.value) {
+		ipGet()
+	}
+})
 
 const isShowDialog = ref(false)
 const input1 = ref('')
