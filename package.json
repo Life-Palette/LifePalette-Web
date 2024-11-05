@@ -38,6 +38,7 @@
     "@iceywu/utils": "^0.0.46",
     "@mapbox/mapbox-gl-language": "^1.0.1",
     "blurhash": "^2.0.5",
+    "compressorjs": "^1.2.1",
     "dayjs": "^1.11.13",
     "element-plus": "^2.8.3",
     "eruda": "^3.3.0",

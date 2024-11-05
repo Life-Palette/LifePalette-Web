@@ -1,3 +1,4 @@
+import Compressor from 'compressorjs'
 import UPNG from 'upng-js'
 
 export interface CompressOptions {
@@ -64,4 +65,31 @@ export async function isPNG(file: File) {
     }
   }
   return true
+}
+function getQuality(file: any) {
+	const fileSize = file.size
+	const maxSize = 18 * 1024 * 1024
+	if (fileSize > maxSize) {
+		return maxSize / fileSize
+	}
+else {
+		return 0.8
+	}
+}
+
+export function imageCompress(file: any) {
+	return new Promise((resolve, reject) => {
+	const quality = getQuality(file)
+		// eslint-disable-next-line no-new
+		new Compressor(file, {
+			quality,
+			retainExif: true,
+			success(result) {
+				resolve(result)
+			},
+			error(err) {
+				reject(err)
+			},
+		})
+	})
 }

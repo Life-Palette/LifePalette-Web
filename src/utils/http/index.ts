@@ -199,7 +199,7 @@ class PureHttp {
         NProgress.done()
         // 所有的响应异常 区分来源为取消请求/非取消请求
         return Promise.resolve({
-          ...error.response.data,
+          ...error?.response?.data,
         })
       },
     )

@@ -4,7 +4,7 @@ import { getSign, saveFile } from '~/api/ossUpload'
 import { getFileType } from '~/utils'
 import { generateBlurhashFromFile } from '~/utils/blurhash'
 import { getFileMD5 } from './md5'
-import { compressPNGImage, isPNG } from './upng'
+import { imageCompress, isPNG } from './upng'
 
 interface uploadOptions {
 	/**
@@ -43,9 +43,9 @@ export async function uploadFile(
 	callback: any,
 	ops: uploadOptions = {},
 ) {
-	const { compressPNG = false } = ops
-	if (compressPNG && isPNG(file)) {
-		const [err, compressedFile] = ({} = await to(compressPNGImage(file)))
+	const { compressPNG = true } = ops
+	if ((compressPNG && await isPNG(file)) || (file.type === 'image/jpeg' && file.size > 18 * 1024 * 1024)) {
+		const [err, compressedFile] = ({} = await to(imageCompress(file)))
 		if (err) {
 			throw err
 		}
