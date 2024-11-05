@@ -62,7 +62,7 @@ const modes: Record<'CONTAIN' | 'ORIGINAL', ImageViewerMode> = {
 	},
 }
 const transform = ref({
-	scale: 0.7,
+	scale: 0.5,
 	deg: 0,
 	offsetX: 0,
 	offsetY: 0,
@@ -91,7 +91,7 @@ const imgStyle = computed(() => {
 })
 function reset() {
 	transform.value = {
-		scale: 1,
+		scale: 0.5,
 		deg: 0,
 		offsetX: 0,
 		offsetY: 0,
@@ -387,13 +387,19 @@ function reShowMap() {
 			<!-- 预览 -->
 			<div ref="wrapper" :tabindex="-1" :class="ns.e('wrapper')">
 				<div :class="ns.e('canvas')">
-					<div ref="preView" class="relative flex-1">
-						<!-- CLOSE -->
-						<span :class="[ns.e('btn'), ns.e('close')]" @click="hide">
+					<span class="left-10" :class="[ns.e('btn'), ns.e('close')]" @click="hide">
 							<el-icon>
 								<Close />
 							</el-icon>
 						</span>
+					<div ref="preView" class="relative flex-1 ">
+						<!-- CLOSE -->
+						<!-- <span :class="[ns.e('btn'), ns.e('close')]" @click="hide"> -->
+						<!-- <span :class="[ns.e('btn'), ns.e('close')]" @click="hide">
+							<el-icon>
+								<Close />
+							</el-icon>
+						</span> -->
 						<!-- ARROW -->
 						<template v-if="!isSingle">
 							<span :class="arrowPrevKls" @click="prev">
@@ -429,6 +435,7 @@ function reShowMap() {
             </el-icon>
           </div>
         </div>
+
 						<!-- CANVAS -->
 						<img
 							v-for="(url, i) in urlList"

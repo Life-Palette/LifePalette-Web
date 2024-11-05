@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCover, getLngLat } from '@/utils/map'
-import { customDestr } from '@iceywu/utils'
+import { customDestr, isEmpty } from '@iceywu/utils'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -36,6 +36,9 @@ function setMapStyle() {
 onMounted(() => {
 	nextTick(() => {
 		const lnglat = getLngLat(exifData.value)
+		if (isEmpty(lnglat)) {
+			return
+		}
 		basePos.value.center = lnglat
 		// basicMapbox.value = document.querySelector('.map-temp-box')
 		init()
@@ -43,7 +46,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-	map!.remove()
+	if (map) {
+		map.remove()
+	}
 })
 
 const basicMapbox = ref<any>(null)
