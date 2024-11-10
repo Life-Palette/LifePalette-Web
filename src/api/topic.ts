@@ -4,6 +4,10 @@ import { http } from '~/utils/http'
 // 继承listParams，并添加自定义参数
 export interface topicListParams extends listParams {
   tagId?: number
+	page?: number
+	size?: number
+	userId?: number
+	exif?: boolean
 }
 
 export function topicFindAll(params?: topicListParams) {
