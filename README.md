@@ -10,7 +10,7 @@
 
 <!-- **English** | [中文](./README.zh-CN.md) -->
 
-- [Preview](http://47.108.192.147:10086)
+- [Preview](https://lpalette.cn)
 
 - [Preview2](https://lifepalette-web.netlify.app)
 
@@ -72,7 +72,7 @@ Why do this **template**?
 
 ## Inspiration
 
-This template is inspired by **[tov-template](https://github.com/dishait/tov-template)**
+This template is inspired by **[cloud-template](https://github.com/IceyWu/cloud-template)**
 
 <br />
 
