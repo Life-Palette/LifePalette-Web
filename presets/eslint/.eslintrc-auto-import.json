@@ -365,6 +365,9 @@
     "useTemplateRef": true,
     "ip": true,
     "ipget": true,
-    "ipGet": true
+    "ipGet": true,
+    "DirectiveBinding": true,
+    "MaybeRef": true,
+    "MaybeRefOrGetter": true
   }
 }

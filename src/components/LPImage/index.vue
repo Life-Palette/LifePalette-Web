@@ -25,33 +25,27 @@ interface ImgProps {
 	alt?: string
 	src?: string
 	baseSrc?: string
-
 }
-// imgInfo  props 为LPImageProps与ImgProps的合并
-// interface ImgInfo extends LPImageProps, ImgProps {}
-
-const { data, isNeedLivePhoto, isBlurhashMode, isShowBase } = withDefaults(
-	defineProps<LPImageProps>(),
-	{
-		data: () => ({
-			file: '',
-			fileType: '',
-			thumbnail: '',
-			preSrc: '',
-			videoSrc: '',
-			cover: '',
-			alt: '',
-			blurhash: '',
-		}),
-		lazyload: 'lazy',
-		objectFit: 'cover',
-		width: '100%',
-		height: '100%',
-		isNeedLivePhoto: true,
-		isBlurhashMode: true,
-		isShowBase: false,
+const {
+	data = {
+		file: '',
+		fileType: '',
+		thumbnail: '',
+		preSrc: '',
+		videoSrc: '',
+		cover: '',
+		alt: '',
+		blurhash: '',
 	},
-)
+	lazyload = 'lazy',
+	objectFit = 'cover',
+	width = '100%',
+	height = '100%',
+	isNeedLivePhoto = true,
+	isBlurhashMode = true,
+	isShowBase = false,
+} = defineProps<LPImageProps>()
+
 const isLoading = ref(true)
 const blurNumber = ref(30)
 function onLoad(e: any) {
@@ -89,12 +83,12 @@ function startDecreaseBlurNumber() {
 function onLoadPreImg() {
 	if (isBlurhashModeFlag.value) {
 		isShowPreImg.value = true
-			isLoading.value = false
+		isLoading.value = false
 	}
-else {
+ else {
 		isShowPreImg.value = true
-	isLoading.value = false
-	startDecreaseBlurNumber()
+		isLoading.value = false
+		startDecreaseBlurNumber()
 	}
 }
 const imgInfo = computed(() => {
@@ -139,7 +133,7 @@ onMounted(() => {
 		const pixels = decode(hashValue, 32, 32)
 		placeholderSrc.value = getDataUrlFromArr(pixels, 32, 32)
 	}
-else if (!imgInfo.value.preSrc) {
+ else if (!imgInfo.value.preSrc) {
 		isLoading.value = false
 		isShowPreImg.value = false
 	}
