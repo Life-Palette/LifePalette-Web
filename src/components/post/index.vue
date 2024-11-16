@@ -1,7 +1,7 @@
 <script setup>
 import PostBase from '~/components/post/base.vue'
 
-const dialogVisible = ref(true)
+const dialogVisible = defineModel({ default: false })
 </script>
 
 <template>
@@ -13,7 +13,7 @@ const dialogVisible = ref(true)
     width="600px"
     top="8vh"
     :z-index="99999"
-    @close="closeDialog"
+    @close="dialogVisible = false"
   >
   <PostBase v-model:is-show-dialog="dialogVisible" />
   </el-dialog>
