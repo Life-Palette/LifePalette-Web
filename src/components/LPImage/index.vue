@@ -2,6 +2,7 @@
 import { isEmpty } from '@iceywu/utils'
 import { decode } from 'blurhash'
 import * as LivePhotosKit from 'livephotoskit'
+import loadErrorData from '~/assets/lottie/img_err.json'
 import { getDataUrlFromArr } from '~/utils/blurhash'
 
 interface LPImageProps {
@@ -166,6 +167,11 @@ const loadingImgSrc = computed(() => {
 const showImgSrc = computed(() => {
 	return isShowBase ? imgInfo.value.baseSrc : imgInfo.value.src
 })
+const loadError = ref(false)
+function onLoadErrorPreImg(e: any) {
+	console.log('💗onLoadErrorPreImg---------->', e)
+	loadError.value = true
+}
 </script>
 
 <template>
@@ -191,6 +197,7 @@ const showImgSrc = computed(() => {
 			:src="loadingImgSrc"
 			:loading="lazyload"
 			@load="onLoadPreImg"
+			@error="onLoadErrorPreImg"
 		>
 
 		<img
@@ -205,6 +212,9 @@ const showImgSrc = computed(() => {
 			:src="showImgSrc"
 			@load="onLoad"
 		>
+		<div v-if="loadError" class="leff-0 absolute top-0 z-9 h-full w-full fcc">
+			<Lottie width="20em" height="20em" :json-data="loadErrorData" />
+		</div>
 	</div>
 </template>
 

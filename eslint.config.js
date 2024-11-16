@@ -11,6 +11,7 @@ export default antfu(
       'content/posts',
       'data',
       'uno.config.ts',
+			'src/assets/lottie',
     ],
   },
   {

@@ -38,7 +38,6 @@ function handleClosePop() {
   emit('closePop')
 }
 function showImgs(index: number) {
-  // eslint-disable-next-line array-callback-return
   const images = fileList.value.map((item: any) => {
     const { fileType, file, cover } = item || {}
     if (fileType === 'IMAGE') {

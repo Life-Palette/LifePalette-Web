@@ -118,7 +118,8 @@ const parts = computed(() => {
 })
 
 function goDe(item: any) {
-  console.log('item', item)
+	console.log('🎁-----item-----', item)
+	// return
   const { id, files } = item
   const imgCover = files[0].file
   router.push(`/detail/${id}?imgCover=${imgCover}`)
@@ -449,43 +450,16 @@ function goCreate() {
   }
 }
 .container-box {
-  .itemT {
-    cursor: pointer;
-    // background: red;
-    // max-height: 300px;
-    // overflow: hidden;
-    // &:hover {
-    //   .item-box {
-    //     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-    //   }
-    // }
-  }
+
   .item-box {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
   .img-cover {
-    // height: 200px;
-    // min-height: 200px;
-    // max-height: 300px;
-    cursor: pointer;
     border-radius: 10px;
     overflow: hidden;
-    &:hover {
-      //   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-      // 遮罩层
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        // background-color: rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
-      }
-    }
+
   }
   .content-desc {
     width: 100%;
