@@ -121,9 +121,7 @@ async function handleSubmit() {
 	}
 	const { requestApi, btnText } = currentText.value
 		const { code, result, msg, message, statusCode, data }
-		= await requestApi(dataParams).catch((err) => {
-			ElMessage.error(`${btnText}失败`)
-		}) || {}
+		= await requestApi(dataParams)
   if (code === 200 && result) {
    const successText = `${btnText}成功`
     ElMessage.success(successText)
@@ -132,6 +130,9 @@ async function handleSubmit() {
 			emit('closeDialog')
 		}
   }
+else if (code === 403) {
+		ElMessage.warning(message)
+	}
   else {
     const { statusCode, message, msg: msgT } = data || {}
     if (statusCode === 403) {
