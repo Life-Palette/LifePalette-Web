@@ -14,7 +14,8 @@ const props = defineProps({
 const emit = defineEmits(['update:isShowDialog'])
 
 const dialogVisible = ref(true)
-const isRegist = ref(false)
+const isRegist = ref(true)
+const target = ref('login')
 
 // 是否是账号密码登录
 const isAccountLogin = ref(true)
@@ -53,7 +54,7 @@ function closeDialog() {
       <template v-if="isAccountLogin">
         <LoginForm
           v-model:is-regist="isRegist"
-          @start-regist="startRegist"
+					v-model:target="target"
           @close-dialog="closeDialog"
         />
       </template>

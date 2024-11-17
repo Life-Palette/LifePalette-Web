@@ -368,6 +368,7 @@
     "ipGet": true,
     "DirectiveBinding": true,
     "MaybeRef": true,
-    "MaybeRefOrGetter": true
+    "MaybeRefOrGetter": true,
+    "resetPassword": true
   }
 }

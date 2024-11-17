@@ -57,11 +57,22 @@ export function sendCode(data) {
     },
   )
 }
-// 发生验证码
+// 注册
 export function register(data) {
   return http.request(
     'post',
     '/auth/register',
+    { data },
+    {
+      isNeedToken: false, // 是否需要token
+    },
+  )
+}
+// 重置密码
+export function resetPassword(data) {
+  return http.request(
+    'post',
+    '/auth/reset-password',
     { data },
     {
       isNeedToken: false, // 是否需要token
