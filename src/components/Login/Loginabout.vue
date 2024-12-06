@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { isObject } from '@iceywu/utils'
+import { isObject, removeEmptyValues } from '@iceywu/utils'
+import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
 import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
+import { requestTo } from '@/utils/http/tool'
+
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
@@ -12,7 +15,7 @@ const dialogVisible = defineModel(false)
 onMounted(() => {
   // console.log('🍪-----userInfoTemp.value-----', userInfoTemp.value)
 })
-
+const formData = ref({})
 // 获取用户信息
 async function getMyInfoFunc() {
   const params = {}
@@ -31,19 +34,6 @@ async function onConfirm(data: any) {
   await updateUserInfoFunc(fileMd5)
   getMyInfoFunc()
 }
-
-const Aname = ref('')
-const Brief = ref('')
-// const setformitem = ([
-//   {
-//     name: "名字",
-//     type: input
-//   },
-//   {
-//     name:'简介',
-//     type: textarea
-//   }
-// ])
 
 // 修改信息
 // async function updateUserInfoFunc() {
@@ -103,7 +93,7 @@ async function updateUserInfoFunc(fileMd5: string) {
   // 	params['avatarFileMd5'] = fileMd5
   // }
   params[editTarget.value] = fileMd5
-  // console.log('🐳-----params-----', params);
+  console.log('🐳-----params---77--', params);
   // return
   const { code, msg, result } = ({} = await updateUserInfo(params).catch(
     (err) => {
@@ -119,266 +109,89 @@ async function updateUserInfoFunc(fileMd5: string) {
   }
   updateLoading.value = false
 }
+const emit = defineEmits(['close', "ok"])
+const handleCancel = () => {
+  console.log('💗handleCancel---------->');
+  emit('close')
+};
+const handleOk = async () => {
+  const params = removeEmptyValues(formData.value)
+  console.log('🎁-----formData.value-----', formData.value);
+  const [err, data] = await requestTo(updateUserInfo(params))
+  if (!err) {
+    console.log('🎉-----data-----', data);
+    userStore.setUserInfo(data)
+    // handleCancel()
+    // emit('close')
+    emit('close')
+  }
+};
 </script>
 
 <template>
-  <!-- <el-dialog
-    v-model="dialogVisible"
-    append-to-body
-    title="Tips"
-    width="350px"
-    top="40vh"
-    :z-index="999"
-    @close="dialogVisible = false"
->
-    <div class="content">
-      <div class="login-box">
-        <div class="My-title">
-          编辑个人资料
-        </div>
-        <form>
-          <div class="user-box">
-            <input v-model="userInfoTemp.userId" type="text" name="" required="">
-            <label>账号</label>
-          </div>
-          <div class="user-box">
-            <input v-model="userInfoTemp.name" type="text" name="" required="">
-            <label>姓名</label>
-          </div>
+  <clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
 
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>性别</label>
-          </div>
-          <div />
-
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>职业</label>
-          </div>
-
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>所在地</label>
-          </div>
-
-          <div class="user-box">
-            <input type="text" name="" required="">
-            <label>邮箱</label>
-          </div>
-          <div class="user-box">
-            <input v-model="userInfoTemp.signature" type="text" name="" required="">
-            <label>个性签名</label>
-          </div>
-        </form>
-
-        <div class="butt">
-          <section class="post-up">
-            <button class="overlay__btn overlay__btn--colors" @click="close">
-              <span>取消</span>
-              <span class="overlay__btn-emoji">💕</span>
-            </button>
-          </section>
-
-          <span class="gap" />
-
-          <section class="post-btn">
-            <button
-              class="overlay__btn overlay__btn--colors"
-              @click="updateUserInfoFunc"
-            >
-              <span>修改</span>
-              <span class="overlay__btn-emoji">💕</span>
-            </button>
-          </section>
-        </div>
-      </div>
+  <div class="dialog-content">
+    <div class="dialog-title">编辑资料</div>
+    <div class="dialog-hadImg">
+      <img :src="userheadUpload" alt="" class="item-img" @click="headUpload">
+      <p class="item-txt">点击修改头像</p>
     </div>
-  </el-dialog> -->
 
-  <clipperDialog
-ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
-/>
-
-  <el-dialog
-v-model="dialogVisible" destroy-on-close width="550" align-center
-    :style="{ borderRadius: '25px', height: '600px' }"
->
-    <div class="dialog-content">
-      <div class="dialog-title">编辑资料</div>
-      <div class="dialog-hadImg">
-        <img :src="userheadUpload" alt="" class="item-img" @click="headUpload">
-        <p class="item-txt">点击修改头像</p>
-      </div>
-
-      <div class="dialog-name">
-        <div>名字</div>
-        <el-input v-model="Aname" placeholder="填写信息" maxlength="20" type="text" show-word-limit />
-      </div>
-
-      <div class="dialog-Personality">
-        <div>简介</div>
-        <el-input v-model="Brief" placeholder="介绍一下你自己" type="textarea" />
-      </div>
-
-      <div class="dialog-footer">
-        <div class="Cancel dialog-btn" @click="dialogVisible = false">取消</div>
-        <div class="Confirm dialog-btn">保存</div>
-      </div>
+    <div class="dialog-name">
+      <div>名字</div>
+      <el-input v-model="formData.name" placeholder="填写信息" maxlength="20" type="text" show-word-limit />
     </div>
-  </el-dialog>
+
+    <div class="dialog-Personality">
+      <div>简介</div>
+      <el-input v-model="formData.signature" placeholder="介绍一下你自己" type="textarea" />
+    </div>
+
+    <div class="dialog-footer">
+      <div class="Cancel dialog-btn" @click="handleCancel">取消</div>
+      <!-- <div class="Confirm dialog-btn" @click="handleOk">保存</div> -->
+      <button
+        class="relative flex items-center px-13 py-1 overflow-hidden font-medium transition-all rounded-md group bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
+        <span
+          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
+          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
+        </span>
+        <span
+          class="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-ml-4 group-hover:-mb-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
+          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
+        </span>
+        <span @click="handleOk"
+          class="relative w-full text-left text-[#e990ba] transition-colors duration-200 ease-in-out group-hover:text-[#d67ca4]">
+          保存
+        </span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <style lang="less" scoped>
-// .login-box {
-//   position: absolute;
-//   top: 50%;
-//   left: 50%;
-//   width: 500px;
-//   padding: 40px;
-//   transform: translate(-50%, -50%);
-//   background: rgba(255, 255, 255, 0.775);
-//   box-sizing: border-box;
-//   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
-//   border-radius: 10px;
-// }
-
-// .My-title {
-//   margin-bottom: 30px;
-// }
-
-// .login-box .user-box {
-//   position: relative;
-// }
-
-// .login-box .user-box input {
-//   width: 100%;
-//   padding: 10px 0;
-//   font-size: 16px;
-//   color: #020100;
-//   margin-bottom: 30px;
-//   border: none;
-//   border-bottom: 1px solid #fff;
-//   outline: none;
-//   background: transparent;
-// }
-
-// .login-box .user-box label {
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   padding: 10px 0;
-//   font-size: 16px;
-//   color: #e26c1d;
-
-//   pointer-events: none;
-//   transition: 0.5s;
-// }
-
-// .login-box .user-box input:focus ~ label,
-// .login-box .user-box input:valid ~ label {
-//   top: -30px;
-//   left: 0;
-//   color: #b8bdba;
-//   color: #606266;
-//   font-size: 20px;
-//   font-weight: 900;
-// }
-
-// // .login-box form a {
-// //   position: relative;
-// //   display: inline-block;
-// //   padding: 10px 20px;
-// //   color: #ffffff;
-// //   font-size: 16px;
-// //   text-decoration: none;
-// //   text-transform: uppercase;
-// //   overflow: hidden;
-// //   transition: .5s;
-// //   margin-top: 40px;
-// //   letter-spacing: 4px
-// // }
-// .butt {
-//   display: flex;
-//   .post-btn {
-//     width: 50%;
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     .overlay__btn {
-//       margin-top: 6px;
-//       width: 100%;
-//       height: 2.5rem;
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//       font-size: 0.875rem;
-//       font-weight: 600;
-
-//       background: hsl(276, 100%, 9%);
-//       color: hsl(0, 0%, 100%);
-//       border: none;
-//       border-radius: 0.5rem;
-//       transition: transform 450ms ease;
-//     }
-
-//     .overlay__btn:hover {
-//       transform: scale(1.05);
-//       cursor: pointer;
-//     }
-
-//     .overlay__btn-emoji {
-//       margin-left: 0.375rem;
-//     }
-//   }
-//   .gap {
-//     width: 25px;
-//   }
-//   .post-up {
-//     width: 50%;
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     .overlay__btn {
-//       margin-top: 6px;
-//       width: 100%;
-//       height: 2.5rem;
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//       font-size: 0.875rem;
-//       font-weight: 600;
-
-//       // background: hsl(276, 100%, 9%);
-//       background-color: hsla(276, 100%, 64%, 0.2);
-//       color: hsl(0, 0%, 100%);
-//       border: none;
-//       border-radius: 0.5rem;
-//       transition: transform 450ms ease;
-//     }
-
-//     .overlay__btn:hover {
-//       transform: scale(1.05);
-//       cursor: pointer;
-//     }
-
-//     .overlay__btn-emoji {
-//       margin-left: 0.375rem;
-//     }
-//   }
-// }
-
 :deep(.el-dialog) {
   height: 550px;
 }
 
 .dialog-content {
-  padding: 0 25px;
+  width: 25%;
+  background: rgb(234, 234, 236);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 25px 25px;
+  border-radius: 30px;
+  // background: linear-gradient(to bottom right, #ffddef, #faf0eb, #f6fde7);
+  background: rgba(255, 255, 255, .776);
 
   .dialog-title {
     text-align: left;
-    font-size: 18px;
+    font-size: 20px;
+    font-family: ui-rounded;
   }
 
   .dialog-hadImg {
@@ -393,6 +206,7 @@ v-model="dialogVisible" destroy-on-close width="550" align-center
       width: 100px;
       height: 100px;
       border-radius: 50%;
+      object-fit: cover;
     }
 
     .item-txt {
@@ -485,6 +299,10 @@ v-model="dialogVisible" destroy-on-close width="550" align-center
     .Confirm {
       color: #f6f6f6;
       background-color: #f2cacd;
+
+      &:hover {
+        background-color: #ece8e8;
+      }
     }
   }
 }
