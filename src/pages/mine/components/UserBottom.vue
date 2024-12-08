@@ -7,6 +7,7 @@ import { topicFindAll } from '~/api/topic'
 import StarportCard from '~/components/StarportCard.vue'
 import { useUserStore } from '~/stores/user'
 import { getUserAvatar } from '~/utils/tools'
+import UserMap from './UserMap.vue'
 import 'vue-waterfall-plugin-next/dist/style.css'
 
 interface tagItem {
@@ -17,6 +18,7 @@ interface tagItem {
   createdAt?: string
   updatedAt?: string
   coverPath?: string
+	com?: any
   thumbnail?: string
 }
 interface topicListParams extends listParams {
@@ -26,12 +28,17 @@ interface topicListParams extends listParams {
 const tagList = ref<Partial<tagItem>[]>([
   {
     id: 1,
-    title: '全部',
+    title: '轨迹',
+		com: UserMap,
   },
-  {
-    id: 2,
-    title: '点赞',
-  },
+  // {
+  //   id: 1,
+  //   title: '全部',
+  // },
+  // {
+  //   id: 2,
+  //   title: '点赞',
+  // },
 ])
 
 const chooseTabId = ref<number | null>(1)
@@ -40,7 +47,7 @@ function handleClick(item: tagItem) {
   getTopicList()
 }
 onMounted(async () => {
-  await getTopicList()
+  // await getTopicList()
 })
 // 获取话题列表
 const tagId = ref<number | null>(null)
@@ -85,10 +92,13 @@ async function getTopicList() {
     getDataLoading.value = false
   }, 500)
 }
+const currentObj = computed(() => {
+	return tagList.value.find(item => item.id === chooseTabId.value)
+})
 </script>
 
 <template>
-  <div class="w-full flex flex-col items-center">
+  <div class="w-full flex flex-col items-center h-full">
     <div class="mb-4 mt-8 flex <md:flex-col">
       <!-- 标签列表 -->
       <div
@@ -118,8 +128,10 @@ async function getTopicList() {
 
     <!-- 作品列表 -->
     <template v-if="true">
-      <div class="container-box w-[60vw]">
+			<component :is="currentObj.com" />
+      <div v-if="0" class="container-box w-[60vw]">
         <Waterfall
+
           :list="topicList"
           background-color="transparent"
           :width="340"

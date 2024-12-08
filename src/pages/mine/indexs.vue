@@ -6,6 +6,8 @@ import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 import { usePopup } from 'vue-hooks-pure';
 
+import UserBottom from './components/UserBottom.vue'
+
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 
@@ -154,10 +156,19 @@ onMounted(() => {
 				<div class="bottom_Gradient" />
 			</div>
 		</div>
+		<!-- 地图 -->
+		<main class="z-1 con-main-box">
+			<UserBottom />
+		</main>
 	</div>
 </template>
 
 <style lang="less" scoped>
+.con-main-box{
+	height: calc(100vh - 400px);
+	// background: red;
+	width: 100%;
+}
 // @import 'https://unpkg.com/normalize.css';
 // @import 'https://unpkg.com/open-props/normalize.min.css';
 // @import 'https://unpkg.com/open-props/open-props.min.css';
