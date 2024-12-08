@@ -2,9 +2,9 @@
 import Loginabout from '@/components/Login/Loginabout.vue'
 import { isObject } from '@iceywu/utils'
 import { ElMessage } from 'element-plus'
+import { usePopup } from 'vue-hooks-pure'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
-import { usePopup } from 'vue-hooks-pure';
 
 import UserBottom from './components/UserBottom.vue'
 
@@ -119,8 +119,10 @@ onMounted(() => {
 
 <template>
 	<!-- 更换背景 -->
-	<clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+	<clipperDialog
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
 	<!-- 编辑个人信息 -->
 	<!-- <Loginabout v-if="true" v-model="isShowDialog" /> -->
 	<div class="Personal-Center h-full w-full">
@@ -146,10 +148,12 @@ onMounted(() => {
 					</div>
 				</div>
 			</div>
-			<div class="backgrImg" :style="{
+			<div
+class="backgrImg" :style="{
 				backgroundImage: `url('${userBackground}')`,
 				backgroundSize: 'cover',
-			}" @click="openUpload">
+			}" @click="openUpload"
+>
 				<div class="top_Gradient" />
 				<div class="right_Gradient" />
 				<div class="left_Gradient" />

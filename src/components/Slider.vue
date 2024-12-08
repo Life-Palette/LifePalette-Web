@@ -68,10 +68,12 @@ function clickTab(item, index) {
 <template>
   <div class="slider">
     <div class="slider__list">
-      <div v-for="(item, index) in showTabList" :key="index" class="slider__item" :class="[
+      <div
+v-for="(item, index) in showTabList" :key="index" class="slider__item" :class="[
         isDark ? 'slider__item-dark' : '',
         index === chooseIndex ? 'bg-[#f8f8f8] dark:bg-[#333]' : ' ',
-      ]" @click="clickTab(item, index)">
+      ]" @click="clickTab(item, index)"
+>
         <router-link :to="item.path" class="slider__link" :class="isDark ? 'slider__link-dark' : ''">
           <div class="slider__icon" :class="item.icon">
             🐇

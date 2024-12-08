@@ -1,11 +1,10 @@
 <script setup lang="ts">
+import { requestTo } from '@/utils/http/tool'
 import { isObject, removeEmptyValues } from '@iceywu/utils'
-import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
 import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
-import { requestTo } from '@/utils/http/tool'
 
-
+const emit = defineEmits(['close', 'ok'])
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 
@@ -93,7 +92,7 @@ async function updateUserInfoFunc(fileMd5: string) {
   // 	params['avatarFileMd5'] = fileMd5
   // }
   params[editTarget.value] = fileMd5
-  console.log('🐳-----params---77--', params);
+  console.log('🐳-----params---77--', params)
   // return
   const { code, msg, result } = ({} = await updateUserInfo(params).catch(
     (err) => {
@@ -109,28 +108,29 @@ async function updateUserInfoFunc(fileMd5: string) {
   }
   updateLoading.value = false
 }
-const emit = defineEmits(['close', "ok"])
-const handleCancel = () => {
-  console.log('💗handleCancel---------->');
+function handleCancel() {
+  console.log('💗handleCancel---------->')
   emit('close')
-};
-const handleOk = async () => {
+}
+async function handleOk() {
   const params = removeEmptyValues(formData.value)
-  console.log('🎁-----formData.value-----', formData.value);
+  console.log('🎁-----formData.value-----', formData.value)
   const [err, data] = await requestTo(updateUserInfo(params))
   if (!err) {
-    console.log('🎉-----data-----', data);
+    console.log('🎉-----data-----', data)
     userStore.setUserInfo(data)
     // handleCancel()
     // emit('close')
     emit('close')
   }
-};
+}
 </script>
 
 <template>
-  <clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+  <clipperDialog
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
 
   <div class="dialog-content">
     <div class="dialog-title">编辑资料</div>
@@ -153,17 +153,22 @@ const handleOk = async () => {
       <div class="Cancel dialog-btn" @click="handleCancel">取消</div>
       <!-- <div class="Confirm dialog-btn" @click="handleOk">保存</div> -->
       <button
-        class="relative flex items-center px-13 py-1 overflow-hidden font-medium transition-all rounded-md group bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
+        class="relative flex items-center px-13 py-1 overflow-hidden font-medium transition-all rounded-md group bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+>
         <span
-          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
-          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
+          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+>
+          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
         </span>
         <span
-          class="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-ml-4 group-hover:-mb-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
-          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
+          class="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-ml-4 group-hover:-mb-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+>
+          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
         </span>
-        <span @click="handleOk"
-          class="relative w-full text-left text-[#e990ba] transition-colors duration-200 ease-in-out group-hover:text-[#d67ca4]">
+        <span
+class="relative w-full text-left text-[#e990ba] transition-colors duration-200 ease-in-out group-hover:text-[#d67ca4]"
+          @click="handleOk"
+>
           保存
         </span>
       </button>

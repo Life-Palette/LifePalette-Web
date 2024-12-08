@@ -60,10 +60,7 @@ async function getData() {
   // }
   // if (err)
   //   getDataLoading.value = false
-	// const res = (await requestTo(topicFindAll(params)))[1] || {}
-	const [err,res] = (await requestTo(topicFindAll(params)))
-	console.log('🌳-----res-----', res);
-	console.log('🐬-----err-----', err);
+	const res = (await requestTo(topicFindAll(params)))[1] || {}
 
 	dataList.value = res.data || []
 	getImgsInfo()
