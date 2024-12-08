@@ -77,6 +77,8 @@ export const useUserStore = defineStore(
     const logout = () => {
       removeToken()
       setUserInfo({})
+			// location.reload()
+			window.location.href = '/'
     }
     return {
       count,
