@@ -45,7 +45,7 @@ async function getData() {
     page: 1,
     size: 100,
 		userId: userInfo.value?.id,
-    // exif: true,
+    exif: true,
   }
   // const API = `${params.baseApi}/api/topic?page=${params.page}&size=${params.size}&sort=desc,createdAt&userId=${params.userId}&exif=${params.exif}`
   // const [err, res] = await to($fetch<any>(API))

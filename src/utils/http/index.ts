@@ -25,7 +25,7 @@ const defaultConfig: AxiosRequestConfig = {
   // 当前使用mock模拟请求，将baseURL制空
   baseURL: baseUrl.apiServer,
   // 请求超时时间
-  timeout: 10000,
+  // timeout: 10000,
   // headers: {
   //   Accept: "application/json, text/plain, */*",
   //   "Content-Type": "application/json",
