@@ -320,11 +320,7 @@ return
 								:key="index"
 								class="h-full w-full"
 							>
-								<StarportCard
-									:data="item"
-									is-detail
-									@click="previewisShow(item, index)"
-								/>
+								<StarportCard :data="item" :index :img-list="fileList" is-detail />
 							</component>
 						</component>
 					</div>

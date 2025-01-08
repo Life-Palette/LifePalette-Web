@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { useRequest, useResettaleRef } from 'vue-hooks-pure'
+import { useResettaleRef } from 'vue-hooks-pure'
 import { register, resetPassword, sendCode } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 import { requestTo } from '~/utils/http/tool'

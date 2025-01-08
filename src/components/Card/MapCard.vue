@@ -9,9 +9,6 @@ interface Props {
 	data: any
 }
 const { data = {} } = defineProps<Props>()
-const exifData = computed(() => {
-	return customDestr(data.exif, { customVal: {} }) || {}
-})
 
 let map: mapboxgl.Map | null
 
@@ -31,11 +28,17 @@ const mapStyle = computed(() => {
 function setMapStyle() {
 	map && map.setStyle(mapStyle.value)
 }
+function getLngLatData() {
+	return getLngLat(customDestr(data.exif, { customVal: {} }) || {})
+}
+const hasMapData = computed(() => {
+	return !isEmpty(getLngLatData())
+})
 
 // 初始化生命周期
 onMounted(() => {
 	nextTick(() => {
-		const lnglat = getLngLat(exifData.value)
+		const lnglat = getLngLatData()
 		if (isEmpty(lnglat)) {
 			return
 		}
@@ -121,21 +124,35 @@ function addMarker(lnglat: number[] | any, data?: any, isSingle?: boolean) {
 }
 // 重新设置marker
 function resetMarker() {
-	const lnglat = getLngLat(customDestr(data.exif, { customVal: {} }) || {})
+	const lnglat = getLngLatData()
+	if (isEmpty(lnglat)) {
+		map && map.remove()
+		return
+	}
 
 	basePos.value.center = lnglat
-	map && map.remove()
 
 	init()
 }
+
 defineExpose({
 	resetMarker,
+	getLngLatData,
 })
+// 监听data
+watch(
+	() => data,
+	() => {
+		resetMarker()
+	},
+)
 </script>
 
 <template>
 	<!-- {{ data }} -->
+	<div v-show="hasMapData" class="w-40 h-40 rounded-xl overflow-hidden">
 	<div ref="basicMapbox" class="w-full relative h-full map-temp-box" />
+</div>
 </template>
 
 <style>

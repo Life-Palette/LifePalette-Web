@@ -2,6 +2,7 @@
 import { requestTo } from '@/utils/http/tool'
 import { isObject, removeEmptyValues } from '@iceywu/utils'
 import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt'
+
 import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 
@@ -162,6 +163,24 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
         @click="handleOk"
         >
         YES
+        class="relative flex items-center px-13 py-1 overflow-hidden font-medium transition-all rounded-md group bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+>
+        <span
+          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+>
+          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
+        </span>
+        <span
+          class="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-ml-4 group-hover:-mb-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+>
+          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
+        </span>
+        <span
+class="relative w-full text-left text-[#e990ba] transition-colors duration-200 ease-in-out group-hover:text-[#d67ca4]"
+          @click="handleOk"
+>
+          保存
+        </span>
       </button>
     </div>
   </div>

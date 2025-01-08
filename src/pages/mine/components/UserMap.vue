@@ -42,7 +42,6 @@ async function getData() {
     return
   getDataLoading.value = true
   const params = {
-
     page: 1,
     size: 100,
 		userId: userInfo.value?.id,
@@ -62,6 +61,7 @@ async function getData() {
   // if (err)
   //   getDataLoading.value = false
 	const res = (await requestTo(topicFindAll(params)))[1] || {}
+
 	dataList.value = res.data || []
 	getImgsInfo()
   getDataLoading.value = false
@@ -130,10 +130,20 @@ async function addMarkers() {
     }
   }
 }
+function clearCache() {
+	if ('caches' in window) {
+        caches.keys().then((cacheNames) => {
+          cacheNames.forEach((cacheName) => {
+            caches.delete(cacheName)
+          })
+        })
+      }
+}
 
 onUnmounted(() => {
   map!.remove()
 	// 清除cache storage
+	clearCache()
 })
 
 const basicMapbox = ref<any>(null)
@@ -160,6 +170,7 @@ function init() {
     ...start.value,
     minZoom: 1,
     maxZoom: 17,
+		// maxTileCacheSize: 50, // 限制缓存的瓦片数量
   })
   map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }))
   // ### 添加导航控制条
@@ -324,9 +335,11 @@ function addPop(lnglat: number[] | any, data?: any, isSingle?: boolean) {
 
 <style>
 .map-temp-box {
-  transform: translateY(-100px);
-  padding-bottom: 100px;
-  height: calc(100vh + 100px);
+  /* transform: translateY(-100px); */
+  /* padding-bottom: 100px;  */
+  /* height: calc(100vh + 100px); */
+	/* min-height: 30vh; */
+	height: 100%;
 }
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right {

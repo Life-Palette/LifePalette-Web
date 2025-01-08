@@ -5,6 +5,11 @@ import { ElMessage } from 'element-plus'
 import { usePopup } from 'vue-hooks-pure'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
+<<<<<<< Modify-info
+=======
+
+import UserBottom from './components/UserBottom.vue'
+>>>>>>> main
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
@@ -120,6 +125,7 @@ onMounted(() => {
 <template>
 	<!-- 更换背景 -->
 	<clipperDialog
+<<<<<<< Modify-info
 		ref="clipperRef"
 		:type="clipperData.type"
 		:allow-type-list="clipperData.allowTypeList"
@@ -127,6 +133,11 @@ onMounted(() => {
 		:preview-width="clipperData.previewWidth"
 		@confirm="onConfirm"
 	/>
+=======
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
+>>>>>>> main
 	<!-- 编辑个人信息 -->
 	<!-- <Loginabout v-if="true" v-model="isShowDialog" /> -->
 	<div class="Personal-Center h-full w-full">
@@ -179,6 +190,7 @@ onMounted(() => {
 				</div>
 			</div>
 			<div
+<<<<<<< Modify-info
 				class="backgrImg"
 				:style="{
 					backgroundImage: `url('${userBackground}')`,
@@ -186,16 +198,32 @@ onMounted(() => {
 				}"
 				@click="openUpload"
 			>
+=======
+class="backgrImg" :style="{
+				backgroundImage: `url('${userBackground}')`,
+				backgroundSize: 'cover',
+			}" @click="openUpload"
+>
+>>>>>>> main
 				<div class="top_Gradient" />
 				<div class="right_Gradient" />
 				<div class="left_Gradient" />
 				<div class="bottom_Gradient" />
 			</div>
 		</div>
+		<!-- 地图 -->
+		<main class="z-1 con-main-box">
+			<UserBottom />
+		</main>
 	</div>
 </template>
 
 <style lang="less" scoped>
+.con-main-box{
+	height: calc(100vh - 400px);
+	// background: red;
+	width: 100%;
+}
 // @import 'https://unpkg.com/normalize.css';
 // @import 'https://unpkg.com/open-props/normalize.min.css';
 // @import 'https://unpkg.com/open-props/open-props.min.css';

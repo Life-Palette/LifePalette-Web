@@ -273,6 +273,7 @@ export default function () {
           globalsPropValue: true,
           filepath: r('presets/eslint/.eslintrc-auto-import.json'),
         },
+				ignore: ['h'], // 自动添加 import { h } from '/node_modules/.vite/deps/vue.js 代码问题处理
       }),
     )
   }
