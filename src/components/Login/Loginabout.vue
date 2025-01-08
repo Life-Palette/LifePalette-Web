@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { requestTo } from '@/utils/http/tool'
 import { isObject, removeEmptyValues } from '@iceywu/utils'
-import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
+import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt'
 import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
-import { requestTo } from '@/utils/http/tool'
 
-
+const emit = defineEmits(['close', 'ok'])
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 
@@ -93,7 +93,7 @@ async function updateUserInfoFunc(fileMd5: string) {
   // 	params['avatarFileMd5'] = fileMd5
   // }
   params[editTarget.value] = fileMd5
-  console.log('🐳-----params---77--', params);
+  console.log('🐳-----params---77--', params)
   // return
   const { code, msg, result } = ({} = await updateUserInfo(params).catch(
     (err) => {
@@ -109,28 +109,29 @@ async function updateUserInfoFunc(fileMd5: string) {
   }
   updateLoading.value = false
 }
-const emit = defineEmits(['close', "ok"])
-const handleCancel = () => {
-  console.log('💗handleCancel---------->');
+function handleCancel() {
+  console.log('💗handleCancel---------->')
   emit('close')
-};
-const handleOk = async () => {
+}
+async function handleOk() {
   const params = removeEmptyValues(formData.value)
-  console.log('🎁-----formData.value-----', formData.value);
+  console.log('🎁-----formData.value-----', formData.value)
   const [err, data] = await requestTo(updateUserInfo(params))
   if (!err) {
-    console.log('🎉-----data-----', data);
+    console.log('🎉-----data-----', data)
     userStore.setUserInfo(data)
     // handleCancel()
     // emit('close')
     emit('close')
   }
-};
+}
 </script>
 
 <template>
-  <clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+  <clipperDialog
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
 
   <div class="dialog-content">
     <div class="dialog-title">编辑资料</div>
@@ -149,23 +150,18 @@ const handleOk = async () => {
       <el-input v-model="formData.signature" placeholder="介绍一下你自己" type="textarea" />
     </div>
 
-    <div class="dialog-footer">
-      <div class="Cancel dialog-btn" @click="handleCancel">取消</div>
-      <!-- <div class="Confirm dialog-btn" @click="handleOk">保存</div> -->
+    <div class="flex justify-between mt-[40px]">
       <button
-        class="relative flex items-center px-13 py-1 overflow-hidden font-medium transition-all rounded-md group bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
-        <span
-          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
-          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-        </span>
-        <span
-          class="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-ml-4 group-hover:-mb-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
-          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-        </span>
-        <span @click="handleOk"
-          class="relative w-full text-left text-[#e990ba] transition-colors duration-200 ease-in-out group-hover:text-[#d67ca4]">
-          保存
-        </span>
+        class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300 text-gray-400 font-bold font-mono"
+        @click="handleCancel"
+        >
+        Esc
+      </button>
+      <button
+        class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300  font-bold font-mono"
+        @click="handleOk"
+        >
+        YES
       </button>
     </div>
   </div>
@@ -187,11 +183,13 @@ const handleOk = async () => {
   border-radius: 30px;
   // background: linear-gradient(to bottom right, #ffddef, #faf0eb, #f6fde7);
   background: rgba(255, 255, 255, .776);
-
+  background: url('https://img.freepik.com/premium-photo/abstract-blurred-sky-colorful_40299-22.jpg') no-repeat ;
+  background-size:100% 100%;
   .dialog-title {
     text-align: left;
     font-size: 20px;
     font-family: ui-rounded;
+    color: white;
   }
 
   .dialog-hadImg {
@@ -219,6 +217,7 @@ const handleOk = async () => {
   .dialog-name {
     margin-top: 40px;
     text-align: left;
+    color: white;
 
     :deep(.el-input__wrapper) {
       width: 100%;
@@ -242,6 +241,7 @@ const handleOk = async () => {
   .dialog-Personality {
     text-align: left;
     margin-top: 40px;
+    color: white;
 
     :deep(.el-textarea__inner) {
       width: 100%;
@@ -271,39 +271,6 @@ const handleOk = async () => {
   :deep(.el-textarea__inner)::-webkit-scrollbar {
     display: none;
     /*chrome safari */
-  }
-
-  .dialog-footer {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 45px;
-
-    .dialog-btn {
-      width: 135px;
-      height: 40px;
-      text-align: center;
-      line-height: 40px;
-      border-radius: 15px;
-      cursor: pointer;
-    }
-
-    .Cancel {
-      background-color: #faf8f8;
-      box-shadow: 0px 8px 14px 0px rgba(164, 164, 164, 0.25);
-
-      &:hover {
-        background-color: #f6f6f6;
-      }
-    }
-
-    .Confirm {
-      color: #f6f6f6;
-      background-color: #f2cacd;
-
-      &:hover {
-        background-color: #ece8e8;
-      }
-    }
   }
 }
 </style>

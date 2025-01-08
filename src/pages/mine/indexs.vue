@@ -2,9 +2,9 @@
 import Loginabout from '@/components/Login/Loginabout.vue'
 import { isObject } from '@iceywu/utils'
 import { ElMessage } from 'element-plus'
+import { usePopup } from 'vue-hooks-pure'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
-import { usePopup } from 'vue-hooks-pure';
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
@@ -16,7 +16,7 @@ async function getMyInfoFunc() {
 	if (code === 200) {
 		userStore.setUserInfo(result)
 	}
-	else {
+ else {
 	}
 }
 
@@ -54,7 +54,7 @@ async function onConfirm(data: any) {
 const updateLoading = ref(false)
 async function updateUserInfoFunc(fileMd5: string) {
 	if (updateLoading.value)
-		return
+return
 	updateLoading.value = true
 	const params = {}
 	params[editTarget.value] = fileMd5
@@ -69,7 +69,7 @@ async function updateUserInfoFunc(fileMd5: string) {
 	if (code === 200) {
 		ElMessage.success('更新用户信息成功')
 	}
-	else {
+ else {
 		ElMessage.error('更新用户信息失败')
 	}
 	updateLoading.value = false
@@ -104,11 +104,13 @@ const headlist = ref([
 const isShowDialog = ref(false)
 function EditInfo() {
 	// isShowDialog.value = true
-	usePopup(Loginabout).then((res) => {
-		console.log('🐳-----res-----', res)
-	}).catch((err) => {
-		console.log('🐳-----err-----', err)
-	})
+	usePopup(Loginabout)
+		.then((res) => {
+			console.log('🐳-----res-----', res)
+		})
+		.catch((err) => {
+			console.log('🐳-----err-----', err)
+		})
 }
 onMounted(() => {
 	getMyInfoFunc()
@@ -117,37 +119,73 @@ onMounted(() => {
 
 <template>
 	<!-- 更换背景 -->
-	<clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-		:limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+	<clipperDialog
+		ref="clipperRef"
+		:type="clipperData.type"
+		:allow-type-list="clipperData.allowTypeList"
+		:limit-size="clipperData.limitSize"
+		:preview-width="clipperData.previewWidth"
+		@confirm="onConfirm"
+	/>
 	<!-- 编辑个人信息 -->
 	<!-- <Loginabout v-if="true" v-model="isShowDialog" /> -->
 	<div class="Personal-Center h-full w-full">
 		<div class="Personal-content">
 			<div class="PerCard">
 				<div class="PerBox">
-					<img :src="userheadUpload" alt="" class="headImg" @click="headUpload">
+					<div class="image-container">
+						<img
+							:src="userheadUpload"
+							alt=""
+							class="headImg"
+							@click="headUpload"
+						>
+						<div class="overlay">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="82"
+								height="82"
+								viewBox="0 0 24 24"
+							>
+								<path
+									fill="#ffffff"
+									d="M11.5 8C14 8 16 10 16 12.5S14 17 11.5 17S7 15 7 12.5S9 8 11.5 8m0 1A3.5 3.5 0 0 0 8 12.5a3.5 3.5 0 0 0 3.5 3.5a3.5 3.5 0 0 0 3.5-3.5A3.5 3.5 0 0 0 11.5 9M5 5h2l2-2h5l2 2h2a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3m4.41-1l-2 2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2.41l-2-2z"
+								/>
+							</svg>
+							<span class="text-[15px] text-white">修改我的头像</span>
+						</div>
+					</div>
+
 					<div class="headright">
 						<div class="headName">{{ userInfo.name }}</div>
-						<div class="headlist">
+						<!-- <div class="headlist">
 							<div v-for="(item) in headlist">
 								<div class="headitem">
 									{{ item.name }}
 									<span class="headitems">{{ item.number }}</span>
 								</div>
 							</div>
+						</div> -->
+						<div class="ifePa">
+							ColourID: <span class="id-entifier">{{ "#154D56F51" }}</span>
 						</div>
-						<div class="ifePa">IfePalette: {{ "#154D56F51" }}</div>
 						<div class="sign">
-							<span class="signtext">{{ userInfo.signature || "这个人很懒，什么都没有留下..." }}</span>
+							<span class="signtext">{{
+								userInfo.signature || "这个人很懒，什么都没有留下..."
+							}}</span>
 							<span class="InforData" @click="EditInfo">编辑个人资料</span>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="backgrImg" :style="{
-				backgroundImage: `url('${userBackground}')`,
-				backgroundSize: 'cover',
-			}" @click="openUpload">
+			<div
+				class="backgrImg"
+				:style="{
+					backgroundImage: `url('${userBackground}')`,
+					backgroundSize: 'cover',
+				}"
+				@click="openUpload"
+			>
 				<div class="top_Gradient" />
 				<div class="right_Gradient" />
 				<div class="left_Gradient" />
@@ -167,12 +205,18 @@ onMounted(() => {
 	--header-scroll: calc(max(100vw / 4, 200px));
 	/*   --header-scroll: 300px; */
 	--title-height: 300px;
-	--shared-range: calc((var(--header-scroll) - var(--title-height))) calc((var(--header-scroll) + (var(--title-height) * 2)));
-	--cover-range: calc(var(--header-scroll) - (var(--title-height))) calc(var(--header-scroll) * 1);
-	--title-range: calc((var(--header-scroll) - (var(--title-height) * 2))) calc((var(--header-scroll) - (var(--title-height) * -0.25)));
-	--avatar-range: calc((var(--header-scroll) - (var(--title-height) * 1.5))) calc((var(--header-scroll) + (var(--title-height) * 0.95))),
-		calc((var(--header-scroll) - (var(--title-height) * 2.5))) calc((var(--header-scroll) + (var(--title-height) * 0.95)));
-	--shadow-range: calc((var(--header-scroll) + var(--title-height))) calc((var(--header-scroll) + (var(--title-height) * 2)));
+	--shared-range: calc((var(--header-scroll) - var(--title-height)))
+		calc((var(--header-scroll) + (var(--title-height) * 2)));
+	--cover-range: calc(var(--header-scroll) - (var(--title-height)))
+		calc(var(--header-scroll) * 1);
+	--title-range: calc((var(--header-scroll) - (var(--title-height) * 2)))
+		calc((var(--header-scroll) - (var(--title-height) * -0.25)));
+	--avatar-range: calc((var(--header-scroll) - (var(--title-height) * 1.5)))
+			calc((var(--header-scroll) + (var(--title-height) * 0.95))),
+		calc((var(--header-scroll) - (var(--title-height) * 2.5)))
+			calc((var(--header-scroll) + (var(--title-height) * 0.95)));
+	--shadow-range: calc((var(--header-scroll) + var(--title-height)))
+		calc((var(--header-scroll) + (var(--title-height) * 2)));
 	--cover-range: var(--shadow-range);
 }
 
@@ -203,14 +247,39 @@ onMounted(() => {
 				height: 100%;
 				display: flex;
 				align-items: center;
-
+				.image-container {
+					width: 170px;
+					height: 170px;
+					position: relative;
+					// background-color: #374151;
+				}
 				.headImg {
 					width: 170px;
 					height: 170px;
 					border-radius: 50%;
 					object-fit: cover;
+					cursor: pointer;
+				}
+				.overlay {
+					position: absolute;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background-color: rgba(0, 0, 0, 0.5);
+					border-radius: 50%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					flex-direction: column;
+					opacity: 0; /* 初始蒙层 */
+					transition: opacity 0.3s ease;
+					pointer-events: none; /* 防止蒙层干扰点击事件 */
 				}
 
+				.image-container:hover .overlay {
+					opacity: 1;
+				}
 				.headright {
 					text-align: left;
 					min-height: 170px;
@@ -218,9 +287,11 @@ onMounted(() => {
 					font-size: 18px;
 					display: flex;
 					flex-direction: column;
+					justify-content: space-around;
 
 					.headName {
-						font-size: 20px;
+						font-size: 26px;
+						font-weight: 600;
 					}
 
 					.headlist {
@@ -242,12 +313,16 @@ onMounted(() => {
 
 					.ifePa {
 						margin-top: 27px;
-						font-size: 16px;
-						color: #1d1f2b99;
+						font-size: 18px;
+						// color: #1d1f2b99;
+						color: #556072;
+						.id-entifier {
+							font-size: 14px;
+						}
 					}
 
 					.sign {
-						font-size: 14px;
+						font-size: 16px;
 						color: #1d1f2b99;
 						margin-top: 22px;
 						display: flex;
@@ -259,6 +334,7 @@ onMounted(() => {
 							text-overflow: ellipsis;
 							white-space: nowrap;
 							width: 300px;
+							color: #556072;
 						}
 
 						.InforData {
@@ -268,6 +344,7 @@ onMounted(() => {
 							z-index: 2;
 							border-radius: 4px;
 							opacity: 1;
+							z-index: 2;
 
 							&:hover {
 								color: #409eff;
@@ -286,6 +363,7 @@ onMounted(() => {
 			cursor: pointer;
 			margin-left: auto;
 			position: relative;
+			z-index: 1;
 
 			.top_Gradient {
 				position: absolute;
@@ -293,9 +371,11 @@ onMounted(() => {
 				left: 0;
 				right: 0;
 				bottom: 0;
-				background: linear-gradient(to bottom,
-						rgb(255, 255, 255) 0%,
-						rgba(255, 255, 255, 0) 50%);
+				background: linear-gradient(
+					to bottom,
+					rgb(255, 255, 255) 0%,
+					rgba(255, 255, 255, 0) 50%
+				);
 				z-index: 2;
 			}
 
@@ -305,9 +385,11 @@ onMounted(() => {
 				left: 0;
 				right: -140px;
 				bottom: 0;
-				background: linear-gradient(to left,
-						rgb(255, 255, 255) 0%,
-						rgba(255, 255, 255, 0) 50%);
+				background: linear-gradient(
+					to left,
+					rgb(255, 255, 255) 0%,
+					rgba(255, 255, 255, 0) 50%
+				);
 				z-index: 2;
 			}
 
@@ -317,9 +399,11 @@ onMounted(() => {
 				left: 0;
 				right: 0;
 				bottom: 0;
-				background: linear-gradient(to top,
-						rgb(255, 255, 255) 0%,
-						rgba(255, 255, 255, 0) 50%);
+				background: linear-gradient(
+					to top,
+					rgb(255, 255, 255) 0%,
+					rgba(255, 255, 255, 0) 50%
+				);
 				z-index: 2;
 			}
 
@@ -329,9 +413,11 @@ onMounted(() => {
 				left: 0;
 				right: 0;
 				bottom: 0;
-				background: linear-gradient(to right,
-						rgb(255, 255, 255) 0%,
-						rgba(255, 255, 255, 0) 50%);
+				background: linear-gradient(
+					to right,
+					rgb(255, 255, 255) 0%,
+					rgba(255, 255, 255, 0) 50%
+				);
 				z-index: 2;
 			}
 		}
