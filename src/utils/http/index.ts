@@ -12,11 +12,11 @@ import type {
 } from './types.d'
 import { formatToken, getToken } from '@/utils/auth'
 import Axios from 'axios'
+// import { useUserStoreHook } from "@/store/modules/user";
+import { useUserStore } from '~/stores/user'
 import NProgress from '../progress'
 // import { stringify } from "qs";
 import baseUrl from './base.js'
-// import { useUserStoreHook } from "@/store/modules/user";
-import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()
 

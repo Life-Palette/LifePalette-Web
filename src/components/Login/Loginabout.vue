@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { requestTo } from '@/utils/http/tool'
 import { isObject, removeEmptyValues } from '@iceywu/utils'
-import { c } from 'node_modules/vite/dist/node/types.d-aGj9QkWt'
 
 import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'

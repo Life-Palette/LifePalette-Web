@@ -10,11 +10,11 @@ import ImgIcon4 from '~/assets/image/icons/setof.png'
 import ImgIcon7 from '~/assets/image/icons/setup.png'
 import ImgIcon6 from '~/assets/image/icons/subscribe.png'
 import ImgIcon2 from '~/assets/image/icons/trends.png'
-import UserBottom from './components/UserBottom.vue'
 // import Sexman from "~/assets/image/icons.man.png"
 // import Sexgirl from "~/assets/image/icons.girl.png"
 // import { uploadFile } from '~/utils/upload'
 import { useUserStore } from '~/stores/user'
+import UserBottom from './components/UserBottom.vue'
 
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
