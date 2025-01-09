@@ -128,10 +128,8 @@ async function handleOk() {
 </script>
 
 <template>
-  <clipperDialog
-ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
-/>
+  <clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
 
   <div class="dialog-content">
     <div class="dialog-title">编辑资料</div>
@@ -153,32 +151,16 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
     <div class="flex justify-between mt-[40px]">
       <button
         class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300 text-gray-400 font-bold font-mono"
-        @click="handleCancel"
-        >
+        @click="handleCancel">
         Esc
       </button>
       <button
-        class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300  font-bold font-mono"
-        @click="handleOk"
-        >
-        YES
-        class="relative flex items-center px-13 py-1 overflow-hidden font-medium transition-all rounded-md group bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
->
-        <span
-          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
->
+        class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300  font-bold font-mono text-[#58636d]"
+        @click="handleOk">
+        Yes
+        <span @click.stop
+          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
           <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
-        </span>
-        <span
-          class="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-ml-4 group-hover:-mb-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
->
-          <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
-        </span>
-        <span
-class="relative w-full text-left text-[#e990ba] transition-colors duration-200 ease-in-out group-hover:text-[#d67ca4]"
-          @click="handleOk"
->
-          保存
         </span>
       </button>
     </div>
@@ -201,8 +183,9 @@ class="relative w-full text-left text-[#e990ba] transition-colors duration-200 e
   border-radius: 30px;
   // background: linear-gradient(to bottom right, #ffddef, #faf0eb, #f6fde7);
   background: rgba(255, 255, 255, .776);
-  background: url('https://img.freepik.com/premium-photo/abstract-blurred-sky-colorful_40299-22.jpg') no-repeat ;
-  background-size:100% 100%;
+  background: url('https://img.freepik.com/premium-photo/abstract-blurred-sky-colorful_40299-22.jpg') no-repeat;
+  background-size: 100% 100%;
+
   .dialog-title {
     text-align: left;
     font-size: 20px;
