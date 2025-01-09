@@ -1,3 +1,5 @@
+// 内置插件
+import type { PluginOption } from 'vite'
 import I18N from '@intlify/unplugin-vue-i18n/vite'
 import Legacy from '@vitejs/plugin-legacy'
 import Vue from '@vitejs/plugin-vue'
@@ -5,6 +7,7 @@ import Jsx from '@vitejs/plugin-vue-jsx'
 import Prism from 'markdown-it-prism'
 import UnoCss from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
+
 import {
   AntDesignVueResolver,
   ArcoResolver,
@@ -24,7 +27,6 @@ import {
   Vuetify3Resolver,
   VueUseComponentsResolver,
 } from 'unplugin-vue-components/resolvers'
-
 import Components from 'unplugin-vue-components/vite'
 import Markdown from 'unplugin-vue-markdown/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
@@ -32,15 +34,13 @@ import VueRouter from 'unplugin-vue-router/vite'
 import { AutoGenerateImports, vue3Presets } from 'vite-auto-import-resolvers'
 import Compression from 'vite-plugin-compression'
 import EnvTypes from 'vite-plugin-env-types'
-import { viteMockServe as Mock } from 'vite-plugin-mock'
 
+import { viteMockServe as Mock } from 'vite-plugin-mock'
 import Removelog from 'vite-plugin-removelog'
 import Modules from 'vite-plugin-use-modules'
 import VueDevTools from 'vite-plugin-vue-devtools'
-import Layouts from 'vite-plugin-vue-layouts'
 
-// 内置插件
-import type { PluginOption } from 'vite'
+import Layouts from 'vite-plugin-vue-layouts'
 import {
   Alias,
   Layers,

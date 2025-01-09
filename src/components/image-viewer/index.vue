@@ -13,9 +13,9 @@ import {
 } from '@element-plus/icons-vue'
 import { customDestr, throttle } from '@iceywu/utils'
 import { useEventListener } from '@vueuse/core'
-import 'element-plus/dist/index.css'
 // import ElIcon from '@element-plus/components/icon'
 import { useNamespace } from './use-namespace'
+import 'element-plus/dist/index.css'
 
 const {
 	urlList = [],

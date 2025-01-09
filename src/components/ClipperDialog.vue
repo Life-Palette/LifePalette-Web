@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { reactive, ref, watch } from 'vue'
-import { VueCropper } from 'vue-cropper'
-// 需要引入的库
-import 'vue-cropper/dist/index.css'
 // import TipsDialog from '~/components/TipsDialog/TipsDialog.vue' // 封装的dialog组件
 import { ElMessage } from 'element-plus'
+import { reactive, ref, watch } from 'vue'
+import { VueCropper } from 'vue-cropper'
 import { uploadFile as uploadFileFunc } from '~/utils/uploadAli'
+// 需要引入的库
+import 'vue-cropper/dist/index.css'
 /* 父组件传参 */
 const props = withDefaults(defineProps<IProps>(), {
   type: 'systemLogo',

@@ -1,6 +1,6 @@
-import { defineComponent, ref, watch } from 'vue'
 // 导入skeleton
 import { ElSkeleton } from 'element-plus'
+import { defineComponent, ref, watch } from 'vue'
 
 const props = {
   animated: {
