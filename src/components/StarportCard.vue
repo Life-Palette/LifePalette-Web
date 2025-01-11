@@ -1,8 +1,9 @@
 <script setup>
 import { Image } from 'l-preview'
+import { adjustImgData } from '~/utils/tools'
 import 'l-preview/dist/style.css'
 
-const { index, data } = defineProps({
+const { index, data, imgList } = defineProps({
 	fileUrl: {
 		type: String,
 		default: '',
@@ -30,7 +31,7 @@ const { index, data } = defineProps({
 })
 
 onMounted(() => {
-	console.log('MyComponent Mounted')
+
 })
 const isactive = ref(false)
 const videoRef = ref(null)
@@ -43,7 +44,7 @@ function reShowMap() {
 }
 // 监听index
 // watch(() => props.index, () => {
-// 	console.log('🌈------------------------------>');
+
 // 	reShowMap()
 // })
 // watch不失效，优化一下
@@ -52,19 +53,10 @@ watch(() => index, (newIndex, oldIndex) => {
 		reShowMap()
 	}
 })
-// eslint-disable-next-line vue/return-in-computed-property
+
 const coverUrl = computed(() => {
-  const fileTemp = data || {}
-
-  const { fileType, file, cover = 'IMAGE' } = fileTemp || {}
-  if (fileType === 'IMAGE') {
-		const fileExtension = file.split('.').pop()?.toLowerCase()
-
-    return ['heic', 'HEIC'].includes(fileExtension) ? `${file}?x-oss-process=image/format,png/resize,l_50` : file
-  }
-  else if (fileType === 'VIDEO') {
-    return cover || ''
-  }
+	const baseData = adjustImgData(data)
+	return baseData.cover
 })
 </script>
 

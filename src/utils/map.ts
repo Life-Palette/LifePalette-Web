@@ -1,3 +1,5 @@
+import { adjustImgData } from '~/utils/tools'
+
 function parseDMS(dms: string) {
 	const dmsPattern = /(-?\d+)deg (\d+)' (-?\d+\.\d+)"/
 	const match = dms.match(dmsPattern)
@@ -38,28 +40,5 @@ export function getLngLat(exifData: any) {
 }
 
 export function getCover(data: any) {
-	const fileTemp = data || {}
-	const { fileType, file, cover } = fileTemp || {}
-	if (fileType === 'IMAGE') {
-		let preSrc = `${file}?x-oss-process=image/resize,l_50`
-		let src = file
-		const fileSuffix = file.substring(file.lastIndexOf('.'))
-		if (fileSuffix.toUpperCase() === '.HEIC') {
-			preSrc = `${file}?x-oss-process=image/resize,l_50/format,jpg`
-			src = `${file}?x-oss-process=image/format,jpg`
-		}
-		return {
-			src,
-			preSrc,
-		}
-	}
- else if (fileType === 'VIDEO') {
-		const srcT
-			= cover
-			|| `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-		return {
-			src: srcT,
-			preSrc: srcT,
-		}
-	}
+	return adjustImgData(data)
 }

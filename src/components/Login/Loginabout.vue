@@ -128,8 +128,10 @@ async function handleOk() {
 </script>
 
 <template>
-  <clipperDialog ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
-    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm" />
+  <clipperDialog
+ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTypeList"
+    :limit-size="clipperData.limitSize" :preview-width="clipperData.previewWidth" @confirm="onConfirm"
+/>
 
   <div class="dialog-content">
     <div class="dialog-title">编辑资料</div>
@@ -151,15 +153,19 @@ async function handleOk() {
     <div class="flex justify-between mt-[40px]">
       <button
         class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300 text-gray-400 font-bold font-mono"
-        @click="handleCancel">
+        @click="handleCancel"
+>
         Esc
       </button>
       <button
         class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300  font-bold font-mono text-[#58636d]"
-        @click="handleOk">
+        @click="handleOk"
+>
         Yes
-        <span @click.stop
-          class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]">
+        <span
+class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+          @click.stop
+>
           <span class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white" />
         </span>
       </button>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { api as viewerApi } from 'v-viewer'
+import { adjustImgData } from '~/utils/tools'
 import 'viewerjs/dist/viewer.css'
 
 const props = defineProps<{
@@ -13,46 +14,19 @@ const fileList = computed(() => {
     return [props.data]
   }
   else {
-    return props.data?.files || []
+    return props.data?.fileList || []
   }
 })
 function getCover(data: any) {
-  const { fileType, file, cover } = data || {}
-  if (fileType === 'IMAGE') {
-    let preSrc = `${file}?x-oss-process=image/resize,l_100`
-    // const preSrc = `${file}`;
-    const fileSuffix = file.substring(file.lastIndexOf('.'))
-    if (fileSuffix.toUpperCase() === '.HEIC') {
-      preSrc = `${file}?x-oss-process=image/resize,l_100/format,jpg`
-    }
-    return preSrc
-  }
-  else if (fileType === 'VIDEO') {
-    const srcT
-      = cover
-      || `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-    return srcT
-  }
+	const baseData = adjustImgData(data)
+	return baseData.cover
 }
 function handleClosePop() {
   emit('closePop')
 }
 function showImgs(index: number) {
   const images = fileList.value.map((item: any) => {
-    const { fileType, file, cover } = item || {}
-    if (fileType === 'IMAGE') {
-      const fileSuffix = file.substring(file.lastIndexOf('.'))
-      if (fileSuffix.toUpperCase() === '.HEIC') {
-        return `${file}?x-oss-process=image/format,jpg`
-      }
-      return file
-    }
-    else if (fileType === 'VIDEO') {
-      const srcT
-        = cover
-        || `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-      return srcT
-    }
+   return adjustImgData(item).file
   })
   viewerApi({
     images,

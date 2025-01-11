@@ -6,6 +6,7 @@ import { customDestr } from '@iceywu/utils'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import mapboxgl from 'mapbox-gl'
 import { createVNode, render } from 'vue'
+import { adjustImgData } from '~/utils/tools'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -86,7 +87,7 @@ function parseDMS(dms: string) {
 }
 function getImgsInfo() {
   dataList.value.forEach((item: any) => {
-    item.files.forEach((file: any) => {
+    item.fileList.forEach((file: any) => {
       const exifInfo = customDestr(file.exif, { customVal: {} }) || {}
       file.exif = exifInfo || {}
 
@@ -197,30 +198,7 @@ function init() {
   // });
 }
 function getCover(data: any) {
-  const fileTemp = data || {}
-  const { fileType, file, cover } = fileTemp || {}
-  if (fileType === 'IMAGE') {
-    let preSrc = `${file}?x-oss-process=image/resize,l_50`
-    let src = file
-    const fileSuffix = file.substring(file.lastIndexOf('.'))
-    if (fileSuffix.toUpperCase() === '.HEIC') {
-      preSrc = `${file}?x-oss-process=image/resize,l_50/format,jpg`
-      src = `${file}?x-oss-process=image/format,jpg`
-    }
-    return {
-      src,
-      preSrc,
-    }
-  }
-  else if (fileType === 'VIDEO') {
-    const srcT
-      = cover
-      || `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-    return {
-      src: srcT,
-      preSrc: srcT,
-    }
-  }
+  return adjustImgData(data)
 }
 // const popIsOpen = ref(false);
 // 传入坐标，添加标记

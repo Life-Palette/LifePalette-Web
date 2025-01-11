@@ -50,10 +50,10 @@ interface topicListParams extends listParams {
 }
 
 function onSwiper(swiper: any) {
-  console.log(swiper)
+
 }
 function onSlideChange() {
-  console.log('slide change')
+
 }
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const cols = computed(() => {
@@ -85,7 +85,6 @@ async function getTagData() {
   const { code, msg, result } = ({} = await tagFindAll(params))
 
   if (code === 200) {
-    // console.log('get api test成功', result)
     const { data = [] } = result
     tagList.value = data
     // tagId.value = data[0].id
@@ -97,7 +96,7 @@ async function getTagData() {
     tagList.value.unshift(newPart)
   }
   else {
-    console.log('get api test失败', msg)
+
   }
 }
 
@@ -118,7 +117,6 @@ const parts = computed(() => {
 })
 
 function goDe(item: any) {
-	console.log('🎁-----item-----', item)
 	// return
   const { id, files } = item
   const imgCover = files[0].file
@@ -131,7 +129,6 @@ function getTagDe(tags: any) {
 }
 /** 加载更多 */
 function handleLoadMore() {
-  console.log('🎁-----handleLoadMore-----')
   getNext()
 }
 function getNext() {
@@ -183,8 +180,6 @@ async function getConData(readStatus, target) {
     const { totalPages } = meta || {}
     listObj.value.list.push(...data)
     listObj.value.finished = totalPages <= dataParams.value.page
-    console.log('🐠-----totalPages-----', totalPages, dataParams.value.page)
-    console.log('🍧-----listObj.value.list-----', listObj.value)
   }
   else {
     listObj.value.finished = true
@@ -271,7 +266,7 @@ function goCreate() {
                 >
                   <el-carousel :interval="5000" arrow="always">
                     <el-carousel-item
-                      v-for="(item2, index2) in item.files"
+                      v-for="(item2, index2) in item.fileList"
                       :key="index2"
                     >
                       <!-- <h3 text="2xl" justify="center">{{ item2 }}</h3> -->
@@ -322,7 +317,7 @@ function goCreate() {
                         :port="`my-id${item.id}`"
                         class="h-full w-full transition-all duration-800"
                       >
-                        <StarportCard :data="item.files[0]" />
+                        <StarportCard :data="item.fileList[0]" />
                       </Starport>
                     </div>
                     <!-- 描述 -->

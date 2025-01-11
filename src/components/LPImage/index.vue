@@ -4,6 +4,7 @@ import { decode } from 'blurhash'
 import * as LivePhotosKit from 'livephotoskit'
 import loadErrorData from '~/assets/lottie/img_err.json'
 import { getDataUrlFromArr } from '~/utils/blurhash'
+import { adjustImgData } from '~/utils/tools'
 
 interface LPImageProps {
 	data: ImgProps
@@ -93,40 +94,7 @@ function onLoadPreImg() {
 	}
 }
 const imgInfo = computed(() => {
-	const { fileType, file, cover } = data || {}
-	let addInfo = {}
-	if (fileType === 'IMAGE') {
-		let preSrc = `${file}?x-oss-process=image/resize,l_50`
-		let src = `${file}?x-oss-process=image/resize,l_400`
-		let baseSrc = file
-		const fileSuffix = file.substring(file.lastIndexOf('.'))
-
-		if (fileSuffix.toUpperCase() === '.HEIC') {
-			baseSrc = `${file}?x-oss-process=image/format,jpg`
-			preSrc = `${file}?x-oss-process=image/resize,l_800/format,jpg`
-			src = `${file}?x-oss-process=image/resize,l_800/format,jpg`
-		}
-		addInfo = {
-			src,
-			baseSrc,
-			preSrc,
-		}
-	}
- else if (fileType === 'VIDEO') {
-		const srcT
-			= cover
-			|| `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-		addInfo = {
-			src: srcT,
-			baseSrc: srcT,
-			preSrc: srcT,
-		}
-	}
-	return {
-		...data,
-		...addInfo,
-		// preSrc: '',
-	}
+	return adjustImgData(data)
 })
 onMounted(() => {
 	if (isBlurhashModeFlag.value) {
@@ -169,7 +137,6 @@ const showImgSrc = computed(() => {
 })
 const loadError = ref(false)
 function onLoadErrorPreImg(e: any) {
-	console.log('💗onLoadErrorPreImg---------->', e)
 	loadError.value = true
 }
 </script>

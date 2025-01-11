@@ -1,4 +1,6 @@
 <script setup>
+import { adjustImgData } from '~/utils/tools'
+
 const props = defineProps({
   data: {
     type: Object,
@@ -6,19 +8,9 @@ const props = defineProps({
   },
 })
 
-// eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
-  const fileTemp = props.data || {}
-
-  const { fileType, file, cover = 'IMAGE' } = fileTemp || {}
-  if (fileType === 'IMAGE') {
-		const fileExtension = file.split('.').pop()?.toLowerCase()
-
-    return ['heic', 'HEIC'].includes(fileExtension) ? `${file}?x-oss-process=image/format,png/resize,l_50` : file
-  }
-  else if (fileType === 'VIDEO') {
-    return cover || ''
-  }
+  const baseData = adjustImgData(props.data)
+	return baseData.cover
 })
 onMounted(() => {
 

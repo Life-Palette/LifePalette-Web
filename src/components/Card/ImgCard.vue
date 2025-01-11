@@ -1,4 +1,6 @@
 <script setup>
+import { adjustImgData } from '~/utils/tools'
+
 const props = defineProps({
 	data: {
 		type: Object,
@@ -14,45 +16,9 @@ const props = defineProps({
 	},
 })
 
-// eslint-disable-next-line vue/return-in-computed-property
 const coverUrl = computed(() => {
-	if (props.src) {
-		return props.src
-	}
-	const fileTemp = props.data || {}
-
-	const { fileType, file, cover, videoSrc = '' } = fileTemp || {}
-	if (fileType === 'IMAGE') {
-		let preSrc = `${file}?x-oss-process=image/resize,l_50`
-		let src = `${file}?x-oss-process=image/resize,l_400`
-		let baseSrc = file
-		const fileSuffix = file.substring(file.lastIndexOf('.'))
-		if (fileSuffix.toUpperCase() === '.HEIC') {
-			baseSrc = `${file}?x-oss-process=image/format,jpg`
-			preSrc = `${file}?x-oss-process=image/resize,l_50/format,jpg`
-			src = `${file}?x-oss-process=image/resize,l_400/format,jpg`
-		}
-		return {
-			src,
-			baseSrc,
-			preSrc,
-			videoSrc,
-		}
-	}
- else if (fileType === 'VIDEO') {
-		// const preSrc = cover + '?x-oss-process=image/resize,l_500'
-		// console.log('🐬-----cover-----', cover);
-		// const srcT = cover + '?x-oss-process=image/resize,l_450'
-		const srcT
-			= cover
-			|| `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
-		return {
-			src: srcT,
-			baseSrc: srcT,
-			preSrc: srcT,
-			videoSrc,
-		}
-	}
+	const baseData = adjustImgData(props.data)
+	return baseData.cover
 })
 onMounted(() => {
 	// coverUrl.value && console.log(coverUrl.value)

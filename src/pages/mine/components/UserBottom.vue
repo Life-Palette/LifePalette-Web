@@ -145,7 +145,7 @@ const currentObj = computed(() => {
                   :port="`my-id${item.id}`"
                   class="h-full w-full transition-all duration-800"
                 >
-                  <StarportCard :data="item.files[0]" />
+                  <StarportCard :data="item.fileList[0]" />
                 </Starport>
               </div>
               <!-- 描述 -->

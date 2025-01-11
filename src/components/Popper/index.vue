@@ -24,7 +24,6 @@ async function getMessageUnreadCount() {
 	}
 }
 async function getData(type) {
-	console.log('🐠-----type-----', type)
 	if (getDataLoading.value)
 return
 	getDataLoading.value = true

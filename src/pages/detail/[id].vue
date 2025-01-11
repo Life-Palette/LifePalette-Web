@@ -17,7 +17,7 @@ import PostForm from '~/components/post/index.vue'
 import StarportCard from '~/components/StarportCard.vue'
 import { useUserStore } from '~/stores/user'
 import { formatTime } from '~/utils'
-import { getUserAvatar } from '~/utils/tools'
+import { adjustImgData, getUserAvatar } from '~/utils/tools'
 
 const userStore = useUserStore()
 
@@ -45,23 +45,23 @@ async function getDataDe() {
 	isLogin.value && (parsms.userId = userInfo.value.id)
 	const { code, msg, result } = ({} = await topicFindById(parsms))
 	if (code === 200) {
-		console.log('获取内容详情成功', result)
 		dataDe.value = result
 		setTimeout(() => {
-			fileList.value = result?.files || []
-			console.log('fileList.value', fileList.value)
+			fileList.value = result?.fileList.map((item) => {
+				return adjustImgData(item)
+}) || []
 		}, 500)
 	}
  else {
-		console.log('获取内容详情失败', msg)
+
 	}
 }
 
 function onSwiper(swiper) {
-	console.log(swiper)
+
 }
 function onSlideChange() {
-	console.log('slide change')
+
 }
 const isInitDone = ref(false)
 onMounted(() => {
@@ -69,13 +69,13 @@ onMounted(() => {
 	const { id } = route.params
 	const { imgCover } = route.query
 	// fileList.value = [{ file: imgCover, fileType: "IMAGE", thumbnail: imgCover }];
-	fileList.value = [
-		{
-			file: imgCover,
-			fileType: 'IMAGE',
-			thumbnail: imgCover,
-		},
-	]
+	// fileList.value = [
+	// 	{
+	// 		url: imgCover,
+	// 		type: 'image/jpeg',
+	// 		thumbnail: imgCover,
+	// 	},
+	// ]
 	deId.value = id
 	isInitDone.value = true
 	getDataDe()
@@ -95,12 +95,11 @@ return
 	}
 	const { code, msg, result } = ({} = await commentCreate(params))
 	if (code === 200) {
-		console.log('获取内容详情成功', result)
 		commentContent.value = ''
 		getCommentData()
 	}
  else {
-		console.log('获取内容详情失败', msg)
+
 	}
 	sendLoading.value = false
 }
@@ -114,10 +113,10 @@ async function handleMessageCreate() {
 	}
 	const { code, msg, result } = ({} = await messageCreate(params))
 	if (code === 200) {
-		console.log('消息创建成功', result)
+
 	}
  else {
-		console.log('消息创建失败', msg)
+
 	}
 }
 
@@ -140,8 +139,6 @@ async function handleLike() {
 	const requestApi = dataDe.value.like ? likeDelete : likeCreate
 	const { code, msg, result } = ({} = await requestApi(params))
 	if (code === 200) {
-		console.log('点赞成功', result)
-
 		// getLikeData();
 		if (dataDe.value.like) {
 			dataDe.value.like = false
@@ -161,7 +158,6 @@ async function handleLike() {
 		}
 	}
  else {
-		console.log('点赞失败', msg)
 		ElMessage.error('点赞失败')
 	}
 }
@@ -176,11 +172,10 @@ async function getLikeData() {
 		topicId: deId.value,
 	}))
 	if (code === 200) {
-		console.log('获取点赞信息成功', result)
 		likeList.value = result || []
 	}
  else {
-		console.log('获取点赞信息失败', msg)
+
 	}
 }
 // 标签信息
@@ -191,7 +186,6 @@ const tagDe = computed(() => {
 
 const currentPlayIndex = ref(0)
 function handleSwiperChange(index) {
-	// console.log("index", index);
 	currentPlayIndex.value = index
 }
 const currentPlayInfo = computed(() => {
@@ -214,16 +208,7 @@ function previewisShow(data, index) {
 const initialIndex = ref(0)
 const fileSrc = computed(() => {
 	return fileList.value.map((item) => {
-		if (item.fileType === 'IMAGE') {
-			const fileExtension = item.file.split('.').pop()?.toLowerCase()
-
-			return ['heic', 'HEIC'].includes(fileExtension)
-				? `${item.file}?x-oss-process=image/format,png`
-				: item.file
-		}
- else if (item.fileType === 'VIDEO') {
-			// return item.cover
-		}
+		return adjustImgData(item).file
 	})
 })
 const isShowDialog = ref(false)
@@ -258,7 +243,6 @@ return
 	// to is a function form (@iceywu/utils)
 	const [err, res] = await to(topicDelete(params))
 	if (res) {
-		console.log('🌈-----接口请求成功-----')
 		const { code, msg, data = [] } = res || {}
 		if (code === 200 && data) {
 			ElMessage({
@@ -266,18 +250,16 @@ return
 				message: '删除成功',
 			})
 			router.back()
-			console.log('😊-----数据获取成功-----', data)
 		}
  else {
 			ElMessage({
 				type: 'info',
 				message: '删除失败',
 			})
-			console.log('😒-----数据获取失败-----', msg)
 		}
 	}
 	if (err) {
-		console.log('❗-----接口请求失败-----')
+
 	}
 	getDataLoading.value = false
 }
