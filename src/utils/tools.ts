@@ -15,18 +15,20 @@ export function isIphoneImg(data: any) {
 
 // 图片数据调整
 export function adjustImgData(data: any) {
-	const { url = '', type = 'image/jpeg', videoSrc = '', cover = '' } = data || {}
+	const { url = '', type = 'image/jpeg', videoSrc = '', cover = '', fromIphone } = data || {}
 	const fileType = type.toUpperCase().includes('VIDEO') ? 'VIDEO' : 'IMAGE'
 	const file = deepClone(url)
 	let newUrl = deepClone(url)
 	const isIphone = isIphoneImg(data)
+
 	let addInfo = {}
 	if (fileType === 'IMAGE') {
 		let preSrc = `${file}?x-oss-process=image/resize,l_50`
 		let src = `${file}?x-oss-process=image/resize,l_400`
 		let baseSrc = deepClone(url)
 		const fileSuffix = file.substring(file.lastIndexOf('.'))?.toLowerCase()
-		if (['heic', 'HEIC'].includes(fileSuffix) || isIphone) {
+
+		if (['.heic', '.HEIC'].includes(fileSuffix) || isIphone || fromIphone) {
 			if (!file.includes('format,jpg')) {
 					baseSrc = `${url}?x-oss-process=image/format,jpg`
 					newUrl = `${url}?x-oss-process=image/format,jpg`

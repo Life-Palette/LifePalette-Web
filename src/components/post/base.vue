@@ -200,19 +200,20 @@ async function handleSave() {
 	saveLoading.value = true
 	// const files = fileList.value || []
 	const files = fileList.value.map((item) => {
-		const { fileType, file, thumbnail, videoSrc } = item
-		return {
-			fileType,
-			file,
-			thumbnail,
-			videoSrc,
-		}
+		// const { fileType, file, thumbnail, videoSrc } = item
+		// return {
+		// 	fileType,
+		// 	file,
+		// 	thumbnail,
+		// 	videoSrc,
+		// }
+		return item.id
 	})
 
 	const params = {
 		content: formData.content,
 		title: formData.title,
-		files,
+		fileIds: files,
 	}
 	if (chooseTagIds.value.length > 0) {
 		params.tagIds = chooseTagIds.value

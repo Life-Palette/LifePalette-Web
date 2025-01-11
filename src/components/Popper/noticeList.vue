@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { messageUpdate } from '~/api/message'
+import { adjustImgData } from '~/utils/tools'
 // import { ListItem } from "./data";
 import NoticeItem from './noticeItem.vue'
 
@@ -15,10 +16,10 @@ function handleItemClick(data) {
   const { type, objInfo = {} } = data || {}
   switch (type) {
     case 'like':
-      const { id, files } = objInfo
+      const { id, fileList } = objInfo
       // 消息状态更新
       handlemessageUpdate(data.id)
-      const imgCover = files[0].file
+      const imgCover = adjustImgData(fileList[0]).cover
       router.push(`/detail/${id}?imgCover=${imgCover}`)
       break
     default:

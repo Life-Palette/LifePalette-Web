@@ -67,7 +67,7 @@ const coverUrl = computed(() => {
       <div class="cover-box" />
     </div>
 		<!-- 视频 -->
-		<template v-if="data.fileType == 'VIDEO'">
+		<template v-if="data?.fileType == 'VIDEO'">
 			<template v-if="isDetail">
 				<div class="relative h-full w-full flex items-center justify-center">
 					<video

@@ -23,7 +23,7 @@ import Skeleton from '~/components/skeleton'
 import StarportCard from '~/components/StarportCard.vue'
 import { useUserStore } from '~/stores/user'
 import { formatTime } from '~/utils'
-import { getUserAvatar } from '~/utils/tools'
+import { adjustImgData, getUserAvatar } from '~/utils/tools'
 
 // Import Swiper Vue.js components
 
@@ -118,8 +118,8 @@ const parts = computed(() => {
 
 function goDe(item: any) {
 	// return
-  const { id, files } = item
-  const imgCover = files[0].file
+  const { id, fileList } = item
+      const imgCover = adjustImgData(fileList[0]).cover
   router.push(`/detail/${id}?imgCover=${imgCover}`)
 }
 // 标签信息
@@ -140,7 +140,7 @@ function getNext() {
 function initData() {
   dataParams.value = {
     page: 1,
-    size: 100,
+    size: 1000,
   }
   listObj.value.list = []
   listObj.value.finished = false
@@ -155,7 +155,7 @@ const listObj = ref({
 })
 const dataParams = ref({
   page: 1,
-  size: 100,
+  size: 1000,
 })
 async function getConData(readStatus, target) {
   listObj.value.loading = true

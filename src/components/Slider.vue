@@ -60,7 +60,8 @@ function clickTab(item, index) {
   console.log('clickTab', item, index)
   const { name } = item
   if (name === '发布') {
-    isShowDialog.value = true
+    // isShowDialog.value = true
+		ElMessage.warning('发布重构中,尽情期待！')
   }
 }
 </script>
