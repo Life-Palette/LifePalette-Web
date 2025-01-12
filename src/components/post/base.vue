@@ -124,7 +124,8 @@ onChange(async (file) => {
 			thumbnail: `${url}?x-oss-process=image/resize,l_500`,
 			videoSrc,
 		}
-		tempFileList.push({ ...fileData, name })
+		// tempFileList.push({ ...fileData, name })
+		tempFileList.push({ ...result })
 	}
 	initFileFill(tempFileList)
 	showUploadLoading.value = false
@@ -170,7 +171,7 @@ async function initFileFill(fileListT) {
 			tempList.push(item)
 		}
 	}
-	console.log('🌵-----tempList-----', tempList)
+
 	fileList.value.push(...tempList)
 }
 
@@ -371,7 +372,7 @@ function initExtraData() {
 								</el-tag>
 							</div>
 							<!-- 图片 -->
-							<template v-if="item.fileType == 'IMAGE'">
+							<template v-if="item.type.includes('image')">
 								<!-- <el-image class="h-full w-full" fit="cover" :src="item.file">
 									<template #placeholder>
 										<div class="image-slot">
@@ -385,7 +386,7 @@ function initExtraData() {
 									</div>
 							</template>
 							<!-- 视频 -->
-							<template v-else-if="item.fileType == 'VIDEO'">
+							<template v-else-if="item.typeincludes('video')">
 								<video
 									class="h-full w-full"
 									controls
