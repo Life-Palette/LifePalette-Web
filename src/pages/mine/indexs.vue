@@ -177,7 +177,7 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
 				</div>
 			</div>
 			<div
-class="backgrImg" :style="{
+				class="backgrImg" :style="{
 				backgroundImage: `url('${userBackground}')`,
 				backgroundSize: 'cover',
 			}" @click="openUpload"
@@ -259,8 +259,8 @@ class="backgrImg" :style="{
 					// background-color: #374151;
 				}
 				.headImg {
-					width: 170px;
-					height: 170px;
+					// width: 170px;
+					// height: 170px;
 					border-radius: 50%;
 					object-fit: cover;
 					cursor: pointer;
