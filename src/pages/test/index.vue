@@ -34,14 +34,21 @@ const list = ref([
 	},
 
 ])
+const imgs = computed(() => {
+	return list.value.map((item) => {
+		return item.thumbnail
+	})
+})
+const chooseImageTemp = ref('')
 function handleClick(e: MouseEvent, item: any) {
-	const { file, id } = item
-	openDialog(e, file)
-	router.push(`/test?${id}`)
+	const { file, id, thumbnail } = item
+	chooseImageTemp.value = file
+	openDialog(e, thumbnail)
+	// router.push(`/test?${id}`)
 }
 function handleClose() {
 	closeDialog()
-	router.back()
+	// router.back()
 }
 onMounted(() => {
 	console.log('🌈------------------------------>')
@@ -59,13 +66,28 @@ onMounted(() => {
 				@click="(e) => handleClick(e, item)"
 			>
 			{{ mediaWidth }}
-				<img :src="item.file" alt="">
+				<img :src="item.thumbnail" alt="">
 			</div>
 		</div>
 		<Dialog
 			v-if="showMask"
 			:media-width="mediaWidth"
 			:image-url="chooseImage"
+			:images="[chooseImage]"
+  :content="{
+    title: '标题',
+    description: '详细描述...',
+    likes: 42,
+    isLiked: false,
+    comments: [
+      {
+        username: '用户1',
+        avatar: 'avatar1.jpg',
+        text: '评论内容',
+        time: '2小时前',
+      },
+    ],
+  }"
 			@close="handleClose"
 		/>
 	</div>
