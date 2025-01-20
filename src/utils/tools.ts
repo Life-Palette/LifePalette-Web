@@ -23,8 +23,8 @@ export function adjustImgData(data: any) {
 
 	let addInfo = {}
 	if (fileType === 'IMAGE') {
-		let preSrc = `${file}?x-oss-process=image/resize,l_50`
-		let src = `${file}?x-oss-process=image/resize,l_400`
+		let preSrc = `${file}?x-oss-process=image/resize,l_800`
+		let src = `${file}?x-oss-process=image/resize,l_800`
 		let baseSrc = deepClone(url)
 		const fileSuffix = file.substring(file.lastIndexOf('.'))?.toLowerCase()
 

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import DetailCom from '@/pages/detail/[id].vue'
 import { defineEmits, defineProps, ref } from 'vue'
 
 const props = defineProps({
@@ -7,122 +8,22 @@ const props = defineProps({
 		type: Array as PropType<string[]>,
 		default: () => [],
 	},
-	content: {
-		type: Object,
-		default: () => ({
-			title: '',
-			description: '',
-			likes: 0,
-			isLiked: false,
-			comments: [],
-		}),
-	},
+	id: Number,
+	data: Object,
+
 })
 
-const emit = defineEmits(['close', 'like', 'comment'])
-
-const currentImageIndex = ref(0)
-const commentText = ref('')
+const emit = defineEmits(['close'])
 
 function close() {
 	emit('close')
-}
-
-function nextImage() {
-	if (currentImageIndex.value < props.images.length - 1) {
-		currentImageIndex.value++
-	}
-}
-
-function prevImage() {
-	if (currentImageIndex.value > 0) {
-		currentImageIndex.value--
-	}
-}
-
-function handleLike() {
-	emit('like')
-}
-
-function submitComment() {
-	if (commentText.value.trim()) {
-		emit('comment', commentText.value)
-		commentText.value = ''
-	}
 }
 </script>
 
 <template>
 	<div class="dialog" @click="close">
 		<div class="dialog-content" @click.stop>
-			<div class="left-container" :style="{ width: `${50}%` }">
-				<div class="image-carousel">
-					<button v-show="currentImageIndex > 0" class="carousel-btn prev" @click="prevImage">
-						<i class="fas fa-chevron-left" />
-					</button>
-					<img :src="images[currentImageIndex]" alt="" class="dialog-image">
-					<button
-v-show="currentImageIndex < images.length - 1" class="carousel-btn next"
-							@click="nextImage"
->
-						<i class="fas fa-chevron-right" />
-					</button>
-					<div class="image-indicator">
-						{{ currentImageIndex + 1 }}/{{ images.length }}
-					</div>
-				</div>
-			</div>
-
-			<div class="right-container">
-				<div class="content-wrapper">
-					<h2 class="title">{{ content.title }}</h2>
-
-					<div class="description">
-						{{ content.description }}
-					</div>
-
-					<div class="interaction-bar">
-						<button class="like-btn" :class="{ active: content.isLiked }" @click="handleLike">
-							<i class="fas" :class="content.isLiked ? 'fa-heart' : 'fa-heart-o'" />
-							<span>{{ content.likes }}</span>
-						</button>
-					</div>
-
-					<div class="comments-section">
-						<h3>评论 ({{ content.comments.length }})</h3>
-						<div class="comments-list">
-							<div
-v-for="(comment, index) in content.comments"
-								 :key="index"
-								 class="comment-item"
->
-								<div class="comment-avatar">
-									<img :src="comment.avatar" alt="">
-								</div>
-								<div class="comment-content">
-									<div class="comment-user">{{ comment.username }}</div>
-									<div class="comment-text">{{ comment.text }}</div>
-									<div class="comment-time">{{ comment.time }}</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="comment-input">
-							<input
-v-model="commentText"
-									type="text"
-									placeholder="添加评论..."
-									@keyup.enter="submitComment"
->
-							<button @click="submitComment">发送</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<button class="close-btn" @click="close">
-				<i class="fas fa-times" />
-			</button>
+<DetailCom :id :data />
 		</div>
 	</div>
 </template>

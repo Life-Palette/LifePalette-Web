@@ -1,120 +1,132 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import Dialog from '@/components/Dialog.vue'
 import { useFlipDialog } from '@/hooks/useFlipDialog'
-import { nextTick, ref } from 'vue'
+import { getObjVal, list, sleep, to } from '@iceywu/utils'
+import { breakpointsTailwind } from '@vueuse/core'
+import { useRequest } from 'vue-hooks-pure'
+import { topicFindAll } from '~/api/topic'
+import CoverCard from '~/components/Card/CoverCard.vue'
+import { adjustImgData } from '~/utils/tools'
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+
+const cols = computed(() => {
+	if (breakpoints.xl.value)
+return 4
+	if (breakpoints.lg.value)
+return 3
+	if (breakpoints.md.value)
+return 2
+	return 1
+})
+
+const parts = computed(() => {
+	if (!listObj.value?.list?.length)
+return []
+	const result = Array.from(
+		{ length: cols.value },
+		() => [] as typeof listObj.value.list,
+	)
+	listObj.value.list.forEach((item, i) => {
+		result[i % cols.value].push(item)
+	})
+	return result
+})
+
+const {
+	onRefresh,
+	onLoad,
+	result: listObj,
+	search,
+	loading,
+} = useRequest(topicFindAll, {
+	target: 'list',
+	// loadingDelay: 300,
+	getVal: (res) => {
+		const list = getObjVal(res, 'result.data', [])
+		const baseList = list.map((item: any) => {
+			// const fileList = adjustImgData(item.fileList)
+		const	fileList = item.fileList.map((file: any) => {
+				const tempData = adjustImgData(file)
+				return tempData
+			})
+			return {
+				...item,
+				fileList,
+			}
+		})
+		return baseList
+	},
+	listOptions: {
+		defaultPageKey: 'page',
+		defaultSizeKey: 'size',
+		defaultDataKey: 'list',
+		defaultPage: 0,
+		getTotal: (data) => {
+			const total = getObjVal(data, 'result.meta.totalElements', 0)
+			return total
+		},
+	},
+})
 
 const route = useRoute()
 const router = useRouter()
-const { showMask, openDialog, closeDialog, mediaWidth, chooseImage } = useFlipDialog()
+const { showMask, openDialog, closeDialog, mediaWidth, chooseImage }
+	= useFlipDialog()
 
-const list = ref([
-	{
-		file: 'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/noId/_DSC0368.JPG',
-		fileType: 'IMAGE',
-		thumbnail:
-			'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/noId/_DSC0368.JPG?x-oss-process=image/resize,l_500',
-	},
-	{
-    'file': 'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/1/1730813577326.jpg',
-    'fileType': 'IMAGE',
-    'videoSrc': null,
-    'thumbnail': 'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/1/1730813577326.jpg?x-oss-process=image/resize,l_500',
-},
-	{
-		file: 'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/1/1710336302522.JPG',
-		fileType: 'IMAGE',
-		thumbnail:
-			'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/1/1710336302522.JPG?x-oss-process=image/resize,l_500',
-	},
-	{
-		file: 'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/1/1710336303551.JPG',
-		fileType: 'IMAGE',
-		thumbnail:
-			'http://nest-js.oss-accelerate.aliyuncs.com/nestTest/1/1710336303551.JPG?x-oss-process=image/resize,l_500',
-	},
-
-])
-const imgs = computed(() => {
-	return list.value.map((item) => {
-		return item.thumbnail
-	})
-})
-const chooseImageTemp = ref('')
+const chooseItem = ref({})
+const chooseId = ref()
 function handleClick(e: MouseEvent, item: any) {
-	const { file, id, thumbnail } = item
-	chooseImageTemp.value = file
-	openDialog(e, thumbnail)
+	const { id, fileList } = item
+	const tempData = adjustImgData(fileList[0])
+
+	const { file, preSrc } = tempData
+	chooseId.value = id
+	chooseItem.value = item
+	openDialog(e, preSrc)
 	// router.push(`/test?${id}`)
+	// const detailUrl = `${window.location.origin + window.location.pathname}#/test?id=${id}`
+	//           // 使用 pushState 改变 URL 但不触发路由跳转
+	//           history.pushState({ id }, '', detailUrl)
 }
 function handleClose() {
 	closeDialog()
 	// router.back()
+	// const initialUrl = window.location.origin + window.location.pathname
+
+	//       const originalState = history.state
+	// history.replaceState(originalState, '', initialUrl)
 }
 onMounted(() => {
-	console.log('🌈------------------------------>')
+	onRefresh()
 })
 </script>
 
 <template>
-	<div class="animation-page">
-		<div class="left-side" />
-		<div class="flip-animation">
-			<div
-				v-for="(item, index) in list"
-				:key="index"
-				class="flip-card"
-				@click="(e) => handleClick(e, item)"
-			>
-			{{ mediaWidth }}
-				<img :src="item.thumbnail" alt="">
+<div class="box-border h-90vh w-100vw p-5">
+				<ScrollList v-model="listObj" @on-load="onLoad">
+					<div grid="~ cols-1 md:cols-2 lg:cols-3 xl:cols-4  gap-6 ">
+						<div
+							v-for="(items, idx) of parts"
+							:key="idx"
+							flex="~ col  "
+							space-y-4
+>
+							<CoverCard v-for="data of items" :key="data.id" :data @click="(e) => handleClick(e, data)" />
+						</div>
+					</div>
+				</ScrollList>
 			</div>
-		</div>
-		<Dialog
-			v-if="showMask"
-			:media-width="mediaWidth"
-			:image-url="chooseImage"
-			:images="[chooseImage]"
-  :content="{
-    title: '标题',
-    description: '详细描述...',
-    likes: 42,
-    isLiked: false,
-    comments: [
-      {
-        username: '用户1',
-        avatar: 'avatar1.jpg',
-        text: '评论内容',
-        time: '2小时前',
-      },
-    ],
-  }"
-			@close="handleClose"
-		/>
-	</div>
+
+	<Dialog
+		v-if="showMask"
+		:id="chooseId"
+		:data="chooseItem"
+		@close="handleClose"
+	/>
 </template>
 
 <style scoped>
-.animation-page {
-	display: flex;
-	align-content: flex-start;
-	width: 1650px;
-	margin: 0 auto;
-	padding-top: 120px;
-	.left-side {
-		width: 260px;
-	}
-	.flip-animation {
-		display: grid;
-		grid-template-columns: repeat(5, 250px);
-		grid-gap: 10px;
-	}
-}
-.flip-card {
-	> img {
-		width: 100%;
-		border-radius: 20px;
-	}
-}
 .dialog {
 	position: fixed;
 	top: 0;
