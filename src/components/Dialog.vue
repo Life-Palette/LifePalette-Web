@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import DetailCom from '@/pages/detail/[id].vue'
-import { defineEmits, defineProps, ref } from 'vue'
+import { defineEmits, defineProps } from 'vue'
 
 const props = defineProps({
 	mediaWidth: Number,

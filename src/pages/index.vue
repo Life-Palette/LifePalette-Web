@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { listParams } from 'presets/types/axios'
 import Dialog from '@/components/Dialog.vue'
-import { getObjVal, list, sleep, to } from '@iceywu/utils'
+import { getObjVal } from '@iceywu/utils'
 import { breakpointsTailwind } from '@vueuse/core'
 import {
 	A11y,
@@ -12,9 +12,7 @@ import {
 	Virtual,
 } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import InfiniteLoading from 'v3-infinite-loading'
 import { useRequest } from 'vue-hooks-pure'
-import { Starport } from 'vue-starport'
 import { tagFindAll } from '~/api/tag'
 
 import { topicFindAll } from '~/api/topic'
@@ -22,10 +20,9 @@ import CoverCard from '~/components/Card/CoverCard.vue'
 import CardSwiper from '~/components/Card/SwiperCard.vue'
 import LottieNoData from '~/components/Lottie/NoData.vue'
 import Skeleton from '~/components/skeleton'
-import StarportCard from '~/components/StarportCard.vue'
 import { useUserStore } from '~/stores/user'
 import { formatTime } from '~/utils'
-import { adjustImgData, getUserAvatar } from '~/utils/tools'
+import { adjustImgData } from '~/utils/tools'
 
 // Import Swiper Vue.js components
 

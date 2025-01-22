@@ -31,7 +31,6 @@ export function useFlipDialog() {
 	let convertX = 0
 
 	const openDialogHandler = async (e: MouseEvent, imageUrl: string) => {
-		console.log('🐬-----imageUrl-----', imageUrl);
 		chooseImage.value = imageUrl
 		firstInfo = e.target.getBoundingClientRect()
 		const { realWidth } = await loadImg(imageUrl)

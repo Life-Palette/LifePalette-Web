@@ -25,7 +25,7 @@ export const namespaceContextKey: InjectionKey<Ref<string | undefined>>
 export function useGetDerivedNamespace(namespaceOverrides?: Ref<string | undefined>) {
   const derivedNamespace
     = namespaceOverrides
-    || (getCurrentInstance()
+      || (getCurrentInstance()
       ? inject(namespaceContextKey, ref(defaultNamespace))
       : ref(defaultNamespace))
   const namespace = computed(() => {

@@ -46,7 +46,7 @@ export function adjustImgData(data: any) {
  else if (fileType === 'VIDEO') {
 		const srcT
 			= cover
-			|| `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
+			  || `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
 		addInfo = {
 			src: srcT,
 			baseSrc: srcT,

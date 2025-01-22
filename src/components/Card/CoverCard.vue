@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { adjustImgData, getUserAvatar } from '~/utils/tools'
+import { getUserAvatar } from '~/utils/tools'
 
 const props = defineProps({
 
