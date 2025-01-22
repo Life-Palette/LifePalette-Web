@@ -20,10 +20,8 @@ import { formatTime } from '~/utils'
 import { adjustImgData, getUserAvatar } from '~/utils/tools'
 
 const props = defineProps({
-
 	id: Number,
 	data: Object,
-
 })
 
 const userStore = useUserStore()
@@ -52,23 +50,18 @@ async function getDataDe() {
 	const { code, msg, result } = ({} = await topicFindById(parsms))
 	if (code === 200) {
 		dataDe.value = result
-		setTimeout(() => {
-			fileList.value = result?.fileList.map((item) => {
+
+		fileList.value
+			= result?.fileList.map((item) => {
 				return adjustImgData(item)
-}) || []
-		}, 500)
+			}) || []
 	}
  else {
-
 	}
 }
 
-function onSwiper(swiper) {
-
-}
-function onSlideChange() {
-
-}
+function onSwiper(swiper) {}
+function onSlideChange() {}
 const isInitDone = ref(false)
 onMounted(() => {
 	isInitDone.value = false
@@ -80,9 +73,9 @@ onMounted(() => {
 	isInitDone.value = true
 	dataDe.value = props.data
 	fileList.value = props.data?.fileList
-	// getDataDe()
+	getDataDe()
 	getLikeData()
-	// getCommentData();
+	getCommentData()
 })
 
 // 发送评论
@@ -101,7 +94,6 @@ return
 		getCommentData()
 	}
  else {
-
 	}
 	sendLoading.value = false
 }
@@ -115,10 +107,8 @@ async function handleMessageCreate() {
 	}
 	const { code, msg, result } = ({} = await messageCreate(params))
 	if (code === 200) {
-
 	}
  else {
-
 	}
 }
 
@@ -177,7 +167,6 @@ async function getLikeData() {
 		likeList.value = result || []
 	}
  else {
-
 	}
 }
 // 标签信息
@@ -261,7 +250,6 @@ return
 		}
 	}
 	if (err) {
-
 	}
 	getDataLoading.value = false
 }
@@ -304,7 +292,12 @@ return
 								:key="index"
 								class="h-full w-full"
 							>
-								<StarportCard :data="item" :index :img-list="fileList" is-detail />
+								<StarportCard
+									:data="item"
+									:index
+									:img-list="fileList"
+									is-detail
+								/>
 							</component>
 						</component>
 					</div>
@@ -437,7 +430,7 @@ return
 			</div>
 			<!-- 返回按钮 -->
 			<div
-			v-if="0"
+				v-if="0"
 				class="close-icon"
 				:class="{ 'mt-10': isLive }"
 				@click="router.back()"
