@@ -1,7 +1,7 @@
 {
   "name": "lp",
   "type": "module",
-  "version": "0.0.12",
+  "version": "0.1.1",
   "packageManager": "pnpm@9.15.4",
   "description": "Record your memories and craft your own masterpiece of life",
   "author": "IceyWu <https://github.com/IceyWu/>",
