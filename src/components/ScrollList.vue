@@ -28,7 +28,7 @@ const isEmpty = computed(() => {
 	<div class="h-full" style="overflow: auto">
 		<ul
 			v-infinite-scroll="load"
-			:infinite-scroll-distance="10"
+			:infinite-scroll-distance="500"
 			:infinite-scroll-disabled="
 				(listObj.loading || listObj.finished) && !disAbleInfinite
 			"
@@ -40,7 +40,9 @@ const isEmpty = computed(() => {
 		<!-- loading -->
 		<template v-if="listObj.loading">
 			<!-- <p>Loading...</p> -->
-			<el-skeleton style="text-align: start" :rows="2" animated />
+			 <slot name="loading">
+<el-skeleton style="text-align: start" :rows="2" animated />
+			 </slot>
 		</template>
 		<!-- nomore -->
 		<template v-if="listObj.finished && !isEmpty">

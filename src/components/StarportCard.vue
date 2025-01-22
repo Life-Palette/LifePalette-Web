@@ -116,14 +116,15 @@ const coverUrl = computed(() => {
 				:initial-index="index"
 				style="object-fit: contain"
 				:is-need-meta-panel="isDetail"
+				:is-need-preview="true"
 			>
 				<template #location="{ data: tData }">
 					<card-map-card v-if="showMap" ref="mapCardRef" :data="tData" />
 				</template>
 			</Image>
 			<template v-else>
-				<!-- <l-p-image :data="data" :is-show-base="isDetail" /> -->
-				<Image :src="data.preSrc" style="object-fit: cover" />
+				<l-p-image :data="data" :is-show-base="isDetail" />
+				<!-- <Image :src="data.preSrc" style="object-fit: cover" /> -->
 			</template>
 		</template>
 	</div>
