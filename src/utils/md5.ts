@@ -31,8 +31,8 @@ function getFileMD5(file, callback) {
     const end = start + chunkSize >= file.size ? file.size : start + chunkSize
     const blobSlice
 				= window.File.prototype.slice
-				|| window.File.prototype.mozSlice
-				|| window.File.prototype.webkitSlice
+				  || window.File.prototype.mozSlice
+				  || window.File.prototype.webkitSlice
     const pieceFile = blobSlice.call(file, start, end)
     pieceFile.name = file.name
     const tmpObj = {

@@ -23,8 +23,8 @@ export function adjustImgData(data: any) {
 
 	let addInfo = {}
 	if (fileType === 'IMAGE') {
-		let preSrc = `${file}?x-oss-process=image/resize,l_50`
-		let src = `${file}?x-oss-process=image/resize,l_400`
+		let preSrc = `${file}?x-oss-process=image/resize,l_800`
+		let src = `${file}?x-oss-process=image/resize,l_800`
 		let baseSrc = deepClone(url)
 		const fileSuffix = file.substring(file.lastIndexOf('.'))?.toLowerCase()
 
@@ -46,7 +46,7 @@ export function adjustImgData(data: any) {
  else if (fileType === 'VIDEO') {
 		const srcT
 			= cover
-			|| `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
+			  || `${file}?x-oss-process=video/snapshot,t_7000,f_jpg,w_0,h_0,m_fast`
 		addInfo = {
 			src: srcT,
 			baseSrc: srcT,

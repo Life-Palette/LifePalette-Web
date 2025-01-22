@@ -7,7 +7,7 @@ import {
 	ElMessage,
 	ElMessageBox,
 } from 'element-plus'
-import { Starport } from 'vue-starport'
+// import { Starport } from 'vue-starport'
 import { commentCreate } from '~/api/comment'
 import { likeCreate, likeDelete, likeFindById } from '~/api/like'
 import { messageCreate } from '~/api/message'
@@ -19,10 +19,16 @@ import { useUserStore } from '~/stores/user'
 import { formatTime } from '~/utils'
 import { adjustImgData, getUserAvatar } from '~/utils/tools'
 
+const props = defineProps({
+
+	id: Number,
+	data: Object,
+
+})
+
 const userStore = useUserStore()
 
 const { userInfo } = storeToRefs(userStore)
-
 const route = useRoute()
 const router = useRouter()
 const deId = ref('')
@@ -66,19 +72,15 @@ function onSlideChange() {
 const isInitDone = ref(false)
 onMounted(() => {
 	isInitDone.value = false
+
 	const { id } = route.params
 	const { imgCover } = route.query
-	// fileList.value = [{ file: imgCover, fileType: "IMAGE", thumbnail: imgCover }];
-	// fileList.value = [
-	// 	{
-	// 		url: imgCover,
-	// 		type: 'image/jpeg',
-	// 		thumbnail: imgCover,
-	// 	},
-	// ]
-	deId.value = id
+
+	deId.value = id || props.id
 	isInitDone.value = true
-	getDataDe()
+	dataDe.value = props.data
+	fileList.value = props.data?.fileList
+	// getDataDe()
 	getLikeData()
 	// getCommentData();
 })
@@ -271,7 +273,7 @@ return
 		v-model:is-show-dialog="isShowDialog"
 		:data="dataDe"
 	/>
-	<div class="box-border h-full w-full flex gap-5 px-10 pb-2 pt-10 <md:px-1">
+	<div class="box-border h-full w-full flex gap-5">
 		<el-image-viewer
 			v-if="showViewer"
 			:initial-index="initialIndex"
@@ -286,7 +288,7 @@ return
 				<div v-if="fileList.length > 0" class="fraction">
 					{{ currentPlayInfo }}
 				</div>
-				<Starport :port="`my-id${deId}`" style="height: 100%">
+				<div :port="`my-id${deId}`" style="height: 100%">
 					<div class="relative h-full">
 						<component
 							:is="fileList.length > 1 ? ElCarousel : 'div'"
@@ -306,7 +308,7 @@ return
 							</component>
 						</component>
 					</div>
-				</Starport>
+				</div>
 			</div>
 			<div class="de-content overflow-auto flex-1 bg-[#fff]">
 				<!-- 用户信息 -->
@@ -435,6 +437,7 @@ return
 			</div>
 			<!-- 返回按钮 -->
 			<div
+			v-if="0"
 				class="close-icon"
 				:class="{ 'mt-10': isLive }"
 				@click="router.back()"

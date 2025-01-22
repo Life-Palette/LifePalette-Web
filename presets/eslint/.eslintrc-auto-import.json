@@ -369,6 +369,11 @@
     "DirectiveBinding": true,
     "MaybeRef": true,
     "MaybeRefOrGetter": true,
-    "resetPassword": true
+    "resetPassword": true,
+    "onElementRemoval": true,
+    "topicListParams": true,
+    "usePreferredReducedTransparency": true,
+    "useSSRWidth": true,
+    "useFlipDialog": true
   }
 }
