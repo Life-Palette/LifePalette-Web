@@ -115,8 +115,8 @@ const coverUrl = computed(() => {
 				:data="imgList"
 				:initial-index="index"
 				style="object-fit: contain"
-				:is-need-meta-panel="isDetail"
-				:is-need-preview="true"
+				is-need-meta-panel
+				is-need-preview
 			>
 				<template #location="{ data: tData }">
 					<card-map-card v-if="showMap" ref="mapCardRef" :data="tData" />
