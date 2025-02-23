@@ -14,6 +14,9 @@ importers:
       '@iceywu/utils':
         specifier: ^0.0.49
         version: 0.0.49
+      '@life-palette/utils':
+        specifier: ^0.0.3
+        version: 0.0.3
       '@mapbox/mapbox-gl-language':
         specifier: ^1.0.1
         version: 1.0.1(mapbox-gl@3.9.3)
@@ -42,8 +45,8 @@ importers:
         specifier: ^0.8.3
         version: 0.8.3
       l-preview:
-        specifier: ^0.0.34
-        version: 0.0.34(vue@3.5.13(typescript@5.7.3))
+        specifier: ^0.0.37
+        version: 0.0.37(vue@3.5.13(typescript@5.7.3))
       livephotoskit:
         specifier: ^1.5.6
         version: 1.5.6
@@ -1477,6 +1480,9 @@ packages:
 
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
+
+  '@life-palette/utils@0.0.3':
+    resolution: {integrity: sha512-pX8qnNO9qWWf+KKN+f2tsSa3T34ZlXigVyOAp9CrE0rt+ozk7oLGSr2UjCwL22pZHoq0VXEle4TIHEN+omFI6A==}
 
   '@ljharb/through@2.3.12':
     resolution: {integrity: sha512-ajo/heTlG3QgC8EGP6APIejksVAYt4ayz4tqoP3MolFELzcH1x1fzwEYRJTPO0IELutZ5HQ0c26/GqAYy79u3g==}
@@ -3978,8 +3984,8 @@ packages:
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
-  l-preview@0.0.34:
-    resolution: {integrity: sha512-4MUIKt2eELo291PNuXlf8A1GTE8zSUQ15lfnXzJny9eomlTn0Wkz+xrdQArOjzsDTLSNjseBVbzIw5fKSq9UxA==}
+  l-preview@0.0.37:
+    resolution: {integrity: sha512-YQTwVH8Uw382bOrypbzq52wHjcCHOwpZLiKybpOLj6Z//i4tojVkLzMoxfVJTMNp2X/rdtWwQLhW3TYOTYu3pg==}
     peerDependencies:
       vue: ^3.4.0
 
@@ -7372,6 +7378,10 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
+  '@life-palette/utils@0.0.3':
+    dependencies:
+      '@iceywu/utils': 0.0.49
+
   '@ljharb/through@2.3.12':
     dependencies:
       call-bind: 1.0.6
@@ -10228,9 +10238,10 @@ snapshots:
 
   kolorist@1.8.0: {}
 
-  l-preview@0.0.34(vue@3.5.13(typescript@5.7.3)):
+  l-preview@0.0.37(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@iceywu/utils': 0.0.49
+      '@life-palette/utils': 0.0.3
       blurhash: 2.0.5
       live-photo: 0.0.45
       vue: 3.5.13(typescript@5.7.3)

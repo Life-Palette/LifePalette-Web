@@ -1,4 +1,5 @@
 <script setup>
+import { fileParse } from '@life-palette/utils'
 import { Image } from 'l-preview'
 import { adjustImgData } from '~/utils/tools'
 import 'l-preview/dist/style.css'
@@ -56,8 +57,10 @@ watch(
 )
 
 const coverUrl = computed(() => {
-	const baseData = adjustImgData(data)
-	return baseData.cover
+	const baseData = fileParse(data, {
+          resize: 100,
+        })
+	return baseData?.thumbnailUrl
 })
 </script>
 
@@ -117,6 +120,10 @@ const coverUrl = computed(() => {
 				style="object-fit: contain"
 				is-need-meta-panel
 				is-need-preview
+				:is-need-origin="false"
+				:parse-options="{
+					resize: 800,
+				}"
 			>
 				<template #location="{ data: tData }">
 					<card-map-card v-if="showMap" ref="mapCardRef" :data="tData" />
