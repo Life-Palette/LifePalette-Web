@@ -33,7 +33,9 @@ export function useFlipDialog() {
 	const openDialogHandler = async (e: MouseEvent, imageUrl: string) => {
 		chooseImage.value = imageUrl
 		firstInfo = e.target.getBoundingClientRect()
-		const { realWidth } = await loadImg(imageUrl)
+		const [err, res] = await to(loadImg(imageUrl))
+
+		const realWidth = res?.realWidth
 
 		dialogMediaWidth.value = realWidth
 		showMask.value = true
