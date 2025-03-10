@@ -37,7 +37,7 @@ function close() {
   bottom: 0;
   background-color: transparent;
   transition: background-color 0.4s;
-  z-index: 9999;
+  z-index: 999;
 }
 
 .dialog-content {

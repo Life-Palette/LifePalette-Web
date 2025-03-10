@@ -29,6 +29,7 @@ export function useFlipDialog() {
 	let maskNode = null
 	let convertY = 0
 	let convertX = 0
+	let realWidthVal
 
 	const openDialogHandler = async (e: MouseEvent, imageUrl: string) => {
 		chooseImage.value = imageUrl
@@ -36,6 +37,7 @@ export function useFlipDialog() {
 		const [err, res] = await to(loadImg(imageUrl))
 
 		const realWidth = res?.realWidth
+		realWidthVal = realWidth
 
 		dialogMediaWidth.value = realWidth
 		showMask.value = true
@@ -88,6 +90,9 @@ export function useFlipDialog() {
 			dialogNode.addEventListener('transitionend', () => {
 				showMask.value = false
 			})
+			if (!realWidthVal) {
+				showMask.value = false
+			}
 		})
 	}
 
