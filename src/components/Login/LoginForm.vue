@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { useResettaleRef } from 'vue-hooks-pure'
-import { register, resetPassword, sendCode } from '~/api/admin'
+import { register, resetPassword, sendCode, sendCodeEmail } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 import { requestTo } from '~/utils/http/tool'
 
@@ -118,6 +118,7 @@ async function handleSubmit() {
     return
 	const dataParams = {
 		...currentForm.value.value,
+		email: currentForm.value.value.mobile,
 	}
 	const { requestApi, btnText } = currentText.value
 		const { code, result, msg, message, statusCode, data }
@@ -177,10 +178,12 @@ async function getCode() {
   }
   sendLoading.value = true
   const dataParams = {
-    mobile: mobileVal,
+    // mobile: mobileVal,
+		email: mobileVal,
   }
 
-const [err] = await requestTo(sendCode(dataParams))
+// const [err] = await requestTo(sendCode(dataParams))
+const [err] = await requestTo(sendCodeEmail(dataParams))
 if (err) {
 	  ElMessage.error('验证码发送失败')
 }
@@ -236,9 +239,8 @@ function checkForm() {
 			<input
 				v-model="registForm.mobile"
 				type="text"
-				maxlength="11"
 				class="input"
-				placeholder="请输入手机号"
+				placeholder="请输入邮箱"
 			>
 
 			<input
@@ -276,7 +278,6 @@ function checkForm() {
 			<input
 				v-model="loginForm.account"
 				type="text"
-				maxlength="11"
 				class="input"
 				placeholder="请输入手机号或LP账号"
 			>
@@ -294,9 +295,8 @@ function checkForm() {
 			<input
 				v-model="forgetForm.mobile"
 				type="text"
-				maxlength="11"
 				class="input"
-				placeholder="请输入手机号"
+				placeholder="请输入邮箱(手机号)"
 			>
 
 			<input
@@ -316,7 +316,6 @@ function checkForm() {
 			<div class="w-full flex gap-3">
 				<input
 					v-model="forgetForm.code"
-					type="password"
 					class="input"
 					maxlength="4"
 					placeholder="请输入验证码"
@@ -329,10 +328,14 @@ function checkForm() {
 				</button>
 			</div>
 		</template>
-
+		<div
+			class="tip"
+			>
+				提示: 手机号因为相关服务商限制,相关短信功能暂已停用(之前注册的手机号可以继续使用手机+密码登录)；后续用户请使用邮箱注册/登录。如遇问题,欢迎请联系作者(WeChat:  restsun)💕。
+			</div>
 		<!-- 注册 -->
 		<div class="box-border w-full flex pr-3">
-			<div class="flex-1" />
+<div class="flex-1" />
 			<div
 				v-if="target === 'login'"
 				class="cursor-pointer"
@@ -442,5 +445,9 @@ function checkForm() {
 
 .overlay__btn-emoji {
 	margin-left: 0.375rem;
+}
+.tip{
+	font-size: 12px;
+	color: #999;
 }
 </style>

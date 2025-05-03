@@ -57,6 +57,17 @@ export function sendCode(data) {
     },
   )
 }
+// 发生验证码
+export function sendCodeEmail(data) {
+  return http.request(
+    'post',
+    '/code/sendEmail',
+    { data },
+    {
+      isNeedToken: false, // 是否需要token
+    },
+  )
+}
 // 注册
 export function register(data) {
   return http.request(
