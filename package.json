@@ -57,7 +57,7 @@
     "viewerjs": "^1.11.7",
     "vite-plugin-use-modules": "^1.4.8",
     "vue-cropper": "^1.1.1",
-    "vue-hooks-pure": "^0.0.29",
+    "vue-hooks-pure": "^0.0.33",
     "vue-starport": "^0.4.0",
     "vue-virtual-scroller": "2.0.0-beta.8",
     "vue-waterfall-plugin-next": "^2.6.5"

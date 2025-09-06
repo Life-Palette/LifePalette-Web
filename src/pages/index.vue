@@ -114,13 +114,18 @@ function handleClick(e: MouseEvent, item: any) {
 	chooseItem.value = item
 	openDialog(e, preSrc)
 }
-
-onMounted(async () => {
-	await getTagData()
+const loaidngFlag = ref(true)
+async function initData() {
+	getTagData()
 	onRefresh()
+}
+
+onMounted(() => {
+	initData()
 })
 const tagList = ref<Partial<tagItem>[]>([])
 async function getTagData() {
+		loaidngFlag.value = true
 	const params = {
 		sort: 'asc,createdAt',
 	}
@@ -139,6 +144,7 @@ async function getTagData() {
 	}
  else {
 	}
+		loaidngFlag.value = false
 }
 
 function handleTagClick(item: tagItem) {
@@ -183,9 +189,40 @@ function handleClose() {
 	//       const originalState = history.state
 	// history.replaceState(originalState, '', initialUrl)
 }
+const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 </script>
 
 <template>
+	<DefineTemplate>
+		<Skeleton
+			:loading="listObj.loading || loaidngFlag"
+			:grid-cols="cols"
+			:count="3"
+		>
+			<template #template>
+				<el-skeleton-item
+					variant="image"
+					class="w-auto"
+					style="height: 140px"
+				/>
+				<div class="mt-2">
+					<el-skeleton-item variant="p" class="w-1/2" />
+					<div
+						style="
+							display: flex;
+							align-items: center;
+							justify-items: space-between;
+						"
+					>
+						<el-skeleton-item variant="text" class="mr-8" />
+						<el-skeleton-item variant="text" class="w-3/10" />
+					</div>
+				</div>
+			</template>
+
+			<template #default />
+		</Skeleton>
+	</DefineTemplate>
 	<div class="h-full flex flex-col gap-0 flex-1 overflow-auto">
 		<div class="mb-4 mt-8 flex <md:flex-col">
 			<!-- 标签列表 -->
@@ -291,34 +328,7 @@ function handleClose() {
 						<div style="height: calc(100vh - 180px)">
 							<ScrollList v-model="listObj" @on-load="onLoad">
 								<template #loading>
-									<Skeleton
-										:loading="listObj.loading"
-										:grid-cols="cols"
-										:count="3"
-									>
-										<template #template>
-											<el-skeleton-item
-												variant="image"
-												class="w-auto"
-												style="height: 140px"
-											/>
-											<div class="mt-2">
-												<el-skeleton-item variant="p" class="w-1/2" />
-												<div
-													style="
-														display: flex;
-														align-items: center;
-														justify-items: space-between;
-													"
-												>
-													<el-skeleton-item variant="text" class="mr-8" />
-													<el-skeleton-item variant="text" class="w-3/10" />
-												</div>
-											</div>
-										</template>
-
-										<template #default />
-									</Skeleton>
+									<ReuseTemplate />
 								</template>
 								<div grid="~ cols-1 md:cols-2 lg:cols-3 xl:cols-4  gap-6 ">
 									<div
@@ -338,6 +348,9 @@ function handleClose() {
 							</ScrollList>
 						</div>
 					</template>
+				</template>
+				<template v-else-if="loaidngFlag || listObj.loading">
+					<ReuseTemplate />
 				</template>
 				<!-- 无数据 -->
 				<template v-else>

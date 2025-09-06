@@ -374,6 +374,7 @@
     "topicListParams": true,
     "usePreferredReducedTransparency": true,
     "useSSRWidth": true,
-    "useFlipDialog": true
+    "useFlipDialog": true,
+    "sendCodeEmail": true
   }
 }
