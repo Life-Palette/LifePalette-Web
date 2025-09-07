@@ -98,7 +98,7 @@ onMounted(async () => {
 	<el-dropdown popper-class="!z-99999" trigger="click" placement="bottom-end">
 		<span class="navbar-bg-hover dropdown-badge select-none">
 			<el-badge :value="noticesNum" :hidden="noticesNum === 0" :max="99">
-				<div i-carbon-notification-new mt-1.5 icon-btn />
+				<div i-carbon-notification-new icon-btn mt-1.5 />
 			</el-badge>
 		</span>
 		<template #dropdown>
@@ -136,35 +136,35 @@ onMounted(async () => {
 
 <style lang="less" scoped>
 .dropdown-badge {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 48px;
-	margin-right: 10px;
-	cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 48px;
+  margin-right: 10px;
+  cursor: pointer;
 
-	.header-notice-icon {
-		font-size: 18px;
-	}
+  .header-notice-icon {
+    font-size: 18px;
+  }
 }
 
 .dropdown-tabs {
-	.noticeList-container {
-		z-index: 99999;
-		padding: 15px 24px 0;
-	}
+  .noticeList-container {
+    z-index: 99999;
+    padding: 15px 24px 0;
+  }
 
-	:deep(.el-tabs__header) {
-		margin: 0;
-	}
+  :deep(.el-tabs__header) {
+    margin: 0;
+  }
 
-	:deep(.el-tabs__nav-wrap)::after {
-		height: 1px;
-	}
+  :deep(.el-tabs__nav-wrap)::after {
+    height: 1px;
+  }
 
-	:deep(.el-tabs__nav-wrap) {
-		padding: 0 36px;
-	}
+  :deep(.el-tabs__nav-wrap) {
+    padding: 0 36px;
+  }
 }
 </style>

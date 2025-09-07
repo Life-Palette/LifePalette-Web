@@ -27,7 +27,7 @@
 
 - 🚩 **Personal information modification**: To be developed...
 
-- 📦 **livephoto**: Show live photos, [how  to uploud livephoto](./public/docs/livePhoto/README.md)
+- 📦 **livephoto**: Show live photos, [how to uploud livephoto](./public/docs/livePhoto/README.md)
 
 ## Features
 
@@ -35,7 +35,7 @@
 
 - 📦 [Components auto importing](./src/components)
 
-- 🐻‍❄️ [livephoto](https://developer.apple.com/live-photos),[how  to uploud livephoto](./public/docs/livePhoto/README.md)
+- 🐻‍❄️ [livephoto](https://developer.apple.com/live-photos),[how to uploud livephoto](./public/docs/livePhoto/README.md)
 
 - 🍍 [State Management via Pinia](https://pinia.vuejs.org/)
 

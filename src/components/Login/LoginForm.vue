@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { useResettaleRef } from 'vue-hooks-pure'
-import { register, resetPassword, sendCode, sendCodeEmail } from '~/api/admin'
+import { register, resetPassword, sendCodeEmail } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 import { requestTo } from '~/utils/http/tool'
 
@@ -228,10 +228,10 @@ function checkForm() {
 </script>
 
 <template>
-	<div class="h-full w-full flex flex-col items-center gap-3">
+	<div class="flex flex-col gap-3 h-full w-full items-center">
 		<span class="title">Have a good day!</span>
 		<span class="sub mb">{{ currentText.title }}</span>
-		<div class="flex flex-1 items-center justify-center text-6xl">
+		<div class="text-6xl flex flex-1 items-center justify-center">
 			{{ currentText.icon }}
 		</div>
 		<!-- 注册 -->
@@ -257,7 +257,7 @@ function checkForm() {
 				maxlength="16"
 				placeholder="请再次输入密码"
 			>
-			<div class="w-full flex gap-3">
+			<div class="flex gap-3 w-full">
 				<input
 					v-model="registForm.code"
 					type="password"
@@ -313,7 +313,7 @@ function checkForm() {
 				maxlength="16"
 				placeholder="请再次输入新密码"
 			>
-			<div class="w-full flex gap-3">
+			<div class="flex gap-3 w-full">
 				<input
 					v-model="forgetForm.code"
 					class="input"
@@ -334,7 +334,7 @@ function checkForm() {
 				提示: 手机号因为相关服务商限制,相关短信功能暂已停用(之前注册的手机号可以继续使用手机+密码登录)；后续用户请使用邮箱注册/登录。如遇问题,欢迎请联系作者(WeChat:  restsun)💕。
 			</div>
 		<!-- 注册 -->
-		<div class="box-border w-full flex pr-3">
+		<div class="pr-3 flex w-full box-border">
 <div class="flex-1" />
 			<div
 				v-if="target === 'login'"
@@ -344,7 +344,7 @@ function checkForm() {
 				注册账号
 			</div>
 			<div v-else class="cursor-pointer" @click="setTarget('login')">登录</div>
-			<div class="cursor-pointer ml-2" @click="setTarget('forget')">
+			<div class="ml-2 cursor-pointer" @click="setTarget('forget')">
 				忘记密码
 			</div>
 		</div>
@@ -358,26 +358,26 @@ function checkForm() {
 
 <style lang="less" scoped>
 .title {
-	color: black;
-	font-weight: bold;
-	text-align: center;
-	font-size: 20px;
-	margin-bottom: 4px;
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 4px;
 }
 
 .sub {
-	text-align: center;
-	color: black;
-	font-size: 14px;
-	width: 100%;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  width: 100%;
 }
 
 .sub.mb {
-	margin-bottom: 1px;
+  margin-bottom: 1px;
 }
 
 .sub a {
-	color: rgb(23, 111, 211);
+  color: rgb(23, 111, 211);
 }
 
 // .input,
@@ -403,51 +403,51 @@ function checkForm() {
 // }
 
 .input {
-	box-sizing: border-box;
-	border: 1px solid transparent;
-	cursor: pointer;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  cursor: pointer;
 
-	outline: none;
-	width: 100%;
-	padding: 16px 10px;
-	background-color: rgb(247, 243, 243);
+  outline: none;
+  width: 100%;
+  padding: 16px 10px;
+  background-color: rgb(247, 243, 243);
 
-	border-radius: 10px;
-	box-shadow:
-		12.5px 12.5px 10px rgba(0, 0, 0, 0.015),
-		100px 100px 80px rgba(0, 0, 0, 0.03);
-	&:focus {
-		border: 1px solid rgb(23, 111, 211);
-	}
+  border-radius: 10px;
+  box-shadow:
+    12.5px 12.5px 10px rgba(0, 0, 0, 0.015),
+    100px 100px 80px rgba(0, 0, 0, 0.03);
+  &:focus {
+    border: 1px solid rgb(23, 111, 211);
+  }
 }
 
 .overlay__btn {
-	margin-top: 6px;
-	width: 100%;
-	height: 2.5rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 0.875rem;
-	font-weight: 600;
+  margin-top: 6px;
+  width: 100%;
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
 
-	background: hsl(276, 100%, 9%);
-	color: hsl(0, 0%, 100%);
-	border: none;
-	border-radius: 0.5rem;
-	transition: transform 450ms ease;
+  background: hsl(276, 100%, 9%);
+  color: hsl(0, 0%, 100%);
+  border: none;
+  border-radius: 0.5rem;
+  transition: transform 450ms ease;
 }
 
 .overlay__btn:hover {
-	transform: scale(1.05);
-	cursor: pointer;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 .overlay__btn-emoji {
-	margin-left: 0.375rem;
+  margin-left: 0.375rem;
 }
-.tip{
-	font-size: 12px;
-	color: #999;
+.tip {
+  font-size: 12px;
+  color: #999;
 }
 </style>

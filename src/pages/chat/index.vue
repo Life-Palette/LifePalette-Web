@@ -186,7 +186,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="box-border w-full flex flex-col gap-5 p-10">
+  <div class="p-10 flex flex-col gap-5 w-full box-border">
     <!-- 绑定输入房间号 -->
     <div class="flex flex-col gap-5">
       <div flex>
@@ -197,7 +197,7 @@ onMounted(async () => {
         />
       </div>
 
-      <div flex items-center gap-5>
+      <div flex gap-5 items-center>
         <!-- 房间状态 -->
         <h1 class="whitespace-nowrap">
           房间状态:{{ status }}
@@ -217,7 +217,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="box-border p-5">
+    <div class="p-5 box-border">
       <DynamicScroller
         ref="chatViewRef"
         class="chat-view"

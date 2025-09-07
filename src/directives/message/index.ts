@@ -1,6 +1,6 @@
 import type { DirectiveBinding } from 'vue'
 
-const handleLinkData = function (values: string) {
+function handleLinkData(values: string) {
   let str = values
   console.log('🍪-----str-----', str)
   const reg

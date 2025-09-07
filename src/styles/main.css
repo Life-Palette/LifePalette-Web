@@ -1,55 +1,77 @@
 @import './md.css';
 
-
 html.dark {
-	background: #121212  !important;
+  background: #191a23 !important;
 }
 
 .prose {
-	scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 #nprogress {
-	pointer-events: none;
+  pointer-events: none;
 }
 
 #nprogress .bar {
-	@apply bg-blue-700 bg-opacity-75;
+  background: rgba(29, 78, 216, 0.75);
+  background: repeating-linear-gradient(90deg, #00dc82 0, #34cdfe 50%, #0047e1);
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
 
-	background: repeating-linear-gradient(90deg, #00dc82 0, #34cdfe 50%, #0047e1);
-	position: fixed;
-	z-index: 1031;
-	top: 0;
-	left: 0;
-
-	width: 100%;
-	height: 2px;
+  width: 100%;
+  height: 2px;
 }
 
 /*
 * 全局滚动条
 */
 ::-webkit-scrollbar {
-	width: 8px;
-	height: 11px;
-	background-color: rgb(246, 247, 248);
+  width: 8px;
+  height: 11px;
+  background-color: rgb(246, 247, 248);
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: rgb(233, 236, 239);
-	border-radius: 10px;
+  background-color: rgb(233, 236, 239);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-track {
-	background-color: rgb(246, 247, 248);
-	border-radius: 10px;
+  background-color: rgb(246, 247, 248);
+  border-radius: 10px;
 }
 
 html.dark ::-webkit-scrollbar,
 html.dark ::-webkit-scrollbar-track {
-	background-color: #212529;
+  background-color: #212529;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-	background-color: #343a40;
+  background-color: #343a40;
+}
+
+@font-face {
+  font-family: 'SmileySansOblique';
+  src: url('@/assets/font/SmileySans-Oblique.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body::before {
+  opacity: 0.56;
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('@/assets/img/bg.png');
+  background-position: top 0 right 0;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: -1;
 }

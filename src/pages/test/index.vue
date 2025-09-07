@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Dialog from '@/components/Dialog.vue'
-import { useFlipDialog } from '@/hooks/useFlipDialog'
 import { getObjVal } from '@iceywu/utils'
 import { breakpointsTailwind } from '@vueuse/core'
 import { useRequest } from 'vue-hooks-pure'
+import Dialog from '@/components/Dialog.vue'
+import { useFlipDialog } from '@/hooks/useFlipDialog'
 import { topicFindAll } from '~/api/topic'
 import CoverCard from '~/components/Card/CoverCard.vue'
 import { adjustImgData } from '~/utils/tools'
@@ -103,7 +103,7 @@ onMounted(() => {
 </script>
 
 <template>
-<div class="box-border h-90vh w-100vw p-5">
+<div class="p-5 h-90vh w-100vw box-border">
 				<ScrollList v-model="listObj" @on-load="onLoad">
 					<div grid="~ cols-1 md:cols-2 lg:cols-3 xl:cols-4  gap-6 ">
 						<div
@@ -128,50 +128,50 @@ onMounted(() => {
 
 <style scoped>
 .dialog {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: transparent;
-	transition: background-color 0.4s;
-	z-index: 9999;
-	.dialog-content {
-		display: flex;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%) scale(1);
-		height: calc(100% - 64px);
-		background-color: #fff;
-		border-radius: 20px;
-		overflow: visible;
-		.left-container {
-			flex-shrink: 0;
-			flex-grow: 0;
-			height: 100%;
-			border-radius: 20px 0 0 20px;
-			overflow: hidden;
-			img {
-				max-width: 100%;
-				max-height: 100%;
-				object-fit: contain;
-			}
-		}
-		.right-container {
-			width: 440px;
-			flex-shrink: 0;
-			flex-grow: 1;
-			border-radius: 0 20px 20px 0;
-			overflow: hidden;
-			padding: 10px;
-			img {
-				max-width: 100%;
-				max-height: 100%;
-				object-fit: contain;
-			}
-		}
-	}
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  transition: background-color 0.4s;
+  z-index: 9999;
+  .dialog-content {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    height: calc(100% - 64px);
+    background-color: #fff;
+    border-radius: 20px;
+    overflow: visible;
+    .left-container {
+      flex-shrink: 0;
+      flex-grow: 0;
+      height: 100%;
+      border-radius: 20px 0 0 20px;
+      overflow: hidden;
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+    }
+    .right-container {
+      width: 440px;
+      flex-shrink: 0;
+      flex-grow: 1;
+      border-radius: 0 20px 20px 0;
+      overflow: hidden;
+      padding: 10px;
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+    }
+  }
 }
 </style>
 

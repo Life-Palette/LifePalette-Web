@@ -24,7 +24,7 @@ const msg = ref('')
 
 <template>
   <VDropdown :distance="6">
-    <div i-carbon-notification-new mt-1.5 icon-btn />
+    <div i-carbon-notification-new icon-btn mt-1.5 />
 
     <template #popper>
       4444444444444

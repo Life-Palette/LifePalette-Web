@@ -5,7 +5,7 @@ import Legacy from '@vitejs/plugin-legacy'
 import Vue from '@vitejs/plugin-vue'
 import Jsx from '@vitejs/plugin-vue-jsx'
 import Prism from 'markdown-it-prism'
-import UnoCss from 'unocss/vite'
+import UnoCSS from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 
 import {
@@ -35,7 +35,7 @@ import { AutoGenerateImports, vue3Presets } from 'vite-auto-import-resolvers'
 import Compression from 'vite-plugin-compression'
 import EnvTypes from 'vite-plugin-env-types'
 
-import { viteMockServe as Mock } from 'vite-plugin-mock'
+import { vitePluginFakeServer } from 'vite-plugin-fake-server'
 import Removelog from 'vite-plugin-removelog'
 import Modules from 'vite-plugin-use-modules'
 import VueDevTools from 'vite-plugin-vue-devtools'
@@ -122,10 +122,14 @@ export default function () {
 		}),
 		/**
 		 * mock 服务
-		 * https://github.com/vbenjs/vite-plugin-mock
 		 */
-		Mock({
-			prodEnabled: env.VITE_APP_MOCK_IN_PRODUCTION,
+
+		// mock支持
+		vitePluginFakeServer({
+			logger: false,
+			include: 'mock',
+			infixName: false,
+			enableProd: env.VITE_APP_MOCK_IN_PRODUCTION,
 		}),
 		/**
 		 * 组件自动按需引入
@@ -199,7 +203,7 @@ export default function () {
 		 * css 原子引擎
 		 * https://github.com/unocss/unocss
 		 */
-		UnoCss({
+		UnoCSS({
 			safelist: env.VITE_APP_MARKDOWN ? safelist.split(' ') : undefined,
 		}),
 	]
@@ -259,8 +263,8 @@ export default function () {
 						'vue-router/auto': ['useLink'],
 					},
 					{
-						'@iceywu/utils': ['to', 'list', 'sleep', 'consolePlus'],
-					},
+              '@iceywu/utils': ['to', 'list', 'sleep', 'consolePlus'],
+          },
 				],
 				resolvers: detectResolvers({
 					onlyExist: [
@@ -273,7 +277,6 @@ export default function () {
 					globalsPropValue: true,
 					filepath: r('presets/eslint/.eslintrc-auto-import.json'),
 				},
-				ignore: ['h'], // 自动添加 import { h } from '/node_modules/.vite/deps/vue.js 代码问题处理
 			}),
 		)
 	}

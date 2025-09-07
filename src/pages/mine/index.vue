@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Loginabout from '@/components/Login/Loginabout.vue'
 import { isObject } from '@iceywu/utils'
 import { ElMessage } from 'element-plus'
+import Loginabout from '@/components/Login/Loginabout.vue'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import ImgIcon5 from '~/assets/image/icons/collect.png'
 import ImgIcon3 from '~/assets/image/icons/contribute.png'
@@ -204,7 +204,7 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
 />
 	<div class="test h-full w-full">
 		<header
-class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEditInfo = true"
+class="header-box cursor-pointer z-99" @click="openUpload" @mouseenter="showEditInfo = true"
 			@mouseleave="showEditInfo = false"
 >
 			<!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
@@ -228,7 +228,7 @@ class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEdit
 				</div>
 			</div>
 		</div>
-		<main class="z-1 w-full">
+		<main class="w-full z-1">
 			<UserBottom />
 		</main>
 		<div>
@@ -252,7 +252,8 @@ class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEdit
   --cover-range: calc(var(--header-scroll) - (var(--title-height))) calc(var(--header-scroll) * 1);
   --title-range: calc((var(--header-scroll) - (var(--title-height) * 2)))
     calc((var(--header-scroll) - (var(--title-height) * -0.25)));
-  --avatar-range: calc((var(--header-scroll) - (var(--title-height) * 1.5)))
+  --avatar-range:
+    calc((var(--header-scroll) - (var(--title-height) * 1.5)))
       calc((var(--header-scroll) + (var(--title-height) * 0.95))),
     calc((var(--header-scroll) - (var(--title-height) * 2.5)))
       calc((var(--header-scroll) + (var(--title-height) * 0.95)));
@@ -287,30 +288,30 @@ class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEdit
     // filter: blur(5px);
     height: 24em;
   }
-  .edit-info{
-  position:absolute;
-  right:319px;
-  bottom: 30px;
-  border-radius: 4px;
-  border: 1px solid #e8d4c9;
-  padding: 7px 12px;
-  z-index: 999 !important;
-  opacity: 1;
+  .edit-info {
+    position: absolute;
+    right: 319px;
+    bottom: 30px;
+    border-radius: 4px;
+    border: 1px solid #e8d4c9;
+    padding: 7px 12px;
+    z-index: 999 !important;
+    opacity: 1;
   }
 
-//   v2过渡类名
-// .fade-enter,
-// .fade-leave-to
-// /* .fade-leave-active in <2.1.8 */
+  //   v2过渡类名
+  // .fade-enter,
+  // .fade-leave-to
+  // /* .fade-leave-active in <2.1.8 */
 
-// v3过渡类名
+  // v3过渡类名
   .fade-enter-from,
-  .fade-leave-to{
-	opacity: 0;; //初始透明
+  .fade-leave-to {
+    opacity: 0; //初始透明
   }
   .fade-enter-active,
-  .fade-leave-active{
-	transition: opacity .4s ease;
+  .fade-leave-active {
+    transition: opacity 0.4s ease;
   }
 }
 
@@ -357,7 +358,7 @@ class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEdit
 
 .avatar {
   // width: var(--size-6);
-	width: 200px;
+  width: 200px;
   height: 200px;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -421,7 +422,7 @@ class="header-box z-99 cursor-pointer" @click="openUpload" @mouseenter="showEdit
   .desc {
     font-size: var(--size-4);
     font-weight: 400;
-	cursor: pointer;
+    cursor: pointer;
   }
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <nav v-motion-slide-top mb-6 w-full f-c inline-flex gap-2 text-xl>
+  <nav v-motion-slide-top text-xl mb-6 f-c inline-flex gap-2 w-full>
     I am footer!
   </nav>
 </template>

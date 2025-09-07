@@ -1,5 +1,4 @@
 <script setup>
-import { showPreView } from '@/utils/popup'
 import { to } from '@iceywu/utils'
 import {
 	ElCarousel,
@@ -7,6 +6,7 @@ import {
 	ElMessage,
 	ElMessageBox,
 } from 'element-plus'
+import { showPreView } from '@/utils/popup'
 // import { Starport } from 'vue-starport'
 import { commentCreate } from '~/api/comment'
 import { likeCreate, likeDelete, likeFindById } from '~/api/like'
@@ -261,7 +261,7 @@ return
 		v-model:is-show-dialog="isShowDialog"
 		:data="dataDe"
 	/>
-	<div class="box-border h-full w-full flex gap-5">
+	<div class="flex gap-5 h-full w-full box-border">
 		<el-image-viewer
 			v-if="showViewer"
 			:initial-index="initialIndex"
@@ -271,13 +271,13 @@ return
 		<div class="conten-box <2xl:flex-col">
 			<div
 				style="flex-shrink: 0"
-				class="img-con relative flex-1 flex-shrink-0 <xl:h-80 <xl:w-full <xl:flex-initial"
+				class="img-con flex-1 flex-shrink-0 relative <xl:flex-initial <xl:h-80 <xl:w-full"
 			>
 				<div v-if="fileList.length > 0" class="fraction">
 					{{ currentPlayInfo }}
 				</div>
 				<div :port="`my-id${deId}`" style="height: 100%">
-					<div class="relative h-full">
+					<div class="h-full relative">
 						<component
 							:is="fileList.length > 1 ? ElCarousel : 'div'"
 							:disabled="true"
@@ -303,17 +303,14 @@ return
 					</div>
 				</div>
 			</div>
-			<div class="de-content overflow-auto flex-1 bg-[#fff]">
+			<div class="de-content bg-[#fff] flex-1 overflow-auto">
 				<!-- 用户信息 -->
 				<section>
 					<div class="content-user">
 						<img
 							class="img-avatar"
-							block
-							h-full
-							w-full
-							bg-gray-400:20
-							object-cover
+
+							 bg-gray-400:20 h-full w-full block object-cover
 							:src="getUserAvatar(dataDe.User)"
 						>
 						<div class="user-name">
@@ -322,12 +319,12 @@ return
 						<div class="flex-1" />
 						<div
 							v-if="isShowEdit"
-							class="i-carbon-trash-can mr-2 cursor-pointer text-xl"
+							class="i-carbon-trash-can text-xl mr-2 cursor-pointer"
 							@click="open(dataDe?.id)"
 						/>
 						<div
 							v-if="isShowEdit"
-							class="i-carbon-edit cursor-pointer text-xl"
+							class="i-carbon-edit text-xl cursor-pointer"
 							@click="handleEdit"
 						/>
 					</div>
@@ -341,22 +338,22 @@ return
 						{{ dataDe.title }}
 					</div>
 					<!-- 内容 -->
-					<div class="title-content py-5 text-start text-[#333]">
+					<div class="title-content text-[#333] py-5 text-start">
 						{{ dataDe.content }}
 					</div>
 					<!-- 标签 -->
-					<div class="title-content py-5 text-start text-lg text-[#13386c]">
+					<div class="title-content text-lg text-[#13386c] py-5 text-start">
 						{{ tagDe }}
 					</div>
 					<!-- 时间 -->
 					<div
-						class="title-content py-5 text-start text-sm text-[rgb(51,51,51,0.6)]"
+						class="title-content text-sm text-[rgb(51,51,51,0.6)] py-5 text-start"
 					>
 						{{ formatTime(dataDe.createdAt, "YYYY-MM-DD HH:mm") }}
 					</div>
 
-					<div class="box-border w-full">
-						<div class="h-[1px] w-full bg-[rgb(0,0,0,0.1)]" />
+					<div class="w-full box-border">
+						<div class="bg-[rgb(0,0,0,0.1)] h-[1px] w-full" />
 					</div>
 					<!-- 标签列表 -->
 					<div class="flex-1">
@@ -369,11 +366,11 @@ return
 					</div>
 				</section>
 
-				<section class="w-full flex flex-col gap-6 bg-white">
+				<section class="bg-white flex flex-col gap-6 w-full">
 					<!-- 基本信息 -->
-					<div class="flex gap-4 text-[#333]">
+					<div class="text-[#333] flex gap-4">
 						<!-- 点赞 -->
-						<div class="flex items-end gap-2">
+						<div class="flex gap-2 items-end">
 							<!-- <div
                 v-if="dataDe.like"
                 class="i-carbon-favorite-filled text-[#ff4d4f] text-xl"
@@ -393,7 +390,7 @@ return
               <div class="text-sm">{{ 0 }}</div>
             </div> -->
 						<!-- 评论 -->
-						<div class="flex items-end gap-2">
+						<div class="flex gap-2 items-end">
 							<div class="i-carbon-chat text-xl" />
 							<div class="text-sm">
 								{{ comNum }}
@@ -403,7 +400,7 @@ return
 					</div>
 					<!-- 评论 -->
 
-					<div class="w-full flex gap-5">
+					<div class="flex gap-5 w-full">
 						<div class="input-wrapper flex-1">
 							<input
 								v-model="commentContent"
@@ -444,173 +441,173 @@ return
 <style lang="less" scoped>
 // 隐藏滚动条
 ::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 .conten-box {
-	height: 100%;
-	width: 100%;
-	background: rgba(255, 255, 255, 0.775);
-	box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
-	border-radius: 15px;
-	border: 1px solid rgba(255, 255, 255, 0.125);
-	//   高斯模糊
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	box-sizing: border-box;
-	overflow: hidden;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.775);
+  box-shadow: 0 0.75rem 2rem 0 rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  //   高斯模糊
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  overflow: hidden;
 
-	display: flex;
-	position: relative;
-	.img-con {
-		border-radius: 15px;
-		overflow: hidden;
-	}
-	.de-content {
-		box-sizing: border-box;
-		padding: 20px 24px;
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-	.close-icon {
-		position: absolute;
-		top: 10px;
-		left: 10px;
-		z-index: 99999;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border-radius: 100%;
-		width: 40px;
-		height: 40px;
-		border-radius: 40px;
-		background: #fff;
-		border: 1px solid rgba(0, 0, 0, 0.08);
-		box-shadow:
-			0 1px 2px rgba(0, 0, 0, 0.025),
-			0 2px 8px rgba(0, 0, 0, 0.05);
-		cursor: pointer;
-		transition: all 0.3s;
-		// color: var(--color-secondary-label);
-	}
+  display: flex;
+  position: relative;
+  .img-con {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  .de-content {
+    box-sizing: border-box;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.025),
+      0 2px 8px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    // color: var(--color-secondary-label);
+  }
 }
 :deep(.el-carousel) {
-	height: 100%;
-	.el-carousel__container {
-		height: 100%;
-	}
+  height: 100%;
+  .el-carousel__container {
+    height: 100%;
+  }
 }
 
 // 用户信息
 .content-user {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	.img-avatar {
-		width: 30px;
-		height: 30px;
-		border-radius: 20px;
-		border: 0.5px solid #e6e6e6;
-	}
-	.user-name {
-		color: #666;
-		font-size: 16px;
-	}
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  .img-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    border: 0.5px solid #e6e6e6;
+  }
+  .user-name {
+    color: #666;
+    font-size: 16px;
+  }
 }
 // 标题
 .title-part {
-	margin: 0 10px;
-	.title-desc {
-		text-align: left;
-		font-weight: 600;
-		font-size: 20px;
-		line-height: 32px;
-		color: #333;
-	}
+  margin: 0 10px;
+  .title-desc {
+    text-align: left;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 32px;
+    color: #333;
+  }
 }
 .input-wrapper {
-	display: flex;
-	position: relative;
-	width: 100%;
-	flex-shrink: 0;
-	transition: flex 0.3s;
+  display: flex;
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  transition: flex 0.3s;
 
-	.comment-input {
-		box-sizing: border-box;
-		padding: 12px 92px 12px 36px;
+  .comment-input {
+    box-sizing: border-box;
+    padding: 12px 92px 12px 36px;
 
-		background-repeat: no-repeat;
-		background-size: 16px 16px;
-		background-position: 16px 12px;
-		width: 100%;
-		height: 40px;
-		line-height: 16px;
-		background: #f5f5f5;
-		caret-color: #5b92e1;
-		border-radius: 22px;
-		border: none;
-		outline: none;
-		// resize: none;
-	}
-	.input-buttons {
-		position: absolute;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding: 0 10px;
-		.i-carbon-send {
-			font-size: 20px;
-			color: #5b92e1;
-			cursor: pointer;
-		}
-	}
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    background-position: 16px 12px;
+    width: 100%;
+    height: 40px;
+    line-height: 16px;
+    background: #f5f5f5;
+    caret-color: #5b92e1;
+    border-radius: 22px;
+    border: none;
+    outline: none;
+    // resize: none;
+  }
+  .input-buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    .i-carbon-send {
+      font-size: 20px;
+      color: #5b92e1;
+      cursor: pointer;
+    }
+  }
 }
 .overlay__btn {
-	width: 100px;
-	margin-top: 6px;
+  width: 100px;
+  margin-top: 6px;
 
-	height: 2.5rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 0.875rem;
-	font-weight: 600;
+  height: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
 
-	background: hsl(276, 100%, 9%);
-	color: hsl(0, 0%, 100%);
-	border: none;
-	border-radius: 0.5rem;
-	transition: transform 450ms ease;
+  background: hsl(276, 100%, 9%);
+  color: hsl(0, 0%, 100%);
+  border: none;
+  border-radius: 0.5rem;
+  transition: transform 450ms ease;
 }
 
 .overlay__btn:hover {
-	transform: scale(1.05);
-	cursor: pointer;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 .overlay__btn-emoji {
-	margin-left: 0.375rem;
+  margin-left: 0.375rem;
 }
 .fraction {
-	position: absolute;
-	right: 28px;
-	top: 24px;
-	padding: 6px 14px;
-	text-align: center;
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-	border-radius: 12px;
-	z-index: 2;
-	color: #fff;
-	background: rgbs(64, 64, 64, 0.25);
-	-webkit-backdrop-filter: saturate(150%) blur(10px);
-	backdrop-filter: saturate(150%) blur(10px);
-	// opacity: 0;
-	transition: all 0.3s;
-	// z-index: 99;
+  position: absolute;
+  right: 28px;
+  top: 24px;
+  padding: 6px 14px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 12px;
+  z-index: 2;
+  color: #fff;
+  background: rgbs(64, 64, 64, 0.25);
+  -webkit-backdrop-filter: saturate(150%) blur(10px);
+  backdrop-filter: saturate(150%) blur(10px);
+  // opacity: 0;
+  transition: all 0.3s;
+  // z-index: 99;
 }
 </style>

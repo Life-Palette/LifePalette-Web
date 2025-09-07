@@ -38,7 +38,7 @@ function showImgs(index: number) {
 </script>
 
 <template>
-  <div class="rounded-md bg p-5 w-fit shadow-lg">
+  <div class="bg p-5 rounded-md w-fit shadow-lg">
     <!-- 头部 -->
     <header class="header-part relative">
       <h3 class="header-title">
@@ -46,7 +46,7 @@ function showImgs(index: number) {
       </h3>
       <span class="header-subTitle">{{ data?.content }}</span>
       <button
-        class="close i-carbon-close-large absolute right-0 top-0 text-xl"
+        class="close i-carbon-close-large text-xl right-0 top-0 absolute"
         @click="handleClosePop"
       />
     </header>
@@ -60,7 +60,7 @@ function showImgs(index: number) {
       >
         <img
           :src="getCover(item)"
-          class="w-full h-full object-cover cursor-pointer"
+          class="h-full w-full cursor-pointer object-cover"
           alt=""
         >
       </div>

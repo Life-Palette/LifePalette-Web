@@ -17,7 +17,7 @@ const { userInfo } = storeToRefs(userStore)
 
 onMounted(() => {})
 
-const handleLinkData = function (values: string) {
+function handleLinkData(values: string) {
   let str = values
   const reg
 		= /(https?|http|ftp|file):\/\/[-\w+&@#/%?=~|!:,.;]+[-\w+&@#/%=~|]/g

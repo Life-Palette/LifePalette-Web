@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { requestTo } from '@/utils/http/tool'
 import { isObject, removeEmptyValues } from '@iceywu/utils'
+import { requestTo } from '@/utils/http/tool'
 
 import { updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
@@ -151,24 +151,24 @@ async function handleOk() {
 			/>
 		</div>
 
-		<div class="flex justify-between mt-[40px]">
+		<div class="mt-[40px] flex justify-between">
 			<button
-				class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300 text-gray-400 font-bold font-mono"
+				class="text-gray-400 font-bold font-mono p-2 rounded-full bg-gray-100 w-[100px] shadow-gray-400 shadow-sm duration-300 hover:bg-gray-200"
 				@click="handleCancel"
 			>
 				Esc
 			</button>
 			<button
-				class="w-[100px] bg-gray-100 p-2 rounded-full shadow-sm shadow-gray-400 hover:bg-gray-200 duration-300 font-bold font-mono text-[#58636d]"
+				class="text-[#58636d] font-bold font-mono p-2 rounded-full bg-gray-100 w-[100px] shadow-gray-400 shadow-sm duration-300 hover:bg-gray-200"
 				@click="handleOk"
 			>
 				Yes
 				<span
-					class="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out rounded group-hover:-mr-4 group-hover:-mt-4 bg-gradient-to-br from-[#ffddef] via-[#faf0eb] to-[#f6fde7]"
+					class="rounded h-4 w-4 inline-block transition-all duration-500 ease-in-out right-0 top-0 absolute from-[#ffddef] to-[#f6fde7] via-[#faf0eb] bg-gradient-to-br group-hover:-mr-4 group-hover:-mt-4"
 					@click.stop
 				>
 					<span
-						class="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"
+						class="bg-white h-5 w-5 translate-x-1/2 rotate-45 right-0 top-0 absolute -translate-y-1/2"
 					/>
 				</span>
 			</button>
@@ -178,110 +178,109 @@ async function handleOk() {
 
 <style lang="less" scoped>
 :deep(.el-dialog) {
-	height: 550px;
+  height: 550px;
 }
 
 .dialog-content {
-	width: 25%;
-	background: rgb(234, 234, 236);
-	position: fixed;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	padding: 25px 25px;
-	border-radius: 30px;
-	// background: linear-gradient(to bottom right, #ffddef, #faf0eb, #f6fde7);
-	background: rgba(255, 255, 255, 0.776);
-	background: url("https://img.freepik.com/premium-photo/abstract-blurred-sky-colorful_40299-22.jpg")
-		no-repeat;
-	background-size: 100% 100%;
+  width: 25%;
+  background: rgb(234, 234, 236);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 25px 25px;
+  border-radius: 30px;
+  // background: linear-gradient(to bottom right, #ffddef, #faf0eb, #f6fde7);
+  background: rgba(255, 255, 255, 0.776);
+  background: url('https://img.freepik.com/premium-photo/abstract-blurred-sky-colorful_40299-22.jpg') no-repeat;
+  background-size: 100% 100%;
 
-	.dialog-title {
-		text-align: left;
-		font-size: 20px;
-		font-family: ui-rounded;
-		color: white;
-	}
+  .dialog-title {
+    text-align: left;
+    font-size: 20px;
+    font-family: ui-rounded;
+    color: white;
+  }
 
-	.dialog-hadImg {
-		height: 120px;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		margin-top: 10px;
+  .dialog-hadImg {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 
-		.item-img {
-			width: 100px;
-			height: 100px;
-			border-radius: 50%;
-			object-fit: cover;
-		}
+    .item-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
 
-		.item-txt {
-			margin-top: 5px;
-			font-size: 12px;
-			color: rgba(22 24 35 / 60%);
-		}
-	}
+    .item-txt {
+      margin-top: 5px;
+      font-size: 12px;
+      color: rgba(22 24 35 / 60%);
+    }
+  }
 
-	.dialog-name {
-		margin-top: 40px;
-		text-align: left;
-		color: white;
+  .dialog-name {
+    margin-top: 40px;
+    text-align: left;
+    color: white;
 
-		:deep(.el-input__wrapper) {
-			width: 100%;
-			height: 32px;
-			background: #f2f2f4;
-			border: none;
-			border-radius: 10px;
-			outline: none;
-			padding-left: 8px;
-			font-size: 14px;
-			line-height: 32px;
-			box-shadow: none;
-			margin-top: 10px;
-		}
+    :deep(.el-input__wrapper) {
+      width: 100%;
+      height: 32px;
+      background: #f2f2f4;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      padding-left: 8px;
+      font-size: 14px;
+      line-height: 32px;
+      box-shadow: none;
+      margin-top: 10px;
+    }
 
-		:deep(.el-input__count-inner) {
-			background: #f2f2f4;
-		}
-	}
+    :deep(.el-input__count-inner) {
+      background: #f2f2f4;
+    }
+  }
 
-	.dialog-Personality {
-		text-align: left;
-		margin-top: 40px;
-		color: white;
+  .dialog-Personality {
+    text-align: left;
+    margin-top: 40px;
+    color: white;
 
-		:deep(.el-textarea__inner) {
-			width: 100%;
-			height: 90px;
-			max-height: 120px;
-			background: #f2f2f4;
-			border: none;
-			border-radius: 10px;
-			outline: none;
-			padding-left: 8px;
-			font-size: 14px;
-			box-shadow: none;
-			margin-top: 10px;
-			scrollbar-width: none;
-			/*firefox*/
-			-ms-overflow-style: none;
-			/*IE 10+ */
-			overflow-x: hidden;
-			overflow-y: auto;
-		}
+    :deep(.el-textarea__inner) {
+      width: 100%;
+      height: 90px;
+      max-height: 120px;
+      background: #f2f2f4;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      padding-left: 8px;
+      font-size: 14px;
+      box-shadow: none;
+      margin-top: 10px;
+      scrollbar-width: none;
+      /*firefox*/
+      -ms-overflow-style: none;
+      /*IE 10+ */
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
 
-		:deep(.el-input__count-inner) {
-			background: #f2f2f4;
-		}
-	}
+    :deep(.el-input__count-inner) {
+      background: #f2f2f4;
+    }
+  }
 
-	:deep(.el-textarea__inner)::-webkit-scrollbar {
-		display: none;
-		/*chrome safari */
-	}
+  :deep(.el-textarea__inner)::-webkit-scrollbar {
+    display: none;
+    /*chrome safari */
+  }
 }
 </style>

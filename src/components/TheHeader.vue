@@ -53,9 +53,9 @@ const isShowDrawer = ref(false)
 <template>
 	<div
 		:class="isDark ? 'header-dark' : 'header-normal'"
-		class="z-999 box-border h-[55px] w-full flex items-center overflow-hidden px-[40px]"
+		class="px-[40px] flex h-[55px] w-full items-center box-border z-999 overflow-hidden"
 	>
-		<div v-motion-roll-bottom h-full font-bold text="2xl">
+		<div v-motion-roll-bottom font-bold h-full text="2xl">
 			<!-- Wow🌟! -->
 			<img :src="ImgLogo" class="ml-4 h-full w-full scale-300">
 		</div>
@@ -66,11 +66,11 @@ const isShowDrawer = ref(false)
 				placeholder="搜索更多美好事物~"
 			/> -->
 		</div>
-		<div class="flex items-center border-none">
+		<div class="border-none flex items-center">
 			<WxNotice v-model="isShowDrawer" />
 
 			<div
-				class="flex items-center justify-start border-none mr-10"
+				class="mr-10 border-none flex items-center justify-start"
 				@click="isShowDrawer = true"
 			>
 				<el-badge value="new" class="mt-1.5">
@@ -78,7 +78,7 @@ const isShowDrawer = ref(false)
 				</el-badge>
 			</div>
 		</div>
-		<div class="h-full flex items-center gap-5 <md:hidden">
+		<div class="flex gap-5 h-full items-center <md:hidden">
 			<div
 				i-carbon-sun
 				dark:i-carbon-moon
@@ -106,10 +106,10 @@ const isShowDrawer = ref(false)
 		>
 			<!-- 已登录 -->
 			<template v-if="isLogin">
-				<div class="flex items-center border-none">
+				<div class="border-none flex items-center">
 					<el-dropdown trigger="hover" @visible-change="handleVisible">
 						<!-- 头像 -->
-						<div class="flex items-center justify-start border-none">
+						<div class="border-none flex items-center justify-start">
 							<el-avatar
 								:size="35"
 								:src="userInfo?.avatar"
@@ -117,7 +117,7 @@ const isShowDrawer = ref(false)
 							/>
 							<span class="navbar-bg-hover el-dropdown-link select-none">
 								<div
-									class="inline-block bg-black text-[1.1em] dark:bg-white"
+									class="text-[1.1em] bg-black inline-block dark:bg-white"
 									:class="
 										isDropdown ? 'i-carbon-caret-up' : 'i-carbon-caret-down'
 									"
@@ -153,52 +153,50 @@ const isShowDrawer = ref(false)
 
 <style lang="less" scoped>
 .header-normal {
-	background-image: radial-gradient(transparent 1px, #fff 1px);
+  background-image: radial-gradient(transparent 1px, #fff 1px);
 
-	background-size: 4px 4px;
-	backdrop-filter: saturate(50%) blur(4px);
-	border-bottom: 1px solid #dcdfe6;
+  background-size: 4px 4px;
+  backdrop-filter: saturate(50%) blur(4px);
+  border-bottom: 1px solid #dcdfe6;
 }
 .header-dark {
-	background-image: radial-gradient(transparent 1px, #141414 1px);
-	background-size: 4px 4px;
-	backdrop-filter: saturate(50%) blur(4px);
+  background-image: radial-gradient(transparent 1px, #141414 1px);
+  background-size: 4px 4px;
+  backdrop-filter: saturate(50%) blur(4px);
 
-	border-bottom: 1px solid #4c4d4f;
+  border-bottom: 1px solid #4c4d4f;
 }
 
 :focus {
-	outline: 0 !important;
+  outline: 0 !important;
 }
 
 .w-50 {
-	width: 400px;
-	height: 40px;
+  width: 400px;
+  height: 40px;
 
-	.el-input__inner {
-		border: none;
-	}
-	:deep(.el-input__wrapper) {
-		border-radius: 9999px;
-		font-size: 16px;
-		padding-left: 20px;
-	}
-	:deep(.el-input__icon) {
-		width: 20px !important;
-		margin-right: 10px;
-	}
-	:deep(.el-icon svg) {
-		height: 2em;
-		width: 2em;
-		color: rgba(51, 51, 51, 0.8);
-	}
+  .el-input__inner {
+    border: none;
+  }
+  :deep(.el-input__wrapper) {
+    border-radius: 9999px;
+    font-size: 16px;
+    padding-left: 20px;
+  }
+  :deep(.el-input__icon) {
+    width: 20px !important;
+    margin-right: 10px;
+  }
+  :deep(.el-icon svg) {
+    height: 2em;
+    width: 2em;
+    color: rgba(51, 51, 51, 0.8);
+  }
 }
 :deep(.el-input__wrapper.is-focus) {
-	box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color))
-		inset;
+  box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color)) inset;
 }
 :deep(.el-input__wrapper:hover) {
-	box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color))
-		inset;
+  box-shadow: 0 0 0 1px var(--el-input-border-color, var(--el-border-color)) inset;
 }
 </style>

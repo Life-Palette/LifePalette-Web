@@ -1,7 +1,6 @@
 <script setup>
 import { fileParse } from '@life-palette/utils'
 import { Image } from 'l-preview'
-import { adjustImgData } from '~/utils/tools'
 import 'l-preview/dist/style.css'
 
 const { index, data, imgList } = defineProps({
@@ -65,7 +64,7 @@ const coverUrl = computed(() => {
 </script>
 
 <template>
-	<div class="h-full w-full img-box">
+	<div class="img-box h-full w-full">
 		<div v-if="isDetail" class="bg-cover-box">
 			<img class="mian-img bg-cover-img" :src="coverUrl">
 			<div class="cover-box" />
@@ -73,7 +72,7 @@ const coverUrl = computed(() => {
 		<!-- 视频 -->
 		<template v-if="data?.fileType == 'VIDEO'">
 			<template v-if="isDetail">
-				<div class="relative h-full w-full flex items-center justify-center">
+				<div class="flex h-full w-full items-center justify-center relative">
 					<video
 						ref="videoRef"
 						class="h-full w-full transition-all duration-900"
@@ -90,7 +89,7 @@ const coverUrl = computed(() => {
 
 					<div
 						v-show="isactive"
-						class="absolute z-12 flex items-center justify-center"
+						class="flex items-center justify-center absolute z-12"
 						@click="videoRef.play()"
 					>
 						<div class="i-carbon-play-outline-filled text-7xl text-[#fff]" />
@@ -102,7 +101,7 @@ const coverUrl = computed(() => {
 			</template>
 
 			<template v-else>
-				<div class="relative h-full w-full">
+				<div class="h-full w-full relative">
 					<l-p-image :data="data" :is-show-base="isDetail" />
 
 					<div class="play-icon">
@@ -139,50 +138,50 @@ const coverUrl = computed(() => {
 
 <style lang="less" scoped>
 .play-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: absolute;
-	right: 14px;
-	top: 14px;
-	width: 30px;
-	height: 30px;
-	background: rgba(0, 0, 0, 0.3);
-	border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 30px;
 }
 .img-box {
-	// align-items: center;
-	// display: flex;
-	// height: 100%;
-	// justify-content: center;
-	// overflow: hidden;
-	// width: 100%;
-	// z-index: 0;
-	// max-height: 100vh;
-	// height: 100vh;
-	position: relative;
+  // align-items: center;
+  // display: flex;
+  // height: 100%;
+  // justify-content: center;
+  // overflow: hidden;
+  // width: 100%;
+  // z-index: 0;
+  // max-height: 100vh;
+  // height: 100vh;
+  position: relative;
 
-	.bg-cover-box {
-		bottom: 0;
-		left: 0;
-		overflow: hidden;
-		position: absolute;
-		right: 0;
-		top: 0;
-		z-index: -1;
-		.bg-cover-img {
-			filter: blur(60px);
-			height: 100%;
-			width: 100%;
-		}
-		.cover-box {
-			background-color: var(--player-background);
-			bottom: 0;
-			left: 0;
-			position: absolute;
-			right: 0;
-			top: 0;
-		}
-	}
+  .bg-cover-box {
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+    .bg-cover-img {
+      filter: blur(60px);
+      height: 100%;
+      width: 100%;
+    }
+    .cover-box {
+      background-color: var(--player-background);
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
 }
 </style>

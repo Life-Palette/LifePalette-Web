@@ -15,11 +15,11 @@ onMounted(() => {
 
 <template>
   <div
-    class="my-component relative h-60 h-full w-30 w-full select-none overflow-hidden transition-all duration-900"
+    class="my-component h-60 h-full w-30 w-full select-none transition-all duration-900 relative overflow-hidden"
   >
-    <img class="block h-full w-full bg-gray-400:20 object-cover" :src="src">
+    <img class="bg-gray-400:20 h-full w-full block object-cover" :src="src">
     <div
-      class="absolute bottom-0 left-0 right-0 flex items-center justify-center from-black:40 to-transparent bg-gradient-to-t pt-5 text-white font-mono"
+      class="text-white font-mono pt-5 flex items-center bottom-0 left-0 right-0 justify-center absolute from-black:40 to-transparent bg-gradient-to-t"
     >
       1
     </div>

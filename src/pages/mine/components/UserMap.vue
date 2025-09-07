@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { topicFindAll } from '@/api/topic'
-import MapPop from '@/components/Mappop.vue'
-import { requestTo } from '@/utils/http/tool'
 import { customDestr } from '@iceywu/utils'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import mapboxgl from 'mapbox-gl'
 import { createVNode, render } from 'vue'
+import { topicFindAll } from '@/api/topic'
+import MapPop from '@/components/Mappop.vue'
+import { requestTo } from '@/utils/http/tool'
 import { adjustImgData } from '~/utils/tools'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -308,7 +308,7 @@ function addPop(lnglat: number[] | any, data?: any, isSingle?: boolean) {
 </script>
 
 <template>
-  <div ref="basicMapbox" class="w-full relative map-temp-box" />
+  <div ref="basicMapbox" class="map-temp-box w-full relative" />
 </template>
 
 <style>
@@ -316,8 +316,8 @@ function addPop(lnglat: number[] | any, data?: any, isSingle?: boolean) {
   /* transform: translateY(-100px); */
   /* padding-bottom: 100px;  */
   /* height: calc(100vh + 100px); */
-	/* min-height: 30vh; */
-	height: 100%;
+  /* min-height: 30vh; */
+  height: 100%;
 }
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right {

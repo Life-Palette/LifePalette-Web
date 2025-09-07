@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { getCover, getLngLat } from '@/utils/map'
 import { customDestr, isEmpty } from '@iceywu/utils'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import mapboxgl from 'mapbox-gl'
+import { getCover, getLngLat } from '@/utils/map'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 interface Props {
@@ -150,41 +150,41 @@ watch(
 
 <template>
 	<!-- {{ data }} -->
-	<div v-show="hasMapData" class="w-40 h-40 rounded-xl overflow-hidden">
-	<div ref="basicMapbox" class="w-full relative h-full map-temp-box" />
+	<div v-show="hasMapData" class="rounded-xl h-40 w-40 overflow-hidden">
+	<div ref="basicMapbox" class="map-temp-box h-full w-full relative" />
 </div>
 </template>
 
 <style>
 .map-temp-box {
-	/* transform: translateY(-100px);
+  /* transform: translateY(-100px);
 	padding-bottom: 100px;
 	height: calc(100vh + 100px); */
-	/* height: fit-content; */
-	/* height集成父级 */
-	/* height: 100%; */
+  /* height: fit-content; */
+  /* height集成父级 */
+  /* height: 100%; */
 }
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right {
-	display: none;
+  display: none;
 }
 
 .mapboxgl-ctrl-icon {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 .marker-dot {
-	height: 20px;
-	width: 20px;
-	border-radius: 50%;
-	overflow: hidden;
-	background-repeat: no-repeat;
-	background-size: 100% 100%;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	border: 2px solid white;
-	cursor: pointer;
-	z-index: 999;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  border: 2px solid white;
+  cursor: pointer;
+  z-index: 999;
 }
 </style>

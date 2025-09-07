@@ -143,7 +143,7 @@ function onLoadErrorPreImg(e: any) {
 
 <template>
 	<div
-		class="relative cursor-pointer overflow-hidden"
+		class="cursor-pointer relative overflow-hidden"
 		:style="{
 			height,
 			width,
@@ -151,7 +151,7 @@ function onLoadErrorPreImg(e: any) {
 	>
 		<div
 			v-show="isLoading"
-			class="leff-0 absolute top-0 z-9 h-full w-full bg-[#f5f7fa] dark:bg-[#262727]"
+			class="leff-0 bg-[#f5f7fa] h-full w-full top-0 absolute z-9 dark:bg-[#262727]"
 		/>
 		<img
 			v-show="isShowPreImg"
@@ -179,7 +179,7 @@ function onLoadErrorPreImg(e: any) {
 			:src="showImgSrc"
 			@load="onLoad"
 		>
-		<div v-if="loadError" class="leff-0 absolute top-0 z-9 h-full w-full fcc">
+		<div v-if="loadError" class="leff-0 fcc h-full w-full top-0 absolute z-9">
 			<Lottie width="20em" height="20em" :json-data="loadErrorData" />
 		</div>
 	</div>
@@ -187,44 +187,44 @@ function onLoadErrorPreImg(e: any) {
 
 <style lang="less" scoped>
 .img-base {
-	z-index: 99;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	object-position: center;
+  z-index: 99;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 .previw-img {
-	filter: blur(40px);
+  filter: blur(40px);
 }
 .loaded-img {
-	opacity: 0;
+  opacity: 0;
 }
 </style>
 
 <style>
 .lpk-live-photo-player {
-	.lpk-badge {
-		top: 15px !important;
-		left: 15px !important;
-		z-index: 999 !important;
-	}
-	.lpk-live-photo-renderer {
-		height: 100% !important;
-		width: 100% !important;
-		top: 0 !important;
-		left: 0 !important;
-		box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
-		-webkit-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
-		-moz-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
-		.lpk-video {
-			height: calc(100% + 20px) !important;
-			width: calc(100% + 20px) !important;
-		}
-	}
+  .lpk-badge {
+    top: 15px !important;
+    left: 15px !important;
+    z-index: 999 !important;
+  }
+  .lpk-live-photo-renderer {
+    height: 100% !important;
+    width: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.4);
+    .lpk-video {
+      height: calc(100% + 20px) !important;
+      width: calc(100% + 20px) !important;
+    }
+  }
 }
 .lpk-live-photo-renderer {
-	canvas {
-		object-fit: cover;
-	}
+  canvas {
+    object-fit: cover;
+  }
 }
 </style>

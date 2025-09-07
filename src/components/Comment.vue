@@ -50,13 +50,13 @@ defineExpose({
 </script>
 
 <template>
-  <div class="h-auto w-full flex flex-col items-center justify-center">
+  <div class="flex flex-col h-auto w-full items-center justify-center">
     <!-- 有数据 -->
     <template v-if="hasData">
       <div
         v-for="item in commentList"
         :key="item.id"
-        class="comment-item box-border w-full"
+        class="comment-item w-full box-border"
       >
         <div class="comment-item__left">
           <img
@@ -78,8 +78,8 @@ defineExpose({
             {{ item.content }}
           </div>
         </div>
-        <div class="absolute bottom-0 right-0 box-border w-full pl-15">
-          <div class="h-[1px] w-full bg-[rgb(0,0,0,0.1)]" />
+        <div class="pl-15 w-full box-border bottom-0 right-0 absolute">
+          <div class="bg-[rgb(0,0,0,0.1)] h-[1px] w-full" />
         </div>
       </div>
     </template>

@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "typescript": "error",
+    "import": "error",
+    "vue": "error",
+    "promise": "error",
+    "unicorn": "warn"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.vitepress/cache/**",
+    "**/.vitepress/dist/**",
+    "**/coverage/**",
+    "**/.next/**",
+    "**/.nuxt/**",
+    "**/.output/**",
+    "**/.vercel/**",
+    "**/.netlify/**",
+    "**/auto-imports.d.ts",
+    "**/components.d.ts",
+    "**/typed-router.d.ts",
+    "**/public/**",
+    "**/*.config.*",
+    "**/scripts/**",
+    "**/presets/**",
+    "**/mock/**"
+  ]
+}

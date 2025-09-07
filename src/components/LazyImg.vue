@@ -81,7 +81,7 @@ async function initLivePhoto() {
 
 <template>
   <div
-    class="relative cursor-pointer overflow-hidden"
+    class="cursor-pointer relative overflow-hidden"
     :style="{
       height,
       width,
@@ -89,7 +89,7 @@ async function initLivePhoto() {
   >
     <div
       v-show="isLoading"
-      class="leff-0 absolute top-0 z-9 h-full w-full bg-[#f5f7fa] dark:bg-[#262727]"
+      class="leff-0 bg-[#f5f7fa] h-full w-full top-0 absolute z-9 dark:bg-[#262727]"
     />
     <img
       v-show="isShowPreImg"

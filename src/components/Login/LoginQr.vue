@@ -236,7 +236,7 @@ function clearQrTimer() {
     <div class="desc-subtitle">
       请使用<span>移动端app</span>扫描二维码
     </div>
-    <div class="qr-code-area relative h-[300px] w-[300px]">
+    <div class="qr-code-area h-[300px] w-[300px] relative">
       <!-- <img
         @click="handle_refreshLoginQrCode"
         class="w-full h-full"
@@ -263,35 +263,35 @@ function clearQrTimer() {
       <!-- 扫码成功遮罩层 -->
       <template v-if="qrCodeStatus === 'confirm'">
         <div
-          class="absolute left-0 top-0 h-full w-full flex items-center justify-center"
+          class="flex h-full w-full items-center left-0 top-0 justify-center absolute"
         >
           <!-- 遮罩层 -->
           <div
-            class="absolute left-0 top-0 z-98 h-full w-full bg-white opacity-80"
+            class="bg-white opacity-80 h-full w-full left-0 top-0 absolute z-98"
           />
           <!-- 标识 -->
           <div
-            class="i-carbon-checkmark-filled z-99 text-4xl color-[#36bf84]"
+            class="i-carbon-checkmark-filled text-4xl color-[#36bf84] z-99"
           />
         </div>
       </template>
       <!-- 过期遮罩层 -->
       <template v-else-if="qrCodeStatus === 'timeout'">
         <div
-          class="absolute left-0 top-0 h-full w-full flex cursor-pointer items-center justify-center backdrop-blur-sm backdrop-filter"
+          class="flex h-full w-full cursor-pointer items-center left-0 top-0 justify-center absolute backdrop-blur-sm backdrop-filter"
           @click="handle_refreshLoginQrCode"
         >
           <!-- 遮罩层 -->
           <div
-            class="absolute left-0 top-0 z-98 h-full w-full bg-black opacity-50"
+            class="bg-black opacity-50 h-full w-full left-0 top-0 absolute z-98"
           />
           <!-- 标识 -->
           <div
-            class="i-carbon-warning-filled z-99 text-4xl color-[#ff4d4f]"
+            class="i-carbon-warning-filled text-4xl color-[#ff4d4f] z-99"
           />
           <!-- 刷新 -->
           <div
-            class="absolute bottom-10 z-99 w-full flex items-center justify-center color-white"
+            class="color-white flex w-full items-center bottom-10 justify-center absolute z-99"
           >
             点击刷新二维码
           </div>
@@ -300,15 +300,15 @@ function clearQrTimer() {
       <!-- 登录成功遮罩层 -->
       <template v-else-if="qrCodeStatus === 'success'">
         <div
-          class="absolute left-0 top-0 h-full w-full flex items-center justify-center"
+          class="flex h-full w-full items-center left-0 top-0 justify-center absolute"
         >
           <!-- 遮罩层 -->
           <div
-            class="absolute left-0 top-0 z-98 h-full w-full bg-white opacity-80"
+            class="bg-white opacity-80 h-full w-full left-0 top-0 absolute z-98"
           />
           <!-- 标识 -->
           <div
-            class="i-carbon-face-wink-filled z-99 text-4xl color-[#36bf84]"
+            class="i-carbon-face-wink-filled text-4xl color-[#36bf84] z-99"
           />
         </div>
       </template>

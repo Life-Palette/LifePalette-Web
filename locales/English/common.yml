@@ -1,10 +1,13 @@
 # English
 
 home: home
+Home: home
 about: about
 echarts: echarts
+list: list
 edit: Edit
 to test HMR: to test HMR
 check out: Check out
 The total number of views is: The total number of views is
 the official Tov + Vue + Vite template: the official Tov + Vue + Vite template
+resData: result

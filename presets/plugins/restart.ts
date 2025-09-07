@@ -13,18 +13,18 @@ const defaultPaths = ['package.json', 'pnpm-lock.yaml']
  * @param  paths 监听重启路径，默认为 ['package.json', 'pnpm-lock.yaml']
  */
 export function Restart(paths = defaultPaths): Plugin {
-  paths = paths.map(path => slash(resolve(path)))
-  const restart = debounce(async () => {
-    const time = new Date()
-    await utimes(r('vite.config.ts'), time, time)
-  }, 1000)
-  return {
-    name: 'vite-plugin-force-restart',
-    apply: 'serve',
-    async watchChange(id) {
-      if (paths.includes(id)) {
-        await restart()
-      }
-    },
-  }
+	paths = paths.map(path => slash(resolve(path)))
+	const restart = debounce(async () => {
+		const time = new Date()
+		await utimes(r('vite.config.ts'), time, time)
+	}, 1000)
+	return {
+		name: 'vite-plugin-force-restart',
+		apply: 'serve',
+		async watchChange(id) {
+			if (paths.includes(id)) {
+				await restart()
+			}
+		},
+	}
 }

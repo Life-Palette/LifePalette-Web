@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { listParams } from 'presets/types/axios'
-import Dialog from '@/components/Dialog.vue'
 import { getObjVal } from '@iceywu/utils'
 import { breakpointsTailwind } from '@vueuse/core'
 import {
@@ -13,6 +12,7 @@ import {
 } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { useRequest } from 'vue-hooks-pure'
+import Dialog from '@/components/Dialog.vue'
 import { tagFindAll } from '~/api/tag'
 
 import { topicFindAll } from '~/api/topic'
@@ -223,16 +223,16 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 			<template #default />
 		</Skeleton>
 	</DefineTemplate>
-	<div class="h-full flex flex-col gap-0 flex-1 overflow-auto">
+	<div class="flex flex-1 flex-col gap-0 h-full overflow-auto">
 		<div class="mb-4 mt-8 flex <md:flex-col">
 			<!-- 标签列表 -->
 			<div
-				class="relative box-border flex items-center gap-1 overflow-auto px-10 <md:px-1"
+				class="px-10 flex gap-1 items-center box-border relative overflow-auto <md:px-1"
 			>
 				<div
 					v-for="(item, index) in tagList"
 					:key="index"
-					class="tag-list relative box-border flex cursor-pointer items-center justify-center whitespace-nowrap rounded-md"
+					class="tag-list rounded-md flex cursor-pointer whitespace-nowrap items-center box-border justify-center relative"
 					@click="handleTagClick(item)"
 				>
 					<div
@@ -251,7 +251,7 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 			</div>
 			<!-- 测试图标 -->
 			<div
-				class="flex flex-1 cursor-pointer items-center justify-end gap-1 whitespace-nowrap <md:my-1 !<md:hidden hover:text-blue"
+				class="flex flex-1 gap-1 cursor-pointer whitespace-nowrap items-center justify-end hover:text-blue <md:my-1 !<md:hidden"
 				@click="isSwiperLayout = !isSwiperLayout"
 			>
 				{{ isSwiperLayout ? "列表模式" : "卡片模式" }}
@@ -267,8 +267,8 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 		</div>
 
 		<!-- 内容列表 -->
-		<div class="content-box box-border overflow-auto px-10 <md:px-1">
-			<div class="h-full w-full overflow-auto rounded-md">
+		<div class="content-box px-10 box-border overflow-auto <md:px-1">
+			<div class="rounded-md h-full w-full overflow-auto">
 				<!-- 有数据 -->
 				<template v-if="listObj?.list?.length > 0">
 					<template v-if="isSwiperLayout">
@@ -291,7 +291,7 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 								:virtual-index="index"
 							>
 								<div
-									class="relative h-full w-full cursor-pointer"
+									class="h-full w-full cursor-pointer relative"
 									@click="goDe(item)"
 								>
 									<el-carousel :interval="5000" arrow="always">
@@ -315,7 +315,7 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 										</div>
 										<div class="title">
 											{{ item.title }}
-											<span class="ml-3 text-[#face15]">{{
+											<span class="text-[#face15] ml-3">{{
 												getTagDe(item.tags)
 											}}</span>
 										</div>
@@ -362,11 +362,11 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 		<!-- 发布按钮 -->
 		<div
 			v-if="!listObj.loading && cols === 1"
-			class="fixed bottom-20 right-10 z-9999"
+			class="bottom-20 right-10 fixed z-9999"
 			@click="goCreate"
 		>
 			<div
-				class="flex items-center justify-center w-12 h-12 rounded-full bg-bg_color shadow-lg"
+				class="bg-bg_color rounded-full flex h-12 w-12 shadow-lg items-center justify-center"
 			>
 				<div class="i-carbon-add-large text-xl" />
 			</div>
@@ -382,149 +382,149 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 
 <style lang="less" scoped>
 .tag-list {
-	display: flex;
-	// padding: 20px 0;
-	// padding-top: 30px;
-	// padding-bottom: 10px;
-	.tag-item {
-		font-size: 16px;
-		color: rgba(51, 51, 51, 0.8);
-		height: 40px;
-		padding: 0 16px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		&-dark {
-			font-size: 16px;
-			color: rgba(51, 51, 51, 0.8);
-			height: 40px;
-			padding: 0 16px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			color: rgba(255, 255, 255, 0.8);
-			&:hover {
-				border-radius: 999px;
-				color: #fff;
-				background-color: #333;
-			}
-		}
-		&-active {
-			border-radius: 999px;
-			color: #333;
-			background-color: #f8f8f8;
-			font-weight: 600;
-			&-dark {
-				border-radius: 999px;
-				color: #fff;
-				background-color: #333;
-				font-weight: 600;
-			}
-		}
-		&:hover {
-			border-radius: 999px;
-			color: #333;
-			background-color: #f8f8f8;
-		}
-	}
+  display: flex;
+  // padding: 20px 0;
+  // padding-top: 30px;
+  // padding-bottom: 10px;
+  .tag-item {
+    font-size: 16px;
+    color: rgba(51, 51, 51, 0.8);
+    height: 40px;
+    padding: 0 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &-dark {
+      font-size: 16px;
+      color: rgba(51, 51, 51, 0.8);
+      height: 40px;
+      padding: 0 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.8);
+      &:hover {
+        border-radius: 999px;
+        color: #fff;
+        background-color: #333;
+      }
+    }
+    &-active {
+      border-radius: 999px;
+      color: #333;
+      background-color: #f8f8f8;
+      font-weight: 600;
+      &-dark {
+        border-radius: 999px;
+        color: #fff;
+        background-color: #333;
+        font-weight: 600;
+      }
+    }
+    &:hover {
+      border-radius: 999px;
+      color: #333;
+      background-color: #f8f8f8;
+    }
+  }
 }
 .container-box {
-	.item-box {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-	}
-	.img-cover {
-		border-radius: 10px;
-		overflow: hidden;
-	}
-	.content-desc {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		gap: 5px;
-		.content-desc-title {
-			text-align: left;
-			font-weight: 500;
-			font-size: 14px;
-			// color: #333;
-			// 最多显示两行
-			overflow: hidden;
-			text-overflow: ellipsis;
-			display: -webkit-box;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
-		}
-		.content-user {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-			.img-avatar {
-				width: 30px;
-				height: 30px;
-				border-radius: 20px;
-				border: 0.5px solid #e6e6e6;
-			}
-			.user-name {
-				color: #666;
-				font-size: 16px;
-			}
-		}
-	}
+  .item-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .img-cover {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .content-desc {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    .content-desc-title {
+      text-align: left;
+      font-weight: 500;
+      font-size: 14px;
+      // color: #333;
+      // 最多显示两行
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .content-user {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      .img-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 20px;
+        border: 0.5px solid #e6e6e6;
+      }
+      .user-name {
+        color: #666;
+        font-size: 16px;
+      }
+    }
+  }
 }
 // 隐藏滚动条
 ::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 .content-box {
-	// background: red;
-	// height: calc(100% - 200px);
-	// width: calc(100% - 200px);
-	height: 100%;
-	width: 100%;
-	box-sizing: border-box;
-	border-radius: 10px;
+  // background: red;
+  // height: calc(100% - 200px);
+  // width: calc(100% - 200px);
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
 }
 :deep(.el-carousel) {
-	height: 100%;
-	.el-carousel__container {
-		height: 100%;
-	}
+  height: 100%;
+  .el-carousel__container {
+    height: 100%;
+  }
 }
 
 .card-info-detail {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	// background: red;
-	padding: 16px 95px 16px 16px;
-	z-index: 2;
-	.account-name {
-		width: 100%;
-		display: flex;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  // background: red;
+  padding: 16px 95px 16px 16px;
+  z-index: 2;
+  .account-name {
+    width: 100%;
+    display: flex;
 
-		justify-content: flex-start;
-		align-items: center;
-		font-size: 24px;
-		line-height: 34px;
-		font-weight: 500;
-		span {
-			font-size: 16px;
-			line-height: 22px;
-			margin-left: 5px;
-			margin-top: 5px;
-			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-		}
-	}
-	.title {
-		width: 100%;
-		display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 24px;
+    line-height: 34px;
+    font-weight: 500;
+    span {
+      font-size: 16px;
+      line-height: 22px;
+      margin-left: 5px;
+      margin-top: 5px;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    }
+  }
+  .title {
+    width: 100%;
+    display: flex;
 
-		justify-content: flex-start;
-		font-size: 18px;
-		line-height: 26px;
-		font-weight: 400;
-	}
+    justify-content: flex-start;
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 400;
+  }
 }
 </style>

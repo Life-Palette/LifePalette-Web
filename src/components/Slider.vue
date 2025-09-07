@@ -135,7 +135,6 @@ v-for="(item, index) in showTabList" :key="index" class="slider__item" :class="[
       //   }
       // }
       &-dark {
-
         // background: #333 !important;
         .slider__name {
           color: #fff !important;

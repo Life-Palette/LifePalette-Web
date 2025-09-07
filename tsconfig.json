@@ -4,7 +4,6 @@
     "jsx": "preserve",
     "jsxImportSource": "vue",
     "lib": ["esnext", "dom"],
-    // "moduleResolution": "node",
     "useDefineForClassFields": true,
     "baseUrl": ".",
     "module": "esnext",

@@ -1,8 +1,8 @@
 import type { Directive } from 'vue' // unocss reset
+import { MotionPlugin } from '@vueuse/motion'
 // 自定义指令
 import * as directives from '@/directives'
 import { destroyEruda } from '@/utils/eruda'
-import { MotionPlugin } from '@vueuse/motion'
 
 import App from './App.vue'
 // https://unocss.dev/ 原子 css 库

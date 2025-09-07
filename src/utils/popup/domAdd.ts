@@ -18,13 +18,13 @@ interface RawSlots {
   $stable?: boolean
 }
 
-type RawChildren =
-  | string
-  | number
-  | boolean
-  | VNode
-  | VNodeArrayChildren
-  | (() => any)
+type RawChildren
+  = | string
+    | number
+    | boolean
+    | VNode
+    | VNodeArrayChildren
+    | (() => any)
 
 export interface IPopupOptions {
   rootComponent: Component<any, any, any, ComputedOptions, MethodOptions>

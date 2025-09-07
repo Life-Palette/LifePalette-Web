@@ -3,17 +3,17 @@ const typedRef = useTyped([' is not found!'])
 </script>
 
 <template>
-  <div class="h-screen flex flex-wrap items-center justify-around text-center">
+  <div class="text-center flex flex-wrap h-screen items-center justify-around">
     <div class="desc font-blod">
       <div class="code text-7xl">
         404
       </div>
-      <div ref="typedRef" class="content mb-5 text-3xl">
+      <div ref="typedRef" class="content text-3xl mb-5">
         The Page
       </div>
       <RouterLink :to="safeResolve('/')">
         <button
-          class="rounded bg-light-800 px-5 py-2 text-lg transition"
+          class="text-lg px-5 py-2 rounded bg-light-800 transition"
           hover="shadow-md"
           dark="text-black"
         >

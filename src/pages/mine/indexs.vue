@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Loginabout from '@/components/Login/Loginabout.vue'
 import { isObject } from '@iceywu/utils'
 import { ElMessage } from 'element-plus'
 import { usePopup } from 'vue-hooks-pure'
+import Loginabout from '@/components/Login/Loginabout.vue'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 
@@ -189,243 +189,227 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
 			</div>
 		</div>
 		<!-- 地图 -->
-		<main class="z-1 con-main-box">
+		<main class="con-main-box z-1">
 			<UserBottom />
 		</main>
 	</div>
 </template>
 
 <style lang="less" scoped>
-.con-main-box{
-	height: calc(100vh - 400px);
-	// background: red;
-	width: 100%;
+.con-main-box {
+  height: calc(100vh - 400px);
+  // background: red;
+  width: 100%;
 }
 // @import 'https://unpkg.com/normalize.css';
 // @import 'https://unpkg.com/open-props/normalize.min.css';
 // @import 'https://unpkg.com/open-props/open-props.min.css';
 
 :root {
-	--aspect-ratio: 4 / 1;
-	--header-scroll: calc(max(100vw / 4, 200px));
-	/*   --header-scroll: 300px; */
-	--title-height: 300px;
-	--shared-range: calc((var(--header-scroll) - var(--title-height)))
-		calc((var(--header-scroll) + (var(--title-height) * 2)));
-	--cover-range: calc(var(--header-scroll) - (var(--title-height)))
-		calc(var(--header-scroll) * 1);
-	--title-range: calc((var(--header-scroll) - (var(--title-height) * 2)))
-		calc((var(--header-scroll) - (var(--title-height) * -0.25)));
-	--avatar-range: calc((var(--header-scroll) - (var(--title-height) * 1.5)))
-			calc((var(--header-scroll) + (var(--title-height) * 0.95))),
-		calc((var(--header-scroll) - (var(--title-height) * 2.5)))
-			calc((var(--header-scroll) + (var(--title-height) * 0.95)));
-	--shadow-range: calc((var(--header-scroll) + var(--title-height)))
-		calc((var(--header-scroll) + (var(--title-height) * 2)));
-	--cover-range: var(--shadow-range);
+  --aspect-ratio: 4 / 1;
+  --header-scroll: calc(max(100vw / 4, 200px));
+  /*   --header-scroll: 300px; */
+  --title-height: 300px;
+  --shared-range: calc((var(--header-scroll) - var(--title-height)))
+    calc((var(--header-scroll) + (var(--title-height) * 2)));
+  --cover-range: calc(var(--header-scroll) - (var(--title-height))) calc(var(--header-scroll) * 1);
+  --title-range: calc((var(--header-scroll) - (var(--title-height) * 2)))
+    calc((var(--header-scroll) - (var(--title-height) * -0.25)));
+  --avatar-range:
+    calc((var(--header-scroll) - (var(--title-height) * 1.5)))
+      calc((var(--header-scroll) + (var(--title-height) * 0.95))),
+    calc((var(--header-scroll) - (var(--title-height) * 2.5)))
+      calc((var(--header-scroll) + (var(--title-height) * 0.95)));
+  --shadow-range: calc((var(--header-scroll) + var(--title-height)))
+    calc((var(--header-scroll) + (var(--title-height) * 2)));
+  --cover-range: var(--shadow-range);
 }
 
 .Personal-Center {
-	background: var(--gray-2);
-	display: grid;
-	min-height: 80vh;
-	justify-items: center;
-	overflow-x: hidden;
-	align-content: start;
-	overflow-y: auto;
+  background: var(--gray-2);
+  display: grid;
+  min-height: 80vh;
+  justify-items: center;
+  overflow-x: hidden;
+  align-content: start;
+  overflow-y: auto;
 
-	.Personal-content {
-		width: 100%;
-		height: 310px;
-		position: relative;
-		/* 确保容器有相对定位 */
-		display: flex;
+  .Personal-content {
+    width: 100%;
+    height: 310px;
+    position: relative;
+    /* 确保容器有相对定位 */
+    display: flex;
 
-		.PerCard {
-			width: 60%;
-			height: 100%;
-			padding: 30px 27px;
-			box-sizing: border-box;
+    .PerCard {
+      width: 60%;
+      height: 100%;
+      padding: 30px 27px;
+      box-sizing: border-box;
 
-			.PerBox {
-				width: 100%;
-				height: 100%;
-				display: flex;
-				align-items: center;
-				.image-container {
-					width: 170px;
-					height: 170px;
-					position: relative;
-					// background-color: #374151;
-				}
-				.headImg {
-					// width: 170px;
-					// height: 170px;
-					border-radius: 50%;
-					object-fit: cover;
-					cursor: pointer;
-				}
-				.overlay {
-					position: absolute;
-					top: 0;
-					left: 0;
-					width: 100%;
-					height: 100%;
-					background-color: rgba(0, 0, 0, 0.5);
-					border-radius: 50%;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					flex-direction: column;
-					opacity: 0; /* 初始蒙层 */
-					transition: opacity 0.3s ease;
-					pointer-events: none; /* 防止蒙层干扰点击事件 */
-				}
+      .PerBox {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        .image-container {
+          width: 170px;
+          height: 170px;
+          position: relative;
+          // background-color: #374151;
+        }
+        .headImg {
+          // width: 170px;
+          // height: 170px;
+          border-radius: 50%;
+          object-fit: cover;
+          cursor: pointer;
+        }
+        .overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          opacity: 0; /* 初始蒙层 */
+          transition: opacity 0.3s ease;
+          pointer-events: none; /* 防止蒙层干扰点击事件 */
+        }
 
-				.image-container:hover .overlay {
-					opacity: 1;
-				}
-				.headright {
-					text-align: left;
-					min-height: 170px;
-					margin-left: 15px;
-					font-size: 18px;
-					display: flex;
-					flex-direction: column;
-					justify-content: space-around;
+        .image-container:hover .overlay {
+          opacity: 1;
+        }
+        .headright {
+          text-align: left;
+          min-height: 170px;
+          margin-left: 15px;
+          font-size: 18px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-around;
 
-					.headName {
-						font-size: 26px;
-						font-weight: 600;
-					}
+          .headName {
+            font-size: 26px;
+            font-weight: 600;
+          }
 
-					.headlist {
-						display: flex;
-						margin-top: 22px;
+          .headlist {
+            display: flex;
+            margin-top: 22px;
 
-						.headitem {
-							color: #1d1f2b99;
-							font-size: 16px;
-							margin-right: 15px;
-							//  font-family: PingFang SC, DFPKingGothicGB-Regular, sans-serif;;
-						}
+            .headitem {
+              color: #1d1f2b99;
+              font-size: 16px;
+              margin-right: 15px;
+              //  font-family: PingFang SC, DFPKingGothicGB-Regular, sans-serif;;
+            }
 
-						.headitems {
-							font-size: 16px;
-							color: #374151;
-						}
-					}
+            .headitems {
+              font-size: 16px;
+              color: #374151;
+            }
+          }
 
-					.ifePa {
-						margin-top: 27px;
-						font-size: 18px;
-						// color: #1d1f2b99;
-						color: #556072;
-						.id-entifier {
-							font-size: 14px;
-						}
-					}
+          .ifePa {
+            margin-top: 27px;
+            font-size: 18px;
+            // color: #1d1f2b99;
+            color: #556072;
+            .id-entifier {
+              font-size: 14px;
+            }
+          }
 
-					.sign {
-						font-size: 16px;
-						color: #1d1f2b99;
-						margin-top: 22px;
-						display: flex;
-						position: relative;
+          .sign {
+            font-size: 16px;
+            color: #1d1f2b99;
+            margin-top: 22px;
+            display: flex;
+            position: relative;
 
-						.signtext {
-							display: inline-block;
-							overflow: hidden;
-							text-overflow: ellipsis;
-							white-space: nowrap;
-							width: 300px;
-							color: #556072;
-						}
+            .signtext {
+              display: inline-block;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              width: 300px;
+              color: #556072;
+            }
 
-						.InforData {
-							position: absolute;
-							right: -120px;
-							bottom: 0;
-							z-index: 2;
-							border-radius: 4px;
-							opacity: 1;
-							z-index: 2;
+            .InforData {
+              position: absolute;
+              right: -120px;
+              bottom: 0;
+              z-index: 2;
+              border-radius: 4px;
+              opacity: 1;
+              z-index: 2;
 
-							&:hover {
-								color: #409eff;
-								cursor: pointer;
-							}
-						}
-					}
-				}
-			}
-		}
+              &:hover {
+                color: #409eff;
+                cursor: pointer;
+              }
+            }
+          }
+        }
+      }
+    }
 
-		// 背景
-		.backgrImg {
-			width: 65%;
-			height: 305px;
-			cursor: pointer;
-			margin-left: auto;
-			position: relative;
-			z-index: 1;
+    // 背景
+    .backgrImg {
+      width: 65%;
+      height: 305px;
+      cursor: pointer;
+      margin-left: auto;
+      position: relative;
+      z-index: 1;
 
-			.top_Gradient {
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background: linear-gradient(
-					to bottom,
-					rgb(255, 255, 255) 0%,
-					rgba(255, 255, 255, 0) 50%
-				);
-				z-index: 2;
-			}
+      .top_Gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 50%);
+        z-index: 2;
+      }
 
-			.right_Gradient {
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: -140px;
-				bottom: 0;
-				background: linear-gradient(
-					to left,
-					rgb(255, 255, 255) 0%,
-					rgba(255, 255, 255, 0) 50%
-				);
-				z-index: 2;
-			}
+      .right_Gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: -140px;
+        bottom: 0;
+        background: linear-gradient(to left, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 50%);
+        z-index: 2;
+      }
 
-			.bottom_Gradient {
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background: linear-gradient(
-					to top,
-					rgb(255, 255, 255) 0%,
-					rgba(255, 255, 255, 0) 50%
-				);
-				z-index: 2;
-			}
+      .bottom_Gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 50%);
+        z-index: 2;
+      }
 
-			.left_Gradient {
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background: linear-gradient(
-					to right,
-					rgb(255, 255, 255) 0%,
-					rgba(255, 255, 255, 0) 50%
-				);
-				z-index: 2;
-			}
-		}
-	}
+      .left_Gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to right, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 50%);
+        z-index: 2;
+      }
+    }
+  }
 }
 </style>

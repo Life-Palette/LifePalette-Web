@@ -1,5 +1,6 @@
+import type { CSSObject } from 'unocss'
 import {
-	type CSSObject,
+
 	defineConfig,
 	presetAttributify,
 	presetIcons,
@@ -9,6 +10,8 @@ import {
 	transformerDirectives,
 	transformerVariantGroup,
 } from 'unocss'
+import presetAnimations from 'unocss-preset-animations'
+import { builtinColors, presetShadcn } from 'unocss-preset-shadcn'
 import { presetUseful } from 'unocss-preset-useful'
 
 const typographyCssExtend: Record<string, CSSObject> = {
@@ -37,9 +40,7 @@ const typographyCssExtend: Record<string, CSSObject> = {
 export default defineConfig({
 	rules: [],
 	shortcuts: [
-		['text', 'text-primary-text'],
 		['bg', 'bg-primary-bg'],
-		// ['u-prose', 'prose prose-reading'],
 
 		['linear-text', 'text-transparent bg-clip-text bg-gradient-to-r'],
 		['text-p-r', 'linear-text from-purple to-red'], // test case
@@ -89,23 +90,21 @@ export default defineConfig({
 			dm: 'dm',
 			craft: 'MonoCraft',
 		},
-		colors: {
-			bg_color: 'var(--el-bg-color)',
-			context: 'rgba(var(--c-context),%alpha)',
-			primary: {
-				DEFAULT: 'rgba(var(--text),%alpha)',
-				text: 'rgba(var(--text),%alpha)',
-				bg: 'rgba(var(--bg),%alpha)',
-			},
-			level: {
-				0: 'var(--gc-level-0)',
-				1: 'var(--gc-level-1)',
-				2: 'var(--gc-level-2)',
-				3: 'var(--gc-level-3)',
-				4: 'var(--gc-level-4)',
-			},
-		},
-
+		// colors: {
+		// 	context: 'rgba(var(--c-context),%alpha)',
+		// 	primary: {
+		// 		DEFAULT: 'rgba(var(--text),%alpha)',
+		// 		text: 'rgba(var(--text),%alpha)',
+		// 		bg: 'rgba(var(--bg),%alpha)',
+		// 	},
+		// 	level: {
+		// 		0: 'var(--gc-level-0)',
+		// 		1: 'var(--gc-level-1)',
+		// 		2: 'var(--gc-level-2)',
+		// 		3: 'var(--gc-level-3)',
+		// 		4: 'var(--gc-level-4)',
+		// 	},
+		// },
 	},
 	presets: [
 		presetAttributify(),
@@ -125,6 +124,8 @@ export default defineConfig({
 			},
 			typography: { cssExtend: typographyCssExtend },
 		}),
+		presetAnimations(),
+		presetShadcn(builtinColors.map((c: any) => ({ color: c }))),
 	],
 	transformers: [
 		transformerDirectives(),
@@ -135,4 +136,17 @@ export default defineConfig({
 		Array.from({ length: 5 }, (j, i) => `fill-level-${i}`),
 		'sm-fsc max-w-75'.split(' '),
 	].flat(),
+	// By default, `.ts` and `.js` files are NOT extracted.
+  // If you want to extract them, use the following configuration.
+  // It's necessary to add the following configuration if you use shadcn-vue or shadcn-svelte.
+  content: {
+    pipeline: {
+      include: [
+        // the default
+        /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
+        // include js/ts files
+        '(components|src)/**/*.{js,ts}',
+      ],
+    },
+  },
 })

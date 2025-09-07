@@ -32,7 +32,7 @@ const isEmpty = computed(() => {
 			:infinite-scroll-disabled="
 				(listObj.loading || listObj.finished) && !disAbleInfinite
 			"
-			class="m-0 list-none p-0"
+			class="m-0 p-0 list-none"
 		>
 			<slot />
 		</ul>

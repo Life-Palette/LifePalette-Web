@@ -11,5 +11,5 @@ const root = resolve(_dirname, '../../')
  * @returns 基于根目录的相对路径
  */
 export function r(path: string) {
-  return resolve(root, path).replaceAll('\\', '/')
+	return resolve(root, path).replaceAll('\\', '/')
 }

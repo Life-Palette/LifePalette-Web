@@ -1,20 +1,16 @@
 import { defineConfig } from 'vite'
 import Tov from './presets'
-// import { useEnv } from './presets/shared/detect'
+import { useEnv } from './presets/shared/detect'
 
-// const env = useEnv()
+const env = useEnv()
 
 export default defineConfig({
-  // base: env.VITE_BASE_URL,
-  plugins: [Tov()],
+	base: env.VITE_BASE_URL,
 	server: {
+		// host: '0.0.0.0',
 		port: 5073,
+		// 是否开启 https
+		// https: false,
 	},
-	css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern-compiler',
-      },
-    },
-  },
+	plugins: [Tov()],
 })

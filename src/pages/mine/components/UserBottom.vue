@@ -98,16 +98,16 @@ const currentObj = computed(() => {
 </script>
 
 <template>
-  <div class="w-full flex flex-col items-center h-full">
+  <div class="flex flex-col h-full w-full items-center">
     <div class="mb-4 mt-8 flex <md:flex-col">
       <!-- 标签列表 -->
       <div
-        class="relative box-border flex items-center gap-1 overflow-auto px-10"
+        class="px-10 flex gap-1 items-center box-border relative overflow-auto"
       >
         <div
           v-for="(item, index) in tagList"
           :key="index"
-          class="tag-list relative box-border flex cursor-pointer items-center justify-center whitespace-nowrap rounded-md"
+          class="tag-list rounded-md flex cursor-pointer whitespace-nowrap items-center box-border justify-center relative"
           @click="handleClick(item)"
         >
           <div
@@ -140,7 +140,7 @@ const currentObj = computed(() => {
           <template #item="{ item }">
             <div class="item-box min-h-50">
               <!-- 封面 -->
-              <div class="img-cover max-h-100 flex-1">
+              <div class="img-cover flex-1 max-h-100">
                 <Starport
                   :port="`my-id${item.id}`"
                   class="h-full w-full transition-all duration-800"
@@ -156,11 +156,8 @@ const currentObj = computed(() => {
                 <div class="content-user">
                   <img
                     class="img-avatar"
-                    block
-                    h-full
-                    w-full
-                    bg-gray-400:20
-                    object-cover
+
+                     bg-gray-400:20 h-full w-full block object-cover
                      :src="getUserAvatar(item.User)"
                   >
                   <div class="user-name">

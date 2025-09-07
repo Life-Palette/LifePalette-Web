@@ -392,7 +392,7 @@ function reShowMap() {
 								<Close />
 							</el-icon>
 						</span>
-					<div ref="preView" class="relative flex-1 ">
+					<div ref="preView" class="flex-1 relative">
 						<!-- CLOSE -->
 						<!-- <span :class="[ns.e('btn'), ns.e('close')]" @click="hide"> -->
 						<!-- <span :class="[ns.e('btn'), ns.e('close')]" @click="hide">
@@ -453,7 +453,7 @@ function reShowMap() {
 
 					<!-- 自定义 -->
 					<div
-						class="z-999 h-full w-50 flex-shrink-0 overflow-auto break-all bg-white"
+						class="bg-white flex-shrink-0 h-full w-50 break-all z-999 overflow-auto"
 					>
 						<!-- vfor -->
 						<div class="p-4">
@@ -469,7 +469,7 @@ function reShowMap() {
 								</div>
 							</div>
 							<div class="text-lg font-bold">地理信息</div>
-							<div class="w-40 h-40 rounded-xl overflow-hidden">
+							<div class="rounded-xl h-40 w-40 overflow-hidden">
 								<card-map-card
 									v-if="showMap"
 									ref="mapCardRef"
@@ -486,15 +486,15 @@ function reShowMap() {
 
 <style scoped>
 .el-image-viewer__wrapper {
-	z-index: 999;
+  z-index: 999;
 }
 .el-image-viewer__canvas {
-	/* position: fixed;
+  /* position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: 9999; */
-	background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 </style>

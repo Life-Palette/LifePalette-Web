@@ -1,23 +1,14 @@
+// @ts-check
 import antfu from '@antfu/eslint-config'
+import oxlint from 'eslint-plugin-oxlint'
 
 export default antfu(
-  {},
   {
-    ignores: [
-      'dist',
-      'node_modules',
-      '.output',
-      '.nuxt',
-      'content/posts',
-      'data',
-      'uno.config.ts',
-			'src/assets/lottie',
-    ],
+    unocss: true,
+    formatters: true,
   },
   {
     rules: {
-      'node/prefer-global/process': 'off',
-      'no-console': 'off',
 			'style/no-tabs': 'off',
 			'style/quote-props': 'off',
 			'vue/html-indent': 'off',
@@ -25,39 +16,37 @@ export default antfu(
 			'node/prefer-global/process': 'off',
 			'node/prefer-global/buffer': 'off',
 			'unused-imports/no-unused-vars': 'off',
+			// 关闭会导致换行问题的规则
 			'vue/singleline-html-element-content-newline': 'off',
-			'ts/no-use-before-define': 'off',
-			'no-empty-pattern': 'off',
-			'vue/eqeqeq': 'off',
-			'ts/no-unsafe-function-type': 'off',
-			'unicorn/no-new-array': 'off',
-			'ts/no-unused-expressions': 'off',
+			'vue/multiline-html-element-content-newline': 'off',
+			'vue/html-closing-bracket-newline': 'off',
+			'vue/max-attributes-per-line': 'off',
+			'eqeqeq': 'off',
+			'style/no-mixed-spaces-and-tabs': 'off',
 			'regexp/no-unused-capturing-group': 'off',
 			'regexp/no-legacy-features': 'off',
-			'eqeqeq': 'off',
+			'no-console': 'off',
+			'ts/no-use-before-define': 'off',
 			'no-empty': 'off',
-			'node/handle-callback-err': 'off',
-			'no-case-declarations': 'off',
-			'style/no-mixed-spaces-and-tabs': 'off',
-			'no-dupe-keys': 'off',
-			'regexp/no-dupe-disjunctions': 'off',
-			'sort-imports': 'off',
-			'unicorn/prefer-dom-node-text-content': 'off',
-			'vue/no-use-v-if-with-v-for': 'off',
-			'vue/no-unused-refs': 'off',
-			'array-callback-return': 'off',
-			'regexp/no-dupe-disjunctions': 'off',
 			'vue/require-v-for-key': 'off',
-			'import/order': 'off',
-    },
+			'vue/eqeqeq': 'off',
+			'vue/no-unused-refs': 'off',
+			'no-case-declarations': 'off',
+			'unicorn/prefer-dom-node-text-content': 'off',
+			'vue/no-required-prop-with-default': 'off',
+			'node/handle-callback-err': 'off',
+			'regexp/no-dupe-disjunctions': 'off',
+			'vue/no-use-v-if-with-v-for': 'off',
+			'ts/no-unsafe-function-type': 'off',
+		},
   },
+  // 集成 oxlint 插件，自动禁用与 oxlint 冲突的 ESLint 规则
   {
-    files: [
-      '*.d.ts',
-    ],
+    plugins: {
+      oxlint,
+    },
     rules: {
-      'unused-imports/no-unused-vars': 'off',
-      'eslint-comments/no-unlimited-disable': 'off',
+      ...oxlint.configs.recommended.rules,
     },
   },
 )
