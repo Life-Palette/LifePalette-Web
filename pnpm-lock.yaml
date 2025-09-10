@@ -33,8 +33,8 @@ importers:
         specifier: ^1.11.13
         version: 1.11.13
       element-plus:
-        specifier: ^2.9.3
-        version: 2.9.3(vue@3.5.13(typescript@5.7.3))
+        specifier: ^2.11.0
+        version: 2.11.0(vue@3.5.13(typescript@5.7.3))
       eruda:
         specifier: ^3.4.1
         version: 3.4.1
@@ -1352,14 +1352,14 @@ packages:
     resolution: {integrity: sha512-lB05FkqEdUg2AA0xEbUz0SnkXT1LcCTa438W4IWTUh4hdOnVbQyOJ81OrDXsJk/LSiJHubgGEFoR5EHq1NsH1A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@floating-ui/core@1.6.0':
-    resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
+  '@floating-ui/core@1.7.3':
+    resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
 
-  '@floating-ui/dom@1.6.3':
-    resolution: {integrity: sha512-RnDthu3mzPlQ31Ss/BTwQ1zjzIhr3lk1gZB1OC56h/1vEtaXkESrOqL5fQVMfXpwGtRwX+YsZBdyHtJMQnkArw==}
+  '@floating-ui/dom@1.7.4':
+    resolution: {integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==}
 
-  '@floating-ui/utils@0.2.1':
-    resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
+  '@floating-ui/utils@0.2.10':
+    resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1799,8 +1799,8 @@ packages:
   '@types/lodash-es@4.17.12':
     resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
 
-  '@types/lodash@4.17.0':
-    resolution: {integrity: sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==}
+  '@types/lodash@4.17.20':
+    resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
 
   '@types/mapbox-gl@3.4.1':
     resolution: {integrity: sha512-NsGKKtgW93B+UaLPti6B7NwlxYlES5DpV5Gzj9F75rK5ALKsqSk15CiEHbOnTr09RGbr6ZYiCdI+59NNNcAImg==}
@@ -2952,8 +2952,8 @@ packages:
   electron-to-chromium@1.5.78:
     resolution: {integrity: sha512-UmwIt7HRKN1rsJfddG5UG7rCTCTAKoS9JeOy/R0zSenAyaZ8SU3RuXlwcratxhdxGRNpk03iq8O7BA3W7ibLVw==}
 
-  element-plus@2.9.3:
-    resolution: {integrity: sha512-6tSLp5XytDS4TMZ0P3aGZnr7MXTagfNycepNfIDitd9IgwM9y01+Ssu6mglNi8RiXYhek6LBWNOd/cvpIO12+w==}
+  element-plus@2.11.0:
+    resolution: {integrity: sha512-Kdr3knlpEpUTfEDbWIyh+/CvQbeNb+Kig971M+G/QinVcD2BfsUNWo5OCogaF0Nvy/BuBFdZ7KoS+PtpWBzidw==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -5768,6 +5768,7 @@ packages:
 
   unocss-preset-magicss@0.1.3:
     resolution: {integrity: sha512-AnKZSvQVpzZekLn5xpkP6CpoTXxFXgK+C5LpLz3UqQtbcjmmNusq7N0OLShyj0XRxsBUL28ZYwYCevLYtKT6Yw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       unocss: ^0.64.1
     peerDependenciesMeta:
@@ -7343,16 +7344,16 @@ snapshots:
       '@eslint/core': 0.10.0
       levn: 0.4.1
 
-  '@floating-ui/core@1.6.0':
+  '@floating-ui/core@1.7.3':
     dependencies:
-      '@floating-ui/utils': 0.2.1
+      '@floating-ui/utils': 0.2.10
 
-  '@floating-ui/dom@1.6.3':
+  '@floating-ui/dom@1.7.4':
     dependencies:
-      '@floating-ui/core': 1.6.0
-      '@floating-ui/utils': 0.2.1
+      '@floating-ui/core': 1.7.3
+      '@floating-ui/utils': 0.2.10
 
-  '@floating-ui/utils@0.2.1': {}
+  '@floating-ui/utils@0.2.10': {}
 
   '@humanfs/core@0.19.1': {}
 
@@ -7822,9 +7823,9 @@ snapshots:
 
   '@types/lodash-es@4.17.12':
     dependencies:
-      '@types/lodash': 4.17.0
+      '@types/lodash': 4.17.20
 
-  '@types/lodash@4.17.0': {}
+  '@types/lodash@4.17.20': {}
 
   '@types/mapbox-gl@3.4.1':
     dependencies:
@@ -9263,13 +9264,13 @@ snapshots:
 
   electron-to-chromium@1.5.78: {}
 
-  element-plus@2.9.3(vue@3.5.13(typescript@5.7.3)):
+  element-plus@2.11.0(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@ctrl/tinycolor': 3.6.1
       '@element-plus/icons-vue': 2.3.1(vue@3.5.13(typescript@5.7.3))
-      '@floating-ui/dom': 1.6.3
+      '@floating-ui/dom': 1.7.4
       '@popperjs/core': '@sxzz/popperjs-es@2.11.7'
-      '@types/lodash': 4.17.0
+      '@types/lodash': 4.17.20
       '@types/lodash-es': 4.17.12
       '@vueuse/core': 9.13.0(vue@3.5.13(typescript@5.7.3))
       async-validator: 4.2.5
