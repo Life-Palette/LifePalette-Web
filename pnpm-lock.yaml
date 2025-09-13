@@ -143,13 +143,13 @@ importers:
         version: 12.4.0(typescript@5.7.3)
       '@vueuse/integrations':
         specifier: ^12.4.0
-        version: 12.4.0(async-validator@4.2.5)(axios@1.8.2)(nprogress@0.2.0)(qrcode@1.5.4)(typescript@5.7.3)
+        version: 12.4.0(async-validator@4.2.5)(axios@1.12.0)(nprogress@0.2.0)(qrcode@1.5.4)(typescript@5.7.3)
       '@vueuse/motion':
         specifier: ^2.2.6
         version: 2.2.6(rollup@4.39.0)(vue@3.5.13(typescript@5.7.3))
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.12.0
+        version: 1.12.0
       browserslist:
         specifier: ^4.24.4
         version: 4.24.4
@@ -2427,8 +2427,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.8.2:
-    resolution: {integrity: sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==}
+  axios@1.12.0:
+    resolution: {integrity: sha512-oXTDccv8PcfjZmPGlWsPSwtOJCZ/b6W5jAMCNcfwJbCzDckwG0jrYJFaWH1yvivfCXjVzV/SPDEhMB3Q+DSurg==}
 
   babel-plugin-polyfill-corejs2@0.4.11:
     resolution: {integrity: sha512-sMEJ27L0gRHShOh5G54uAAPaiCOygY/5ratXuiyb2G46FmlSpc9eFCzYVyDiPxfNbwzA7mYahmjQc5q+CZQ09Q==}
@@ -3497,8 +3497,8 @@ packages:
   flatted@3.2.9:
     resolution: {integrity: sha512-36yxDn5H7OFZQla0/jFJmbIKTdZAQHngCedGxiMmpNfEZM0sdEeT+WczLQrjK6D7o2aiyLYDnkw0R3JK0Qv1RQ==}
 
-  follow-redirects@1.15.9:
-    resolution: {integrity: sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==}
+  follow-redirects@1.15.11:
+    resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -3518,8 +3518,8 @@ packages:
     resolution: {integrity: sha512-TMKDUnIte6bfb5nWv7V/caI169OHgvwjb7V4WkeUvbQQdjr5rWKqHFiKWb/fcOwB+CzBT+qbWjvj+DVwRskpIg==}
     engines: {node: '>=14'}
 
-  form-data@4.0.2:
-    resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
+  form-data@4.0.4:
+    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
     engines: {node: '>= 6'}
 
   framesync@6.1.2:
@@ -5768,6 +5768,7 @@ packages:
 
   unocss-preset-magicss@0.1.3:
     resolution: {integrity: sha512-AnKZSvQVpzZekLn5xpkP6CpoTXxFXgK+C5LpLz3UqQtbcjmmNusq7N0OLShyj0XRxsBUL28ZYwYCevLYtKT6Yw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       unocss: ^0.64.1
     peerDependenciesMeta:
@@ -8591,14 +8592,14 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/integrations@12.4.0(async-validator@4.2.5)(axios@1.8.2)(nprogress@0.2.0)(qrcode@1.5.4)(typescript@5.7.3)':
+  '@vueuse/integrations@12.4.0(async-validator@4.2.5)(axios@1.12.0)(nprogress@0.2.0)(qrcode@1.5.4)(typescript@5.7.3)':
     dependencies:
       '@vueuse/core': 12.4.0(typescript@5.7.3)
       '@vueuse/shared': 12.4.0(typescript@5.7.3)
       vue: 3.5.13(typescript@5.7.3)
     optionalDependencies:
       async-validator: 4.2.5
-      axios: 1.8.2
+      axios: 1.12.0
       nprogress: 0.2.0
       qrcode: 1.5.4
     transitivePeerDependencies:
@@ -8725,10 +8726,10 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.8.2:
+  axios@1.12.0:
     dependencies:
-      follow-redirects: 1.15.9
-      form-data: 4.0.2
+      follow-redirects: 1.15.11
+      form-data: 4.0.4
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -9945,7 +9946,7 @@ snapshots:
 
   flatted@3.2.9: {}
 
-  follow-redirects@1.15.9: {}
+  follow-redirects@1.15.11: {}
 
   for-in@1.0.2: {}
 
@@ -9958,11 +9959,12 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  form-data@4.0.2:
+  form-data@4.0.4:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
+      hasown: 2.0.2
       mime-types: 2.1.35
 
   framesync@6.1.2:
