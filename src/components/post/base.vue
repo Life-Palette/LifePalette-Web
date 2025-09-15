@@ -362,11 +362,11 @@ function initExtraData() {
 						<div class="upload-item relative">
 							<!-- 删除按钮 -->
 							<div
-								class="i-carbon-delete cursor-pointer right-2 top-2 absolute z-9999"
+								class="i-carbon-delete cursor-pointer right-2 top-2 absolute z-[9999]"
 								@click="deleteItem(index)"
 							/>
 							<!-- live-tag -->
-							<div class="cursor-pointer bottom-2 right-2 absolute z-99">
+							<div class="cursor-pointer bottom-2 right-2 absolute z-[99]">
 								<el-tag v-if="item.videoSrc" round type="primary">
 									live
 								</el-tag>
@@ -408,7 +408,7 @@ function initExtraData() {
 							>
 								<template #trigger>
 									<el-button round type="primary">
-										<div class="i-carbon-deletecursor-pointer">+</div>
+										<div class="i-carbon-add cursor-pointer">+</div>
 									</el-button>
 								</template>
 							</el-upload>

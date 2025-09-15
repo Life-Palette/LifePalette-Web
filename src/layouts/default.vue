@@ -4,15 +4,13 @@ import { StarportCarrier } from 'vue-starport'
 
 <template>
 	<div
-		font-sans
-		text="center gray-700 dark:gray-200"
-		class="overscroll-auto flex flex-col h-screen w-full"
+		class="font-sans text-center text-gray-700 dark:text-gray-200 overscroll-auto flex flex-col h-screen w-full"
 	>
-		<div class="top-0 sticky z-999">
+		<div class="top-0 sticky z-[999]">
 			<TheHeader />
 		</div>
-		<div class="con-h px-5 flex w-full box-border <md:!h-auto">
-			<div class="<md:hidden">
+		<div class="con-h px-5 flex w-full box-border md:h-auto">
+			<div class="hidden md:block">
 				<Slider />
 				<div class="flex-1" />
 			</div>

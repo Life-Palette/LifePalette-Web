@@ -9,9 +9,9 @@ const props = defineProps({
 </script>
 
 <template>
-	<div class="item-box min-h-80">
+	<div class="item-box min-h-[320px]">
 		<!-- 封面 -->
-		<div class="img-cover flex-1 max-h-100">
+		<div class="img-cover flex-1 max-h-[400px]">
 			<Starport
 				:port="`my-id${data.id}`"
 				class="h-full w-full transition-all duration-800"
@@ -26,9 +26,7 @@ const props = defineProps({
 			</div>
 			<div class="content-user">
 				<img
-					class="img-avatar"
-
-					 bg-gray-400:20 h-full w-full block object-cover
+					class="img-avatar bg-gray-400/20 h-full w-full block object-cover"
 					:src="getUserAvatar(data.User)"
 				>
 				<div class="user-name">

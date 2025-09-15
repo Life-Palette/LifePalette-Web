@@ -204,7 +204,7 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
 />
 	<div class="test h-full w-full">
 		<header
-class="header-box cursor-pointer z-99" @click="openUpload" @mouseenter="showEditInfo = true"
+class="header-box cursor-pointer z-[99]" @click="openUpload" @mouseenter="showEditInfo = true"
 			@mouseleave="showEditInfo = false"
 >
 			<!-- <header class="header-box z-99 cursor-pointer" @click="open"> -->
@@ -214,7 +214,7 @@ class="header-box cursor-pointer z-99" @click="openUpload" @mouseenter="showEdit
 			</transition>
 			<div class="header__cover" />
 		</header>
-		<div class="intro z-99">
+		<div class="intro z-[99]">
 			<!-- <img :src="userInfo?.avatar" alt="" class="avatar" @click="headUpload"/> -->
 			<img :src="userheadUpload" alt="" class="avatar" @click="headUpload">
 			<div class="title-wrapper">
@@ -228,7 +228,7 @@ class="header-box cursor-pointer z-99" @click="openUpload" @mouseenter="showEdit
 				</div>
 			</div>
 		</div>
-		<main class="w-full z-1">
+		<main class="w-full z-[1]">
 			<UserBottom />
 		</main>
 		<div>

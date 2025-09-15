@@ -43,7 +43,7 @@ const showWords = ref(`
 
 <template>
 	<el-drawer v-model="isShowDrawer" append-to-body title="小程序体验通知🎉">
-		<div class="h-50vw cursor-pointer relative overflow-hidden">
+		<div class="h-[50vw] cursor-pointer relative overflow-hidden">
 			<h1 class="whitespace-break-spaces" v-html="showWords" />
 			<div class="mt-40 w-full">
 				<l-p-image :data="fileData?.exif" is-show-base object-fit="contain" />

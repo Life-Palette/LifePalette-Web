@@ -204,7 +204,7 @@ function getCover(data: any) {
 // 传入坐标，添加标记
 function addMarker(lnglat: number[] | any, data?: any, isSingle?: boolean) {
   const flagEl = document.createElement('div')
-  flagEl.className = 'marker-flag z-998 i-meteocons-windsock text-6xl'
+  flagEl.className = 'marker-flag z-[998] i-meteocons-windsock text-6xl'
   new mapboxgl.Marker(flagEl).setLngLat(lnglat).addTo(map)
 
   // cover

@@ -189,7 +189,7 @@ ref="clipperRef" :type="clipperData.type" :allow-type-list="clipperData.allowTyp
 			</div>
 		</div>
 		<!-- 地图 -->
-		<main class="con-main-box z-1">
+		<main class="con-main-box z-[1]">
 			<UserBottom />
 		</main>
 	</div>

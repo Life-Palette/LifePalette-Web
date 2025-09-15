@@ -308,9 +308,7 @@ return
 				<section>
 					<div class="content-user">
 						<img
-							class="img-avatar"
-
-							 bg-gray-400:20 h-full w-full block object-cover
+							class="img-avatar bg-gray-400/20 h-full w-full block object-cover"
 							:src="getUserAvatar(dataDe.User)"
 						>
 						<div class="user-name">
@@ -319,19 +317,19 @@ return
 						<div class="flex-1" />
 						<div
 							v-if="isShowEdit"
-							class="i-carbon-trash-can text-xl mr-2 cursor-pointer"
+							class="icon-[carbon--trash-can] text-xl mr-2 cursor-pointer"
 							@click="open(dataDe?.id)"
 						/>
 						<div
 							v-if="isShowEdit"
-							class="i-carbon-edit text-xl cursor-pointer"
+							class="icon-[carbon--edit] text-xl cursor-pointer"
 							@click="handleEdit"
 						/>
 					</div>
 				</section>
 				<!-- 标题 -->
 				<section
-					class="title-part flex flex-1 flex-col overflow-auto <md:overflow-initial"
+					class="title-part flex flex-1 flex-col overflow-auto md:overflow-initial"
 				>
 					<!-- 标题 -->
 					<div class="title-desc py-5">
@@ -373,9 +371,9 @@ return
 						<div class="flex gap-2 items-end">
 							<!-- <div
                 v-if="dataDe.like"
-                class="i-carbon-favorite-filled text-[#ff4d4f] text-xl"
+                class="icon-[carbon--favorite-filled] text-[#ff4d4f] text-xl"
               ></div>
-              <div v-else class="i-carbon-favorite text-xl"></div> -->
+              <div v-else class="icon-[carbon--favorite] text-xl"></div> -->
 							<BaseLike
 								v-model:is-like-pro="dataDe.like"
 								@like-change="handleLike"
@@ -386,12 +384,12 @@ return
 						</div>
 						<!-- 收藏 -->
 						<!-- <div class="flex gap-2 items-end">
-              <div class="i-carbon-star text-xl"></div>
+              <div class="icon-[carbon--star] text-xl"></div>
               <div class="text-sm">{{ 0 }}</div>
             </div> -->
 						<!-- 评论 -->
 						<div class="flex gap-2 items-end">
-							<div class="i-carbon-chat text-xl" />
+							<div class="icon-[carbon--chat] text-xl" />
 							<div class="text-sm">
 								{{ comNum }}
 							</div>
@@ -411,7 +409,7 @@ return
 							>
 							<div class="input-buttons">
 								<div
-									class="186, 186)] text-[rgb(186, i-carbon-face-activated-filled"
+									class="icon-[carbon--face-activated-filled] text-[rgb(186,186,186)]"
 								/>
 							</div>
 						</div>
@@ -432,7 +430,7 @@ return
 				:class="{ 'mt-10': isLive }"
 				@click="router.back()"
 			>
-				<div class="i-carbon-arrow-left" />
+				<div class="icon-[carbon--arrow-left]" />
 			</div>
 		</div>
 	</div>
@@ -558,11 +556,6 @@ return
     align-items: center;
     gap: 10px;
     padding: 0 10px;
-    .i-carbon-send {
-      font-size: 20px;
-      color: #5b92e1;
-      cursor: pointer;
-    }
   }
 }
 .overlay__btn {

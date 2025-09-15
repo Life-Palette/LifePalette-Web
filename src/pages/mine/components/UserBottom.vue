@@ -99,7 +99,7 @@ const currentObj = computed(() => {
 
 <template>
   <div class="flex flex-col h-full w-full items-center">
-    <div class="mb-4 mt-8 flex <md:flex-col">
+    <div class="mb-4 mt-8 flex md:flex-col">
       <!-- 标签列表 -->
       <div
         class="px-10 flex gap-1 items-center box-border relative overflow-auto"
@@ -138,9 +138,9 @@ const currentObj = computed(() => {
           :lazyload="false"
         >
           <template #item="{ item }">
-            <div class="item-box min-h-50">
+            <div class="item-box min-h-[200px]">
               <!-- 封面 -->
-              <div class="img-cover flex-1 max-h-100">
+              <div class="img-cover flex-1 max-h-[400px]">
                 <Starport
                   :port="`my-id${item.id}`"
                   class="h-full w-full transition-all duration-800"
@@ -155,9 +155,7 @@ const currentObj = computed(() => {
                 </div>
                 <div class="content-user">
                   <img
-                    class="img-avatar"
-
-                     bg-gray-400:20 h-full w-full block object-cover
+                    class="img-avatar bg-gray-400/20 h-full w-full block object-cover"
                      :src="getUserAvatar(item.User)"
                   >
                   <div class="user-name">

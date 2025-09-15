@@ -53,13 +53,13 @@ const isShowDrawer = ref(false)
 <template>
 	<div
 		:class="isDark ? 'header-dark' : 'header-normal'"
-		class="px-[40px] flex h-[55px] w-full items-center box-border z-999 overflow-hidden"
+		class="px-[40px] flex h-[55px] w-full items-center box-border z-[999] overflow-hidden"
 	>
-		<div v-motion-roll-bottom font-bold h-full text="2xl">
+		<div v-motion-roll-bottom class="font-bold h-full text-2xl">
 			<!-- Wow🌟! -->
 			<img :src="ImgLogo" class="ml-4 h-full w-full scale-300">
 		</div>
-		<div flex-1>
+		<div class="flex-1">
 			<!-- <el-input
 				v-model="input1"
 				class="m-2 w-50"
@@ -74,21 +74,18 @@ const isShowDrawer = ref(false)
 				@click="isShowDrawer = true"
 			>
 				<el-badge value="new" class="mt-1.5">
-					<div class="i-carbon-email-new icon-btn" />
+					<div class="icon-[carbon--email-new] icon-btn" />
 				</el-badge>
 			</div>
 		</div>
-		<div class="flex gap-5 h-full items-center <md:hidden">
+		<div class="flex gap-5 h-full items-center md:hidden">
 			<div
-				i-carbon-sun
-				dark:i-carbon-moon
-				icon-btn
+				class="icon-[carbon--sun] dark:icon-[carbon--moon] icon-btn"
 				title="Change Theme"
 				@click="toggleDark()"
 			/>
 			<a
-				i-carbon-logo-github
-				icon-btn
+				class="icon-[carbon--logo-github] icon-btn"
 				rel="noreferrer"
 				href="https://github.com/IceyWu"
 				target="_blank"
@@ -102,7 +99,7 @@ const isShowDrawer = ref(false)
 		<!-- 头像 -->
 		<div
 			v-loading="loginLoading"
-			class="ml-5 flex cursor-pointer items-center z-1000"
+			class="ml-5 flex cursor-pointer items-center z-[1000]"
 		>
 			<!-- 已登录 -->
 			<template v-if="isLogin">
@@ -119,7 +116,7 @@ const isShowDrawer = ref(false)
 								<div
 									class="text-[1.1em] bg-black inline-block dark:bg-white"
 									:class="
-										isDropdown ? 'i-carbon-caret-up' : 'i-carbon-caret-down'
+										isDropdown ? 'icon-[carbon--caret-up]' : 'icon-[carbon--caret-down]'
 									"
 								/>
 							</span>
@@ -128,11 +125,11 @@ const isShowDrawer = ref(false)
 						<template #dropdown>
 							<el-dropdown-menu class="logout" @visible-change="handleVisible2">
 								<el-dropdown-item class="h-[30px]">
-									<p class="i-material-symbols-lock-outline" />
+									<p class="icon-[material-symbols--lock-outline]" />
 									<p class="ml-2">修改密码</p>
 								</el-dropdown-item>
 								<el-dropdown-item class="h-[30px]" @click="handleLogout">
-									<p class="i-grommet-icons-power-shutdown" />
+									<p class="icon-[grommet-icons--power-shutdown]" />
 									<p class="ml-2">退出</p>
 								</el-dropdown-item>
 							</el-dropdown-menu>

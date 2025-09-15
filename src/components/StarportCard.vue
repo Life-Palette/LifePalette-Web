@@ -89,7 +89,7 @@ const coverUrl = computed(() => {
 
 					<div
 						v-show="isactive"
-						class="flex items-center justify-center absolute z-12"
+						class="flex items-center justify-center absolute z-[12]"
 						@click="videoRef.play()"
 					>
 						<div class="i-carbon-play-outline-filled text-7xl text-[#fff]" />

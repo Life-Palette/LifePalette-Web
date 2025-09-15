@@ -13,9 +13,7 @@ const typedRef = useTyped([' is not found!'])
       </div>
       <RouterLink :to="safeResolve('/')">
         <button
-          class="text-lg px-5 py-2 rounded bg-light-800 transition"
-          hover="shadow-md"
-          dark="text-black"
+          class="text-lg px-5 py-2 rounded bg-light-800 transition hover:shadow-md dark:text-black"
         >
           Go Home
         </button>

@@ -224,10 +224,10 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 		</Skeleton>
 	</DefineTemplate>
 	<div class="flex flex-1 flex-col gap-0 h-full overflow-auto">
-		<div class="mb-4 mt-8 flex <md:flex-col">
+		<div class="mb-4 mt-8 flex md:flex-col">
 			<!-- 标签列表 -->
 			<div
-				class="px-10 flex gap-1 items-center box-border relative overflow-auto <md:px-1"
+				class="px-10 flex gap-1 items-center box-border relative overflow-auto md:px-1"
 			>
 				<div
 					v-for="(item, index) in tagList"
@@ -251,7 +251,7 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 			</div>
 			<!-- 测试图标 -->
 			<div
-				class="flex flex-1 gap-1 cursor-pointer whitespace-nowrap items-center justify-end hover:text-blue <md:my-1 !<md:hidden"
+				class="flex flex-1 gap-1 cursor-pointer whitespace-nowrap items-center justify-end hover:text-blue md:my-1 md:hidden"
 				@click="isSwiperLayout = !isSwiperLayout"
 			>
 				{{ isSwiperLayout ? "列表模式" : "卡片模式" }}
@@ -259,15 +259,15 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 				<div
 					:class="[
 						isSwiperLayout
-							? 'i-carbon-ibm-secure-infrastructure-on-vpc-for-regulated-industries'
-							: 'i-carbon-show-data-cards',
+							? 'icon-[carbon--ibm-secure-infrastructure-on-vpc-for-regulated-industries]'
+							: 'icon-[carbon--show-data-cards]',
 					]"
 				/>
 			</div>
 		</div>
 
 		<!-- 内容列表 -->
-		<div class="content-box px-10 box-border overflow-auto <md:px-1">
+		<div class="content-box px-10 box-border overflow-auto md:px-1">
 			<div class="rounded-md h-full w-full overflow-auto">
 				<!-- 有数据 -->
 				<template v-if="listObj?.list?.length > 0">
@@ -330,12 +330,11 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 								<template #loading>
 									<ReuseTemplate />
 								</template>
-								<div grid="~ cols-1 md:cols-2 lg:cols-3 xl:cols-4  gap-6 ">
+								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 									<div
 										v-for="(items, idx) of parts"
 										:key="idx"
-										flex="~ col  "
-										space-y-4
+										class="flex flex-col space-y-4"
 									>
 										<CoverCard
 											v-for="data of items"
@@ -362,13 +361,13 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 		<!-- 发布按钮 -->
 		<div
 			v-if="!listObj.loading && cols === 1"
-			class="bottom-20 right-10 fixed z-9999"
+			class="bottom-20 right-10 fixed z-[9999]"
 			@click="goCreate"
 		>
 			<div
 				class="bg-bg_color rounded-full flex h-12 w-12 shadow-lg items-center justify-center"
 			>
-				<div class="i-carbon-add-large text-xl" />
+				<div class="icon-[carbon--add-large] text-xl" />
 			</div>
 		</div>
 	</div>

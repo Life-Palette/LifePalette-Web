@@ -103,15 +103,14 @@ onMounted(() => {
 </script>
 
 <template>
-<div class="p-5 h-90vh w-100vw box-border">
+<div class="p-5 h-[90vh] w-[100vw] box-border">
 				<ScrollList v-model="listObj" @on-load="onLoad">
-					<div grid="~ cols-1 md:cols-2 lg:cols-3 xl:cols-4  gap-6 ">
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 						<div
 							v-for="(items, idx) of parts"
 							:key="idx"
-							flex="~ col  "
-							space-y-4
->
+							class="flex flex-col space-y-4"
+						>
 							<CoverCard v-for="data of items" :key="data.id" :data @click="(e) => handleClick(e, data)" />
 						</div>
 					</div>

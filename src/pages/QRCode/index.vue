@@ -229,11 +229,11 @@ function clearQrTimer() {
         >
           <!-- 遮罩层 -->
           <div
-            class="bg-white opacity-80 h-full w-full left-0 top-0 absolute z-98"
+            class="bg-white opacity-80 h-full w-full left-0 top-0 absolute z-[98]"
           />
           <!-- 标识 -->
           <div
-            class="i-carbon-checkmark-filled text-4xl color-[#36bf84] z-99"
+            class="icon-[carbon--checkmark-filled] text-4xl text-[#36bf84] z-[99]"
           />
         </div>
       </template>
@@ -245,14 +245,14 @@ function clearQrTimer() {
         >
           <!-- 遮罩层 -->
           <div
-            class="bg-black opacity-50 h-full w-full left-0 top-0 absolute z-98"
+            class="bg-black opacity-50 h-full w-full left-0 top-0 absolute z-[98]"
           />
           <!-- 标识 -->
           <div
-            class="i-carbon-warning-filled text-4xl color-[#ff4d4f] z-99"
+            class="icon-[carbon--warning-filled] text-4xl text-[#ff4d4f] z-[99]"
           />
           <!-- 刷新 -->
-          <div class="color-white w-full bottom-10 absolute z-99">
+          <div class="text-white w-full bottom-10 absolute z-[99]">
             点击刷新二维码
           </div>
         </div>
@@ -264,11 +264,11 @@ function clearQrTimer() {
         >
           <!-- 遮罩层 -->
           <div
-            class="bg-white opacity-80 h-full w-full left-0 top-0 absolute z-98"
+            class="bg-white opacity-80 h-full w-full left-0 top-0 absolute z-[98]"
           />
           <!-- 标识 -->
           <div
-            class="i-carbon-face-wink-filled text-4xl color-[#36bf84] z-99"
+            class="icon-[carbon--face-wink-filled] text-4xl text-[#36bf84] z-[99]"
           />
         </div>
       </template>

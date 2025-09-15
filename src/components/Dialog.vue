@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { defineEmits, defineProps } from 'vue'
 import DetailCom from '@/pages/detail/[id].vue'
 
 const props = defineProps({

@@ -1,14 +1,12 @@
-import type { Directive } from 'vue' // unocss reset
+import type { Directive } from 'vue'
 import { MotionPlugin } from '@vueuse/motion'
 // 自定义指令
 import * as directives from '@/directives'
 import { destroyEruda } from '@/utils/eruda'
 
 import App from './App.vue'
-// https://unocss.dev/ 原子 css 库
-import '@unocss/reset/tailwind-compat.css'
-import 'virtual:uno.css'
-import 'virtual:unocss-devtools'
+// TailwindCSS 和 shadcn-vue 样式
+import '@/assets/index.css'
 import 'element-plus/dist/index.css'
 // 你自定义的 css
 import './styles/main.css'
