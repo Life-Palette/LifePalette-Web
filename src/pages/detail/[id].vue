@@ -341,7 +341,7 @@ return
 						{{ dataDe.title }}
 					</div>
 					<!-- 内容 -->
-					<div class="title-content py-5 text-start text-[#333]">
+					<div class="title-content py-5 text-start text-[#333] whitespace-break-spaces">
 						{{ dataDe.content }}
 					</div>
 					<!-- 标签 -->
