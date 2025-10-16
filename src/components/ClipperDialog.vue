@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-// import TipsDialog from '~/components/TipsDialog/TipsDialog.vue' // 封装的dialog组件
-import { ElMessage } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
 import { VueCropper } from 'vue-cropper'
+import { toast } from 'vue-sonner'
+// import TipsDialog from '~/components/TipsDialog/TipsDialog.vue' // 封装的dialog组件
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { uploadFile as uploadFileFunc } from '~/utils/uploadAli'
 // 需要引入的库
 import 'vue-cropper/dist/index.css'
@@ -97,7 +99,7 @@ function beforeUploadEvent(file: File) {
   // 判断是否符合上传类型
   const isAllowTye = props.allowTypeList.includes(type)
   if (!isAllowTye) {
-    ElMessage.error(`仅支持${acceptType.value.join('、')}格式的图片`)
+    toast.error(`仅支持${acceptType.value.join('、')}格式的图片`)
     return false
   }
   return true
@@ -218,15 +220,11 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    append-to-body
-    title="图片裁剪"
-    width="40%"
-    :z-index="99999"
-    @close="dialogVisible = false"
-  >
-    <template #default>
+  <Dialog v-model:open="dialogVisible">
+    <DialogContent class="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>图片裁剪</DialogTitle>
+      </DialogHeader>
       <div class="cropper">
         <div class="cropper_left">
           <VueCropper
@@ -242,6 +240,8 @@ defineExpose({
             :fixed-number="options.fixedNumber"
             :fixed="options.fixed"
             :full="options.full"
+            :auto-crop-width="options.autoCropWidth"
+            :auto-crop-height="options.autoCropHeight"
             :center-box="options.centerBox"
             @real-time="previewHandle"
           />
@@ -275,17 +275,17 @@ defineExpose({
           </div>
         </div>
       </div>
-    </template>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="" @click="refreshCrop">重置</el-button>
-        <el-button :loading="uploadLoading" type="primary" @click="onConfirm">
-          确认
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+      <DialogFooter>
+        <div class="flex gap-2">
+          <Button variant="outline" @click="dialogVisible = false">取消</Button>
+          <Button variant="outline" @click="refreshCrop">重置</Button>
+          <Button :disabled="uploadLoading" @click="onConfirm">
+            {{ uploadLoading ? '处理中...' : '确认' }}
+          </Button>
+        </div>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <style lang="less" scoped>

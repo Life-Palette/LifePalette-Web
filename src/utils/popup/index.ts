@@ -2,7 +2,7 @@
  * 用户访问相关的弹窗
  */
 import { h } from 'vue'
-import dialog from '~/components/image-viewer/index.vue'
+// import dialog from '~/components/image-viewer/index.vue'
 import { domAdd } from './domAdd'
 
 function domSet(el: HTMLDivElement) {
@@ -16,7 +16,7 @@ export function showPreView(options: any) {
 	const { renderer, ...data } = options
 	return new Promise((resolve, reject) => {
 		let popupInstance: any
-		const testDom = h(dialog as any, {
+		const testDom = h('div' as any, {
 			data,
 		})
 		const handleClose = () => {

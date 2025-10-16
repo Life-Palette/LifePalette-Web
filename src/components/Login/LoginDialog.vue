@@ -1,4 +1,5 @@
 <script setup>
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import ImgLoginAccount from '~/assets/image/login/account.svg'
 import ImgLoginQr from '~/assets/image/login/qr.svg'
 import LoginForm from '~/components/Login/LoginForm.vue'
@@ -26,18 +27,10 @@ function closeDialog() {
 </script>
 
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    append-to-body
-    title="Tips"
-    width="350px"
-    top="20vh"
-    :z-index="999"
-    class="no-dlg-bg-class"
-    @close="closeDialog"
-  >
-    <div
-      class="form-box"
+  <Dialog :open="dialogVisible" @update:open="closeDialog">
+    <DialogContent class="max-w-sm no-dlg-bg-class">
+      <div
+        class="form-box"
       :style="{
         // isRegist: 'height: 540px !important;',
         height: isRegist ? '540px !important;' : '450px !important;',
@@ -63,7 +56,8 @@ function closeDialog() {
         <LoginQR @close-dialog="closeDialog" />
       </template>
     </div>
-  </el-dialog>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <style lang="less" scoped>
@@ -104,11 +98,6 @@ function closeDialog() {
 <style lang="less">
 .no-dlg-bg-class {
   background: none !important;
-  .el-dialog__header {
-    display: none;
-  }
-  .el-dialog__body {
-    padding: 0;
-  }
+  /* Element Plus dialog styles removed */
 }
 </style>

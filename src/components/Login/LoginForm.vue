@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
 import { useResettaleRef } from 'vue-hooks-pure'
+import { toast } from 'vue-sonner'
 import { register, resetPassword, sendCodeEmail } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
 import { requestTo } from '~/utils/http/tool'
@@ -125,24 +125,24 @@ async function handleSubmit() {
 		= await requestApi(dataParams)
   if (code === 200 && result) {
    const successText = `${btnText}成功`
-    ElMessage.success(successText)
+    toast.success(successText)
     setTarget('login')
 		if (target.value === 'login') {
 			emit('closeDialog')
 		}
   }
 else if (code === 403) {
-		ElMessage.warning(message)
+		toast.warning(message)
 	}
   else {
     const { statusCode, message, msg: msgT } = data || {}
     if (statusCode === 403) {
-      ElMessage.warning(message)
+      toast.warning(message)
       return
     }
 		const msgStr = msgT?.length > 0 ? msgT[0]?.message : `${btnText}失败`
 
-    ElMessage.error(msgStr)
+    toast.error(msgStr)
   }
 }
 function setTarget(val: 'login' | 'regist' | 'forget') {
@@ -173,7 +173,7 @@ async function getCode() {
 	const mobileVal = currentForm.value.value?.mobile
 
   if (!mobileVal) {
-    ElMessage.warning('请输入手机号')
+    toast.warning('请输入手机号')
     return false
   }
   sendLoading.value = true
@@ -185,10 +185,10 @@ async function getCode() {
 // const [err] = await requestTo(sendCode(dataParams))
 const [err] = await requestTo(sendCodeEmail(dataParams))
 if (err) {
-	  ElMessage.error('验证码发送失败')
+	  toast.error('验证码发送失败')
 }
 else {
-	ElMessage.success('验证码发送成功')
+	toast.success('验证码发送成功')
     hasGetCode.value = true
     startCountDown()
 }
@@ -212,14 +212,14 @@ function checkForm() {
 		const key = keys[i]
 		if (!currentForm.value.value[key]) {
 			const key_name = keys_enum[key as keyof typeof keys_enum] || key
-			ElMessage.warning(`请输入${key_name}`)
+			toast.warning(`请输入${key_name}`)
 			return false
 		}
 	}
 	// 如果是注册和忘记密码，需要检验两次密码是否一致
 	if (target.value === 'regist' || target.value === 'forget') {
 		if (currentForm.value.value.password !== currentForm.value.value.password_confirm) {
-			ElMessage.warning('两次密码不一致')
+			toast.warning('两次密码不一致')
 			return false
 		}
 	}

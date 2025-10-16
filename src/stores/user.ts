@@ -1,5 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { ref } from 'vue'
+import { toast } from 'vue-sonner'
 import { getLogin, refreshTokenApi } from '~/api/admin'
 import { removeToken, setToken } from '~/utils/auth'
 
@@ -27,7 +28,7 @@ export const useUserStore = defineStore(
               if (status && status === 400) {
                 const { response } = result
                 const value = Object.values(response)[0]
-                value && ElMessage.error(value)
+                value && toast.error(value as string)
                 reject(data)
               }
               else {

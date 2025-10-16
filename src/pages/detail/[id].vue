@@ -1,11 +1,6 @@
 <script setup>
 import { to } from '@iceywu/utils'
-import {
-	ElCarousel,
-	ElCarouselItem,
-	ElMessage,
-	ElMessageBox,
-} from 'element-plus'
+import { toast } from 'vue-sonner'
 import { showPreView } from '@/utils/popup'
 // import { Starport } from 'vue-starport'
 import { commentCreate } from '~/api/comment'
@@ -144,13 +139,13 @@ async function handleLike() {
 				userId: userInfo.value.id,
 				topicId: deId.value,
 			})
-			ElMessage.success('点赞成功')
+			toast.success('点赞成功')
 			// 消息创建
 			handleMessageCreate()
 		}
 	}
  else {
-		ElMessage.error('点赞失败')
+		toast.error('点赞失败')
 	}
 }
 // 是否登录
@@ -208,20 +203,17 @@ function handleEdit() {
 }
 // 删除
 function open(id) {
-	ElMessageBox.confirm('确定删除吗', {
-		confirmButtonText: '删除',
-		cancelButtonText: '取消',
-		type: 'warning',
+	// 使用 toast 提示用户确认删除
+	toast('确定删除吗？', {
+		action: {
+			label: '删除',
+			onClick: () => getDelete(id),
+		},
+		cancel: {
+			label: '取消',
+			onClick: () => toast.info('已取消删除'),
+		},
 	})
-		.then(() => {
-			getDelete(id)
-		})
-		.catch(() => {
-			ElMessage({
-				type: 'info',
-				message: '取消删除',
-			})
-		})
 }
 
 // 🌈 接口数据请求
@@ -236,17 +228,11 @@ return
 	if (res) {
 		const { code, msg, data = [] } = res || {}
 		if (code === 200 && data) {
-			ElMessage({
-				type: 'success',
-				message: '删除成功',
-			})
+			toast.success('删除成功')
 			router.back()
 		}
  else {
-			ElMessage({
-				type: 'info',
-				message: '删除失败',
-			})
+			toast.error('删除失败')
 		}
 	}
 	if (err) {
@@ -262,12 +248,7 @@ return
 		:data="dataDe"
 	/>
 	<div class="flex gap-5 h-full w-full box-border">
-		<el-image-viewer
-			v-if="showViewer"
-			:initial-index="initialIndex"
-			:url-list="fileSrc"
-			@close="() => (showViewer = false)"
-		/>
+		<!-- el-image-viewer removed, using showPreView function instead -->
 		<div class="conten-box <2xl:flex-col">
 			<div
 				style="flex-shrink: 0"

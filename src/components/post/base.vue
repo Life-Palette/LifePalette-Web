@@ -1,6 +1,7 @@
 <script setup>
 import { deepClone, isEmpty, to } from '@iceywu/utils'
-import { ElMessage } from 'element-plus'
+import { toast } from 'vue-sonner'
+import { Badge } from '@/components/ui/badge'
 import { fileUpdate } from '~/api/ossUpload'
 import { tagFindAll } from '~/api/tag'
 // import { uploadFile } from "~/api/common";
@@ -187,15 +188,15 @@ async function handleSave() {
 		return
 	}
 	if (!formData.content) {
-		ElMessage.error('请输入内容')
+		toast.error('请输入内容')
 		return
 	}
 	if (!formData.title) {
-		ElMessage.error('请输入标题')
+		toast.error('请输入标题')
 		return
 	}
 	if (fileList.value.length === 0) {
-		ElMessage.error('请上传图片')
+		toast.error('请上传图片')
 		return
 	}
 	saveLoading.value = true
@@ -224,7 +225,7 @@ async function handleSave() {
 
 	const { code, msg, result } = await topicCreate(params)
 	if (code === 200) {
-		ElMessage.success('创建话题成功')
+		toast.success('创建话题成功')
 		closeDialog()
 		if (props.isNeedBack) {
 			router.back()
@@ -234,7 +235,7 @@ async function handleSave() {
 		}
 	}
  else {
-		ElMessage.error('创建话题失败')
+		toast.error('创建话题失败')
 	}
 	saveLoading.value = false
 }
@@ -255,14 +256,14 @@ return
 	const { code, msg, result } = await topicEdit(params)
 
 	if (code === 200) {
-		ElMessage.success('编辑话题成功')
+		toast.success('编辑话题成功')
 		closeDialog()
 		if (props.isNeedBack) {
 			router.back()
 		}
 	}
  else {
-		ElMessage.error('编辑话题失败')
+		toast.error('编辑话题失败')
 	}
 	saveLoading.value = false
 }
@@ -367,19 +368,12 @@ function initExtraData() {
 							/>
 							<!-- live-tag -->
 							<div class="cursor-pointer bottom-2 right-2 absolute z-[99]">
-								<el-tag v-if="item.videoSrc" round type="primary">
+								<Badge v-if="item.videoSrc" variant="default">
 									live
-								</el-tag>
+								</Badge>
 							</div>
 							<!-- 图片 -->
 							<template v-if="item.type.includes('image')">
-								<!-- <el-image class="h-full w-full" fit="cover" :src="item.file">
-									<template #placeholder>
-										<div class="image-slot">
-											Loading<span class="dot">...</span>
-										</div>
-									</template>
-								</el-image> -->
 								<!-- {{ item }} -->
 									<div class="h-full w-full">
 <StarportCard :data="item" />
@@ -395,23 +389,7 @@ function initExtraData() {
 									:poster="item.cover"
 								/>
 							</template>
-							<!-- live photo -->
-							<el-upload
-								v-if="0"
-								ref="uploadRef"
-								class="cursor-pointer left-2 top-2 absolute z-99"
-								action="#"
-								:show-file-list="false"
-								accept="video/*"
-								:http-request="() => {}"
-								:before-upload="(file) => beforeUploadFunc(file, item, index)"
-							>
-								<template #trigger>
-									<el-button round type="primary">
-										<div class="i-carbon-add cursor-pointer">+</div>
-									</el-button>
-								</template>
-							</el-upload>
+							<!-- live photo upload functionality removed as it was disabled (v-if="0") -->
 						</div>
 					</div>
 
@@ -556,10 +534,6 @@ function initExtraData() {
     .upload-item {
       width: 100%;
       height: 100%;
-      .el-image {
-        width: 100%;
-        height: 100%;
-      }
     }
   }
   .add-icon {
@@ -582,10 +556,7 @@ function initExtraData() {
       display: flex;
       justify-content: center;
       align-items: center;
-      &:hover {
-        // background: #f5f5f5;
-        // backdrop-filter: blur(1px);
-      }
+      /* &:hover styles removed as empty */
     }
   }
 }
@@ -658,13 +629,5 @@ function initExtraData() {
 </style>
 
 <style lang="less">
-.no-dlg-bg-class {
-  background: none !important;
-  .el-dialog__header {
-    display: none;
-  }
-  .el-dialog__body {
-    padding: 0;
-  }
-}
+/* Element Plus dialog styles removed as no longer using el-dialog */
 </style>

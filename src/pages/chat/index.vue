@@ -1,7 +1,8 @@
-<!-- 生成一个聊天页面可以发送消息，可以用element-plus UI,unocss布局 -->
+<!-- 生成一个聊天页面可以发送消息，使用shadcn-vue UI组件,unocss布局 -->
 <script setup>
 import { useWebSocket } from '@vueuse/core'
 import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
+import { Button } from '@/components/ui/button'
 import { chatMsgFindAll } from '~/api/chat'
 import MessageCard from '~/components/Card/MessageCard.vue'
 import { useUserStore } from '~/stores/user'
@@ -205,15 +206,15 @@ onMounted(async () => {
         <h1 class="whitespace-nowrap">
           在线人数:{{ totalNums }}
         </h1>
-        <el-button type="primary" size="large" class="pal-btn" @click="joinRoom">
+        <Button size="lg" class="pal-btn" @click="joinRoom">
           加入房间
-        </el-button>
-        <el-button type="primary" size="large" class="pal-btn" @click="open()">
+        </Button>
+        <Button size="lg" class="pal-btn" @click="open()">
           打开socket
-        </el-button>
-        <el-button type="primary" size="large" class="pal-btn" @click="close()">
+        </Button>
+        <Button size="lg" class="pal-btn" @click="close()">
           关闭socket
-        </el-button>
+        </Button>
       </div>
     </div>
 
@@ -249,12 +250,12 @@ onMounted(async () => {
         class="flex-1"
         @keyup.enter="sendMsg"
       />
-      <el-button type="primary" size="large" class="pal-btn" @click="sendMsg">
+      <Button size="lg" class="pal-btn" @click="sendMsg">
         发送
-      </el-button>
-      <el-button type="primary" size="large" class="pal-btn" @click="fileOpen">
+      </Button>
+      <Button size="lg" class="pal-btn" @click="fileOpen">
         文件
-      </el-button>
+      </Button>
     </div>
     <LoadingUpload
       v-model:percent="upPercent"
@@ -280,9 +281,7 @@ onMounted(async () => {
     // background: blue;
     box-sizing: border-box;
     padding-bottom: 20px;
-    &:last-child {
-      // padding-bottom: 10px;
-    }
+    /* &:last-child empty rule removed */
   }
 }
 </style>

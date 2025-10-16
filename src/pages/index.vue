@@ -13,6 +13,8 @@ import {
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { useRequest } from 'vue-hooks-pure'
 import Dialog from '@/components/Dialog.vue'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
+import { Skeleton as SkeletonComponent } from '@/components/ui/skeleton'
 import { tagFindAll } from '~/api/tag'
 
 import { topicFindAll } from '~/api/topic'
@@ -200,13 +202,11 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 			:count="3"
 		>
 			<template #template>
-				<el-skeleton-item
-					variant="image"
-					class="w-auto"
-					style="height: 140px"
+				<SkeletonComponent
+					class="w-auto h-[140px]"
 				/>
 				<div class="mt-2">
-					<el-skeleton-item variant="p" class="w-1/2" />
+					<SkeletonComponent class="w-1/2 h-4" />
 					<div
 						style="
 							display: flex;
@@ -214,8 +214,8 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 							justify-items: space-between;
 						"
 					>
-						<el-skeleton-item variant="text" class="mr-8" />
-						<el-skeleton-item variant="text" class="w-3/10" />
+						<SkeletonComponent class="mr-8 h-3 w-16" />
+						<SkeletonComponent class="w-3/10 h-3" />
 					</div>
 				</div>
 			</template>
@@ -294,15 +294,19 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 									class="h-full w-full cursor-pointer relative"
 									@click="goDe(item)"
 								>
-									<el-carousel :interval="5000" arrow="always">
-										<el-carousel-item
-											v-for="(item2, index2) in item.fileList"
-											:key="index2"
-										>
-											<!-- <h3 text="2xl" justify="center">{{ item2 }}</h3> -->
-											<CardSwiper :data="item2" />
-										</el-carousel-item>
-									</el-carousel>
+									<Carousel class="w-full">
+										<CarouselContent>
+											<CarouselItem
+												v-for="(item2, index2) in item.fileList"
+												:key="index2"
+											>
+												<!-- <h3 text="2xl" justify="center">{{ item2 }}</h3> -->
+												<CardSwiper :data="item2" />
+											</CarouselItem>
+										</CarouselContent>
+										<CarouselPrevious />
+										<CarouselNext />
+									</Carousel>
 									<!-- 信息 -->
 									<div class="card-info-detail text-[#fff]">
 										<div class="account-name">

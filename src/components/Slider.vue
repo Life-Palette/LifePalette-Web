@@ -1,4 +1,5 @@
 <script setup>
+import { Badge } from '@/components/ui/badge'
 import PostForm from '~/components/post/index.vue'
 import { useUserStore } from '~/stores/user'
 
@@ -61,7 +62,7 @@ function clickTab(item, index) {
   const { name } = item
   if (name === '发布') {
     isShowDialog.value = true
-		// ElMessage.warning('发布重构中,尽情期待！')
+		// 注释已删除，之前使用了 ElMessage.warning
   }
 }
 </script>
@@ -83,9 +84,9 @@ v-for="(item, index) in showTabList" :key="index" class="slider__item" :class="[
             {{ item.name }}
           </div>
 
-          <el-tag v-if="item.desc" class="mx-1" round>
+          <Badge v-if="item.desc" class="mx-1" variant="secondary">
             {{ item.desc }}
-          </el-tag>
+          </Badge>
         </router-link>
       </div>
     </div>

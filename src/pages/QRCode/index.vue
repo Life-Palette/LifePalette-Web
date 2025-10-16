@@ -1,7 +1,8 @@
 <script setup>
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
+import { toast } from 'vue-sonner'
+import { Button } from '@/components/ui/button'
 import { qrChangeSate, qrCheck, qrGenerate, qrLogin, qrRefresh } from '~/api/qr'
 import { useUserStore } from '~/stores/user'
 import { setToken } from '~/utils/auth'
@@ -179,7 +180,7 @@ async function handle_checkLoginQrCodeStatus() {
       // 二维码过期
       qrCodeData.loginQRCodeStatus = 'timeout'
       clearQrTimer()
-      ElMessage.warning('二维码已过期，请刷新')
+      toast.warning('二维码已过期，请刷新')
     }
     else if (status === 'success') {
       // 二维码登录成功
@@ -187,7 +188,7 @@ async function handle_checkLoginQrCodeStatus() {
       const { token, user } = data
       setToken(token)
       userStore.setUserInfo(user)
-      ElMessage.success('登录成功')
+      toast.success('登录成功')
       clearQrTimer()
     }
     else {
@@ -275,16 +276,15 @@ function clearQrTimer() {
     </div>
 
     <!-- 登录 -->
-    <el-button class="login-btn" type="primary" @click="handleLogin">
+    <Button class="login-btn" @click="handleLogin">
       登录
-    </el-button>
+    </Button>
     <!-- 改变二维码状态 -->
-    <el-button
+    <Button
       class="login-btn"
-      type="primary"
       @click="handle_changeLoginQrCodeStatus"
     >
       改变二维码状态
-    </el-button>
+    </Button>
   </div>
 </template>

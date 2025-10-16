@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
+import { toast } from 'vue-sonner'
 import { qrChangeSate, qrCheck, qrGenerate, qrLogin, qrRefresh } from '~/api/qr'
 import { useUserStore } from '~/stores/user'
 import { setToken } from '~/utils/auth'
@@ -194,7 +194,7 @@ async function handle_checkLoginQrCodeStatus() {
       // 二维码过期
       qrCodeData.loginQRCodeStatus = 'timeout'
       clearQrTimer()
-      ElMessage.warning('二维码已过期，请刷新')
+      toast.warning('二维码已过期，请刷新')
     }
     else if (status === 'success') {
       // 二维码登录成功
@@ -202,7 +202,7 @@ async function handle_checkLoginQrCodeStatus() {
       const { token, user } = data
       setToken(token)
       userStore.setUserInfo(user)
-      ElMessage.success('登录成功')
+      toast.success('登录成功')
       clearQrTimer()
       emit('closeDialog')
     }
@@ -247,17 +247,16 @@ function clearQrTimer() {
         <div class="qr-coner-2" />
         <div class="qr-coner-3" />
         <div class="qr-coner-4" />
-        <el-image
+        <div v-if="!qrImg" class="image-slot h-full w-full flex items-center justify-center">
+          Loading<span class="dot">...</span>
+        </div>
+        <img
+          v-else
           class="h-full w-full"
           :src="qrImg"
+          alt="QR Code"
           @click="handle_refreshLoginQrCode"
         >
-          <template #placeholder>
-            <div class="image-slot">
-              Loading<span class="dot">...</span>
-            </div>
-          </template>
-        </el-image>
       </div>
 
       <!-- 扫码成功遮罩层 -->

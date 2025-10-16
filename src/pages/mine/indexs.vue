@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isObject } from '@iceywu/utils'
-import { ElMessage } from 'element-plus'
 import { usePopup } from 'vue-hooks-pure'
+import { toast } from 'vue-sonner'
 import Loginabout from '@/components/Login/Loginabout.vue'
 import { getMyInfo, updateUserInfo } from '~/api/admin'
 import { useUserStore } from '~/stores/user'
@@ -65,14 +65,14 @@ return
 	const { code, msg, result } = ({} = await updateUserInfo(params).catch(
 		(err) => {
 			updateLoading.value = false
-			ElMessage.error('更新用户信息失败')
+			toast.error('更新用户信息失败')
 		},
 	))
 	if (code === 200) {
-		ElMessage.success('更新用户信息成功')
+		toast.success('更新用户信息成功')
 	}
  else {
-		ElMessage.error('更新用户信息失败')
+		toast.error('更新用户信息失败')
 	}
 	updateLoading.value = false
 }

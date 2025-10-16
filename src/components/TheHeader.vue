@@ -1,5 +1,5 @@
 <script setup>
-// import { Search } from '@element-plus/icons-vue'
+// 注释已删除，之前引用了不再使用的 @element-plus/icons-vue
 import { ipGet } from '~/api/ip'
 import ImgLogo from '~/assets/image/logo/logo.svg'
 // import PopperNews from "~/components/Popper/News.vue";

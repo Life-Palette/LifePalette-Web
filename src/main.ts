@@ -7,7 +7,6 @@ import { destroyEruda } from '@/utils/eruda'
 import App from './App.vue'
 // TailwindCSS 和 shadcn-vue 样式
 import '@/assets/index.css'
-import 'element-plus/dist/index.css'
 // 你自定义的 css
 import './styles/main.css'
 
