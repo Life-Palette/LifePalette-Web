@@ -184,7 +184,7 @@ async function handle_checkLoginQrCodeStatus() {
   const { code, result, msg } = await qrCheck(qrKey.value)
   if (code === 200 && result) {
     console.log('二维码状态检查成功', result)
-    const { status, data } = result
+    const { status } = result
     qrCodeStatus.value = status
     if (status === 'normal') {
       // 二维码正常
@@ -199,7 +199,7 @@ async function handle_checkLoginQrCodeStatus() {
     else if (status === 'success') {
       // 二维码登录成功
       qrCodeData.loginQRCodeStatus = 'success'
-      const { token, user } = data
+      const { token, user } = result
       setToken(token)
       userStore.setUserInfo(user)
       ElMessage.success('登录成功')
