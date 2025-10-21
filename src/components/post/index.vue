@@ -1,6 +1,13 @@
 <script setup>
 import PostBase from '~/components/post/base.vue'
 
+const props = defineProps({
+
+	data: {
+		type: Object,
+		default: () => {},
+	},
+})
 const dialogVisible = defineModel({ default: false })
 </script>
 
@@ -15,6 +22,6 @@ const dialogVisible = defineModel({ default: false })
     :z-index="99999"
     @close="dialogVisible = false"
   >
-  <PostBase v-model:is-show-dialog="dialogVisible" />
+  <PostBase v-model:is-show-dialog="dialogVisible" :data />
   </el-dialog>
 </template>

@@ -1,13 +1,15 @@
-<script setup>
-import { deepClone, isEmpty, to } from '@iceywu/utils'
+<script setup lang="ts">
+import type { FileItem } from '~/utils/fileProcessor'
 import { ElMessage } from 'element-plus'
-import { fileUpdate } from '~/api/ossUpload'
 import { tagFindAll } from '~/api/tag'
-// import { uploadFile } from "~/api/common";
 import { topicCreate, topicEdit } from '~/api/topic'
 import StarportCard from '~/components/StarportCard.vue'
-// import { uploadFile } from '~/utils/upload'
-import { uploadFile } from '~/utils/uploadAli'
+import { useFileUpload } from '~/composables/useFileUpload'
+import {
+	extractFileIds,
+	processLivePhotoFiles,
+	removeFileByIndex,
+} from '~/utils/fileProcessor'
 
 const props = defineProps({
 	isShowDialog: {
@@ -27,55 +29,8 @@ const emit = defineEmits(['update:isShowDialog'])
 
 const router = useRouter()
 
-// 图片上传
-async function beforeUploadFuncV2(result, data, index) {
-	showUploadLoading.value = true
-	const { file = '' } = result || {}
-	const { name, ...tempVal } = data
-	const baseVal = deepClone(tempVal)
-
-	const updateParams = {
-		id: data.id,
-		videoSrc: file,
-	}
-	const [fileUpdateErr, fileUpdateData] = ({} = await to(
-		fileUpdate(updateParams),
-	))
-	if (fileUpdateData) {
-		const { code, msg, result } = fileUpdateData || {}
-		if (code === 200) {
-			const { videoSrc } = result
-			baseVal.videoSrc = videoSrc
-		}
-	}
-	showUploadLoading.value = false
-	return baseVal
-}
-// 图片上传
-async function beforeUploadFunc(file, data, index) {
-	upPercent.value = 0
-	showUploadLoading.value = true
-	const result = await uploadFile(file, (res) => {
-		const { percent, stage = 'upload' } = res
-		upText.value = stage === 'upload' ? '上传中...' : '生成blushHash...'
-	})
-	const { url = '' } = result || {}
-	const updateParams = {
-		id: data.id,
-		videoSrc: url,
-	}
-	const [fileUpdateErr, fileUpdateData] = ({} = await to(
-		fileUpdate(updateParams),
-	))
-	if (fileUpdateData) {
-		const { code, msg, result } = fileUpdateData || {}
-		if (code === 200) {
-			const { videoSrc } = result
-			fileList.value[index].videoSrc = videoSrc
-		}
-	}
-	showUploadLoading.value = false
-}
+// 使用文件上传 composable
+const { uploadState, uploadMultipleFiles, updateFileVideoSrc } = useFileUpload()
 
 const { files, open, reset, onChange } = useFileDialog({
 	accept: 'image/*,video/*,image/heic,image/heif',
@@ -85,7 +40,7 @@ function closeDialog() {
 	emit('update:isShowDialog', false)
 }
 
-const fileList = ref([])
+const fileList = ref<FileItem[]>([])
 const formData = reactive({
 	content: '',
 	title: '',
@@ -93,87 +48,37 @@ const formData = reactive({
 	tagIds: [],
 })
 
-const upPercent = ref(0)
-const upText = ref('上传中...')
-const showUploadLoading = ref(false)
+// 直接使用 uploadState 中的值
+const upPercent = computed(() => uploadState.value.percent)
+const upText = computed(() => uploadState.value.text)
+const showUploadLoading = computed(() => uploadState.value.showLoading)
 
-function deleteItem(index) {
-	fileList.value.splice(index, 1)
+/**
+ * 删除文件
+ */
+function deleteItem(index: number) {
+	fileList.value = removeFileByIndex(fileList.value, index)
 }
 
-onChange(async (file) => {
-	upPercent.value = 0
-	showUploadLoading.value = true
-	const tempFileList = []
-	for (let i = 0; i < file.length; i++) {
-		const result = await uploadFile(file[i], (res) => {
-			const { percent, stage = 'upload' } = res
-			const nowPart = (i + 1) / file.length
-			upPercent.value = percent * nowPart
-			upText.value = stage === 'upload' ? '上传中...' : '生成blushHash...'
-		})
+/**
+ * 处理文件变化
+ */
+onChange(async (selectedFiles) => {
+	if (!selectedFiles || selectedFiles.length === 0)
+		return
 
-		const { type, url, id, videoSrc, name } = result
-		// type:"image/jpeg"
-		// 获取/前面的字符串并转为大写
-		const fileType = type?.split('/')[0].toUpperCase()
-		const fileData = {
-			id,
-			fileType,
-			file: url,
-			thumbnail: `${url}?x-oss-process=image/resize,l_500`,
-			videoSrc,
-		}
-		// tempFileList.push({ ...fileData, name })
-		tempFileList.push({ ...result })
-	}
-	initFileFill(tempFileList)
-	showUploadLoading.value = false
+	// 上传所有选中的文件
+	const uploadedFiles = await uploadMultipleFiles(Array.from(selectedFiles))
+
+	// 处理 Live Photo 文件关联
+	const processedFiles = await processLivePhotoFiles(
+		uploadedFiles,
+		updateFileVideoSrc,
+	)
+
+	// 添加到文件列表
+	fileList.value.push(...processedFiles)
 })
-async function initFileFill(fileListT) {
-	const tempList = []
-	for (let index = 0; index < fileListT.length; index++) {
-		const item = fileListT[index]
-		const [name, prefix] = item.name.split('.')
-
-		if (prefix.toUpperCase() === 'MOV') {
-			const movIndex = fileListT.findIndex((item2) => {
-				const tempImg = item2.name.split('.')
-				return tempImg[0] === name && tempImg[1].toUpperCase() !== 'MOV'
-			})
-			if (movIndex !== -1) {
-				if (!isEmpty(fileListT[movIndex].videoSrc)) {
-					continue
-				}
-				const addData = await beforeUploadFuncV2(
-					fileListT[index],
-					fileListT[movIndex],
-					movIndex,
-				)
-
-				// tempList.push(addData)
-				const reWriteIndex = tempList.findIndex((item3) => {
-					return addData.id === item3.id
-				})
-
-				if (reWriteIndex !== -1) {
-					tempList[reWriteIndex] = addData
-				}
- else {
-					tempList.push(addData)
-				}
-			}
- else {
-				tempList.push(item)
-			}
-		}
- else {
-			tempList.push(item)
-		}
-	}
-
-	fileList.value.push(...tempList)
-}
 
 // 创建话题
 const saveLoading = ref(false)
@@ -199,22 +104,14 @@ async function handleSave() {
 		return
 	}
 	saveLoading.value = true
-	// const files = fileList.value || []
-	const files = fileList.value.map((item) => {
-		// const { fileType, file, thumbnail, videoSrc } = item
-		// return {
-		// 	fileType,
-		// 	file,
-		// 	thumbnail,
-		// 	videoSrc,
-		// }
-		return item.id
-	})
 
-	const params = {
+	// 提取文件 ID 列表
+	const fileIds = extractFileIds(fileList.value)
+
+	const params: any = {
 		content: formData.content,
 		title: formData.title,
-		fileIds: files,
+		fileIds: fileIds.reverse(),
 	}
 	if (chooseTagIds.value.length > 0) {
 		params.tagIds = chooseTagIds.value
@@ -222,7 +119,7 @@ async function handleSave() {
 
 	// return
 
-	const { code, msg, result } = await topicCreate(params)
+	const { code, msg, result } = (await topicCreate(params)) as any
 	if (code === 200) {
 		ElMessage.success('创建话题成功')
 		closeDialog()
@@ -252,7 +149,7 @@ return
 
 	// return
 
-	const { code, msg, result } = await topicEdit(params)
+	const { code, msg, result } = (await topicEdit(params)) as any
 
 	if (code === 200) {
 		ElMessage.success('编辑话题成功')
@@ -267,21 +164,21 @@ return
 	saveLoading.value = false
 }
 // 内容校验
-function validateContent(rule, value, callback) {
+function validateContent(rule: any, value: any, callback: any) {
 	if (!value) {
 		return callback(new Error('请输入内容'))
 	}
 	callback()
 }
 // 获取标签列表
-const tagList = ref([])
+const tagList = ref<any[]>([])
 // 选中的标签
-const chooseTagIds = ref([])
+const chooseTagIds = ref<string[]>([])
 async function getTestData() {
 	const params = {
 		sort: 'asc,createdAt',
 	}
-	const { code, msg, result } = ({} = await tagFindAll(params))
+	const { code, msg, result } = (await tagFindAll(params)) as any
 
 	if (code === 200) {
 		const { data = [] } = result
@@ -290,7 +187,7 @@ async function getTestData() {
  else {
 	}
 }
-function handleTagClick(item) {
+function handleTagClick(item: any) {
 	const { id } = item
 	if (chooseTagIds.value.includes(id)) {
 		chooseTagIds.value = chooseTagIds.value.filter(item => item !== id)
@@ -386,7 +283,7 @@ function initExtraData() {
 									</div>
 							</template>
 							<!-- 视频 -->
-							<template v-else-if="item.typeincludes('video')">
+							<template v-else-if="item.type.includes('video')">
 								<video
 									class="h-full w-full"
 									controls
@@ -395,28 +292,11 @@ function initExtraData() {
 									:poster="item.cover"
 								/>
 							</template>
-							<!-- live photo -->
-							<el-upload
-								v-if="0"
-								ref="uploadRef"
-								class="absolute left-2 top-2 z-99 cursor-pointer"
-								action="#"
-								:show-file-list="false"
-								accept="video/*"
-								:http-request="() => {}"
-								:before-upload="(file) => beforeUploadFunc(file, item, index)"
-							>
-								<template #trigger>
-									<el-button round type="primary">
-										<div class="i-carbon-deletecursor-pointer">+</div>
-									</el-button>
-								</template>
-							</el-upload>
 						</div>
 					</div>
 
 					<div class="add-icon">
-						<button type="button" @click="open">
+						<button type="button" @click="() => open()">
 							<div class="i-carbon-add text-5xl text-[#4c4d4f]" />
 						</button>
 					</div>
@@ -582,10 +462,6 @@ function initExtraData() {
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			&:hover {
-				// background: #f5f5f5;
-				// backdrop-filter: blur(1px);
-			}
 		}
 	}
 }

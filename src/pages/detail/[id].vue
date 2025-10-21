@@ -14,6 +14,7 @@ import { messageCreate } from '~/api/message'
 import { topicDelete, topicFindById } from '~/api/topic'
 import BaseLike from '~/components/Base/Like.vue'
 import PostForm from '~/components/post/index.vue'
+
 import StarportCard from '~/components/StarportCard.vue'
 import { useUserStore } from '~/stores/user'
 import { formatTime } from '~/utils'
@@ -258,7 +259,7 @@ return
 <template>
 	<PostForm
 		v-if="isShowDialog"
-		v-model:is-show-dialog="isShowDialog"
+		v-model="isShowDialog"
 		:data="dataDe"
 	/>
 	<div class="box-border h-full w-full flex gap-5">
