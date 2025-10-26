@@ -174,7 +174,7 @@ class PureHttp {
       (error: PureHttpError) => {
         const $error = error
         $error.isCancelRequest = Axios.isCancel($error)
-        const statusCode = error?.response?.data?.code
+        const statusCode = error?.response?.data?.code || error?.response?.data.statusCode
         if (statusCode === 401) {
           if (!PureHttp.isRefreshing) {
             PureHttp.isRefreshing = true
