@@ -342,9 +342,7 @@ return
 						{{ dataDe.title }}
 					</div>
 					<!-- 内容 -->
-					<div class="title-content py-5 text-start text-[#333] whitespace-break-spaces">
-						{{ dataDe.content }}
-					</div>
+					<div class="title-content py-5 text-start text-[#333] whitespace-break-spaces" v-html="dataDe.content" />
 					<!-- 标签 -->
 					<div class="title-content py-5 text-start text-lg text-[#13386c]">
 						{{ tagDe }}
