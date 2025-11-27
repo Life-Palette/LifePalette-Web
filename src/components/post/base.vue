@@ -114,7 +114,7 @@ async function handleSave() {
 		fileIds: fileIds.reverse(),
 	}
 	if (chooseTagIds.value.length > 0) {
-		params.tagIds = chooseTagIds.value
+		// params.tagIds = chooseTagIds.value
 	}
 
 	// return
@@ -181,8 +181,8 @@ async function getTestData() {
 	const { code, msg, result } = (await tagFindAll(params)) as any
 
 	if (code === 200) {
-		const { data = [] } = result
-		tagList.value = data
+		const { list = [] } = result
+		tagList.value = list
 	}
  else {
 	}

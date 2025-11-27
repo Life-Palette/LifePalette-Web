@@ -32,10 +32,10 @@ const props = defineProps({
 					w-full
 					bg-gray-400:20
 					object-cover
-					:src="getUserAvatar(data.User)"
+					:src="getUserAvatar(data.user)"
 				>
 				<div class="user-name">
-					{{ data.User.name }}
+					{{ data.user.name }}
 				</div>
 			</div>
 		</div>

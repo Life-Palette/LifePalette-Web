@@ -137,8 +137,8 @@ async function getData() {
   const { code, msg, result = [] } = ({} = await chatMsgFindAll(params))
   if (code === 200 && result) {
     console.log('---数据请求成功---', result)
-    const { data = [], meta = ({} = []) } = result
-    const tempData = data.map((item) => {
+    const { list = [], meta = ({} = []) } = result
+    const tempData = list.map((item) => {
       return {
         ...item,
         isTimeOut: false,

@@ -35,8 +35,8 @@ return
 	}
 	const { code, msg, result = [] } = ({} = await messageFindAll(params))
 	if (code === 200 && result) {
-		const { data = [], meta = {} } = result
-		handleNotice(data)
+		const { list = [], meta = {} } = result
+		handleNotice(list)
 	}
 	getDataLoading.value = false
 }

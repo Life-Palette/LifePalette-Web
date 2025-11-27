@@ -315,10 +315,10 @@ return
 							w-full
 							bg-gray-400:20
 							object-cover
-							:src="getUserAvatar(dataDe.User)"
+							:src="getUserAvatar(dataDe.user)"
 						>
 						<div class="user-name">
-							{{ dataDe?.User?.name }}
+							{{ dataDe?.user?.name }}
 						</div>
 						<div class="flex-1" />
 						<div

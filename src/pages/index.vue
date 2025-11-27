@@ -77,7 +77,7 @@ const {
 	target: 'list',
 	// loadingDelay: 300,
 	getVal: (res) => {
-		const list = getObjVal(res, 'result.data', [])
+		const list = getObjVal(res, 'result.list', [])
 		const baseList = list.map((item: any) => {
 			// const fileList = adjustImgData(item.fileList)
 			const fileList = item.fileList.map((file: any) => {
@@ -97,7 +97,7 @@ const {
 		defaultDataKey: 'list',
 		defaultPage: 0,
 		getTotal: (data) => {
-			const total = getObjVal(data, 'result.meta.totalElements', 0)
+			const total = getObjVal(data, 'result.pagination.total', 0)
 			return total
 		},
 	},
@@ -130,10 +130,9 @@ async function getTagData() {
 		sort: 'asc,createdAt',
 	}
 	const { code, msg, result } = ({} = await tagFindAll(params))
-
 	if (code === 200) {
-		const { data = [] } = result
-		tagList.value = data
+		const { list = [] } = result
+		tagList.value = list
 		// tagId.value = data[0].id
 		// 新增最新
 		const newPart = {
@@ -306,7 +305,7 @@ const [DefineTemplate, ReuseTemplate] = createReusableTemplate()
 									<!-- 信息 -->
 									<div class="card-info-detail text-[#fff]">
 										<div class="account-name">
-											@{{ item?.User?.name }}
+											@{{ item?.user?.name }}
 											<span>
 												·
 												{{

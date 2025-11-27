@@ -63,7 +63,7 @@ const {
 		defaultDataKey: 'list',
 		defaultPage: 0,
 		getTotal: (data) => {
-			const total = getObjVal(data, 'result.meta.totalElements', 0)
+			const total = getObjVal(data, 'result.pagination.total', 0)
 			return total
 		},
 	},

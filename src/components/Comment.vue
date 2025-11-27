@@ -61,14 +61,14 @@ defineExpose({
         <div class="comment-item__left">
           <img
             class="comment-item__left-avatar"
-            :src="getUserAvatar(item.User)"
+            :src="getUserAvatar(item.user)"
             alt=""
           >
         </div>
         <div class="comment-item__right">
           <div class="comment-item__right-top">
             <div class="comment-item__right-top-name">
-              {{ item?.User?.name || '神秘人' }}
+              {{ item?.user?.name || '神秘人' }}
             </div>
             <div class="comment-item__right-top-time">
               {{ formatTime(item.createdAt, 'YYYY-MM-DD HH:mm') }}

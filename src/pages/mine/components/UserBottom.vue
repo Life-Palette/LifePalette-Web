@@ -71,12 +71,12 @@ async function getTopicList() {
   const { code, msg, result } = ({} = await requestApi(params))
   if (code === 200) {
     console.log('getTopicList成功', result)
-    const { data = [] } = result
+    const { list = [] } = result
     if (chooseTabId.value === 1) {
-      topicList.value = data
+      topicList.value = list
     }
     else {
-      topicList.value = data.map((item: any) => {
+      topicList.value = list.map((item: any) => {
         return {
           ...item,
           ...item.topic,
@@ -161,10 +161,10 @@ const currentObj = computed(() => {
                     w-full
                     bg-gray-400:20
                     object-cover
-                     :src="getUserAvatar(item.User)"
+                     :src="getUserAvatar(item.user)"
                   >
                   <div class="user-name">
-                    {{ item.User.name }}
+                    {{ item.user.name }}
                   </div>
                 </div>
               </div>
