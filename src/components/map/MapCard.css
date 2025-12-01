@@ -1,0 +1,39 @@
+/* 确保地图容器有正确的尺寸 */
+.map-temp-box {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+/* 隐藏Mapbox的底部控件 */
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
+
+.mapboxgl-ctrl-icon {
+  box-sizing: border-box;
+}
+
+/* 确保Mapbox画布有正确的尺寸 */
+.mapboxgl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.marker-dot {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  border: 2px solid white;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
