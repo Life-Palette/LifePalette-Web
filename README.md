@@ -1,3 +1,8 @@
+> [!WARNING]
+> **⚠️ 此分支 (vue) 已不再维护！**
+>
+> 当前为 `vue` 分支的归档代码，不会再进行更新。请前往 [主分支 (main)](https://github.com/Life-Palette/LifePalette-Web/tree/main) 查看最新代码。
+
 <p align="center">
   <br>
   <img width="400" src="./src/assets/image/logo/logo.svg" alt="logo of vue-awesome repository">
@@ -80,7 +85,7 @@ This template is inspired by **[cloud-template](https://github.com/IceyWu/cloud-
 
 ### Development
 
-Just run and visit http://localhost:9527
+Just run and visit <http://localhost:9527>
 
 ```bash
 pnpm dev
