@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "./", // 使用相对路径，支持任意目录部署
+  base: "/", // 使用绝对路径，配合服务器 try_files 解决刷新404问题
   plugins: [
     tailwindcss(),
     react({

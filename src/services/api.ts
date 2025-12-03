@@ -210,6 +210,11 @@ class ApiService {
     localStorage.removeItem("auth_token");
   }
 
+  // 刷新token（从localStorage重新读取）
+  refreshToken() {
+    this.token = localStorage.getItem("auth_token");
+  }
+
   // 获取话题列表
   async getTopics(params?: {
     page?: number;
@@ -1080,9 +1085,14 @@ class ApiService {
         takenAt?: string;
         createdAt: string;
         updatedAt: string;
+        isPrivate?: boolean;
+        hasTopic?: boolean;
       }>;
     }>
   > {
+    // 确保使用最新的token（用户登录后能带上认证信息）
+    this.refreshToken();
+
     const searchParams = new URLSearchParams();
 
     if (params) {
@@ -1097,6 +1107,29 @@ class ApiService {
     const endpoint = `/api/file/user/files${queryString ? `?${queryString}` : ""}`;
 
     return this.request(endpoint);
+  }
+
+  // 更新文件信息
+  async updateFile(
+    fileId: number,
+    data: {
+      isPrivate?: boolean;
+      name?: string;
+    },
+  ): Promise<ApiResponse<any>> {
+    this.refreshToken();
+    return this.request(`/api/file/${fileId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // 删除文件
+  async deleteFile(fileId: number): Promise<ApiResponse<any>> {
+    this.refreshToken();
+    return this.request(`/api/file/${fileId}`, {
+      method: "DELETE",
+    });
   }
 }
 

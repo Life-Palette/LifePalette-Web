@@ -9,6 +9,7 @@ import {
   Globe,
   Grid,
   Heart,
+  Image,
   Mail,
   Map,
   MapPin,
@@ -22,6 +23,7 @@ import SimpleInfiniteScroll from "@/components/common/SimpleInfiniteScroll";
 import { LottieAnimation } from "@/components/lottie";
 import TrackPage from "@/components/map/TrackPage";
 import SimpleImageDetail from "@/components/media/SimpleImageDetail";
+import PhotoWall from "@/components/profile/PhotoWall";
 import CreatePostModal from "@/components/post/CreatePostModal";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -238,6 +240,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
       label: "动态",
       count: topicsData?.pages[0]?.total,
     },
+    { id: "photos", icon: Image, label: "照片墙" },
     { id: "track", icon: Map, label: "轨迹" },
     {
       id: "liked",
@@ -467,7 +470,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
 
       {/* 内容切换标签 - 使用 shadcn Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-5 h-auto p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -489,6 +492,14 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
         </TabsList>
 
         {/* 主要内容区域 - 使用 TabsContent */}
+        <TabsContent value="photos" className="mt-6">
+          <Card className="min-h-[500px]">
+            <CardContent className="p-6">
+              <PhotoWall userId={targetUserId} isOwnProfile={isViewingOwnProfile} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="track" className="mt-6">
           <TrackPage userId={targetUserId} />
         </TabsContent>

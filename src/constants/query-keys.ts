@@ -76,6 +76,10 @@ export const queryKeys = {
   files: {
     all: ["files"] as const,
     detail: (id: number) => [...queryKeys.files.all, id] as const,
+    byUser: (userId: number, params?: any) =>
+      [...queryKeys.files.all, "user", userId, params] as const,
+    infiniteByUser: (userId: number, params?: any) =>
+      [...queryKeys.files.all, "infinite", "user", userId, params] as const,
   },
 
   // 二维码登录相关
