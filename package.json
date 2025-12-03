@@ -1,6 +1,6 @@
 {
   "name": "lifepalette-web",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "LifePalette 拾色 - 以色彩为笔，以轨迹为墨，绘制专属于你的人生画卷",
   "author": "IceyWu <https://github.com/IceyWu/>",
@@ -30,7 +30,12 @@
     "format": "ultracite fix src",
     "preview": "vite preview",
     "ui:add": "pnpm dlx shadcn@latest add",
-    "clean:modules": "npx rimraf node_modules"
+    "clean:modules": "npx rimraf node_modules",
+    "changelog": "changelogen --output CHANGELOG.md",
+    "release": "changelogen --release",
+    "release:patch": "changelogen --release --patch",
+    "release:minor": "changelogen --release --minor",
+    "release:major": "changelogen --release --major"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -113,6 +118,7 @@
     "tailwindcss": "^4.1.17",
     "terser": "^5.36.0",
     "typescript": "^5.9.3",
+    "changelogen": "^0.6.1",
     "ultracite": "^6.3.2",
     "vite": "^7.2.2"
   },
