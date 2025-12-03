@@ -103,7 +103,11 @@ export default function ImageGallery({
                 }}
                 type="button"
               >
-                <OptimizedImage className={`${imageClass} object-cover`} image={image} />
+                <OptimizedImage
+                  className={`${imageClass} object-cover`}
+                  image={image}
+                  noResize={images.length === 1}
+                />
               </button>
 
               {/* 显示剩余图片数量（覆盖层按钮，与上面按钮为兄弟关系，避免嵌套） */}

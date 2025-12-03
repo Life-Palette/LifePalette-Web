@@ -131,7 +131,6 @@ export default function NotificationList({
       {isFetchingNextPage && (
         <div className="flex flex-col items-center gap-2 py-8">
           <LoadingSpinner size="md" />
-          <p className="text-muted-foreground text-sm">加载中...</p>
         </div>
       )}
       {!hasMore && notifications.length > 0 && (

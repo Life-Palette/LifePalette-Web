@@ -306,7 +306,6 @@ function CommentItem({
               {repliesLoading ? (
                 <div className="py-6 text-center">
                   <LoadingSpinner size="sm" />
-                  <p className="mt-2 text-muted-foreground/60 text-xs">加载中...</p>
                 </div>
               ) : replies && replies.length > 0 ? (
                 <div className="divide-y divide-border/30">
@@ -408,7 +407,6 @@ export default function CommentSection({
         {isLoading ? (
           <div className="py-12 text-center">
             <LoadingSpinner className="mb-2" size="md" />
-            <p className="text-muted-foreground/60 text-sm">加载中...</p>
           </div>
         ) : comments && comments.length > 0 ? (
           <div className="space-y-0">

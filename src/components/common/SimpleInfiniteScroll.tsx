@@ -79,7 +79,6 @@ export default function SimpleInfiniteScroll({
         {isLoading && (
           <div className="flex flex-col items-center gap-2">
             <LoadingSpinner size="md" />
-            <p className="text-muted-foreground text-sm">加载中...</p>
           </div>
         )}
         {!hasMore && posts.length > 0 && <p className="text-muted-foreground">已经到底了～</p>}

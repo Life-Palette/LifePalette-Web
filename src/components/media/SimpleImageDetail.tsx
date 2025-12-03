@@ -449,7 +449,7 @@ export default function SimpleImageDetail({
                 animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
                 className={`relative w-full overflow-hidden rounded-lg border-0 bg-background shadow-2xl ${
                   hasImages
-                    ? "h-[95vh] max-w-[90vw] md:max-w-[85vw] lg:max-w-[1400px] xl:max-w-[1600px] 2xl:max-w-[1800px]"
+                    ? "h-[95vh] max-w-[85vw] md:max-w-[80vw] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px]"
                     : "h-auto max-h-[85vh] max-w-2xl my-8"
                 }`}
                 exit={getInitialPosition()}

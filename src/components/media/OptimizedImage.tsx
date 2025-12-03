@@ -81,7 +81,7 @@ export default function OptimizedImage({
   const optimizedUrl = isVideoFile
     ? getVideoThumbnailUrl(image.url)
     : noResize
-      ? `${image.url}?x-oss-process=image/quality,q_${quality}/format,webp`
+      ? `${image.url}?x-oss-process=image/resize,w_1600,m_lfit/format,webp`
       : image.url + generateOssImageParams(image.width, image.height, targetWidth, quality);
 
   const handleLoad = () => {

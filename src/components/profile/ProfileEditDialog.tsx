@@ -462,11 +462,11 @@ export default function ProfileEditDialog({
       >
         取消
       </Button>
-      <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-        {([canSubmit, isSubmitting]) => (
+      <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting, state.isDirty]}>
+        {([canSubmit, isSubmitting, isDirty]) => (
           <Button
             className="h-11 flex-1 md:flex-none md:min-w-[120px]"
-            disabled={!canSubmit || !hasChanges()}
+            disabled={!canSubmit || (!isDirty && avatarFile === null && backgroundFile === null)}
             onClick={form.handleSubmit}
             type="button"
           >

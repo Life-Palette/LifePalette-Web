@@ -1,28 +1,39 @@
 import { ChevronUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
+  const scrollContainerRef = useRef<Element | Window | null>(null);
   const VISIBILITY_THRESHOLD = 300;
 
   useEffect(() => {
+    // 查找 ScrollRestoreContainer 的滚动容器，或 fallback 到 window
+    const scrollContainer = document.querySelector(".h-screen.overflow-auto") || window;
+    scrollContainerRef.current = scrollContainer;
+
     const toggleVisibility = () => {
-      if (window.pageYOffset > VISIBILITY_THRESHOLD) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      const scrollTop =
+        scrollContainer instanceof Window
+          ? window.pageYOffset
+          : (scrollContainer as Element).scrollTop;
+
+      setIsVisible(scrollTop > VISIBILITY_THRESHOLD);
     };
 
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
+    scrollContainer.addEventListener("scroll", toggleVisibility, { passive: true });
+    // 初始检查
+    toggleVisibility();
+
+    return () => scrollContainer.removeEventListener("scroll", toggleVisibility);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer instanceof Window) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   if (!isVisible) {

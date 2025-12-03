@@ -1,7 +1,7 @@
-import { Eye, EyeOff, Info, MoreVertical, Plus, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/constants/query-keys";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Eye, EyeOff, Info, MoreVertical, Plus, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { LottieAnimation } from "@/components/lottie";
@@ -17,20 +17,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import PhotoWallUploader from "./PhotoWallUploader";
+import { queryKeys } from "@/constants/query-keys";
 import {
   type UserFileImage,
   useDeleteFile,
   useInfiniteUserFiles,
   useUpdateFileVisibility,
 } from "@/hooks/useUserFiles";
+import PhotoWallUploader from "./PhotoWallUploader";
+
+// 网格列数配置
+const COLUMNS = 6;
 
 interface PhotoWallProps {
   userId?: number;
@@ -61,17 +65,36 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
   const deleteFileMutation = useDeleteFile();
 
   const photos = filesData?.pages.flatMap((page) => page.items) || [];
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  // 处理滚动加载更多
-  const handleScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
-      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-      if (scrollHeight - scrollTop - clientHeight < 200 && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    },
-    [hasNextPage, isFetchingNextPage, fetchNextPage],
-  );
+  // 将照片按行分组
+  const rows = useMemo(() => {
+    const result: UserFileImage[][] = [];
+    for (let i = 0; i < photos.length; i += COLUMNS) {
+      result.push(photos.slice(i, i + COLUMNS));
+    }
+    return result;
+  }, [photos]);
+
+  // 虚拟列表配置
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 120, // 估算每行高度
+    overscan: 3,
+  });
+
+  // 监听滚动到底部，触发加载更多
+  const virtualItems = virtualizer.getVirtualItems();
+  const lastItem = virtualItems[virtualItems.length - 1];
+
+  useEffect(() => {
+    if (!lastItem) return;
+    // 当滚动到最后3行时，触发加载更多
+    if (lastItem.index >= rows.length - 3 && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [lastItem, rows.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleImageClick = useCallback(
     (image: UserFileImage, index: number) => {
@@ -180,97 +203,109 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
         </div>
       )}
 
-      {/* 照片墙网格 */}
-      <div
-        className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
-        onScroll={handleScroll}
-      >
-        {photos.map((photo, index) => (
-          <div
-            key={photo.id}
-            className="group relative aspect-square cursor-pointer overflow-hidden rounded-md bg-muted transition-all hover:z-10 hover:shadow-lg"
-            onClick={() => handleImageClick(photo, index)}
-          >
-            <OptimizedImage
-              image={photo}
-              className="h-full w-full transition-transform duration-300 group-hover:scale-105"
-              objectFit="cover"
-              loading="lazy"
-            />
-            {/* 私密标识 - 始终显示 */}
-            {photo.isPrivate && (
-              <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur-sm">
-                <EyeOff size={10} className="text-white/90" />
-                <span className="text-[10px] text-white/90">仅自己</span>
-              </div>
-            )}
-            {/* 悬停遮罩和操作按钮 */}
-            <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
-            {isOwnProfile && (
-              <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    className="rounded bg-black/60 p-1 hover:bg-black/80"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical size={14} className="text-white" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={(e) => handleToggleVisibility(photo, e)}>
-                      {photo.isPrivate ? (
-                        <>
-                          <Eye size={14} className="mr-2" />
-                          设为公开
-                        </>
-                      ) : (
-                        <>
-                          <EyeOff size={14} className="mr-2" />
-                          设为仅自己可见
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget(photo);
-                      }}
+      {/* 虚拟列表容器 */}
+      <div ref={parentRef} className="h-[calc(100vh-280px)] overflow-auto">
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const rowPhotos = rows[virtualRow.index];
+            return (
+              <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+                className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 pb-1"
+              >
+                {rowPhotos.map((photo) => {
+                  const globalIndex = photos.findIndex((p) => p.id === photo.id);
+                  return (
+                    <div
+                      key={photo.id}
+                      className="group relative aspect-square cursor-pointer overflow-hidden rounded-md bg-muted transition-all hover:z-10 hover:shadow-lg"
+                      onClick={() => handleImageClick(photo, globalIndex)}
                     >
-                      <Trash2 size={14} className="mr-2" />
-                      删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <OptimizedImage
+                        image={photo}
+                        className="h-full w-full transition-transform duration-300 group-hover:scale-105"
+                        objectFit="cover"
+                        loading="lazy"
+                      />
+                      {/* 私密标识 */}
+                      {photo.isPrivate && (
+                        <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur-sm">
+                          <EyeOff size={10} className="text-white/90" />
+                          <span className="text-[10px] text-white/90">仅自己</span>
+                        </div>
+                      )}
+                      {/* 悬停遮罩 */}
+                      <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+                      {isOwnProfile && (
+                        <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              className="rounded bg-black/60 p-1 hover:bg-black/80"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical size={14} className="text-white" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => handleToggleVisibility(photo, e)}>
+                                {photo.isPrivate ? (
+                                  <>
+                                    <Eye size={14} className="mr-2" />
+                                    设为公开
+                                  </>
+                                ) : (
+                                  <>
+                                    <EyeOff size={14} className="mr-2" />
+                                    设为仅自己可见
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteTarget(photo);
+                                }}
+                              >
+                                <Trash2 size={14} className="mr-2" />
+                                删除
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            );
+          })}
+        </div>
+
+        {/* 加载状态 */}
+        {isFetchingNextPage && (
+          <div className="flex items-center justify-center py-4">
+            <LoadingSpinner size="sm" />
           </div>
-        ))}
+        )}
+        {!hasNextPage && photos.length > 0 && (
+          <div className="py-4 text-center text-muted-foreground text-sm">已加载全部照片</div>
+        )}
       </div>
-
-      {/* 加载更多指示器 */}
-      {isFetchingNextPage && (
-        <div className="flex items-center justify-center py-4">
-          <LoadingSpinner size="sm" />
-          <span className="ml-2 text-muted-foreground text-sm">加载中...</span>
-        </div>
-      )}
-
-      {/* 加载更多按钮 */}
-      {hasNextPage && !isFetchingNextPage && (
-        <div className="flex items-center justify-center py-4">
-          <button
-            onClick={() => fetchNextPage()}
-            className="rounded-full bg-secondary px-6 py-2 text-secondary-foreground text-sm transition-colors hover:bg-secondary/80"
-          >
-            加载更多
-          </button>
-        </div>
-      )}
-
-      {/* 已加载全部 */}
-      {!hasNextPage && photos.length > 0 && (
-        <div className="py-4 text-center text-muted-foreground text-sm">已加载全部照片</div>
-      )}
 
       {/* 删除确认对话框 */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

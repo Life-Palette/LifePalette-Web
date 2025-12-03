@@ -108,10 +108,7 @@ export default function TopicsListPage({
       <PageLayout activeTab={activeTab}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <LoadingSpinner className="mb-4" size="lg" />
-              <p className="text-muted-foreground">加载中...</p>
-            </div>
+            <LoadingSpinner size="lg" />
           </div>
         </div>
       </PageLayout>

@@ -322,7 +322,10 @@
   * {
     @apply border-border outline-ring/50;
   }
-  html,
+  html {
+    /* 防止弹窗打开时滚动条消失导致页面抖动 */
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background text-foreground h-full w-full;
   }
