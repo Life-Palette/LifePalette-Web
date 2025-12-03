@@ -115,6 +115,7 @@ export async function saveFileInfo(data: {
   name: string;
   dir: string;
   hashCode?: string;
+  isPrivate?: boolean;
 }): Promise<ApiResponse<FileItem>> {
   const token = localStorage.getItem("auth_token");
   const url = `${API_BASE_URL}/api/alioss/saveFile`;

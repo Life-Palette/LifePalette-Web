@@ -32,6 +32,8 @@ export interface UploadOptions {
   compressJPEG?: boolean;
   /** 最大文件大小（MB） */
   maxSizeMB?: number;
+  /** 是否私有文件 */
+  isPrivate?: boolean;
   /** 进度回调 */
   onProgress?: (progress: UploadProgress) => void;
 }

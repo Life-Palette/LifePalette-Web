@@ -27,7 +27,7 @@ function isVideoFile(file: File): boolean {
  * @returns 上传后的文件信息
  */
 export async function uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
-  const { compressPNG = false, compressJPEG = false, onProgress } = options;
+  const { compressPNG = false, compressJPEG = false, isPrivate, onProgress } = options;
 
   let processedFile = file;
 
@@ -109,6 +109,7 @@ export async function uploadFile(file: File, options: UploadOptions = {}): Promi
       name: processedFile.name,
       dir: ossData.dir,
       hashCode: blurhash,
+      isPrivate,
     });
 
     if (saveResponse.code !== 200) {

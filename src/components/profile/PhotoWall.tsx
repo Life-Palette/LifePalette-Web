@@ -1,5 +1,7 @@
-import { Eye, EyeOff, Info, MoreVertical, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Info, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/constants/query-keys";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { LottieAnimation } from "@/components/lottie";
@@ -21,6 +23,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import PhotoWallUploader from "./PhotoWallUploader";
 import {
   type UserFileImage,
   useDeleteFile,
@@ -38,6 +42,8 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
   const [deleteTarget, setDeleteTarget] = useState<UserFileImage | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     data: filesData,
@@ -109,6 +115,12 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
     }
   }, [deleteTarget, deleteFileMutation]);
 
+  // 上传成功回调
+  const handleUploadSuccess = useCallback(() => {
+    // 刷新文件列表
+    queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
+  }, [queryClient]);
+
   if (isLoading && photos.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -131,12 +143,23 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
 
   return (
     <div className="space-y-4">
-      {/* 照片统计 */}
+      {/* 照片统计和上传按钮 */}
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
           共 <span className="font-medium text-foreground">{filesData?.pages[0]?.total || 0}</span>{" "}
           张照片
         </p>
+        {isOwnProfile && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setUploadDialogOpen(true)}
+            className="gap-1.5"
+          >
+            <Plus size={14} />
+            上传图片
+          </Button>
+        )}
       </div>
 
       {/* 隐私说明 */}
@@ -283,6 +306,15 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
         isOpen={previewOpen}
         onClose={() => setPreviewOpen(false)}
       />
+
+      {/* 上传对话框 */}
+      {isOwnProfile && (
+        <PhotoWallUploader
+          open={uploadDialogOpen}
+          onOpenChange={setUploadDialogOpen}
+          onUploadSuccess={handleUploadSuccess}
+        />
+      )}
     </div>
   );
 }
