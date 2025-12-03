@@ -3,9 +3,7 @@ import mapboxgl from "mapbox-gl";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MAPBOX_TOKEN } from "@/config/mapbox";
-import { useImageViewer } from "@/hooks/useImageViewer";
 import { apiService } from "@/services/api";
-import type { PostImage } from "@/types";
 import { generateOssImageParams } from "@/utils/media";
 import PhotoGallery from "./PhotoGallery";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -87,6 +85,8 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
+  const eventHandlers = useRef<{ event: string; handler: any; layer?: string }[]>([]);
+  const currentPopup = useRef<mapboxgl.Popup | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filteredFiles, setFilteredFiles] = useState<FileData[]>([]);
@@ -95,9 +95,6 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const circleSelectorRef = useRef<HTMLDivElement>(null);
   const selectModeRef = useRef(selectMode);
   const filteredFilesRef = useRef(filteredFiles);
-
-  // 图片预览功能 - 不传入 initialOptions.images，避免自动初始化
-  const { initWithPostImages, openPreview } = useImageViewer();
 
   // 同步 ref 和 state
   useEffect(() => {
@@ -109,6 +106,32 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   }, [filteredFiles]);
 
   const mapStyle = isDark ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11";
+
+  // 清理事件处理器
+  const cleanupEventHandlers = useCallback(() => {
+    if (!map.current) return;
+    eventHandlers.current.forEach(({ event, handler, layer }) => {
+      try {
+        if (layer) {
+          (map.current as any).off(event, layer, handler);
+        } else {
+          map.current!.off(event as any, handler);
+        }
+      } catch (e) { /* ignore */ }
+    });
+    eventHandlers.current = [];
+  }, []);
+
+  // 注册事件处理器（便于统一清理）
+  const registerEventHandler = useCallback((event: string, handler: any, layer?: string) => {
+    if (!map.current) return;
+    if (layer) {
+      map.current.on(event as any, layer, handler);
+    } else {
+      map.current.on(event as any, handler);
+    }
+    eventHandlers.current.push({ event, handler, layer });
+  }, []);
 
   // OSS 缩略图处理函数
   const getThumbnailUrl = useCallback(
@@ -125,13 +148,11 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   // 加载数据
   const loadData = useCallback(async () => {
     if (!userId) {
-      console.log("⚠️ 未提供 userId");
       return;
     }
 
     try {
       setLoading(true);
-      console.log(`📡 加载用户 ${userId} 的文件...`);
       const response = await apiService.getUserFiles({
         userId,
         size: -1, // 获取所有数据
@@ -148,7 +169,6 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
             return new Date(a.takenAt).getTime() - new Date(b.takenAt).getTime();
           });
 
-        console.log(`✅ 加载了 ${sortedFiles.length} 张照片`);
         setFilteredFiles(sortedFiles);
       }
     } catch (error) {
@@ -158,84 +178,56 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     }
   }, [userId]);
 
-  // 打开图片预览（按需初始化单张图片）
-  const openImagePreview = useCallback(
-    (fileData: FileData) => {
-      console.log("📸 打开图片预览（单张）", fileData);
-      return;
-      const postImage: PostImage = {
-        id: fileData.id,
-        url: fileData.url,
-        width: fileData.width,
-        height: fileData.height,
-        blurhash: fileData.blurhash,
-        type: fileData.type,
-        name: fileData.name,
-        lat: fileData.lat,
-        lng: fileData.lng,
-        videoSrc: fileData.videoSrc || null,
-      };
-
-      // 只初始化当前点击的图片
-      initWithPostImages([postImage]);
-
-      // 延迟打开，确保初始化完成
-      setTimeout(() => {
-        openPreview(0);
-      }, 100);
-
-      console.log("📸 打开图片预览（单张）");
-    },
-    [initWithPostImages, openPreview],
-  );
-
-  // 飞到指定位置（从文字区域点击触发）
-  const flyToLocation = useCallback(
-    (lng: number, lat: number, fileData: FileData) => {
-      if (!map.current) return;
-
-      map.current.flyTo({
-        center: [lng, lat],
-        zoom: 16,
-        essential: true,
-        duration: 1500,
+  // 打开图片预览
+  const openImagePreview = useCallback((fileData: FileData) => {
+    import("viewer-pro").then(({ ViewerPro }) => {
+      const viewer = new ViewerPro({
+        images: [{
+          src: fileData.url,
+          thumbnail: `${fileData.url}?x-oss-process=image/resize,w_300,h_200,m_lfit/quality,q_80/format,webp`,
+          title: fileData.name,
+          width: fileData.width,
+          height: fileData.height,
+        }],
       });
+      viewer.init();
+      viewer.open(0);
+    });
+  }, []);
 
-      // 延迟显示弹窗
-      setTimeout(() => {
-        const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
-        const time = fileData.takenAt
-          ? new Date(fileData.takenAt).toLocaleString("zh-CN")
-          : "未知时间";
-        const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
-        const popup = new mapboxgl.Popup()
-          .setLngLat([lng, lat])
-          .setHTML(createPopupHTML(popupImgUrl, fileData.name, "照片", time, photoIndex))
-          .addTo(map.current!);
+  // 显示照片弹窗（统一函数）
+  const showPhotoPopup = useCallback((coords: [number, number], fileData: FileData, index?: number) => {
+    if (!map.current) return;
+    const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
+    const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
+    const time = fileData.takenAt ? new Date(fileData.takenAt).toLocaleString("zh-CN") : "未知时间";
 
-        // 为弹窗中的图片添加点击事件
-        setTimeout(() => {
-          const popupEl = popup.getElement();
-          const img = popupEl?.querySelector(".popup-preview-image") as HTMLElement;
-          if (img && photoIndex !== -1) {
-            img.addEventListener("click", () => {
-              openImagePreview(fileData);
-            });
-          }
-        }, 50);
-      }, 1000);
-    },
-    [getThumbnailUrl, filteredFiles, openImagePreview],
-  );
+    const popup = new mapboxgl.Popup({ offset: 25 })
+      .setLngLat(coords)
+      .setHTML(createPopupHTML(popupImgUrl, fileData.name, `#${index || photoIndex + 1}`, time, photoIndex))
+      .addTo(map.current);
+
+    setTimeout(() => {
+      const img = popup.getElement()?.querySelector(".popup-preview-image") as HTMLElement;
+      if (img && photoIndex !== -1) {
+        img.addEventListener("click", () => openImagePreview(fileData));
+      }
+    }, 50);
+  }, [filteredFiles, getThumbnailUrl, openImagePreview]);
+
+  // 飞到指定位置
+  const flyToLocation = useCallback((lng: number, lat: number, fileData: FileData) => {
+    if (!map.current) return;
+    map.current.flyTo({ center: [lng, lat], zoom: 16, essential: true, duration: 1500 });
+    setTimeout(() => showPhotoPopup([lng, lat], fileData), 1000);
+  }, [showPhotoPopup]);
 
   // 添加聚类和照片图层
   const addPhotoLayers = useCallback(() => {
     if (!map.current || !isMapReady || filteredFiles.length === 0) {
-      console.log("⏭️ 跳过图层添加:", { mapReady: isMapReady, filesCount: filteredFiles.length });
       return;
     }
 
-    console.log(`📍 添加 ${filteredFiles.length} 个照片点到地图...`);
 
     // 创建 GeoJSON 数据
     const pointsGeoJSON: GeoJSON.FeatureCollection = {
@@ -282,10 +274,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       source: "points",
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": ["step", ["get", "point_count"], "#666666", 5, "#4a4a4a", 10, "#333333"],
-        "circle-radius": ["step", ["get", "point_count"], 10, 5, 12, 10, 14],
+        "circle-color": ["step", ["get", "point_count"], "#666", 5, "#555", 10, "#444"],
+        "circle-radius": ["step", ["get", "point_count"], 12, 5, 15, 10, 18],
         "circle-opacity": 0.15,
-        "circle-blur": 0.3,
       },
     });
 
@@ -296,10 +287,10 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       source: "points",
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": ["step", ["get", "point_count"], "#666666", 5, "#4a4a4a", 10, "#333333"],
-        "circle-radius": ["step", ["get", "point_count"], 8, 5, 10, 10, 12],
+        "circle-color": ["step", ["get", "point_count"], "#666", 5, "#555", 10, "#444"],
+        "circle-radius": ["step", ["get", "point_count"], 10, 5, 12, 10, 14],
         "circle-stroke-width": 1,
-        "circle-stroke-color": "#ffffff",
+        "circle-stroke-color": "#fff",
       },
     });
 
@@ -319,14 +310,14 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       },
     });
 
-    // 添加单个点的外圈
+    // 添加单个点外圈
     map.current.addLayer({
       id: LAYER_NAMES.POINT_OUTER,
       type: "circle",
       source: "points",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-color": "#666666",
+        "circle-color": "#666",
         "circle-radius": 6,
         "circle-opacity": 0.15,
       },
@@ -339,218 +330,153 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       source: "points",
       filter: ["!", ["has", "point_count"]],
       paint: {
-        "circle-color": "#666666",
-        "circle-radius": 3,
+        "circle-color": "#666",
+        "circle-radius": 4,
         "circle-stroke-width": 1,
         "circle-stroke-color": "#fff",
       },
     });
 
-    // 添加图片标记
-    markers.current.forEach((marker) => marker.remove());
+    // 清理旧的 markers 和事件
+    markers.current.forEach((m) => m.remove());
     markers.current = [];
+    cleanupEventHandlers();
 
+    // 图片标记配置
+    const MARKER_ZOOM_THRESHOLD = 12;
+    const markerData: { marker: mapboxgl.Marker; el: HTMLImageElement; coords: [number, number]; imgSrc: string; loaded: boolean }[] = [];
+
+    // 创建所有 markers
     pointsGeoJSON.features.forEach((feature) => {
+      const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+      const fileData = filteredFiles.find((f) => f.url === feature.properties?.url);
+      const imgSrc = fileData ? getThumbnailUrl(fileData.url, fileData.width, fileData.height, 100) : "";
+
       const el = document.createElement("img");
       el.className = "photo-marker";
-      el.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        object-fit: cover;
-        will-change: transform;
-        backface-visibility: hidden;
-        transform: translate3d(0, 0, 0);
-        transition: box-shadow 0.2s ease;
-      `;
-      const fileData = filteredFiles.find((f) => f.url === feature.properties?.url);
-      el.src = fileData ? getThumbnailUrl(fileData.url, fileData.width, fileData.height, 100) : "";
+      el.style.cssText = "width:40px;height:40px;border-radius:50%;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;object-fit:cover;background:#f0f0f0";
       el.alt = feature.properties?.name || "";
       el.loading = "lazy";
 
-      const coordinates = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
-      const marker = new mapboxgl.Marker({
-        element: el,
-        anchor: "center",
-      }).setLngLat(coordinates);
+      const marker = new mapboxgl.Marker({ element: el, anchor: "center" }).setLngLat(coords);
 
-      el.addEventListener("click", (e) => {
-        // 选择模式下阻止标记点击
-        if (selectModeRef.current) {
-          e.stopPropagation();
-          return;
+      el.onclick = (e) => {
+        e.stopPropagation();
+        if (selectModeRef.current || !fileData || !map.current) return;
+        
+        // 关闭之前的弹窗
+        if (currentPopup.current) {
+          currentPopup.current.remove();
         }
-        const fileData = filteredFiles.find((f) => f.url === feature.properties?.url);
-        if (fileData) {
-          const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
-          const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
-          const popup = new mapboxgl.Popup({ offset: 25 })
-            .setLngLat(coordinates)
-            .setHTML(
-              createPopupHTML(
-                popupImgUrl,
-                feature.properties?.name || "",
-                `#${feature.properties?.index}`,
-                feature.properties?.time || "",
-                photoIndex,
-              ),
-            )
-            .addTo(map.current!);
-
-          // 为弹窗中的图片添加点击事件
-          setTimeout(() => {
-            const popupEl = popup.getElement();
-            const img = popupEl?.querySelector(".popup-preview-image") as HTMLElement;
-            if (img && photoIndex !== -1 && fileData) {
-              img.addEventListener("click", () => {
-                openImagePreview(fileData);
-              });
-            }
-          }, 50);
-        }
-      });
-
-      // 根据缩放级别显示/隐藏图片标记
-      const toggleMarkerVisibility = () => {
-        if (!map.current) return;
-        const zoom = map.current.getZoom();
-        if (zoom > 14) {
-          if (!marker.getElement().parentNode) {
-            marker.addTo(map.current);
+        
+        const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
+        const time = fileData.takenAt ? new Date(fileData.takenAt).toLocaleString("zh-CN") : "未知时间";
+        currentPopup.current = new mapboxgl.Popup({ offset: 25, closeOnClick: true })
+          .setLngLat(coords)
+          .setHTML(createPopupHTML(popupImgUrl, fileData.name, `#${feature.properties?.index}`, time, -1))
+          .addTo(map.current);
+        
+        // 为弹窗图片添加点击预览
+        setTimeout(() => {
+          const img = currentPopup.current?.getElement()?.querySelector(".popup-preview-image") as HTMLElement;
+          if (img && fileData) {
+            img.style.cursor = "pointer";
+            img.onclick = (ev) => {
+              ev.stopPropagation();
+              ev.preventDefault();
+              openImagePreview(fileData);
+            };
           }
-          map.current.setLayoutProperty(LAYER_NAMES.POINT, "visibility", "none");
-          map.current.setLayoutProperty(LAYER_NAMES.POINT_OUTER, "visibility", "none");
-        } else {
-          if (marker.getElement().parentNode) {
-            marker.remove();
-          }
-          map.current.setLayoutProperty(LAYER_NAMES.POINT, "visibility", "visible");
-          map.current.setLayoutProperty(LAYER_NAMES.POINT_OUTER, "visibility", "visible");
-        }
+        }, 50);
       };
 
-      if (map.current) {
-        map.current.on("zoom", toggleMarkerVisibility);
-        toggleMarkerVisibility();
-      }
-
+      markerData.push({ marker, el, coords, imgSrc, loaded: false });
       markers.current.push(marker);
     });
 
-    // 移除旧的事件监听器（如果存在）
-    // 注意：这里使用any类型断言来绕过TypeScript的图层事件类型检查
-    try {
-      (map.current as any).off("click", LAYER_NAMES.CLUSTERS);
-      (map.current as any).off("click", LAYER_NAMES.POINT);
-      (map.current as any).off("mouseenter", LAYER_NAMES.CLUSTERS);
-      (map.current as any).off("mouseleave", LAYER_NAMES.CLUSTERS);
-      (map.current as any).off("mouseenter", LAYER_NAMES.POINT);
-      (map.current as any).off("mouseleave", LAYER_NAMES.POINT);
-    } catch (e) {
-      // 忽略移除不存在的监听器的错误
-    }
+    // 统一的 marker 可见性更新函数
+    const updateMarkersVisibility = () => {
+      if (!map.current) return;
+      const zoom = map.current.getZoom();
+      const bounds = map.current.getBounds();
+      if (!bounds) return;
 
-    // 点击聚类时放大（选择模式下跳过）
+      const showMarkers = zoom > MARKER_ZOOM_THRESHOLD;
+      const pointLayer = map.current.getLayer(LAYER_NAMES.POINT);
+      const pointOuterLayer = map.current.getLayer(LAYER_NAMES.POINT_OUTER);
+
+      // 批量更新图层可见性
+      if (pointLayer) map.current.setLayoutProperty(LAYER_NAMES.POINT, "visibility", showMarkers ? "none" : "visible");
+      if (pointOuterLayer) map.current.setLayoutProperty(LAYER_NAMES.POINT_OUTER, "visibility", showMarkers ? "none" : "visible");
+
+      // 更新各 marker
+      markerData.forEach((item) => {
+        const isInView = bounds.contains(item.coords);
+        if (showMarkers && isInView) {
+          if (!item.loaded && item.imgSrc) { item.el.src = item.imgSrc; item.loaded = true; }
+          if (!item.marker.getElement().parentNode) item.marker.addTo(map.current!);
+        } else {
+          if (item.marker.getElement().parentNode) item.marker.remove();
+        }
+      });
+    };
+
+    // 注册统一的事件监听器
+    registerEventHandler("zoomend", updateMarkersVisibility);
+    registerEventHandler("moveend", updateMarkersVisibility);
+
+    // 点击聚类时放大
     const clusterClickHandler = (e: mapboxgl.MapMouseEvent) => {
       if (!map.current || selectModeRef.current) return;
-      const features = map.current.queryRenderedFeatures(e.point, {
-        layers: ["clusters"],
-      });
+      const features = map.current.queryRenderedFeatures(e.point, { layers: [LAYER_NAMES.CLUSTERS] });
       if (features.length === 0) return;
       const clusterId = features[0].properties?.cluster_id;
-
-      (map.current.getSource("points") as mapboxgl.GeoJSONSource).getClusterExpansionZoom(
-        clusterId,
-        (err, zoom) => {
-          if (err || !map.current) return;
-
-          map.current.easeTo({
-            center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
-            zoom: zoom as number,
-          });
-        },
-      );
+      (map.current.getSource("points") as mapboxgl.GeoJSONSource).getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err || !map.current) return;
+        map.current.easeTo({ center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number], zoom: zoom as number });
+      });
     };
-    map.current.on("click", "clusters", clusterClickHandler);
+    registerEventHandler("click", clusterClickHandler, LAYER_NAMES.CLUSTERS);
 
-    // 点击单个点显示弹窗（选择模式下跳过）
+    // 点击单个点显示弹窗
     const pointClickHandler = (e: mapboxgl.MapMouseEvent) => {
-      if (!map.current || !e.features || e.features.length === 0 || selectModeRef.current) return;
-      const coordinates = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [
-        number,
-        number,
-      ];
-      const { name, time, url, index } = e.features[0].properties!;
-
+      if (!map.current || !e.features?.length || selectModeRef.current) return;
+      const coords = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number];
+      const { url, index } = e.features[0].properties!;
       const fileData = filteredFiles.find((f) => f.url === url);
-      if (fileData) {
-        const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
-        const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
-        const popup = new mapboxgl.Popup()
-          .setLngLat(coordinates)
-          .setHTML(createPopupHTML(popupImgUrl, name, `#${index}`, time, photoIndex))
-          .addTo(map.current);
-
-        // 为弹窗中的图版添加点击事件
-        setTimeout(() => {
-          const popupEl = popup.getElement();
-          const img = popupEl?.querySelector(".popup-preview-image") as HTMLElement;
-          if (img && photoIndex !== -1 && fileData) {
-            img.addEventListener("click", () => {
-              openImagePreview(fileData);
-            });
-          }
-        }, 50);
-      }
+      if (fileData) showPhotoPopup(coords, fileData, index);
     };
-    map.current.on("click", "unclustered-point", pointClickHandler);
+    registerEventHandler("click", pointClickHandler, LAYER_NAMES.POINT);
 
     // 鼠标悬停效果
-    const setCursor = (cursor: string) => () => {
-      if (map.current) map.current.getCanvas().style.cursor = cursor;
-    };
-    map.current.on("mouseenter", LAYER_NAMES.CLUSTERS, setCursor("pointer"));
-    map.current.on("mouseleave", LAYER_NAMES.CLUSTERS, setCursor(""));
-    map.current.on("mouseenter", LAYER_NAMES.POINT, setCursor("pointer"));
-    map.current.on("mouseleave", LAYER_NAMES.POINT, setCursor(""));
+    const setCursor = (cursor: string) => () => { if (map.current) map.current.getCanvas().style.cursor = cursor; };
+    registerEventHandler("mouseenter", setCursor("pointer"), LAYER_NAMES.CLUSTERS);
+    registerEventHandler("mouseleave", setCursor(""), LAYER_NAMES.CLUSTERS);
+    registerEventHandler("mouseenter", setCursor("pointer"), LAYER_NAMES.POINT);
+    registerEventHandler("mouseleave", setCursor(""), LAYER_NAMES.POINT);
 
-    // 自动调整视图
+    // 自动调整视图并在完成后更新 markers
     if (pointsGeoJSON.features.length > 0) {
       const bounds = new mapboxgl.LngLatBounds();
       pointsGeoJSON.features.forEach((point) => {
         bounds.extend((point.geometry as GeoJSON.Point).coordinates as [number, number]);
       });
+      map.current.once("moveend", updateMarkersVisibility);
       map.current.fitBounds(bounds, {
         padding: 50,
         maxZoom: 14,
       });
+    } else {
+      updateMarkersVisibility();
     }
-  }, [filteredFiles, isMapReady, getThumbnailUrl, openImagePreview]);
+  }, [filteredFiles, isMapReady, getThumbnailUrl, showPhotoPopup, registerEventHandler, cleanupEventHandlers]);
 
   // 存储事件监听器的引用，便于清理
   const canvasMouseMoveHandler = useRef<((e: MouseEvent) => void) | null>(null);
 
   // 初始化地图
   const initMap = useCallback(() => {
-    if (!mapContainer.current) {
-      console.log("❌ 地图容器不存在");
-      return;
-    }
-
-    if (map.current) {
-      console.log("⚠️ 地图已经初始化");
-      return;
-    }
-
-    console.log("🗺️ 初始化地图容器...", {
-      container: mapContainer.current,
-      width: mapContainer.current.offsetWidth,
-      height: mapContainer.current.offsetHeight,
-      token: MAPBOX_TOKEN.substring(0, 20) + "...",
-    });
+    if (!mapContainer.current || map.current) return;
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
     try {
@@ -604,7 +530,6 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
             return distance <= CIRCLE_RADIUS;
           });
           setSelectedPhotos(selected);
-          console.log(`✅ 选中了 ${selected.length} 张照片`);
         }
       };
 
@@ -612,31 +537,10 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       map.current.on("click", handleMapClick);
 
       map.current.on("load", () => {
-        console.log("✅ 地图加载完成");
-
-        // 检查 canvas 元素
-        if (mapContainer.current) {
-          const canvas = mapContainer.current.querySelector("canvas");
-          console.log("🎨 Canvas 元素检查:", {
-            exists: !!canvas,
-            width: canvas?.width,
-            height: canvas?.height,
-            style: canvas?.style.cssText,
-          });
-        }
-
         setIsMapReady(true);
 
         // 触发 resize 确保地图适应容器
-        setTimeout(() => {
-          if (map.current) {
-            map.current.resize();
-            console.log("🔄 地图 resize 完成", {
-              containerWidth: mapContainer.current?.offsetWidth,
-              containerHeight: mapContainer.current?.offsetHeight,
-            });
-          }
-        }, 100);
+        setTimeout(() => map.current?.resize(), 100);
       });
 
       if (onViewChange) {
@@ -663,50 +567,24 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 初始化地图 - 只有在数据加载完成且有数据时才初始化
   useEffect(() => {
-    // 必须满足：有 userId、不在加载中、有数据、有容器
-    if (!userId || loading || filteredFiles.length === 0) {
-      console.log("⏭️ 跳过地图初始化:", {
-        userId,
-        loading,
-        filesCount: filteredFiles.length,
-        hasContainer: !!mapContainer.current,
-      });
-      return;
-    }
+    if (!userId || loading || filteredFiles.length === 0) return;
 
-    // 再次检查容器（可能在渲染后才存在）
     if (!mapContainer.current) {
-      console.log("⚠️ 容器还未挂载，延迟初始化");
-      const checkTimer = setTimeout(() => {
-        if (mapContainer.current) {
-          initMap();
-        } else {
-          console.error("❌ 容器挂载超时");
-        }
-      }, 200);
+      const checkTimer = setTimeout(() => mapContainer.current && initMap(), 200);
       return () => clearTimeout(checkTimer);
     }
 
-    console.log("📦 准备初始化地图", {
-      userId,
-      filesCount: filteredFiles.length,
-      hasContainer: !!mapContainer.current,
-      containerDimensions: {
-        width: mapContainer.current.offsetWidth,
-        height: mapContainer.current.offsetHeight,
-      },
-    });
-
-    // 延迟初始化，确保容器已经渲染
-    const timer = setTimeout(() => {
-      initMap();
-    }, 100);
+    const timer = setTimeout(initMap, 100);
 
     return () => {
       clearTimeout(timer);
+      // 清理 markers
+      markers.current.forEach((m) => m.remove());
+      markers.current = [];
+      // 清理事件监听器
+      cleanupEventHandlers();
+      // 清理地图实例
       if (map.current) {
-        console.log("🧹 清理地图实例");
-        // 移除 canvas 事件监听器
         const canvas = map.current.getCanvas();
         if (canvas && canvasMouseMoveHandler.current) {
           canvas.removeEventListener("mousemove", canvasMouseMoveHandler.current);
@@ -716,7 +594,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       }
       setIsMapReady(false);
     };
-  }, [userId, loading, filteredFiles.length, initMap]);
+  }, [userId, loading, filteredFiles.length, initMap, cleanupEventHandlers]);
 
   // 添加照片图层
   useEffect(() => {
@@ -730,24 +608,21 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     }
   }, [isMapReady, filteredFiles, addPhotoLayers, onReady]);
 
-  // 监听主题变化，动态更新地图样式
+  // 监听主题变化（仅在运行时切换主题时使用）
+  const prevIsDark = useRef(isDark);
   useEffect(() => {
+    // 跳过初始渲染，只处理运行时主题切换
+    if (prevIsDark.current === isDark) return;
+    prevIsDark.current = isDark;
+    
     if (map.current && isMapReady) {
       const newMapStyle = isDark
         ? "mapbox://styles/mapbox/dark-v11"
         : "mapbox://styles/mapbox/light-v11";
-      console.log(`🎨 切换地图主题: ${isDark ? "深色" : "浅色"}`);
       map.current.setStyle(newMapStyle);
 
-      // 样式加载完成后重新添加图层
       map.current.once("styledata", () => {
-        console.log("✅ 地图样式加载完成，重新添加图层");
-        if (filteredFiles.length > 0) {
-          // 延迟一下，确保样式完全加载
-          setTimeout(() => {
-            addPhotoLayers();
-          }, 100);
-        }
+        if (filteredFiles.length > 0) setTimeout(() => addPhotoLayers(), 100);
       });
     }
   }, [isDark, isMapReady, filteredFiles, addPhotoLayers]);

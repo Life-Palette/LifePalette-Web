@@ -13,7 +13,7 @@ import {
   Mail,
   Map,
   MapPin,
-  MessageCircle,
+  // MessageCircle, // 暂时屏蔽
   Plus,
   Settings,
 } from "lucide-react";
@@ -75,19 +75,19 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
   } | null>(null);
   const queryClient = useQueryClient();
 
-  // 发送消息处理函数
-  const handleSendMessage = useCallback(async () => {
-    if (!targetUserId || isViewingOwnProfile) return;
-
-    try {
-      // 创建或获取私聊房间
-      await apiService.createPrivateChat(targetUserId);
-      // 跳转到聊天页面
-      navigate({ to: "/chat" as any });
-    } catch (error) {
-      console.error("创建聊天失败:", error);
-    }
-  }, [targetUserId, isViewingOwnProfile, navigate]);
+  // 发送消息处理函数 - 暂时屏蔽
+  // const handleSendMessage = useCallback(async () => {
+  //   if (!targetUserId || isViewingOwnProfile) return;
+  //
+  //   try {
+  //     // 创建或获取私聊房间
+  //     await apiService.createPrivateChat(targetUserId);
+  //     // 跳转到聊天页面
+  //     navigate({ to: "/chat" as any });
+  //   } catch (error) {
+  //     console.error("创建聊天失败:", error);
+  //   }
+  // }, [targetUserId, isViewingOwnProfile, navigate]);
 
   // 获取用户动态数据
   const {
@@ -342,8 +342,8 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
                   </Badge>
                 )}
               </div>
-              {/* 发消息按钮 - 仅在查看其他用户时显示 */}
-              {!isViewingOwnProfile && targetUserId && (
+              {/* 发消息按钮 - 暂时屏蔽 */}
+              {/* {!isViewingOwnProfile && targetUserId && (
                 <Button
                   onClick={handleSendMessage}
                   className="flex items-center gap-2 rounded-full"
@@ -352,7 +352,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
                   <MessageCircle size={16} />
                   <span>发消息</span>
                 </Button>
-              )}
+              )} */}
             </div>
             <p className="max-w-md text-muted-foreground/80 text-sm leading-relaxed mb-4">
               {displayUser.signature || "记录生活中的美好时光 ✨"}
@@ -414,7 +414,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
               {/* 网站 */}
               {displayUser.website && (
                 <a
-                  href={`https://${displayUser.website}`}
+                  href={displayUser.website.startsWith("http") ? displayUser.website : `https://${displayUser.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -422,7 +422,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 group-hover:bg-primary/10 transition-colors">
                     <Globe size={15} className="group-hover:text-primary transition-colors" />
                   </div>
-                  <span className="hidden sm:inline">{displayUser.website}</span>
+                  <span className="hidden sm:inline">{displayUser.website.replace(/^https?:\/\//, "")}</span>
                 </a>
               )}
 
@@ -501,7 +501,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
         </TabsContent>
 
         <TabsContent value="track" className="mt-6">
-          <TrackPage userId={targetUserId} />
+          <TrackPage userId={targetUserId} isOwnProfile={isViewingOwnProfile} />
         </TabsContent>
 
         <TabsContent value="posts" className="mt-6">

@@ -42,9 +42,10 @@ interface TravelStats {
 
 interface TrackPageProps {
   userId?: number;
+  isOwnProfile?: boolean;
 }
 
-const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId }) => {
+const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile = false }) => {
   const { user } = useIsAuthenticated();
   const { theme } = useTheme();
 
@@ -61,7 +62,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId }) => {
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [sortBy, setSortBy] = useState<"photoCount" | "lastVisitAt" | "firstVisitAt">("photoCount");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [viewMode, setViewMode] = useState<"grid" | "map">("map");
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [countryFilter, setCountryFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -388,10 +389,12 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId }) => {
 
             {/* 视图切换和导出按钮 */}
             <div className="flex items-center gap-2">
-              <Button className="h-8" onClick={handleOpenExportDialog} size="sm" variant="outline">
-                <Download className="mr-1" size={14} />
-                导出海报
-              </Button>
+              {isOwnProfile && (
+                <Button className="h-8" onClick={handleOpenExportDialog} size="sm" variant="outline">
+                  <Download className="mr-1" size={14} />
+                  导出海报
+                </Button>
+              )}
               <div className="flex items-center rounded-lg bg-muted p-1">
                 <Button
                   className="h-8"
