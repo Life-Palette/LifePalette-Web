@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -9,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Share2,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MarkdownPreview } from "@/components/changelog";
@@ -20,6 +22,78 @@ import { Separator } from "@/components/ui/separator";
 import { useChangelogByIdentifier, useChangelogs } from "@/hooks/useChangelog";
 import { cn } from "@/lib/utils";
 import type { ChangelogType } from "@/types";
+
+// 大纲项类型
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+// 从 Markdown 内容中提取标题
+function extractHeadings(content: string): TocItem[] {
+  const headingRegex = /^(#{1,3})\s+(.+)$/gm;
+  const headings: TocItem[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = headingRegex.exec(content)) !== null) {
+    const level = match[1].length;
+    const text = match[2].trim();
+    // 生成 ID：移除 emoji 和特殊字符，转为小写
+    const id = text
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, "") // 移除 emoji
+      .replace(/[^\w\u4e00-\u9fa5\s-]/g, "") // 保留中文、字母、数字
+      .trim()
+      .replace(/\s+/g, "-")
+      .toLowerCase();
+    
+    if (text && level <= 3) {
+      headings.push({ id, text, level });
+    }
+  }
+  return headings;
+}
+
+// 大纲组件
+function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId: string }) {
+  const handleClick = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  if (headings.length === 0) return null;
+
+  return (
+    <nav className="space-y-1">
+      <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-3">
+        <List className="h-4 w-4" />
+        <span>目录</span>
+      </div>
+      <div className="space-y-1 text-sm">
+        {headings.map((heading) => (
+          <button
+            key={heading.id}
+            onClick={() => handleClick(heading.id)}
+            className={cn(
+              "block w-full text-left py-1.5 px-2 rounded transition-colors hover:bg-muted",
+              heading.level === 1 && "font-medium",
+              heading.level === 2 && "pl-4",
+              heading.level === 3 && "pl-6 text-muted-foreground",
+              activeId === heading.id
+                ? "text-primary bg-primary/5 border-l-2 border-primary"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            type="button"
+          >
+            <span className="line-clamp-1">{heading.text}</span>
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
 
 // 更新类型配置
 const typeConfig: Record<
@@ -66,6 +140,7 @@ function formatDate(dateString: string | null): string {
 function ChangelogDetailPage() {
   const { version } = Route.useParams();
   const { data: changelog, isLoading, error } = useChangelogByIdentifier(version);
+  const [activeId, setActiveId] = useState("");
 
   // 获取所有日志用于导航
   const { data: allLogs } = useChangelogs({ pageSize: 100 });
@@ -75,6 +150,37 @@ function ChangelogDetailPage() {
   const currentIndex = allChangelogs.findIndex((log) => log.version === version);
   const prevLog = currentIndex > 0 ? allChangelogs[currentIndex - 1] : null;
   const nextLog = currentIndex < allChangelogs.length - 1 ? allChangelogs[currentIndex + 1] : null;
+
+  // 提取大纲
+  const headings = useMemo(() => {
+    if (!changelog?.content) return [];
+    return extractHeadings(changelog.content);
+  }, [changelog?.content]);
+
+  // 监听滚动，更新当前激活的标题
+  useEffect(() => {
+    const handleScroll = () => {
+      const headingElements = headings
+        .map((h) => document.getElementById(h.id))
+        .filter(Boolean) as HTMLElement[];
+
+      for (let i = headingElements.length - 1; i >= 0; i--) {
+        const el = headingElements[i];
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= 100) {
+          setActiveId(headings[i].id);
+          return;
+        }
+      }
+      if (headings.length > 0) {
+        setActiveId(headings[0].id);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [headings]);
 
   // 分享功能
   const handleShare = async () => {
@@ -128,7 +234,7 @@ function ChangelogDetailPage() {
     <div className="min-h-screen bg-background">
       {/* 顶部导航 */}
       <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/changelog">
             <Button className="gap-2" size="sm" variant="ghost">
               <ArrowLeft className="h-4 w-4" />
@@ -145,82 +251,98 @@ function ChangelogDetailPage() {
         </div>
       </header>
 
-      {/* 内容区域 */}
-      <main className="mx-auto max-w-4xl px-4 py-8">
-        {/* 版本信息头部 */}
-        <div className={cn("mb-8 rounded-2xl bg-gradient-to-b p-8", config.bgClass)}>
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <h1 className="font-mono text-3xl font-bold text-foreground sm:text-4xl">
-              {changelog.version}
-            </h1>
-            <Badge className={cn("flex items-center gap-1.5 px-3 py-1", config.className)} variant="outline">
-              {config.icon}
-              {config.label}
-            </Badge>
-          </div>
+      {/* 主体布局：内容 + 侧边大纲 */}
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="flex gap-8">
+          {/* 主内容区域 */}
+          <main className="flex-1 min-w-0">
+            {/* 版本信息头部 */}
+            <div className={cn("mb-8 rounded-2xl bg-gradient-to-b p-8", config.bgClass)}>
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <h1 className="font-mono text-3xl font-bold text-foreground sm:text-4xl">
+                  {changelog.version}
+                </h1>
+                <Badge className={cn("flex items-center gap-1.5 px-3 py-1", config.className)} variant="outline">
+                  {config.icon}
+                  {config.label}
+                </Badge>
+              </div>
 
-          <h2 className="mb-4 text-xl font-medium text-foreground sm:text-2xl">
-            {changelog.title}
-          </h2>
+              <h2 className="mb-4 text-xl font-medium text-foreground sm:text-2xl">
+                {changelog.title}
+              </h2>
 
-          {changelog.publishedAt && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>发布于 {formatDate(changelog.publishedAt)}</span>
+              {changelog.publishedAt && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>发布于 {formatDate(changelog.publishedAt)}</span>
+                </div>
+              )}
             </div>
+
+            {/* Markdown 内容 */}
+            <Card className="mb-8">
+              <CardContent className="p-6 sm:p-8">
+                <MarkdownPreview content={changelog.content} />
+              </CardContent>
+            </Card>
+
+            {/* 版本导航 */}
+            <Separator className="my-8" />
+
+            <div className="grid grid-cols-2 gap-4">
+              {prevLog ? (
+                <Link className="group" to="/changelog/$version" params={{ version: prevLog.version }}>
+                  <Card className="h-full p-4 transition-colors hover:bg-muted/50">
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>上一版本</span>
+                    </div>
+                    <div className="font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {prevLog.version}
+                    </div>
+                    <div className="text-muted-foreground text-sm line-clamp-1 mt-1">
+                      {prevLog.title}
+                    </div>
+                  </Card>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {nextLog ? (
+                <Link className="group" to="/changelog/$version" params={{ version: nextLog.version }}>
+                  <Card className="h-full p-4 transition-colors hover:bg-muted/50 text-right">
+                    <div className="flex items-center justify-end gap-2 text-muted-foreground text-sm mb-1">
+                      <span>下一版本</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
+                    <div className="font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {nextLog.version}
+                    </div>
+                    <div className="text-muted-foreground text-sm line-clamp-1 mt-1">
+                      {nextLog.title}
+                    </div>
+                  </Card>
+                </Link>
+              ) : (
+                <div />
+              )}
+            </div>
+          </main>
+
+          {/* 侧边大纲 - 仅在大屏显示 */}
+          {headings.length > 0 && (
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-20">
+                <Card className="p-4">
+                  <TableOfContents activeId={activeId} headings={headings} />
+                </Card>
+              </div>
+            </aside>
           )}
         </div>
-
-        {/* Markdown 内容 */}
-        <Card className="mb-8">
-          <CardContent className="p-6 sm:p-8">
-            <MarkdownPreview content={changelog.content} />
-          </CardContent>
-        </Card>
-
-        {/* 版本导航 */}
-        <Separator className="my-8" />
-
-        <div className="grid grid-cols-2 gap-4">
-          {prevLog ? (
-            <Link className="group" to="/changelog/$version" params={{ version: prevLog.version }}>
-              <Card className="h-full p-4 transition-colors hover:bg-muted/50">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>上一版本</span>
-                </div>
-                <div className="font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {prevLog.version}
-                </div>
-                <div className="text-muted-foreground text-sm line-clamp-1 mt-1">
-                  {prevLog.title}
-                </div>
-              </Card>
-            </Link>
-          ) : (
-            <div />
-          )}
-
-          {nextLog ? (
-            <Link className="group" to="/changelog/$version" params={{ version: nextLog.version }}>
-              <Card className="h-full p-4 transition-colors hover:bg-muted/50 text-right">
-                <div className="flex items-center justify-end gap-2 text-muted-foreground text-sm mb-1">
-                  <span>下一版本</span>
-                  <ChevronRight className="h-4 w-4" />
-                </div>
-                <div className="font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {nextLog.version}
-                </div>
-                <div className="text-muted-foreground text-sm line-clamp-1 mt-1">
-                  {nextLog.title}
-                </div>
-              </Card>
-            </Link>
-          ) : (
-            <div />
-          )}
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

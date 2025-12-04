@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Eye, EyeOff, Info, MoreVertical, Plus, Trash2 } from "lucide-react";
+import { Copy, Eye, EyeOff, Info, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -108,6 +108,17 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
     },
     [onImageClick],
   );
+
+  // 复制图片 URL
+  const handleCopyUrl = useCallback(async (photo: UserFileImage, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(photo.url);
+      toast.success("链接已复制到剪贴板");
+    } catch {
+      toast.error("复制失败，请重试");
+    }
+  }, []);
 
   // 切换可见性
   const handleToggleVisibility = useCallback(
@@ -261,6 +272,10 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                               <MoreVertical size={14} className="text-white" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => handleCopyUrl(photo, e)}>
+                                <Copy size={14} className="mr-2" />
+                                复制链接
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={(e) => handleToggleVisibility(photo, e)}>
                                 {photo.isPrivate ? (
                                   <>
