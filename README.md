@@ -1,6 +1,8 @@
 <p align="center">
-  <h1 align="center">LifePalette 拾色</h1>
+  <img src="./public/logo.jpg" alt="LifePalette Logo" width="120" height="120" style="border-radius: 20px;" />
 </p>
+
+<h1 align="center">LifePalette 拾色</h1>
 
 <p align="center">
   <strong>Record your memories and craft your own masterpiece of life</strong>

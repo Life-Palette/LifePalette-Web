@@ -1,6 +1,8 @@
 <p align="center">
-  <h1 align="center">LifePalette</h1>
+  <img src="./public/logo.jpg" alt="LifePalette Logo" width="120" height="120" style="border-radius: 20px;" />
 </p>
+
+<h1 align="center">LifePalette</h1>
 
 <p align="center">
   <strong>Paint your life story with colors and traces from every captured moment</strong>
