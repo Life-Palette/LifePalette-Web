@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut, Plus, Search, User } from "lucide-react";
+import { Github, History, LogOut, Plus, Search, User } from "lucide-react";
 import { ModeToggle } from "@/components/common/mode-toggle";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -66,6 +66,47 @@ export default function Header({ activeTab, onCreatePost, onLogin, onTabChange }
             <div className="flex items-center gap-3">
               {/* 主题切换 */}
               <ModeToggle />
+
+              {/* GitHub */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://github.com/Life-Palette/LifePalette-Web"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <Button
+                      className="h-9 w-9 rounded-full border border-border/50 bg-secondary/50 text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground hover:border-primary/30 dark:bg-white/5 dark:hover:bg-white/10"
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Github size={18} />
+                    </Button>
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>GitHub</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* 更新日志入口 */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link preload="intent" to="/changelog">
+                    <Button
+                      className="relative h-9 w-9 rounded-full border border-border/50 bg-secondary/50 text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground hover:border-primary/30 dark:bg-white/5 dark:hover:bg-white/10"
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <History size={18} />
+                      <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    </Button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>更新日志</p>
+                </TooltipContent>
+              </Tooltip>
 
               {isAuthenticated ? (
                 <>

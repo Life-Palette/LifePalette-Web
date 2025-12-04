@@ -1131,6 +1131,83 @@ class ApiService {
       method: "DELETE",
     });
   }
+
+  // ============ 更新日志相关接口 ============
+
+  // 获取已发布的更新日志列表（公开接口）
+  async getPublishedChangelogs(params?: {
+    page?: number;
+    size?: number;
+  }): Promise<
+    ApiResponse<{
+      list: Array<{
+        id: number;
+        version: string;
+        title: string;
+        content: string;
+        type: "feature" | "bugfix" | "improvement" | "breaking";
+        isPublished: boolean;
+        publishedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+      pagination: {
+        current_page: number;
+        size: number;
+        totalElements: number;
+        totalPages: number;
+      };
+    }>
+  > {
+    const searchParams = new URLSearchParams();
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    const queryString = searchParams.toString();
+    const endpoint = `/api/changelog/public${queryString ? `?${queryString}` : ""}`;
+
+    return this.request(endpoint);
+  }
+
+  // 获取最新发布的更新日志
+  async getLatestChangelog(): Promise<
+    ApiResponse<{
+      id: number;
+      version: string;
+      title: string;
+      content: string;
+      type: "feature" | "bugfix" | "improvement" | "breaking";
+      isPublished: boolean;
+      publishedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+    }>
+  > {
+    return this.request("/api/changelog/latest");
+  }
+
+  // 获取更新日志详情（支持ID或版本号）
+  async getChangelogByIdentifier(identifier: string | number): Promise<
+    ApiResponse<{
+      id: number;
+      version: string;
+      title: string;
+      content: string;
+      type: "feature" | "bugfix" | "improvement" | "breaking";
+      isPublished: boolean;
+      publishedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+    }>
+  > {
+    return this.request(`/api/changelog/${identifier}`);
+  }
 }
 
 export const apiService = new ApiService();

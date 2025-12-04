@@ -13,6 +13,8 @@ import { createFileRoute } from "@tanstack/react-router";
 // Import Routes
 
 import { Route as rootRoute } from "./routes/__root";
+import { Route as ChangelogImport } from "./routes/changelog";
+import { Route as ChangelogVersionImport } from "./routes/changelog.$version";
 import { Route as ChatImport } from "./routes/chat";
 import { Route as ColorsImport } from "./routes/colors";
 import { Route as IndexImport } from "./routes/index";
@@ -21,6 +23,16 @@ import { Route as ProfileImport } from "./routes/profile";
 import { Route as SearchImport } from "./routes/search";
 
 // Create/Update Routes
+
+const ChangelogRoute = ChangelogImport.update({
+  path: "/changelog",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const ChangelogVersionRoute = ChangelogVersionImport.update({
+  path: "/changelog/$version",
+  getParentRoute: () => rootRoute,
+} as any);
 
 const SearchRoute = SearchImport.update({
   path: "/search",
@@ -98,6 +110,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SearchImport;
       parentRoute: typeof rootRoute;
     };
+    "/changelog": {
+      id: "/changelog";
+      path: "/changelog";
+      fullPath: "/changelog";
+      preLoaderRoute: typeof ChangelogImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/changelog/$version": {
+      id: "/changelog/$version";
+      path: "/changelog/$version";
+      fullPath: "/changelog/$version";
+      preLoaderRoute: typeof ChangelogVersionImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
@@ -105,6 +131,8 @@ declare module "@tanstack/react-router" {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
+  ChangelogRoute,
+  ChangelogVersionRoute,
   ChatRoute,
   ColorsRoute,
   NotificationsRoute,

@@ -87,4 +87,15 @@ export const queryKeys = {
     all: ["qrCode"] as const,
     status: (key: string) => [...queryKeys.qrCode.all, "status", key] as const,
   },
+
+  // 更新日志相关
+  changelog: {
+    all: ["changelog"] as const,
+    lists: () => [...queryKeys.changelog.all, "list"] as const,
+    list: (params?: any) => [...queryKeys.changelog.lists(), params] as const,
+    infiniteLists: () => [...queryKeys.changelog.all, "infinite"] as const,
+    infiniteList: (params?: any) => [...queryKeys.changelog.infiniteLists(), params] as const,
+    latest: () => [...queryKeys.changelog.all, "latest"] as const,
+    detail: (id: number) => [...queryKeys.changelog.all, id] as const,
+  },
 } as const;
