@@ -18,6 +18,7 @@ import { Route as ChangelogVersionImport } from "./routes/changelog.$version";
 import { Route as ChatImport } from "./routes/chat";
 import { Route as ColorsImport } from "./routes/colors";
 import { Route as IndexImport } from "./routes/index";
+import { Route as MapSecUidImport } from "./routes/map.$secUid";
 import { Route as NotificationsImport } from "./routes/notifications";
 import { Route as ProfileImport } from "./routes/profile";
 import { Route as SearchImport } from "./routes/search";
@@ -61,6 +62,11 @@ const ColorsRoute = ColorsImport.update({
 
 const IndexRoute = IndexImport.update({
   path: "/",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const MapSecUidRoute = MapSecUidImport.update({
+  path: "/map/$secUid",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -124,6 +130,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ChangelogVersionImport;
       parentRoute: typeof rootRoute;
     };
+    "/map/$secUid": {
+      id: "/map/$secUid";
+      path: "/map/$secUid";
+      fullPath: "/map/$secUid";
+      preLoaderRoute: typeof MapSecUidImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
@@ -135,6 +148,7 @@ export const routeTree = rootRoute.addChildren({
   ChangelogVersionRoute,
   ChatRoute,
   ColorsRoute,
+  MapSecUidRoute,
   NotificationsRoute,
   ProfileRoute,
   SearchRoute,

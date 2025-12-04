@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { Camera, Clock, Download, Globe, Map, MapPin, Search, Star } from "lucide-react";
+import { Camera, Clock, Download, Globe, Link2, Map, MapPin, Search, Star } from "lucide-react";
 import type React from "react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useTheme } from "@/components/common/theme-provider";
 import ExportMapDialog from "@/components/map/ExportMapDialog";
@@ -111,6 +112,24 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
   const handleOpenExportDialog = () => {
     setShowExportDialog(true);
   };
+
+  // 复制分享链接
+  const handleCopyShareLink = useCallback(() => {
+    const secUid = user?.secUid;
+    if (!secUid) {
+      toast.error("无法生成链接，请稍后再试");
+      return;
+    }
+    const shareUrl = `${window.location.origin}/map/${secUid}`;
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        toast.success("链接已复制到剪贴板");
+      })
+      .catch(() => {
+        toast.error("复制失败，请手动复制链接");
+      });
+  }, [user?.secUid]);
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("zh-CN", {
@@ -390,10 +409,21 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
             {/* 视图切换和导出按钮 */}
             <div className="flex items-center gap-2">
               {isOwnProfile && (
-                <Button className="h-8" onClick={handleOpenExportDialog} size="sm" variant="outline">
-                  <Download className="mr-1" size={14} />
-                  导出海报
-                </Button>
+                <>
+                  <Button className="h-8" onClick={handleCopyShareLink} size="sm" variant="outline">
+                    <Link2 className="mr-1" size={14} />
+                    生成链接
+                  </Button>
+                  <Button
+                    className="h-8"
+                    onClick={handleOpenExportDialog}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Download className="mr-1" size={14} />
+                    导出海报
+                  </Button>
+                </>
               )}
               <div className="flex items-center rounded-lg bg-muted p-1">
                 <Button
@@ -523,12 +553,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
           ) : (
             /* 地图视图 */
             <div style={{ height: "600px", overflow: "hidden", borderRadius: "0.5rem" }}>
-              <TrackMapView
-                userId={targetUserId}
-                isDark={isDark}
-                showGallery={true}
-                showInfoPanel={true}
-              />
+              <TrackMapView userId={targetUserId} isDark={isDark} showGallery={true} />
             </div>
           )}
 

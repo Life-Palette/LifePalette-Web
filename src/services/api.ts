@@ -107,6 +107,7 @@ export interface ApiUser {
   account: string;
   mobile?: string;
   name: string;
+  secUid?: string;
   avatar?: string;
   github?: string | null;
   createdAt: string;
@@ -1059,6 +1060,7 @@ class ApiService {
     page?: number;
     size?: number;
     userId?: number;
+    secUid?: string;
     sort?: string;
     includeExif?: boolean;
     filterEmptyLocation?: boolean;
