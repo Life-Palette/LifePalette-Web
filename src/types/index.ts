@@ -63,6 +63,7 @@ export interface UpdateProfileData {
   github?: string;
   avatarFileMd5?: string;
   backgroundInfoFileMd5?: string;
+  code?: string; // 邮箱验证码，更改邮箱时需要
 }
 
 export interface FormErrors {

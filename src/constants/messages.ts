@@ -97,6 +97,20 @@ export const MESSAGES = {
     EDIT_PROFILE: "编辑个人资料",
   },
 
+  // 邮箱绑定
+  EMAIL_BIND: {
+    TITLE: "绑定邮箱",
+    DESCRIPTION: "绑定邮箱后，您可以通过邮箱与微信小程序进行互通关联",
+    PLACEHOLDER_EMAIL: "请输入您的邮箱地址",
+    PLACEHOLDER_CODE: "请输入验证码",
+    BIND_SUCCESS: "邮箱绑定成功",
+    BIND_FAILED: "邮箱绑定失败",
+    CODE_SENT: "验证码已发送，请查收邮箱",
+    CODE_SEND_FAILED: "发送验证码失败",
+    LATER: "稍后再说",
+    BIND_NOW: "立即绑定",
+  },
+
   // 帖子相关
   POST: {
     CREATE_NEW: "创建新动态",

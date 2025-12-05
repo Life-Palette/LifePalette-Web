@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import OptimizedImage from "@/components/media/OptimizedImage";
 import type { ChatMessage as ChatMessageType } from "@/types/chat";
+import { getUserAvatar } from "@/utils/avatar";
 import { formatDistanceToNow } from "@/utils/date";
 
 interface ChatMessageProps {
@@ -9,7 +10,7 @@ interface ChatMessageProps {
 }
 
 export default function ChatMessage({ message, isMine }: ChatMessageProps) {
-  const avatarUrl = message.user.avatarInfo?.url || message.user.avatar;
+  const avatarUrl = getUserAvatar(message.user);
   const blurhash = message.user.avatarInfo?.blurhash;
 
   const renderContent = () => {

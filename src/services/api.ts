@@ -552,6 +552,7 @@ class ApiService {
       github?: string;
       avatarFileMd5?: string;
       backgroundInfoFileMd5?: string;
+      code?: string; // 验证码，用于绑定邮箱时校验
     },
   ): Promise<ApiResponse<ApiUser>> {
     return this.request<ApiUser>(`/api/user/${userId}`, {
@@ -1137,10 +1138,7 @@ class ApiService {
   // ============ 更新日志相关接口 ============
 
   // 获取已发布的更新日志列表（公开接口）
-  async getPublishedChangelogs(params?: {
-    page?: number;
-    size?: number;
-  }): Promise<
+  async getPublishedChangelogs(params?: { page?: number; size?: number }): Promise<
     ApiResponse<{
       list: Array<{
         id: number;
@@ -1209,6 +1207,14 @@ class ApiService {
     }>
   > {
     return this.request(`/api/changelog/${identifier}`);
+  }
+
+  // 发送邮箱验证码
+  async sendEmailCode(email: string): Promise<ApiResponse<any>> {
+    return this.request("/api/code/sendEmail", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
   }
 }
 

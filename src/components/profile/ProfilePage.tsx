@@ -23,8 +23,8 @@ import SimpleInfiniteScroll from "@/components/common/SimpleInfiniteScroll";
 import { LottieAnimation } from "@/components/lottie";
 import TrackPage from "@/components/map/TrackPage";
 import SimpleImageDetail from "@/components/media/SimpleImageDetail";
-import PhotoWall from "@/components/profile/PhotoWall";
 import CreatePostModal from "@/components/post/CreatePostModal";
+import PhotoWall from "@/components/profile/PhotoWall";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +43,7 @@ import {
 import { useUserById } from "@/hooks/useUserById";
 import { useUserStats } from "@/hooks/useUserStats";
 import { apiService } from "@/services/api";
+import { getUserAvatar } from "@/utils/avatar";
 
 interface ProfilePageProps {
   userId?: number;
@@ -272,20 +273,26 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/0 to-background" />
             </>
           ) : (
-            <div className="relative h-full w-full overflow-hidden bg-gradient-to-br from-muted via-muted/80 to-muted/60">
+            <div
+              className={`relative h-full w-full overflow-hidden bg-gradient-to-br from-muted via-muted/80 to-muted/60 ${isViewingOwnProfile ? "cursor-pointer transition-colors hover:bg-muted/90" : ""}`}
+              onClick={isViewingOwnProfile ? () => setIsEditDialogOpen(true) : undefined}
+            >
               {/* 几何装饰元素 */}
               <div className="absolute inset-0 opacity-[0.03]">
                 <div className="absolute top-0 left-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border-[40px] border-foreground" />
                 <div className="absolute top-1/2 right-0 h-48 w-48 translate-x-1/2 -translate-y-1/2 rounded-full border-[30px] border-foreground" />
               </div>
-              <div className="flex h-full w-full items-center justify-center">
-                <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-muted-foreground/30">
-                    <Camera className="text-muted-foreground/50" size={28} />
+              {/* 仅在查看自己的个人中心时显示添加背景提示 */}
+              {isViewingOwnProfile && (
+                <div className="flex h-full w-full items-center justify-center">
+                  <div className="text-center">
+                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-muted-foreground/30">
+                      <Camera className="text-muted-foreground/50" size={28} />
+                    </div>
+                    <p className="text-muted-foreground/60 text-sm font-medium">添加背景图片</p>
                   </div>
-                  <p className="text-muted-foreground/60 text-sm font-medium">添加背景图片</p>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -305,16 +312,18 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
 
         <CardContent className="relative px-8 pb-8">
           {/* 头像 - 使用 shadcn Avatar */}
-          <div className="relative -mt-16 mb-6 inline-block">
+          <div
+            className={`relative -mt-16 mb-6 inline-block ${isViewingOwnProfile ? "cursor-pointer" : ""}`}
+            onClick={isViewingOwnProfile ? () => setIsEditDialogOpen(true) : undefined}
+          >
             {/* 外层装饰框 */}
             <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-foreground/5 to-foreground/0" />
             {/* Avatar 组件 */}
-            <Avatar className="relative h-28 w-28 border-[3px] border-background shadow-2xl ring-1 ring-foreground/5">
+            <Avatar
+              className={`relative h-28 w-28 border-[3px] border-background shadow-2xl ring-1 ring-foreground/5 ${isViewingOwnProfile ? "transition-all duration-300 hover:ring-primary/50 hover:shadow-primary/20" : ""}`}
+            >
               <AvatarImage
-                src={
-                  displayUser.avatarInfo?.url ||
-                  "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=120"
-                }
+                src={getUserAvatar(displayUser)}
                 alt={displayUser.name || displayUser.account}
                 className="transition-transform duration-300 hover:scale-105"
               />
@@ -414,7 +423,11 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
               {/* 网站 */}
               {displayUser.website && (
                 <a
-                  href={displayUser.website.startsWith("http") ? displayUser.website : `https://${displayUser.website}`}
+                  href={
+                    displayUser.website.startsWith("http")
+                      ? displayUser.website
+                      : `https://${displayUser.website}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -422,7 +435,9 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 group-hover:bg-primary/10 transition-colors">
                     <Globe size={15} className="group-hover:text-primary transition-colors" />
                   </div>
-                  <span className="hidden sm:inline">{displayUser.website.replace(/^https?:\/\//, "")}</span>
+                  <span className="hidden sm:inline">
+                    {displayUser.website.replace(/^https?:\/\//, "")}
+                  </span>
                 </a>
               )}
 
@@ -514,18 +529,20 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
               ) : posts.length === 0 ? (
                 <LottieAnimation
                   type="empty"
-                  emptyTitle="还没有发布内容"
-                  emptyDescription="记录并分享你的精彩瞬间"
+                  emptyTitle={isViewingOwnProfile ? "还没有发布内容" : "TA还没有发布内容"}
+                  emptyDescription={isViewingOwnProfile ? "记录并分享你的精彩瞬间" : ""}
                   width={200}
                   height={200}
                   actionButton={
-                    <Button
-                      onClick={() => setIsCreateModalOpen(true)}
-                      className="rounded-full bg-gradient-to-r from-pink-500 to-purple-500 px-6 py-2 font-medium text-white transition-opacity hover:opacity-90"
-                    >
-                      <Plus size={16} className="mr-2" />
-                      发布第一篇内容
-                    </Button>
+                    isViewingOwnProfile ? (
+                      <Button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="rounded-full bg-gradient-to-r from-pink-500 to-purple-500 px-6 py-2 font-medium text-white transition-opacity hover:opacity-90"
+                      >
+                        <Plus size={16} className="mr-2" />
+                        发布第一篇内容
+                      </Button>
+                    ) : undefined
                   }
                 />
               ) : (
@@ -553,8 +570,8 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
               ) : likedPosts.length === 0 ? (
                 <LottieAnimation
                   type="empty"
-                  emptyTitle="还没有喜欢的内容"
-                  emptyDescription="点赞你喜欢的内容"
+                  emptyTitle={isViewingOwnProfile ? "还没有喜欢的内容" : "TA还没有喜欢的内容"}
+                  emptyDescription={isViewingOwnProfile ? "点赞你喜欢的内容" : ""}
                   width={200}
                   height={200}
                 />
@@ -583,8 +600,8 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
               ) : collectedPosts.length === 0 ? (
                 <LottieAnimation
                   type="empty"
-                  emptyTitle="还没有收藏的内容"
-                  emptyDescription="收藏你感兴趣的内容"
+                  emptyTitle={isViewingOwnProfile ? "还没有收藏的内容" : "TA还没有收藏的内容"}
+                  emptyDescription={isViewingOwnProfile ? "收藏你感兴趣的内容" : ""}
                   width={200}
                   height={200}
                 />

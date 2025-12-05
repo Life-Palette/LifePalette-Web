@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
+import { useQuery } from "@tanstack/react-query";
 import mapboxgl from "mapbox-gl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -176,8 +176,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     import("viewer-pro").then(({ ViewerPro }) => {
       // 检查是否需要格式转换（HEIC等格式浏览器不支持）
       const needsFormatConversion =
-        fileData.url.includes("aliyuncs.com") &&
-        /\.(heic|heif|tiff?)$/i.test(fileData.name);
+        fileData.url.includes("aliyuncs.com") && /\.(heic|heif|tiff?)$/i.test(fileData.name);
 
       // 主图：HEIC等格式需要转换为JPEG，保持高质量
       const mainSrc = needsFormatConversion

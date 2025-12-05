@@ -1,17 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft,
-  Calendar,
-  Sparkles,
-  Bug,
-  Zap,
   AlertTriangle,
+  ArrowLeft,
+  Bug,
+  Calendar,
   ChevronLeft,
   ChevronRight,
-  Share2,
   List,
+  Share2,
+  Sparkles,
+  Zap,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { MarkdownPreview } from "@/components/changelog";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -46,7 +46,7 @@ function extractHeadings(content: string): TocItem[] {
       .trim()
       .replace(/\s+/g, "-")
       .toLowerCase();
-    
+
     if (text && level <= 3) {
       headings.push({ id, text, level });
     }
@@ -83,7 +83,7 @@ function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId
               heading.level === 3 && "pl-6 text-muted-foreground",
               activeId === heading.id
                 ? "text-primary bg-primary/5 border-l-2 border-primary"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
             type="button"
           >
@@ -262,7 +262,10 @@ function ChangelogDetailPage() {
                 <h1 className="font-mono text-3xl font-bold text-foreground sm:text-4xl">
                   {changelog.version}
                 </h1>
-                <Badge className={cn("flex items-center gap-1.5 px-3 py-1", config.className)} variant="outline">
+                <Badge
+                  className={cn("flex items-center gap-1.5 px-3 py-1", config.className)}
+                  variant="outline"
+                >
                   {config.icon}
                   {config.label}
                 </Badge>
@@ -292,7 +295,11 @@ function ChangelogDetailPage() {
 
             <div className="grid grid-cols-2 gap-4">
               {prevLog ? (
-                <Link className="group" to="/changelog/$version" params={{ version: prevLog.version }}>
+                <Link
+                  className="group"
+                  to="/changelog/$version"
+                  params={{ version: prevLog.version }}
+                >
                   <Card className="h-full p-4 transition-colors hover:bg-muted/50">
                     <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                       <ChevronLeft className="h-4 w-4" />
@@ -311,7 +318,11 @@ function ChangelogDetailPage() {
               )}
 
               {nextLog ? (
-                <Link className="group" to="/changelog/$version" params={{ version: nextLog.version }}>
+                <Link
+                  className="group"
+                  to="/changelog/$version"
+                  params={{ version: nextLog.version }}
+                >
                   <Card className="h-full p-4 transition-colors hover:bg-muted/50 text-right">
                     <div className="flex items-center justify-end gap-2 text-muted-foreground text-sm mb-1">
                       <span>下一版本</span>

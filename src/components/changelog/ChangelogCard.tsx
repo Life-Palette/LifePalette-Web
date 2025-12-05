@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles, Bug, Zap, AlertTriangle, Calendar, ChevronRight } from "lucide-react";
+import { AlertTriangle, Bug, Calendar, ChevronRight, Sparkles, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,10 @@ export default function ChangelogCard({ changelog }: ChangelogCardProps) {
                 <span className="font-mono font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
                   {changelog.version}
                 </span>
-                <Badge className={cn("flex items-center gap-1", config.className)} variant="outline">
+                <Badge
+                  className={cn("flex items-center gap-1", config.className)}
+                  variant="outline"
+                >
                   {config.icon}
                   {config.label}
                 </Badge>

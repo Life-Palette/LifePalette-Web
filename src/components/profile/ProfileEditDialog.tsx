@@ -20,10 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { MESSAGES } from "@/constants/messages";
 import { PROFILE_VALIDATION } from "@/constants/validation";
+import { useSendEmailCode } from "@/hooks/useAuth";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import type { ApiUser } from "@/services/api";
+import { getUserAvatar } from "@/utils/avatar";
 
 interface ProfileEditDialogProps {
   user: ApiUser;
@@ -86,13 +89,23 @@ export default function ProfileEditDialog({
         const updates: any = {};
         if (value.name !== user.name) updates.name = value.name;
         if (value.signature !== (user.signature || "")) updates.signature = value.signature;
-        if (value.email !== (user.email || "")) updates.email = value.email;
         if (value.mobile !== (user.mobile || "")) updates.mobile = value.mobile;
         if (value.city !== (user.city || "")) updates.city = value.city;
         if (value.job !== (user.job || "")) updates.job = value.job;
         if (value.company !== (user.company || "")) updates.company = value.company;
         if (value.website !== (user.website || "")) updates.website = value.website;
         if (value.github !== (user.github || "")) updates.github = value.github;
+
+        // 邮箱更改需要验证码
+        const emailChanged = value.email !== (user.email || "") && value.email !== "";
+        if (emailChanged) {
+          if (!emailCode) {
+            toast.error("更改邮箱需要验证码");
+            return;
+          }
+          updates.email = value.email;
+          updates.code = emailCode;
+        }
 
         // Add file uploads if any
         if (avatarFile) updates.avatarFile = avatarFile;
@@ -124,6 +137,11 @@ export default function ProfileEditDialog({
   const [backgroundError, setBackgroundError] = useState<string | undefined>();
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
+  // 邮箱验证码相关状态
+  const [emailCode, setEmailCode] = useState("");
+  const [emailCountdown, setEmailCountdown] = useState(0);
+  const sendEmailCodeMutation = useSendEmailCode();
+
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
@@ -134,8 +152,48 @@ export default function ProfileEditDialog({
       setBackgroundPreview(null);
       setAvatarError(undefined);
       setBackgroundError(undefined);
+      setEmailCode("");
+      setEmailCountdown(0);
     }
   }, [open, user]);
+
+  // 发送邮箱验证码
+  const handleSendEmailCode = async () => {
+    const email = form.getFieldValue("email");
+    if (!email) {
+      toast.error("请先输入邮箱地址");
+      return;
+    }
+
+    // 简单的邮箱格式验证
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("请输入正确的邮箱格式");
+      return;
+    }
+
+    try {
+      const result = await sendEmailCodeMutation.mutateAsync(email);
+      if (result.code === 200) {
+        toast.success(MESSAGES.EMAIL_BIND.CODE_SENT);
+        // 开始倒计时
+        setEmailCountdown(60);
+        const timer = setInterval(() => {
+          setEmailCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : MESSAGES.EMAIL_BIND.CODE_SEND_FAILED;
+      toast.error(errorMessage);
+    }
+  };
 
   // Check if form has changes
   const hasChanges = () => {
@@ -162,7 +220,7 @@ export default function ProfileEditDialog({
       <Card className="border-border/50">
         <CardContent className="flex justify-center pt-6">
           <AvatarUpload
-            currentAvatar={user.avatarInfo?.url}
+            currentAvatar={getUserAvatar(user)}
             error={avatarError}
             onAvatarChange={(file, preview) => {
               setAvatarFile(file);
@@ -242,6 +300,8 @@ export default function ProfileEditDialog({
           <form.Field name="email">
             {(field) => {
               const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              const emailHasChanged =
+                field.state.value !== (user.email || "") && field.state.value !== "";
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>邮箱</FieldLabel>
@@ -251,11 +311,58 @@ export default function ProfileEditDialog({
                     type="email"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value);
+                      // 邮箱变化时清空验证码
+                      if (e.target.value !== (user.email || "")) {
+                        setEmailCode("");
+                      }
+                    }}
                     placeholder="example@email.com"
                     aria-invalid={isInvalid}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  {emailHasChanged && (
+                    <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border/50 space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        更改邮箱需要验证码校验，用于与微信小程序互通关联
+                      </p>
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <FieldLabel htmlFor="email-code" className="text-xs">
+                            {MESSAGES.FORM.CODE}
+                          </FieldLabel>
+                          <Input
+                            id="email-code"
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={4}
+                            placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_CODE}
+                            value={emailCode}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                              setEmailCode(value);
+                            }}
+                            className="mt-1"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleSendEmailCode}
+                          disabled={sendEmailCodeMutation.isPending || emailCountdown > 0}
+                          className="whitespace-nowrap h-9"
+                        >
+                          {emailCountdown > 0
+                            ? MESSAGES.FORM.RESEND_CODE(emailCountdown)
+                            : sendEmailCodeMutation.isPending
+                              ? MESSAGES.FORM.SENDING_CODE
+                              : MESSAGES.FORM.SEND_CODE}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </Field>
               );
             }}

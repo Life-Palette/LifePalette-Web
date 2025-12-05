@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { queryKeys } from "@/constants/query-keys";
 import { type ApiTopic, apiService } from "@/services/api";
 import type { Post, PostImage } from "@/types";
+import { getUserAvatar } from "@/utils/avatar";
 
 // 将API话题数据转换为前端Post类型
 const transformApiTopicToPost = (apiTopic: ApiTopic): Post => {
@@ -24,8 +25,7 @@ const transformApiTopicToPost = (apiTopic: ApiTopic): Post => {
   const tags = (apiTopic.topicTags || []).map((topicTag) => topicTag.tag.title);
 
   // 构建用户头像URL
-  const avatar =
-    apiTopic.user?.avatarInfo?.url || "https://test.wktest.cn:3001/assets/default/boy.png";
+  const avatar = getUserAvatar(apiTopic.user);
 
   // 构建位置信息
   const location = apiTopic.user?.ipInfo

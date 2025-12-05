@@ -1,4 +1,5 @@
 import type { Post } from "@/types";
+import { DEFAULT_AVATAR } from "@/utils/avatar";
 
 export const mockPosts: Post[] = [
   {
@@ -12,7 +13,7 @@ export const mockPosts: Post[] = [
     ],
     author: {
       name: "小雨",
-      avatar: "https://test.wktest.cn:3001/assets/default/boy.png",
+      avatar: DEFAULT_AVATAR.FEMALE,
     },
     tags: ["咖啡", "午后时光", "生活美学"],
     likes: 128,

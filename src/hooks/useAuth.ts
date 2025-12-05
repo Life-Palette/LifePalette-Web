@@ -114,3 +114,26 @@ export const useLogout = () => {
     },
   });
 };
+
+// 更新用户邮箱 hook
+export const useUpdateUserEmail = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, email, code }: { userId: number; email: string; code: string }) =>
+      await apiService.updateUser(userId, { email, code }),
+    onSuccess: (data) => {
+      if (data.code === 200) {
+        // 更新成功后，刷新当前用户信息
+        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      }
+    },
+  });
+};
+
+// 发送邮箱验证码 hook
+export const useSendEmailCode = () => {
+  return useMutation({
+    mutationFn: async (email: string) => await apiService.sendEmailCode(email),
+  });
+};

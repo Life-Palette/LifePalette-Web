@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsAuthenticated } from "@/hooks/useAuth";
 import { useCommentReplies, useDeleteComment } from "@/hooks/useTopicDetail";
+import { getUserAvatar } from "@/utils/avatar";
 import { formatRelativeTime } from "@/utils/date";
 
 interface CommentUser {
@@ -79,7 +80,7 @@ function ReplyItem({
       transition={{ delay: replyIdx * 0.03 }}
     >
       <Avatar className="h-6 w-6 flex-shrink-0 rounded-full">
-        <AvatarImage alt={reply.user?.name} src={reply.user?.avatarInfo?.url} />
+        <AvatarImage alt={reply.user?.name} src={getUserAvatar(reply.user)} />
         <AvatarFallback className="bg-gray-200 text-gray-600 text-[10px]">
           {reply.user?.name?.charAt(0)}
         </AvatarFallback>
@@ -178,7 +179,7 @@ function CommentItem({
     >
       <div className="flex gap-3">
         <Avatar className="h-8 w-8 flex-shrink-0 rounded-full">
-          <AvatarImage alt={comment.user?.name} src={comment.user?.avatarInfo?.url} />
+          <AvatarImage alt={comment.user?.name} src={getUserAvatar(comment.user)} />
           <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
             {comment.user?.name?.charAt(0)}
           </AvatarFallback>

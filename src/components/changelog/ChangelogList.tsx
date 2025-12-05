@@ -40,11 +40,7 @@ export default function ChangelogList({
   return (
     <InfiniteScroll
       dataLength={changelogs.length}
-      endMessage={
-        <div className="text-center py-8 text-muted-foreground text-sm">
-          已经到底了
-        </div>
-      }
+      endMessage={<div className="text-center py-8 text-muted-foreground text-sm">已经到底了</div>}
       hasMore={hasMore}
       loader={
         <div className="flex justify-center py-6">

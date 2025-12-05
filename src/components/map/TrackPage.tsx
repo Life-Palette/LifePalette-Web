@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useTheme } from "@/components/common/theme-provider";
+import { LottieAnimation } from "@/components/lottie";
 import ExportMapDialog from "@/components/map/ExportMapDialog";
 import TrackMapView from "@/components/map/TrackMapView";
 import { Badge } from "@/components/ui/badge";
@@ -322,23 +323,25 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
 
   if (!travelStats || travelStats.totalCities === 0) {
     return (
-      <div className="min-h-[500px] rounded-2xl border border-gray-100 bg-white">
-        <div className="p-6">
-          <div className="py-20 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100">
-              <Map className="text-blue-600" size={24} />
-            </div>
-            <h3 className="mb-2 font-semibold text-gray-900 text-xl">开始你的旅行足迹</h3>
-            <p className="mb-6 text-gray-500 text-sm">
-              上传带有GPS信息的照片，记录你走过的每一个地方
-            </p>
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-blue-600 text-sm">
-              <Camera size={16} />
-              <span>拍照记录足迹</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Card className="min-h-[500px]">
+        <CardContent className="p-6">
+          <LottieAnimation
+            type="empty"
+            emptyTitle={isOwnProfile ? "还没有旅行足迹" : "TA还没有旅行足迹"}
+            emptyDescription={isOwnProfile ? "上传带有GPS信息的照片，记录你走过的每一个地方" : ""}
+            width={200}
+            height={200}
+            actionButton={
+              isOwnProfile ? (
+                <Button variant="outline" className="rounded-full">
+                  <Camera size={16} className="mr-2" />
+                  拍照记录足迹
+                </Button>
+              ) : undefined
+            }
+          />
+        </CardContent>
+      </Card>
     );
   }
 

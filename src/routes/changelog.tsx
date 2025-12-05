@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, History } from "lucide-react";
 import { useMemo } from "react";
-import { History, ArrowLeft } from "lucide-react";
 import { ChangelogList } from "@/components/changelog";
 import KeepAlivePage from "@/components/common/KeepAlivePage";
 import ScrollRestoreContainer from "@/components/common/ScrollRestoreContainer";

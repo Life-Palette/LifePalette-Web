@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiService } from "@/services/api";
 import type { Post, PostImage } from "@/types";
+import { getUserAvatar } from "@/utils/avatar";
 
 // 将API话题数据转换为前端Post类型（复用之前的逻辑）
 const transformApiTopicToPost = (apiTopic: any): Post => {
@@ -21,8 +22,7 @@ const transformApiTopicToPost = (apiTopic: any): Post => {
 
   const tags = (apiTopic.topicTags || []).map((topicTag: any) => topicTag.tag.title);
 
-  const avatar =
-    apiTopic.user?.avatarInfo?.url || "https://test.wktest.cn:3001/assets/default/boy.png";
+  const avatar = getUserAvatar(apiTopic.user);
 
   const location = apiTopic.user?.ipInfo
     ? `${apiTopic.user.ipInfo.city}·${apiTopic.user.ipInfo.regionName}`

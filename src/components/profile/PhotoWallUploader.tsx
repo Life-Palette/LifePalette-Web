@@ -113,9 +113,7 @@ export default function PhotoWallUploader({
     e.preventDefault();
     setIsDragging(false);
 
-    const files = Array.from(e.dataTransfer.files).filter((file) =>
-      file.type.startsWith("image/"),
-    );
+    const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith("image/"));
     addFiles(files);
   };
 
@@ -217,7 +215,8 @@ export default function PhotoWallUploader({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  已选择 <span className="text-foreground font-medium">{selectedFiles.length}</span> 张图片
+                  已选择 <span className="text-foreground font-medium">{selectedFiles.length}</span>{" "}
+                  张图片
                 </p>
                 {!uploadState.isUploading && (
                   <Button
@@ -306,11 +305,7 @@ export default function PhotoWallUploader({
 
           {/* 操作按钮 */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              disabled={uploadState.isUploading}
-            >
+            <Button variant="outline" onClick={handleClose} disabled={uploadState.isUploading}>
               取消
             </Button>
             <Button

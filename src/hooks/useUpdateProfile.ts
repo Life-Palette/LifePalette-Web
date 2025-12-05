@@ -52,6 +52,7 @@ export const useUpdateProfile = () => {
         github?: string;
         avatarFileMd5?: string;
         backgroundInfoFileMd5?: string;
+        code?: string;
       } = {};
 
       // 只添加有值的字段
@@ -59,6 +60,7 @@ export const useUpdateProfile = () => {
       if (data.signature !== undefined) updateData.signature = data.signature;
       if (data.mobile !== undefined) updateData.mobile = data.mobile;
       if (data.email !== undefined) updateData.email = data.email;
+      if (data.code !== undefined) updateData.code = data.code; // 邮箱验证码
       if (data.sex !== undefined) updateData.sex = data.sex;
       if (data.birthday !== undefined) updateData.birthday = data.birthday;
       if (data.city !== undefined) updateData.city = data.city;

@@ -3,6 +3,7 @@ import { useRef } from "react";
 import OptimizedImage from "@/components/media/OptimizedImage";
 import { Badge } from "@/components/ui/badge";
 import type { ChatRoom } from "@/types/chat";
+import { getUserAvatar } from "@/utils/avatar";
 import { formatDistanceToNow } from "@/utils/date";
 
 interface ChatRoomListProps {
@@ -31,7 +32,7 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
 
   const getRoomAvatar = (room: ChatRoom) => {
     if (room.type === "PRIVATE") {
-      return room.otherUser?.avatarInfo?.url || room.otherUser?.avatar;
+      return getUserAvatar(room.otherUser);
     }
     return room.avatar;
   };

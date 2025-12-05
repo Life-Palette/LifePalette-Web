@@ -72,17 +72,12 @@ const components: Components = {
     </ul>
   ),
   li: ({ children, ...props }) => (
-    <li
-      className="flex items-start gap-3 text-muted-foreground leading-relaxed"
-      {...props}
-    >
+    <li className="flex items-start gap-3 text-muted-foreground leading-relaxed" {...props}>
       <span className="inline-block w-2 h-2 rounded-full bg-foreground/40 mt-[0.45rem] shrink-0" />
       <span className="flex-1">{children}</span>
     </li>
   ),
-  hr: ({ ...props }) => (
-    <hr className="my-8 border-t border-border/60" {...props} />
-  ),
+  hr: ({ ...props }) => <hr className="my-8 border-t border-border/60" {...props} />,
 };
 
 export default function MarkdownPreview({ content, className }: MarkdownPreviewProps) {

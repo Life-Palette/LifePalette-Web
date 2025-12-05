@@ -2,12 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { Github, History, LogOut, Plus, Search, User } from "lucide-react";
 import { ModeToggle } from "@/components/common/mode-toggle";
 import MobileSidebar from "@/components/layout/MobileSidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsAuthenticated, useLogout } from "@/hooks/useAuth";
+import { getUserAvatar } from "@/utils/avatar";
 
 // import { useUnreadCount } from "@/hooks/useNotifications";
 
@@ -166,6 +167,7 @@ export default function Header({ activeTab, onCreatePost, onLogin, onTabChange }
                     <TooltipTrigger asChild>
                       <Link preload="intent" search={{ userId: undefined }} to="/profile">
                         <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-border transition-all duration-200 hover:scale-110 hover:ring-ring dark:ring-white/10 dark:hover:ring-primary/50">
+                          <AvatarImage src={getUserAvatar(user)} alt={user?.name || "用户头像"} />
                           <AvatarFallback className="bg-muted font-medium text-muted-foreground text-sm dark:bg-white/10">
                             {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
                           </AvatarFallback>
