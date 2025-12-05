@@ -223,7 +223,12 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         });
 
         if (result.code === 200) {
-          toast.success("注册成功");
+          // 检查是否返回了 token（自动登录）
+          if (result.result?.token?.access_token) {
+            toast.success("注册成功，已自动登录");
+          } else {
+            toast.success("注册成功");
+          }
           onSuccess();
           onClose();
           // 重置表单
