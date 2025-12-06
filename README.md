@@ -1,102 +1,111 @@
-<p align="center">
-  <img src="./public/logo.jpg" alt="LifePalette Logo" width="120" height="120" style="border-radius: 20px;" />
-</p>
+<div align="center">
 
-<h1 align="center">LifePalette 拾色</h1>
+<img src="./public/logo.jpg" alt="LifePalette Logo" width="120" height="120" style="border-radius: 20px;" />
 
-<p align="center">
-  <strong>Record your memories and craft your own masterpiece of life</strong>
-</p>
+# LifePalette 拾色
 
-<p align="center">
-  以色彩为笔，以轨迹为墨，绘制专属于你的人生画卷
-</p>
+**以色彩为笔，以轨迹为墨，绘制专属于你的人生画卷**
 
-<p align="center">
-  简体中文 | <a href="./README_EN.md">English</a>
-</p>
+[![在线体验](https://img.shields.io/badge/在线体验-lpalette.cn-ff6b6b?style=for-the-badge)](https://lpalette.cn)
+[![备用地址](https://img.shields.io/badge/备用地址-Netlify-00C7B7?style=for-the-badge)](https://lifepalette-web.netlify.app)
 
-<p align="center">
-  <a href="https://lpalette.cn">在线预览</a> | <a href="https://lifepalette-web.netlify.app">备用地址</a>
-</p>
+简体中文 | [English](./README_EN.md)
+
+<br>
+
+<!-- ![首页预览](https://lpalette.oss-accelerate.aliyuncs.com/prod/32/1764831234905.png?x-oss-process=image/resize,w_1600,m_lfit/format,webp) -->
+
+</div>
 
 ---
 
-## 📖 项目简介
+## 关于拾色
 
-**LifePalette（拾色）** 是一款精心设计的生活记录应用，旨在帮助用户以独特的视角记录生活中的点滴瞬间。通过图片颜色分析、地理轨迹追踪、智能 AI 辅助等创新功能，将你的记忆编织成一幅绚丽的人生画卷。
+生活是一幅画，而你是唯一的画师。
 
-> ⚠️ **版本说明**：当前主分支已采用 **React** 重构。原 [Vue 版本分支](https://github.com/Life-Palette/LifePalette-Web/tree/vue) 不再维护更新。
+**拾色**不只是一个记录工具，它是你的**私人色彩博物馆**、**足迹地图**和**记忆档案馆**。每一张照片都有它独特的色彩故事，每一个地点都承载着特别的回忆——拾色帮你把这些碎片编织成一幅完整的人生画卷。
 
-## ✨ 功能特性
+> _"当你回顾自己的照片库，看到的不再只是图片，而是一场穿越时光的色彩之旅。"_
 
-### 🎨 颜色画廊 (Color Palette)
+> ⚠️ **版本说明**：当前主分支已采用 **React** 重构。原 [Vue 版本](https://github.com/Life-Palette/LifePalette-Web/tree/vue) 不再维护。
 
-- **颜色统计分析**：自动从上传的图片中提取主色调
-- **颜色轮盘展示**：直观展示你的照片色彩分布
-- **按色彩浏览**：通过颜色筛选查看相关照片
-- **网格/列表视图**：灵活切换浏览模式
-- **虚拟滚动**：流畅处理大量颜色数据
+---
 
-### 📝 话题动态 (Posts/Topics)
+## 功能一览
 
-- **富文本编辑器**：支持 Markdown 和富文本格式
-- **多媒体支持**：图片、视频、Live Photo 上传
-- **点赞与收藏**：社交互动功能
-- **评论系统**：支持多级评论回复
-- **标签系统**：灵活的内容分类管理
-- **置顶功能**：重要内容优先展示
+| 功能 | 亮点 |
+|------|------|
+| **颜色画廊** | 智能提色、色彩轮盘、按色浏览 |
+| **话题动态** | 富文本编辑、多媒体融合、社交互动 |
+| **地图轨迹** | 自动定位、智能聚合、海报导出 |
+| **AI 助手** | 智能续写、文本润色、灵感激发 |
+| **个人空间** | 个性定制、数据统计、扫码登录 |
 
-### 🗺️ 地图轨迹 (Map & Track)
+---
 
-- **Mapbox 地图集成**：精美地图展示
-- **位置选择器**：精准定位拍摄地点
-- **轨迹记录**：记录你的旅行足迹
-- **照片地图画廊**：在地图上浏览照片
-- **地图导出**：生成精美的轨迹图片
+## 使用场景
 
-### 💬 实时聊天 `开发中`
+- **环游世界** — 照片自动标记地点，生成专属旅行足迹图
+- **日常点滴** — 美食、风景、心情，配上文字就是一篇微日记
+- **年度回顾** — 按颜色浏览，发现这一年的主色调
+- **成长记录** — 统计数据可视化，见证自己的创作历程
 
-- **即时通讯**：Socket.io 实现实时消息
-- **聊天室列表**：管理多个对话
-- **消息通知**：不错过任何重要信息
+---
 
-### 🖼️ 媒体管理 (Media)
+## 功能详情
 
-- **智能图片压缩**：上传前自动优化
-- **图片裁剪**：头像和背景图编辑
-- **Blurhash 预览**：优雅的图片加载体验
-- **Live Photo 支持**：播放 Apple Live Photo
-- **EXIF 信息提取**：读取照片元数据
-- **图片详情面板**：查看完整图片信息
+<details>
+<summary><b>🎨 颜色画廊</b></summary>
 
-### 🤖 AI 智能助手
+- 自动从图片中提取主色调
+- 颜色轮盘直观展示色彩分布
+- 按色彩筛选浏览照片
+- 网格/列表视图灵活切换
+</details>
 
-- **AI 写作辅助**：智能内容生成
-- **AI 自动补全**：编辑器内智能建议
-- **Ghost Text**：实时 AI 输入提示
+<details>
+<summary><b>📝 话题动态</b></summary>
 
-### 👤 用户系统
+- 富文本 + Markdown 编辑器
+- 图片、视频、Live Photo 上传
+- 点赞、收藏、评论互动
+- 标签分类管理
+</details>
 
-- **用户认证**：安全的用户认证
-- **QR 码登录**：便捷的扫码登录
-- **个人资料**：自定义头像和背景
-- **用户统计**：查看活动数据
+<details>
+<summary><b>🗺️ 地图轨迹</b></summary>
 
-### 🔔 通知系统 `开发中`
+- Mapbox 地图集成
+- 照片自动定位标记
+- 轨迹记录与导出
+- 生成精美足迹海报
+</details>
 
-- **实时通知**：即时推送互动消息
-- **通知管理**：清晰的通知列表
+<details>
+<summary><b>🤖 AI 智能助手</b></summary>
 
-### 🔍 搜索功能
+- 智能续写（停止输入 1.5 秒后自动联想）
+- 文本润色与优化
+- Ghost Text 实时提示
+</details>
 
-- **全局搜索**：快速查找内容
-- **智能筛选**：多维度搜索过滤
+<details>
+<summary><b>🖼️ 媒体管理</b></summary>
 
-### 🌙 主题切换
+- 智能图片压缩
+- Blurhash 优雅加载
+- Live Photo 播放
+- EXIF 元数据提取
+</details>
 
-- **深色/浅色模式**：自由切换主题风格
-- **系统主题跟随**：自动适配系统设置
+<details>
+<summary><b>👤 用户系统</b></summary>
+
+- 扫码登录
+- 个人资料定制
+- 深色/浅色主题
+- 数据统计
+</details>
 
 ## 🛠️ 技术栈
 
@@ -210,7 +219,7 @@ src/
 
 ## 📄 License
 
-MIT License © 2024 LifePalette
+MIT License © 2025 LifePalette
 
 ---
 

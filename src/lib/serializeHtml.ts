@@ -71,3 +71,66 @@ function escapeHtml(text: string): string {
   };
   return text.replace(/[&<>"']/g, (char) => map[char]);
 }
+
+/**
+ * 将 HTML 字符串转换为 Plate Value
+ * @param html - HTML 字符串
+ * @returns Plate Value (Slate 节点数组)
+ */
+export function deserializeHtml(html: string): Value {
+  if (!html || !html.trim()) {
+    return [{ type: "p", children: [{ text: "" }] }];
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const nodes = Array.from(doc.body.childNodes);
+
+  const result = nodes.map(deserializeNode).filter(Boolean) as Value;
+  return result.length > 0 ? result : [{ type: "p", children: [{ text: "" }] }];
+}
+
+function deserializeNode(node: Node): any {
+  // 文本节点
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent || "";
+    return text ? { text } : null;
+  }
+
+  // 元素节点
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    const el = node as Element;
+    const children = Array.from(el.childNodes)
+      .map(deserializeNode)
+      .filter(Boolean);
+
+    // 确保有子节点
+    const validChildren = children.length > 0 ? children : [{ text: "" }];
+
+    switch (el.tagName.toLowerCase()) {
+      case "p":
+        return { type: "p", children: validChildren };
+      case "a":
+        return {
+          type: "a",
+          url: el.getAttribute("href") || "",
+          children: validChildren,
+        };
+      case "strong":
+      case "b":
+        return validChildren.map((child: any) => ({ ...child, bold: true }));
+      case "em":
+      case "i":
+        return validChildren.map((child: any) => ({ ...child, italic: true }));
+      case "u":
+        return validChildren.map((child: any) => ({ ...child, underline: true }));
+      case "br":
+        return { text: "\n" };
+      default:
+        // 其他标签当作段落处理
+        return { type: "p", children: validChildren };
+    }
+  }
+
+  return null;
+}

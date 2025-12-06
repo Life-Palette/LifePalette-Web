@@ -628,7 +628,10 @@ export default function SimpleImageDetail({
                               onClick={() => {
                                 onClose();
                                 setTimeout(() => {
-                                  navigate({ to: "/profile", search: { userId: topic.author.id } });
+                                  navigate({
+                                    to: "/profile",
+                                    search: { userId: topic.author.id, tab: undefined },
+                                  });
                                 }, 100);
                               }}
                             >
@@ -656,7 +659,7 @@ export default function SimpleImageDetail({
                                   setTimeout(() => {
                                     navigate({
                                       to: "/profile",
-                                      search: { userId: topic.author.id },
+                                      search: { userId: topic.author.id, tab: undefined },
                                     });
                                   }, 100);
                                 }}
@@ -726,7 +729,7 @@ export default function SimpleImageDetail({
                             </div>
                             <div className="col-span-11">
                               <div
-                                className="prose prose-sm max-w-none text-gray-800 leading-relaxed"
+                                className="prose prose-sm max-w-none text-gray-800 leading-relaxed [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80"
                                 dangerouslySetInnerHTML={{ __html: topic.content }}
                               />
                             </div>

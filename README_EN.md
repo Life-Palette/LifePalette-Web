@@ -1,98 +1,111 @@
-<p align="center">
-  <img src="./public/logo.jpg" alt="LifePalette Logo" width="120" height="120" style="border-radius: 20px;" />
-</p>
+<div align="center">
 
-<h1 align="center">LifePalette</h1>
+<img src="./public/logo.jpg" alt="LifePalette Logo" width="120" height="120" style="border-radius: 20px;" />
 
-<p align="center">
-  <strong>Paint your life story with colors and traces from every captured moment</strong>
-</p>
+# LifePalette
 
-<p align="center">
-  <a href="./README.md">简体中文</a> | English
-</p>
+**Paint your life with colors, trace your journey with memories**
 
-<p align="center">
-  <a href="https://lpalette.cn">Live Demo</a> | <a href="https://lifepalette-web.netlify.app">Mirror</a>
-</p>
+[![Live Demo](https://img.shields.io/badge/Live_Demo-lpalette.cn-ff6b6b?style=for-the-badge)](https://lpalette.cn)
+[![Mirror](https://img.shields.io/badge/Mirror-Netlify-00C7B7?style=for-the-badge)](https://lifepalette-web.netlify.app)
+
+[简体中文](./README.md) | English
+
+<br>
+
+<!-- ![Preview](https://lpalette.oss-accelerate.aliyuncs.com/prod/32/1764831234905.png?x-oss-process=image/resize,w_1600,m_lfit/format,webp) -->
+
+</div>
 
 ---
 
-## 📖 Introduction
+## About LifePalette
 
-**LifePalette** is a beautifully designed life recording application that helps users capture everyday moments from a unique perspective. Through innovative features like image color analysis, geographic tracking, and AI assistance, it weaves your memories into a colorful tapestry of life.
+Life is a canvas, and you are the only artist.
 
-> ⚠️ **Note**: The main branch has been rebuilt with **React**. The legacy [Vue version branch](https://github.com/Life-Palette/LifePalette-Web/tree/vue) is no longer maintained.
+**LifePalette** is more than a recording tool — it's your **personal color museum**, **footprint map**, and **memory archive**. Every photo has its unique color story, every location carries special memories — LifePalette weaves these fragments into a complete tapestry of your life.
 
-## ✨ Features
+> _"When you look back at your photo library, you no longer see just images, but a colorful journey through time."_
 
-### 🎨 Color Palette
+> ⚠️ **Note**: Main branch rebuilt with **React**. Legacy [Vue version](https://github.com/Life-Palette/LifePalette-Web/tree/vue) is no longer maintained.
 
-- **Color Statistics** - Automatically extract dominant colors from uploaded images
-- **Color Wheel Display** - Visualize the color distribution of your photos
-- **Browse by Color** - Filter and view photos by color
-- **Grid/List View** - Flexible viewing modes
-- **Virtual Scrolling** - Smooth handling of large datasets
+---
 
-### 📝 Posts & Topics
+## Features at a Glance
 
-- **Rich Text Editor** - Support for Markdown and rich text formatting
-- **Multimedia Support** - Upload images, videos, and Live Photos
-- **Likes & Collections** - Social interaction features
-- **Comment System** - Multi-level comment replies
-- **Tag System** - Flexible content categorization
-- **Pin Feature** - Prioritize important content
+| Feature | Highlights |
+|---------|------------|
+| **Color Gallery** | Smart color extraction, color wheel, browse by color |
+| **Posts & Topics** | Rich text editing, multimedia support, social interactions |
+| **Map & Track** | Auto-location, smart clustering, poster export |
+| **AI Assistant** | Smart continuation, text polishing, inspiration |
+| **Personal Space** | Customization, statistics, QR login |
 
-### 🗺️ Map & Track
+---
 
-- **Mapbox Integration** - Beautiful interactive maps
-- **Location Picker** - Precise photo location tagging
-- **Track Recording** - Record your travel footprints
-- **Photo Map Gallery** - Browse photos on the map
-- **Map Export** - Generate beautiful track images
+## Use Cases
 
-### 💬 Real-time Chat `WIP`
+- **Travel the World** — Photos auto-tagged with locations, generate your travel footprint
+- **Daily Moments** — Food, scenery, mood — add text and it's a micro-diary
+- **Year in Review** — Browse by color, discover your year's dominant palette
+- **Growth Journey** — Visualized statistics, witness your creative journey
 
-- **Instant Messaging** - Real-time messages via Socket.io
-- **Chat Room List** - Manage multiple conversations
-- **Message Notifications** - Never miss important messages
+---
 
-### 🖼️ Media Management
+## Feature Details
 
-- **Smart Image Compression** - Auto-optimize before upload
-- **Image Cropping** - Avatar and background editing
-- **Blurhash Preview** - Elegant image loading experience
-- **Live Photo Support** - Play Apple Live Photos
-- **EXIF Extraction** - Read photo metadata
-- **Image Info Panel** - View complete image details
+<details>
+<summary><b>🎨 Color Gallery</b></summary>
 
-### 🤖 AI Assistant
+- Auto-extract dominant colors from images
+- Color wheel visualizes your photo palette
+- Filter and browse photos by color
+- Flexible grid/list view switching
+</details>
 
-- **AI Writing Assist** - Intelligent content generation
-- **AI Auto-completion** - Smart suggestions in editor
-- **Ghost Text** - Real-time AI input hints
+<details>
+<summary><b>📝 Posts & Topics</b></summary>
 
-### 👤 User System
+- Rich text + Markdown editor
+- Upload images, videos, Live Photos
+- Likes, saves, comments interaction
+- Tag-based content organization
+</details>
 
-- **User Auth** - Secure user authentication
-- **QR Code Login** - Convenient scan-to-login
-- **User Profile** - Custom avatar and background
-- **User Statistics** - View activity data
+<details>
+<summary><b>🗺️ Map & Track</b></summary>
 
-### 🔔 Notifications `WIP`
+- Mapbox integration
+- Auto-tag photo locations
+- Track recording and export
+- Generate beautiful footprint posters
+</details>
 
-- **Real-time Notifications** - Instant push for interactions
-- **Notification Management** - Clear notification list
+<details>
+<summary><b>🤖 AI Assistant</b></summary>
 
-### 🔍 Search
+- Smart continuation (auto-suggest after 1.5s pause)
+- Text polishing and optimization
+- Ghost Text real-time hints
+</details>
 
-- **Global Search** - Quick content discovery
-- **Smart Filtering** - Multi-dimensional search filters
+<details>
+<summary><b>🖼️ Media Management</b></summary>
 
-### 🌙 Theme Switching
+- Smart image compression
+- Blurhash elegant loading
+- Live Photo playback
+- EXIF metadata extraction
+</details>
 
-- **Dark/Light Mode** - Free theme switching
-- **System Theme Follow** - Auto-adapt to system settings
+<details>
+<summary><b>👤 User System</b></summary>
+
+- QR code login
+- Profile customization
+- Dark/Light themes
+- Activity statistics
+</details>
 
 ## 🛠️ Tech Stack
 
@@ -206,7 +219,7 @@ src/
 
 ## 📄 License
 
-MIT License © 2024 LifePalette
+MIT License © 2025 LifePalette
 
 ---
 

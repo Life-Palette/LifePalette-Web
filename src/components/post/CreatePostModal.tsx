@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { TagsInput } from "@/components/ui/tags-input";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { serializeToHtml } from "@/lib/serializeHtml";
+import { deserializeHtml, serializeToHtml } from "@/lib/serializeHtml";
 import type { Post, PostImage } from "@/types";
 import type { FileItem } from "@/types/upload";
 
@@ -185,12 +185,7 @@ export default function CreatePostModal({
 
       // 将 HTML 内容转换回 Plate Value
       if (initialData.content) {
-        setContent([
-          {
-            type: "p",
-            children: [{ text: initialData.content.replace(/<[^>]*>/g, "") }],
-          },
-        ]);
+        setContent(deserializeHtml(initialData.content));
       }
 
       // 回显标签
