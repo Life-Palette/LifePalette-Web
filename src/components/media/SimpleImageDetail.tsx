@@ -602,8 +602,9 @@ export default function SimpleImageDetail({
                               })}
                             </span>
                             {topic.updatedAt &&
-                              new Date(topic.updatedAt).getTime() !==
-                                new Date(topic.createdAt).getTime() && (
+                              // 比较到分钟级别，避免毫秒差异导致显示相同时间
+                              Math.floor(new Date(topic.updatedAt).getTime() / 60000) !==
+                                Math.floor(new Date(topic.createdAt).getTime() / 60000) && (
                                 <span className="text-[10px] text-gray-400">
                                   更新于{" "}
                                   {new Date(topic.updatedAt).toLocaleDateString("zh-CN", {
@@ -663,7 +664,7 @@ export default function SimpleImageDetail({
                                 {topic.author.name}
                               </h3>
                               <div className="mt-0.5 text-[11px] text-gray-400">
-                                {topic.location || "全世界"}
+                                {topic.location || ""}
                               </div>
                             </div>
                           </div>
