@@ -58,6 +58,19 @@ const components: Components = {
       </h3>
     );
   },
+  h4: ({ children, ...props }) => {
+    const text = typeof children === "string" ? children : String(children);
+    const id = generateId(text);
+    return (
+      <h4
+        className="text-base font-semibold text-foreground mt-6 mb-3 scroll-mt-20"
+        id={id}
+        {...props}
+      >
+        {children}
+      </h4>
+    );
+  },
   blockquote: ({ children, ...props }) => (
     <blockquote
       className="my-6 py-3 px-4 border-l-2 border-muted-foreground/40 bg-muted/30 rounded-r text-muted-foreground italic"
@@ -78,6 +91,47 @@ const components: Components = {
     </li>
   ),
   hr: ({ ...props }) => <hr className="my-8 border-t border-border/60" {...props} />,
+  a: ({ children, href, ...props }) => (
+    <a
+      href={href}
+      className="text-primary font-medium hover:underline transition-colors"
+      target={href?.startsWith("http") ? "_blank" : undefined}
+      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+  table: ({ children, ...props }) => (
+    <div className="my-6 overflow-x-auto rounded-lg border border-border">
+      <table className="w-full border-collapse text-sm" {...props}>
+        {children}
+      </table>
+    </div>
+  ),
+  thead: ({ children, ...props }) => (
+    <thead className="bg-muted/50" {...props}>
+      {children}
+    </thead>
+  ),
+  th: ({ children, ...props }) => (
+    <th
+      className="px-4 py-3 text-left font-semibold text-foreground border-b border-border"
+      {...props}
+    >
+      {children}
+    </th>
+  ),
+  td: ({ children, ...props }) => (
+    <td className="px-4 py-3 text-muted-foreground border-b border-border/50" {...props}>
+      {children}
+    </td>
+  ),
+  tr: ({ children, ...props }) => (
+    <tr className="hover:bg-muted/30 transition-colors" {...props}>
+      {children}
+    </tr>
+  ),
 };
 
 export default function MarkdownPreview({ content, className }: MarkdownPreviewProps) {

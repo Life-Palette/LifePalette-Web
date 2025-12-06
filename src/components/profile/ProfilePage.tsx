@@ -45,11 +45,14 @@ import { useUserStats } from "@/hooks/useUserStats";
 import { apiService } from "@/services/api";
 import { getUserAvatar } from "@/utils/avatar";
 
+type TabType = "posts" | "photos" | "track" | "liked" | "saved";
+
 interface ProfilePageProps {
   userId?: number;
+  initialTab?: TabType;
 }
 
-export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {}) {
+export default function ProfilePage({ userId: propUserId, initialTab }: ProfilePageProps = {}) {
   const { user: currentUser, isLoading: isAuthLoading } = useIsAuthenticated();
   const navigate = useNavigate();
 
@@ -58,7 +61,19 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
   const isViewingOwnProfile = !propUserId || propUserId === currentUser?.id;
   const user = currentUser; // 保持原有的 user 变量用于权限判断
   const isLoading = isAuthLoading;
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab || "posts");
+
+  // 切换 Tab 时更新 URL
+  const handleTabChange = (value: string) => {
+    const tab = value as TabType;
+    setActiveTab(tab);
+    // 更新 URL，保留其他参数
+    navigate({
+      to: "/profile",
+      search: { userId: propUserId, tab: tab === "posts" ? undefined : tab },
+      replace: true,
+    });
+  };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
@@ -484,7 +499,7 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
       </Card>
 
       {/* 内容切换标签 - 使用 shadcn Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-5 h-auto p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -535,11 +550,8 @@ export default function ProfilePage({ userId: propUserId }: ProfilePageProps = {
                   height={200}
                   actionButton={
                     isViewingOwnProfile ? (
-                      <Button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="rounded-full bg-gradient-to-r from-pink-500 to-purple-500 px-6 py-2 font-medium text-white transition-opacity hover:opacity-90"
-                      >
-                        <Plus size={16} className="mr-2" />
+                      <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
+                        <Plus size={16} />
                         发布第一篇内容
                       </Button>
                     ) : undefined

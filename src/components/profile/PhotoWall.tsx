@@ -252,6 +252,8 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                         className="h-full w-full transition-transform duration-300 group-hover:scale-105"
                         objectFit="cover"
                         loading="lazy"
+                        quality={70}
+                       
                       />
                       {/* 私密标识 */}
                       {photo.isPrivate && (

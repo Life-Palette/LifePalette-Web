@@ -1,7 +1,8 @@
 "use client";
 
 import { BoldPlugin, ItalicPlugin, UnderlinePlugin } from "@platejs/basic-nodes/react";
-import { Bold, Italic, Sparkles, Underline } from "lucide-react";
+import { LinkPlugin } from "@platejs/link/react";
+import { Bold, Italic, Link, Sparkles, Underline } from "lucide-react";
 import type { Value } from "platejs";
 import { Plate, usePlateEditor } from "platejs/react";
 import { useEffect, useRef, useState } from "react";
@@ -10,10 +11,13 @@ import { type AIAction, AIToolbar } from "@/components/editor/AIToolbar";
 import { GhostText } from "@/components/editor/GhostText";
 import { Editor, EditorContainer } from "@/components/ui/editor";
 import { FixedToolbar } from "@/components/ui/fixed-toolbar";
+import { LinkElement } from "@/components/ui/link-element";
+import { LinkToolbarButton } from "@/components/ui/link-toolbar-button";
 import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
 import { Separator } from "@/components/ui/separator";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
 import { useAICompletion } from "@/hooks/useAICompletion";
+import { useIsAuthenticated } from "@/hooks/useAuth";
 
 interface PlateEditorProps {
   value: Value;
@@ -30,11 +34,21 @@ export function PlateEditor({
   enableAI = true,
   enableCompletion = true,
 }: PlateEditorProps) {
+  const { user } = useIsAuthenticated();
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
   const editor = usePlateEditor({
-    plugins: [BoldPlugin, ItalicPlugin, UnderlinePlugin],
+    plugins: [
+      BoldPlugin,
+      ItalicPlugin,
+      UnderlinePlugin,
+      LinkPlugin.configure({
+        render: {
+          node: LinkElement,
+        },
+      }),
+    ],
     value,
   });
 
@@ -164,6 +178,11 @@ export function PlateEditor({
             <MarkToolbarButton nodeType="underline" tooltip="下划线 (⌘+U)">
               <Underline size={16} />
             </MarkToolbarButton>
+            {user?.id === 32 && (
+              <LinkToolbarButton tooltip="链接 (⌘+K)">
+                <Link size={16} />
+              </LinkToolbarButton>
+            )}
 
             {enableAI && (
               <>

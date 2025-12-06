@@ -77,12 +77,17 @@ export default function OptimizedImage({
   // 检测是否为视频
   const isVideoFile = isVideo(image);
 
+  // 检测是否为 GIF 图片（GIF 不应走缩略图处理，否则会丢失动画）
+  const isGif = image.type === "image/gif" || image.url?.toLowerCase().endsWith(".gif");
+
   // 生成缩放后的图片URL或视频缩略图URL
   const optimizedUrl = isVideoFile
     ? getVideoThumbnailUrl(image.url)
-    : noResize
-      ? `${image.url}?x-oss-process=image/resize,w_1600,m_lfit/format,webp`
-      : image.url + generateOssImageParams(image.width, image.height, targetWidth, quality);
+    : isGif
+      ? image.url // GIF 直接使用原始 URL，保留动画
+      : noResize
+        ? `${image.url}?x-oss-process=image/resize,w_1600,m_lfit/format,webp`
+        : image.url + generateOssImageParams(image.width, image.height, targetWidth, quality);
 
   const handleLoad = () => {
     setLoadingState("loaded");

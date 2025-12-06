@@ -17,6 +17,7 @@ const AuthFallback = () => (
 export default function ProfilePageWrapper() {
   const search = useSearch({ from: "/profile" });
   const userId = search.userId;
+  const tab = search.tab;
 
   // 使用 useLayoutEffect 在浏览器绘制前恢复滚动位置，避免闪烁
   useLayoutEffect(() => {
@@ -52,7 +53,7 @@ export default function ProfilePageWrapper() {
   return (
     <PageLayout activeTab="profile" authFallback={<AuthFallback />} requireAuth={requireAuth}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ProfilePage userId={userId} />
+        <ProfilePage userId={userId} initialTab={tab} />
       </div>
     </PageLayout>
   );

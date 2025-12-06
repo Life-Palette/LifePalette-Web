@@ -11,7 +11,7 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { MarkdownPreview } from "@/components/changelog";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -32,7 +32,7 @@ interface TocItem {
 
 // 从 Markdown 内容中提取标题
 function extractHeadings(content: string): TocItem[] {
-  const headingRegex = /^(#{1,3})\s+(.+)$/gm;
+  const headingRegex = /^(#{1,4})\s+(.+)$/gm;
   const headings: TocItem[] = [];
   let match: RegExpExecArray | null;
 
@@ -47,7 +47,7 @@ function extractHeadings(content: string): TocItem[] {
       .replace(/\s+/g, "-")
       .toLowerCase();
 
-    if (text && level <= 3) {
+    if (text && level <= 4) {
       headings.push({ id, text, level });
     }
   }
@@ -60,6 +60,8 @@ function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
+      // 更新 URL hash，方便分享
+      window.history.replaceState(null, "", `#${id}`);
     }
   };
 
@@ -72,24 +74,32 @@ function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId
         <span>目录</span>
       </div>
       <div className="space-y-1 text-sm">
-        {headings.map((heading) => (
-          <button
-            key={heading.id}
-            onClick={() => handleClick(heading.id)}
-            className={cn(
-              "block w-full text-left py-1.5 px-2 rounded transition-colors hover:bg-muted",
-              heading.level === 1 && "font-medium",
-              heading.level === 2 && "pl-4",
-              heading.level === 3 && "pl-6 text-muted-foreground",
-              activeId === heading.id
-                ? "text-primary bg-primary/5 border-l-2 border-primary"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-            type="button"
-          >
-            <span className="line-clamp-1">{heading.text}</span>
-          </button>
-        ))}
+        {headings.map((heading, index) => {
+          const isNewSection = heading.level === 1 && index > 0;
+          return (
+            <div key={heading.id}>
+              {isNewSection && <div className="my-4 border-t border-border/40" />}
+              <button
+                onClick={() => handleClick(heading.id)}
+                className={cn(
+                  "block w-full text-left py-1.5 px-2 rounded transition-colors",
+                  // 层级缩进
+                  heading.level === 1 && "font-semibold text-foreground mt-3 mb-1",
+                  heading.level === 2 && "pl-4 font-medium",
+                  heading.level === 3 && "pl-7 text-muted-foreground",
+                  heading.level === 4 && "pl-10 text-muted-foreground/80 text-[13px]",
+                  // 激活状态
+                  activeId === heading.id
+                    ? "text-primary bg-primary/5"
+                    : "hover:text-foreground hover:bg-muted/50",
+                )}
+                type="button"
+              >
+                <span className="line-clamp-1">{heading.text}</span>
+              </button>
+            </div>
+          );
+        })}
       </div>
     </nav>
   );
@@ -141,6 +151,7 @@ function ChangelogDetailPage() {
   const { version } = Route.useParams();
   const { data: changelog, isLoading, error } = useChangelogByIdentifier(version);
   const [activeId, setActiveId] = useState("");
+  const hasScrolledToHash = useRef(false);
 
   // 获取所有日志用于导航
   const { data: allLogs } = useChangelogs({ pageSize: 100 });
@@ -156,6 +167,33 @@ function ChangelogDetailPage() {
     if (!changelog?.content) return [];
     return extractHeadings(changelog.content);
   }, [changelog?.content]);
+
+  // 页面加载时，根据 URL hash 滚动到对应锚点
+  useEffect(() => {
+    if (hasScrolledToHash.current || headings.length === 0) return;
+
+    const hash = window.location.hash.slice(1); // 移除 # 前缀
+    if (!hash) return;
+
+    // 解码 URL 编码的 hash（如 %E4%B8%AA%E4%BA%BA%E7%A9%BA%E9%97%B4 -> 个人空间）
+    const decodedHash = decodeURIComponent(hash);
+
+    // 轮询等待 DOM 元素渲染完成
+    let attempts = 0;
+    const maxAttempts = 20;
+    const checkElement = () => {
+      const element = document.getElementById(decodedHash);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        setActiveId(decodedHash);
+        hasScrolledToHash.current = true;
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        requestAnimationFrame(checkElement);
+      }
+    };
+    checkElement();
+  }, [headings]);
 
   // 监听滚动，更新当前激活的标题
   useEffect(() => {
@@ -182,9 +220,10 @@ function ChangelogDetailPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [headings]);
 
-  // 分享功能
+  // 分享功能（包含当前锚点）
   const handleShare = async () => {
-    const url = window.location.href;
+    const baseUrl = window.location.origin + window.location.pathname;
+    const url = activeId ? `${baseUrl}#${activeId}` : baseUrl;
     if (navigator.share) {
       try {
         await navigator.share({

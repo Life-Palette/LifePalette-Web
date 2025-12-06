@@ -31,6 +31,9 @@ function serializeNode(node: any): string {
   switch (node.type) {
     case "p":
       return `<p>${children}</p>`;
+    case "a":
+    case "link":
+      return `<a href="${escapeHtml(node.url || "")}" target="_blank" rel="noopener noreferrer">${children}</a>`;
     case "h1":
       return `<h1>${children}</h1>`;
     case "h2":

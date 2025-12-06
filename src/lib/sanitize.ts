@@ -13,6 +13,7 @@ export function sanitizeHtml(html: string): string {
       "em",
       "u",
       "br",
+      "a",
       "ul",
       "ol",
       "li",
@@ -26,6 +27,6 @@ export function sanitizeHtml(html: string): string {
       "code",
       "pre",
     ],
-    ALLOWED_ATTR: [],
+    ALLOWED_ATTR: ["href", "target", "rel"],
   });
 }

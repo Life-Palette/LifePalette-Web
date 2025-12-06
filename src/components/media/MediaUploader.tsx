@@ -79,11 +79,12 @@ function UnifiedSortableMediaItem({
   const [videoPreview, setVideoPreview] = useState<string>("");
   const livePhotoRef = useRef<HTMLDivElement>(null);
 
-  // 判断是否有地理位置信息
+  // 判断是否有地理位置信息（注意：lat/lng 可能为 0，不能用 !! 判断）
   const hasLocation =
-    item.type === "existing"
-      ? !!(item.data.lat && item.data.lng)
-      : !!(item.data.lat && item.data.lng);
+    item.data.lat !== undefined &&
+    item.data.lat !== null &&
+    item.data.lng !== undefined &&
+    item.data.lng !== null;
 
   // 获取初始位置（如果有）
   const initialLocation = hasLocation ? { lat: item.data.lat!, lng: item.data.lng! } : undefined;
@@ -304,35 +305,39 @@ export function MediaUploader({
     // 如果没有有效文件，直接返回
     if (validFiles.length === 0) return;
 
+    // 计算新文件的起始索引
+    const startIndex = selectedFiles.length;
+
     // 更新原始文件列表
     const newSelectedFiles = [...selectedFiles, ...validFiles];
     setSelectedFiles(newSelectedFiles);
 
-    // 检测 Live Photo 配对
-    const livePhotoPairs = detectLocalLivePhotos(newSelectedFiles);
+    // 只对新添加的文件检测 Live Photo 配对
+    const livePhotoPairs = detectLocalLivePhotos(validFiles);
     const livePhotoMap = new Map<number, File>();
     livePhotoPairs.forEach((pair) => {
       livePhotoMap.set(pair.imageIndex, pair.videoFile);
     });
 
-    // 过滤已配对的视频文件
+    // 过滤已配对的视频文件（只处理新添加的文件）
     const pairedVideoIndices = new Set(livePhotoPairs.map((pair) => pair.videoIndex));
-    const displayFiles = newSelectedFiles.filter((_, index) => !pairedVideoIndices.has(index));
+    const displayFiles = validFiles.filter((_, index) => !pairedVideoIndices.has(index));
 
-    // 批量检测GPS信息
+    // 批量检测GPS信息（返回完整的GPS坐标对象）
     const gpsCheckPromises = displayFiles.map(async (file) => {
       if (file.type.startsWith("image/")) {
-        const gps = await extractGPSFromImage(file);
-        return gps !== null;
+        return await extractGPSFromImage(file);
       }
-      return false;
+      return null;
     });
     const gpsResults = await Promise.all(gpsCheckPromises);
 
-    // 创建新的媒体项
+    // 创建新的媒体项（只为新文件创建）
     const newItems: NewMediaItem[] = displayFiles.map((file, displayIndex) => {
-      const originalIndex = newSelectedFiles.indexOf(file);
-      const videoFile = livePhotoMap.get(originalIndex);
+      const indexInValidFiles = validFiles.indexOf(file);
+      const originalIndex = startIndex + indexInValidFiles;
+      const videoFile = livePhotoMap.get(indexInValidFiles);
+      const gpsData = gpsResults[displayIndex];
 
       return {
         id: `new-${Date.now()}-${displayIndex}`,
@@ -341,7 +346,9 @@ export function MediaUploader({
           file,
           videoFile,
           originalIndex,
-          hasGPS: gpsResults[displayIndex],
+          hasGPS: gpsData !== null,
+          lat: gpsData?.lat,
+          lng: gpsData?.lng,
         },
       };
     });
