@@ -385,7 +385,7 @@ function ChangelogDetailPage() {
           {headings.length > 0 && (
             <aside className="hidden lg:block w-64 shrink-0">
               <div className="sticky top-20">
-                <Card className="p-4">
+                <Card className="p-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
                   <TableOfContents activeId={activeId} headings={headings} />
                 </Card>
               </div>
