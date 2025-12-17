@@ -1,3 +1,4 @@
+import { getFileType } from "@iceywu/utils";
 import { updateFileInfo } from "@/services/upload/ossService";
 import type { FileItem } from "@/types/upload";
 
@@ -26,7 +27,7 @@ export function parseFileName(fileName: string): FileNameInfo {
   return {
     name,
     extension,
-    isVideo: ["MOV", "MP4", "AVI", "MKV"].includes(extension.toUpperCase()),
+    isVideo: getFileType(fileName) === "video",
   };
 }
 
@@ -59,8 +60,8 @@ export async function processLivePhotoFiles(uploadedFiles: FileItem[]): Promise<
   for (const file of uploadedFiles) {
     const fileNameInfo = parseFileName(file.name);
 
-    // 如果是 MOV 视频文件
-    if (fileNameInfo.extension.toUpperCase() === "MOV") {
+    // 如果是视频文件 (MOV, MP4, etc.)
+    if (fileNameInfo.isVideo) {
       // 查找对应的图片文件
       const matchingImageIndex = findMatchingImageFile(file, uploadedFiles);
 
@@ -234,8 +235,8 @@ export function detectLocalLivePhotos(files: File[]): LocalLivePhotoInfo[] {
   files.forEach((file, videoIndex) => {
     const fileNameInfo = parseFileName(file.name);
 
-    // 如果是 MOV 视频文件
-    if (fileNameInfo.extension.toUpperCase() === "MOV") {
+    // 如果是视频文件 (MOV, MP4, etc.)
+    if (fileNameInfo.isVideo) {
       // 查找对应的图片文件
       const imageIndex = findMatchingLocalImageFile(file, files);
 
