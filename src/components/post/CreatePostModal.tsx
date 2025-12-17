@@ -89,7 +89,14 @@ export default function CreatePostModal({
         let uploadedFiles: FileItem[] = [];
 
         if (newItems.length > 0) {
-          const filesToUpload = newItems.map((item) => item.data.file);
+          const filesToUpload: File[] = [];
+          newItems.forEach((item) => {
+            filesToUpload.push(item.data.file);
+            if (item.data.videoFile) {
+              filesToUpload.push(item.data.videoFile);
+            }
+          });
+
           const rawUploadedFiles = await uploadMultipleFiles(filesToUpload, {
             compressPNG: false,
             compressJPEG: false,
