@@ -241,12 +241,15 @@ interface MediaUploaderProps {
   initialImages?: PostImage[];
   disabled?: boolean;
   onChange?: (items: UnifiedMediaItem[]) => void;
+  /** 是否允许压缩大于 20MB 的图片 */
+  compressLargeFiles?: boolean;
 }
 
 export function MediaUploader({
   initialImages = [],
   disabled = false,
   onChange,
+  compressLargeFiles = false,
 }: MediaUploaderProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [unifiedMediaItems, setUnifiedMediaItems] = useState<UnifiedMediaItem[]>([]);
@@ -288,7 +291,11 @@ export function MediaUploader({
     const oversizedFiles: string[] = [];
 
     files.forEach((file) => {
-      if (file.size > MAX_FILE_SIZE) {
+      // 这里的逻辑：如果文件 > 20MB，仅当开启了大图压缩且文件为图片时才允许
+      const isLarge = file.size > MAX_FILE_SIZE;
+      const isImage = file.type.startsWith("image/");
+
+      if (isLarge && !(compressLargeFiles && isImage)) {
         oversizedFiles.push(file.name);
       } else {
         validFiles.push(file);
@@ -297,9 +304,18 @@ export function MediaUploader({
 
     // 如果有超大文件，提示用户
     if (oversizedFiles.length > 0) {
-      toast.error("文件大小超出限制", {
-        description: `以下文件超过 20MB 已被忽略：\n${oversizedFiles.join(", ")}`,
+      const isOnlyImages = oversizedFiles.every((name) => {
+        const file = files.find((f) => f.name === name);
+        return file?.type.startsWith("image/");
       });
+
+      if (isOnlyImages && !compressLargeFiles) {
+        toast.error("包含大于 20MB 的图片，请开启「大图压缩」功能");
+      } else {
+        toast.error("文件大小超出限制 (20MB)", {
+          description: `以下文件过大：${oversizedFiles.join(", ")}`,
+        });
+      }
     }
 
     // 如果没有有效文件，直接返回

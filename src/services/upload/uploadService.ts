@@ -37,7 +37,7 @@ export async function uploadFile(file: File, options: UploadOptions = {}): Promi
       onProgress?.({ stage: "compress", percent: 0 });
       try {
         processedFile = await compressImage(file, {
-          maxSizeMB: 1,
+          maxSizeMB: options.maxSizeMB || 1,
           maxWidthOrHeight: 1920,
         });
         onProgress?.({ stage: "compress", percent: 100 });

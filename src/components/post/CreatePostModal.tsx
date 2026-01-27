@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { TagsInput } from "@/components/ui/tags-input";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -66,6 +68,7 @@ export default function CreatePostModal({
 }: CreatePostModalProps) {
   const [content, setContent] = useState<Value>(initialValue);
   const [mediaItems, setMediaItems] = useState<UnifiedMediaItem[]>([]);
+  const [isCompressMode, setIsCompressMode] = useState(false);
 
   // 使用文件上传 Hook
   const { uploadState, uploadMultipleFiles } = useFileUpload();
@@ -98,8 +101,9 @@ export default function CreatePostModal({
           });
 
           const rawUploadedFiles = await uploadMultipleFiles(filesToUpload, {
-            compressPNG: false,
-            compressJPEG: false,
+            compressPNG: isCompressMode,
+            compressJPEG: isCompressMode,
+            maxSizeMB: isCompressMode ? 20 : undefined,
           });
 
           // 处理 Live Photo 文件关联
@@ -176,6 +180,7 @@ export default function CreatePostModal({
           form.reset();
           setContent(initialValue);
           setMediaItems([]);
+          setIsCompressMode(false);
         }
         onClose();
       } catch (error) {
@@ -207,6 +212,7 @@ export default function CreatePostModal({
       form.reset();
       setContent(initialValue);
       setMediaItems([]);
+      setIsCompressMode(false);
     }
   }, [isOpen, editMode, initialData]);
 
@@ -304,11 +310,29 @@ export default function CreatePostModal({
                 />
               </div>
 
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">媒体内容</Label>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="compress-mode"
+                    checked={isCompressMode}
+                    onCheckedChange={setIsCompressMode}
+                  />
+                  <Label
+                    htmlFor="compress-mode"
+                    className="cursor-pointer text-sm text-gray-500 font-normal"
+                  >
+                    启用大图压缩（当图片 &gt;20MB）
+                  </Label>
+                </div>
+              </div>
+
               {/* 媒体上传区域 */}
               <MediaUploader
                 disabled={uploadState.isUploading}
                 initialImages={initialData?.images}
                 onChange={setMediaItems}
+                compressLargeFiles={isCompressMode}
               />
 
               {/* 上传进度 */}
