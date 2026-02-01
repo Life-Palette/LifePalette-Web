@@ -1,7 +1,9 @@
 // 环境配置
 export const config = {
-  API_BASE_URL: "http://localhost:3001",
-  WS_URL: "ws://localhost:3001/ws",
+  API_BASE_URL: "http://localhost:9527",
+  WS_URL: "ws://localhost:9527/ws",
+  // API_BASE_URL: "http://localhost:3001",
+  // WS_URL: "ws://localhost:3001/ws",
   // API_BASE_URL: "https://test.wktest.cn:3001",
   // WS_URL: "wss://test.wktest.cn:3001/ws",
   // 可以根据环境变量来切换不同的API地址

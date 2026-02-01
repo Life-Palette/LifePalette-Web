@@ -154,21 +154,25 @@ export default function CreatePostModal({
             .filter((tag) => tag.length > 0);
         }
 
-        // 5. 按照 mediaItems 的顺序构建 fileIds
-        const fileIds: number[] = [];
+        // 5. 按照 mediaItems 的顺序构建 file_sec_uids
+        const fileSecUids: string[] = [];
         let newFileIndex = 0;
 
         for (const item of mediaItems) {
           if (item.type === "existing") {
-            fileIds.push(item.data.id);
+            // 对于已存在的文件，使用其 sec_uid（如果有的话）
+            const secUid = item.data.sec_uid || String(item.data.id);
+            fileSecUids.push(secUid);
           } else {
-            fileIds.push(Number(uploadedFiles[newFileIndex].id));
+            // 对于新上传的文件，使用返回的 sec_uid
+            const secUid = uploadedFiles[newFileIndex].sec_uid || uploadedFiles[newFileIndex].id;
+            fileSecUids.push(secUid);
             newFileIndex++;
           }
         }
 
-        if (fileIds.length > 0) {
-          postData.fileIds = fileIds.reverse();
+        if (fileSecUids.length > 0) {
+          postData.file_sec_uids = fileSecUids.reverse();
         }
 
         // 6. 实际提交

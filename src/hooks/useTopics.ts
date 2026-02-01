@@ -209,12 +209,15 @@ export const useCreateTopic = () => {
       content: string;
       tags?: string[];
       fileIds?: (number | string)[];
+      file_sec_uids?: string[];
       extraData?: string;
       isPinned?: boolean;
     }) => {
       const response = await apiService.createTopic(data);
-      if (response.code === 200 && response.result) {
-        return transformApiTopicToPost(response.result);
+      // 新接口返回 201 状态码
+      if ((response.code === 200 || response.code === 201) && (response.result || response.data)) {
+        const topicData = response.data || response.result;
+        return transformApiTopicToPost(topicData);
       }
       throw new Error(response.message || "创建话题失败");
     },
@@ -445,6 +448,6 @@ export const useUpdateTopic = () => {
       // 刷新话题列表缓存
       queryClient.invalidateQueries({ queryKey: ["topics"] });
     },
-    onError: (_error) => {},
+    onError: (_error) => { },
   });
 };

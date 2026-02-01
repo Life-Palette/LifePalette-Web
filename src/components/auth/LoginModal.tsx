@@ -114,12 +114,15 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
     setSendingCode(true);
     try {
-      const response = await fetch(`${config.API_BASE_URL}/api/code/sendEmail`, {
+      // 确定验证码用途
+      const purpose = isLogin ? "reset_password" : "register";
+      
+      const response = await fetch(`${config.API_BASE_URL}/api/v1/verification/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: emailOrAccount }),
+        body: JSON.stringify({ email: emailOrAccount, purpose }),
       });
 
       const data = await response.json();
@@ -201,7 +204,8 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
           });
         }
 
-        if (result.code === 200) {
+        // 登录成功返回 200 或 201
+        if (result.code === 200 || result.code === 201) {
           toast.success("登录成功");
           onSuccess();
           onClose();
@@ -218,13 +222,15 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         const result = await registerMutation.mutateAsync({
           email: formData.email,
           password: formData.password,
-          password_confirm: formData.password_confirm,
           code: formData.code,
         });
 
-        if (result.code === 200) {
-          // 检查是否返回了 token（自动登录）
-          if (result.result?.token?.access_token) {
+        // 注册成功返回 201 或 200
+        if (result.code === 200 || result.code === 201) {
+          // 新接口使用 data 字段，旧接口使用 result 字段
+          const loginData = result.data || result.result;
+          // 检查是否返回了 access_token（自动登录）
+          if (loginData?.access_token) {
             toast.success("注册成功，已自动登录");
           } else {
             toast.success("注册成功");
@@ -300,9 +306,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                         className="flex-1"
                         id="code"
                         inputMode="numeric"
-                        maxLength={4}
+                        maxLength={6}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                           setFormData({ ...formData, code: value });
                         }}
                         placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}
@@ -379,9 +385,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                             className="flex-1"
                             id="code"
                             inputMode="numeric"
-                            maxLength={4}
+                            maxLength={6}
                             onChange={(e) => {
-                              const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                               setFormData({ ...formData, code: value });
                             }}
                             placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}
@@ -455,9 +461,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                         className="flex-1"
                         id="code"
                         inputMode="numeric"
-                        maxLength={4}
+                        maxLength={6}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                           setFormData({ ...formData, code: value });
                         }}
                         placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}

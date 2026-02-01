@@ -6,8 +6,9 @@ const API_BASE_URL = config.API_BASE_URL;
 export interface ApiResponse<T = any> {
   code: number;
   message: string;
-  result: T;
-  timestamp: number;
+  result?: T; // 旧接口使用 result
+  data?: T;   // 新接口使用 data
+  timestamp?: number;
 }
 
 // 分页响应类型
@@ -144,12 +145,9 @@ export interface ApiUser {
 
 // 登录响应类型
 export interface LoginResponse {
-  admin: ApiUser;
-  token: {
-    access_token: string;
-    refresh_token: string;
-    expires_in: number;
-  };
+  user: ApiUser;
+  access_token: string;
+  refresh_token: string;
 }
 
 class ApiService {
@@ -185,8 +183,8 @@ class ApiService {
       throw new Error("登录已过期，请重新登录");
     }
 
-    // 处理错误响应
-    if (!response.ok || data.code !== 200) {
+    // 处理错误响应 (200-299 范围内的状态码都认为是成功)
+    if (!response.ok || (data.code !== 200 && data.code !== 201)) {
       // 处理字段验证错误 (msg是数组)
       if (Array.isArray(data.msg) && data.msg.length > 0) {
         const errorMessages = data.msg.map((err: any) => err.message).join(", ");
@@ -249,12 +247,36 @@ class ApiService {
     content: string;
     tags?: string[];
     fileIds?: (number | string)[];
+    file_sec_uids?: string[]; // 新接口使用 file_sec_uids
     extraData?: string;
     isPinned?: boolean;
   }): Promise<ApiResponse<ApiTopic>> {
-    return this.request<ApiTopic>("/api/topic", {
+    // 构建请求数据
+    const requestData: any = {
+      title: data.title,
+      content: data.content,
+      tags: data.tags,
+    };
+
+    // 新接口使用 file_sec_uids，如果没有提供则尝试从 fileIds 转换
+    if (data.file_sec_uids && data.file_sec_uids.length > 0) {
+      requestData.file_sec_uids = data.file_sec_uids;
+    } else if (data.fileIds && data.fileIds.length > 0) {
+      // 暂时将 fileIds 转换为字符串数组作为 file_sec_uids
+      // TODO: 需要从上传的文件中获取真实的 sec_uid
+      requestData.file_sec_uids = data.fileIds.map(String);
+    }
+
+    if (data.extraData) {
+      requestData.extraData = data.extraData;
+    }
+    if (data.isPinned !== undefined) {
+      requestData.isPinned = data.isPinned;
+    }
+
+    return this.request<ApiTopic>("/api/v1/topics", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestData),
     });
   }
 
@@ -366,13 +388,21 @@ class ApiService {
 
   // 登录
   async login(account: string, password: string): Promise<ApiResponse<LoginResponse>> {
-    const response = await this.request<LoginResponse>("/api/auth/loginV2", {
+    // 判断 account 是邮箱还是手机号
+    const isEmail = account.includes('@');
+    const requestBody = isEmail
+      ? { email: account, password }
+      : { mobile: account, password };
+
+    const response = await this.request<LoginResponse>("/api/v1/auth/login", {
       method: "POST",
-      body: JSON.stringify({ account, password }),
+      body: JSON.stringify(requestBody),
     });
 
-    if (response.code === 200 && response.result?.token?.access_token) {
-      this.setToken(response.result.token.access_token);
+    // 新接口使用 data 字段，旧接口使用 result 字段
+    const loginData = response.data || response.result;
+    if ((response.code === 200 || response.code === 201) && loginData?.access_token) {
+      this.setToken(loginData.access_token);
     }
 
     return response;
@@ -385,8 +415,8 @@ class ApiService {
       body: JSON.stringify({ account, code }),
     });
 
-    if (response.code === 200 && response.result?.token?.access_token) {
-      this.setToken(response.result.token.access_token);
+    if (response.code === 200 && response.result?.access_token) {
+      this.setToken(response.result.access_token);
     }
 
     return response;
@@ -407,18 +437,20 @@ class ApiService {
 
   // 注册
   async register(data: {
-    email: string;
+    email?: string;
+    mobile?: string;
     password: string;
-    password_confirm: string;
     code: string;
   }): Promise<ApiResponse<LoginResponse>> {
-    const response = await this.request<LoginResponse>("/api/auth/register", {
+    const response = await this.request<LoginResponse>("/api/v1/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });
 
-    if (response.code === 200 && response.result?.token?.access_token) {
-      this.setToken(response.result.token.access_token);
+    // 新接口使用 data 字段，旧接口使用 result 字段
+    const loginData = response.data || response.result;
+    if (response.code === 200 && loginData?.access_token) {
+      this.setToken(loginData.access_token);
     }
 
     return response;
@@ -438,7 +470,7 @@ class ApiService {
 
   // 获取当前用户信息
   async getCurrentUser(): Promise<ApiResponse<ApiUser>> {
-    return this.request<ApiUser>("/api/auth/current");
+    return this.request<ApiUser>("/api/v1/auth/me");
   }
 
   // 获取点赞统计
@@ -602,6 +634,57 @@ class ApiService {
 
     if (data.code !== 200) {
       throw new Error(data.message || "头像上传失败");
+    }
+
+    return data;
+  }
+
+  // 上传文件（新接口）
+  async uploadFile(file: File): Promise<
+    ApiResponse<{
+      sec_uid: string;
+      name: string;
+      url: string;
+      type: string;
+      size: number;
+      width?: number;
+      height?: number;
+      blurhash?: string;
+      file_md5: string;
+      created_at: string;
+    }>
+  > {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const url = `${this.baseURL}/api/v1/files/upload`;
+    const headers: Record<string, string> = {};
+
+    if (this.token) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    if (response.status === 401) {
+      this.clearToken();
+      throw new Error("登录已过期，请重新登录");
+    }
+
+    const data = await response.json();
+
+    // 新接口返回 201 状态码
+    if (!response.ok || (data.code !== 200 && data.code !== 201)) {
+      // 处理字段验证错误
+      if (Array.isArray(data.msg) && data.msg.length > 0) {
+        const errorMessages = data.msg.map((err: any) => err.message).join(", ");
+        throw new Error(errorMessages);
+      }
+      throw new Error(data.msg || data.message || "文件上传失败");
     }
 
     return data;
@@ -1210,10 +1293,10 @@ class ApiService {
   }
 
   // 发送邮箱验证码
-  async sendEmailCode(email: string): Promise<ApiResponse<any>> {
-    return this.request("/api/code/sendEmail", {
+  async sendEmailCode(email: string, purpose: "register" | "reset_password" | "bind_email" = "register"): Promise<ApiResponse<any>> {
+    return this.request("/api/v1/verification/send", {
       method: "POST",
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, purpose }),
     });
   }
 }

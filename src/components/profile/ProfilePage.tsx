@@ -250,12 +250,12 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
   ];
 
   const tabs = [
-    {
-      id: "posts",
-      icon: Grid,
-      label: "动态",
-      count: topicsData?.pages[0]?.total,
-    },
+    // {
+    //   id: "posts",
+    //   icon: Grid,
+    //   label: "动态",
+    //   count: topicsData?.pages[0]?.total,
+    // },
     { id: "photos", icon: Image, label: "照片墙" },
     { id: "track", icon: Map, label: "轨迹" },
     {

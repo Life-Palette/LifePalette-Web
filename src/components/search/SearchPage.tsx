@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Search, TrendingUp, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Search, TrendingUp, Upload, X } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import SimpleInfiniteScroll from "@/components/common/SimpleInfiniteScroll";
 import SimpleImageDetail from "@/components/media/SimpleImageDetail";
@@ -8,7 +9,9 @@ import CreatePostModal from "@/components/post/CreatePostModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { useIsAuthenticated } from "@/hooks/useAuth";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { useTags } from "@/hooks/useTags";
 import { useCollectTopic, useInfiniteTopics, useLikeTopic } from "@/hooks/useTopics";
 import { apiService } from "@/services/api";
@@ -30,6 +33,9 @@ export default function SearchPage() {
       };
     }>;
   } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadState, uploadMultipleFiles } = useFileUpload();
 
   const queryClient = useQueryClient();
   const { isAuthenticated } = useIsAuthenticated();
@@ -138,11 +144,80 @@ export default function SearchPage() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // 处理文件上传测试
+  const handleTestUpload = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+
+      try {
+        toast.info(`开始上传 ${files.length} 个文件...`);
+        
+        const fileArray = Array.from(files);
+        const uploadedFiles = await uploadMultipleFiles(fileArray, {
+          compressPNG: false,
+          compressJPEG: false,
+        });
+
+        toast.success(`成功上传 ${uploadedFiles.length} 个文件！`);
+        console.log("上传结果:", uploadedFiles);
+      } catch (error) {
+        console.error("上传失败:", error);
+        toast.error(error instanceof Error ? error.message : "上传失败");
+      } finally {
+        // 重置 input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    },
+    [uploadMultipleFiles],
+  );
+
   // 是否显示搜索结果
   const showSearchResults = activeSearchQuery || selectedTagId;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* 隐藏的文件输入 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*,video/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {/* 测试上传按钮 */}
+      <div className="mb-6 flex justify-end">
+        <Button
+          onClick={handleTestUpload}
+          disabled={uploadState.isUploading}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          <Upload size={16} />
+          {uploadState.isUploading ? "上传中..." : "测试上传"}
+        </Button>
+      </div>
+
+      {/* 上传进度 */}
+      {uploadState.isUploading && (
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-blue-900 text-sm">{uploadState.stageText}</span>
+            <span className="text-blue-700 text-sm font-medium">{uploadState.progress}%</span>
+          </div>
+          <Progress className="h-2" value={uploadState.progress} />
+        </div>
+      )}
+
       {/* 搜索框 */}
       <div className="relative mb-12">
         <Search

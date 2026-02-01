@@ -11,7 +11,24 @@ export interface FileItem {
   thumbnail?: string;
   width?: number;
   height?: number;
+  colors?: FileColor[];
   [key: string]: any;
+}
+
+/** 颜色信息 */
+export interface Color {
+  hex: string;
+  r: number;
+  g: number;
+  b: number;
+}
+
+/** 文件颜色关联 */
+export interface FileColor {
+  color: Color;
+  is_primary: boolean;
+  rank: number;
+  percentage?: number;
 }
 
 /** 上传进度阶段 */

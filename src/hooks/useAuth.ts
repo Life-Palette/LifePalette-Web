@@ -8,8 +8,10 @@ export const useCurrentUser = () => {
     queryFn: async () => {
       try {
         const response = await apiService.getCurrentUser();
-        if (response.code === 200 && response.result) {
-          return response.result;
+        if (response.code === 200) {
+          // 新接口使用 data 字段，旧接口使用 result 字段
+          const userData = response.data || response.result;
+          return userData || null;
         }
         return null;
       } catch (_error) {
@@ -39,10 +41,14 @@ export const useLogin = () => {
     mutationFn: async ({ account, password }: { account: string; password: string }) =>
       await apiService.login(account, password),
     onSuccess: (data) => {
-      if (data.code === 200 && data.result) {
-        // 登录成功后，刷新当前用户信息
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        queryClient.invalidateQueries({ queryKey: ["topics"] });
+      // 登录成功返回 200 或 201
+      if (data.code === 200 || data.code === 201) {
+        const loginData = data.data || data.result;
+        if (loginData) {
+          // 登录成功后，刷新当前用户信息
+          queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          queryClient.invalidateQueries({ queryKey: ["topics"] });
+        }
       }
     },
   });
@@ -83,16 +89,20 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (data: {
-      email: string;
+      email?: string;
+      mobile?: string;
       password: string;
-      password_confirm: string;
       code: string;
     }) => await apiService.register(data),
     onSuccess: (data) => {
-      if (data.code === 200 && data.result) {
-        // 注册成功后，刷新当前用户信息
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        queryClient.invalidateQueries({ queryKey: ["topics"] });
+      // 注册成功返回 201 或 200
+      if (data.code === 200 || data.code === 201) {
+        const loginData = data.data || data.result;
+        if (loginData) {
+          // 注册成功后，刷新当前用户信息
+          queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+          queryClient.invalidateQueries({ queryKey: ["topics"] });
+        }
       }
     },
   });

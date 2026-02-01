@@ -1,17 +1,16 @@
-import { getOSSSignature, saveFileInfo, uploadToOSS } from "@/services/upload/ossService";
-import type { FileItem, UploadErrorCode, UploadOptions, UploadProgress } from "@/types/upload";
+import {
+  initUpload,
+  completeUpload,
+  uploadToOSS,
+  getPartUploadURLs,
+  uploadPart,
+  type UploadInitResponse,
+} from "@/services/upload/ossService";
+import type { FileItem, UploadErrorCode, UploadOptions } from "@/types/upload";
 import { UploadError } from "@/types/upload";
 import { generateBlurhash } from "@/utils/upload/blurhash";
 import { compressImage, shouldCompress } from "@/utils/upload/imageCompress";
 import { calculateMD5 } from "@/utils/upload/md5";
-
-/**
- * 获取文件类型
- */
-function getFileType(file: File): string {
-  const type = file.type.split("/")[0];
-  return type.toUpperCase();
-}
 
 /**
  * 判断是否为视频文件
@@ -21,13 +20,10 @@ function isVideoFile(file: File): boolean {
 }
 
 /**
- * 上传单个文件
- * @param file 文件对象
- * @param options 上传配置
- * @returns 上传后的文件信息
+ * 上传单个文件（统一接口，自动选择普通/分片上传）
  */
 export async function uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
-  const { compressPNG = false, compressJPEG = false, isPrivate, onProgress } = options;
+  const { compressPNG = false, compressJPEG = false, onProgress } = options;
 
   let processedFile = file;
 
@@ -53,83 +49,102 @@ export async function uploadFile(file: File, options: UploadOptions = {}): Promi
       onProgress?.({ stage: "md5", percent });
     });
 
-    // 3. 获取 OSS 签名
-    const signatureResponse = await getOSSSignature(md5);
+    // 3. 初始化上传（统一接口）
+    const initResponse = await initUpload({
+      fileName: processedFile.name,
+      fileSize: processedFile.size,
+      md5,
+    });
 
-    if (signatureResponse.code !== 200) {
+    if (initResponse.code !== 200) {
       throw new UploadError(
-        signatureResponse.msg || "获取 OSS 签名失败",
+        initResponse.msg || "初始化上传失败",
         "SIGNATURE_FAILED" as UploadErrorCode,
         "upload",
       );
     }
 
-    const ossData = signatureResponse.result;
+    const initData = initResponse.result;
 
-    // 4. 检查是否已上传
-    if (ossData.hasUpload && ossData.url) {
-      // 文件已存在，直接返回完整的文件信息
+    // 4. 检查秒传
+    if (initData.exists && initData.file) {
       return {
-        ...ossData,
-        id: ossData.id || md5,
-        name: file.name,
-        type: file.type,
-        url: ossData.url,
-        size: file.size,
-        md5,
+        id: initData.file.sec_uid || initData.file.id?.toString() || md5,
+        sec_uid: initData.file.sec_uid,
+        name: initData.file.name || file.name,
+        type: initData.file.type || file.type,
+        url: initData.file.url,
+        size: initData.file.size || file.size,
+        md5: initData.file.file_md5 || md5,
+        fileMd5: initData.file.file_md5 || md5,
+        width: initData.file.width,
+        height: initData.file.height,
+        blurhash: initData.file.blurhash,
         hasUpload: true,
       } as FileItem;
     }
 
-    // 5. 上传到 OSS
-    onProgress?.({ stage: "upload", percent: 0 });
-    const fileUrl = await uploadToOSS(processedFile, ossData, (percent) => {
-      onProgress?.({ stage: "upload", percent });
-    });
+    // 5. 根据模式上传
+    let key: string;
+    let uploadId: string | undefined;
+    let parts: Array<{ part_number: number; etag: string }> | undefined;
 
-    // 6. 生成 Blurhash（仅图片）
-    let blurhash: string | undefined;
+    if (initData.mode === "multipart") {
+      // 分片上传
+      const result = await uploadMultipart(processedFile, initData, (percent) => {
+        onProgress?.({ stage: "upload", percent });
+      });
+      key = result.key;
+      uploadId = result.uploadId;
+      parts = result.parts;
+    } else {
+      // 普通上传
+      onProgress?.({ stage: "upload", percent: 0 });
+      const token = initData.token!;
+      const fileUrl = await uploadToOSS(processedFile, token, (percent) => {
+        onProgress?.({ stage: "upload", percent });
+      });
+      // 从 URL 提取 key
+      const urlObj = new URL(fileUrl);
+      key = urlObj.pathname.substring(1);
+    }
+
+    // 6. 生成 Blurhash（仅图片，可选）
     if (!isVideoFile(processedFile)) {
       try {
         onProgress?.({ stage: "blurhash", percent: 0 });
-        blurhash = await generateBlurhash(processedFile);
+        await generateBlurhash(processedFile);
         onProgress?.({ stage: "blurhash", percent: 100 });
       } catch (error) {
         console.warn("Blurhash 生成失败:", error);
       }
     }
 
-    // 7. 保存文件信息到服务器
+    // 7. 完成上传
     onProgress?.({ stage: "save", percent: 0 });
-    const saveResponse = await saveFileInfo({
-      fileUrl,
-      fileMd5: md5,
-      size: processedFile.size,
-      type: processedFile.type,
-      name: processedFile.name,
-      dir: ossData.dir,
-      hashCode: blurhash,
-      isPrivate,
+    const completeResponse = await completeUpload({
+      key,
+      md5,
+      fileName: processedFile.name,
+      fileSize: processedFile.size,
+      uploadId,
+      parts,
     });
 
-    if (saveResponse.code !== 200) {
+    if (completeResponse.code !== 200) {
       throw new UploadError(
-        saveResponse.msg || "保存文件信息失败",
+        completeResponse.msg || "完成上传失败",
         "SAVE_FAILED" as UploadErrorCode,
         "save",
       );
     }
 
     onProgress?.({ stage: "save", percent: 100 });
-
-    // 8. 返回文件信息
-    return saveResponse.result;
+    return completeResponse.result;
   } catch (error) {
     if (error instanceof UploadError) {
       throw error;
     }
-
-    // 包装其他错误
     throw new UploadError(
       error instanceof Error ? error.message : "上传失败",
       "UPLOAD_FAILED" as UploadErrorCode,
@@ -139,11 +154,67 @@ export async function uploadFile(file: File, options: UploadOptions = {}): Promi
 }
 
 /**
+ * 分片上传
+ */
+async function uploadMultipart(
+  file: File,
+  initData: UploadInitResponse,
+  onProgress?: (percent: number) => void,
+): Promise<{ key: string; uploadId: string; parts: Array<{ part_number: number; etag: string }> }> {
+  const { key, upload_id: uploadId, total_parts: totalParts, chunk_size: chunkSize, uploaded_parts: uploadedParts } = initData;
+
+  if (!key || !uploadId || !totalParts || !chunkSize) {
+    throw new Error("分片上传初始化数据不完整");
+  }
+
+  const parts: Array<{ part_number: number; etag: string }> = [];
+  const uploadedSet = new Set(uploadedParts || []);
+  let uploadedCount = uploadedSet.size;
+
+  // 获取需要上传的分片号
+  const pendingParts: number[] = [];
+  for (let i = 1; i <= totalParts; i++) {
+    if (!uploadedSet.has(i)) {
+      pendingParts.push(i);
+    }
+  }
+
+  // 批量获取上传URL（每次最多10个）
+  const batchSize = 10;
+  for (let i = 0; i < pendingParts.length; i += batchSize) {
+    const batch = pendingParts.slice(i, i + batchSize);
+
+    const urlsResponse = await getPartUploadURLs({
+      key,
+      uploadId,
+      partNumbers: batch,
+    });
+
+    const urls = urlsResponse.result.urls;
+
+    // 并发上传这批分片
+    await Promise.all(
+      urls.map(async ({ part_number, url }) => {
+        const start = (part_number - 1) * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+
+        const etag = await uploadPart(url, chunk);
+        parts.push({ part_number, etag });
+        uploadedCount++;
+        onProgress?.(Math.round((uploadedCount / totalParts) * 100));
+      }),
+    );
+  }
+
+  // 按分片号排序
+  parts.sort((a, b) => a.part_number - b.part_number);
+
+  return { key, uploadId, parts };
+}
+
+/**
  * 批量上传文件（带重试机制）
- * @param files 文件列表
- * @param options 上传配置
- * @param maxRetries 最大重试次数
- * @returns 上传后的文件信息列表
  */
 export async function uploadFiles(
   files: File[],
@@ -168,7 +239,6 @@ export async function uploadFiles(
 
         if (retries < maxRetries) {
           console.warn(`文件 ${file.name} 上传失败，正在重试 (${retries}/${maxRetries})...`);
-          // 等待一段时间后重试
           await new Promise((resolve) => setTimeout(resolve, 1000 * retries));
         }
       }
