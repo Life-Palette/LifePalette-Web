@@ -86,8 +86,17 @@ export function deserializeHtml(html: string): Value {
   const doc = parser.parseFromString(html, "text/html");
   const nodes = Array.from(doc.body.childNodes);
 
-  const result = nodes.map(deserializeNode).filter(Boolean) as Value;
-  return result.length > 0 ? result : [{ type: "p", children: [{ text: "" }] }];
+  const raw = nodes.map(deserializeNode).filter(Boolean);
+  // 扁平化：deserializeNode 可能对 inline marks（bold/italic/u）返回数组
+  const result = (raw.flat(1) as Value).filter(Boolean);
+  // 确保顶级节点都是 block（有 type 字段），内联文本节点提升为段落
+  const blocks: Value = result.map((node: any) => {
+    if (!node.type) {
+      return { type: "p", children: [node] };
+    }
+    return node;
+  });
+  return blocks.length > 0 ? blocks : [{ type: "p", children: [{ text: "" }] }];
 }
 
 function deserializeNode(node: Node): any {
@@ -118,11 +127,21 @@ function deserializeNode(node: Node): any {
         };
       case "strong":
       case "b":
+        // 若只有一个文本子节点，直接打 mark；否则包一个 p
+        if (validChildren.length === 1 && "text" in validChildren[0]) {
+          return { ...validChildren[0], bold: true };
+        }
         return validChildren.map((child: any) => ({ ...child, bold: true }));
       case "em":
       case "i":
+        if (validChildren.length === 1 && "text" in validChildren[0]) {
+          return { ...validChildren[0], italic: true };
+        }
         return validChildren.map((child: any) => ({ ...child, italic: true }));
       case "u":
+        if (validChildren.length === 1 && "text" in validChildren[0]) {
+          return { ...validChildren[0], underline: true };
+        }
         return validChildren.map((child: any) => ({ ...child, underline: true }));
       case "br":
         return { text: "\n" };

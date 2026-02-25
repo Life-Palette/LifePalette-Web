@@ -27,6 +27,8 @@ interface PlateEditorProps {
   enableCompletion?: boolean;
 }
 
+const DEFAULT_VALUE: Value = [{ type: "p", children: [{ text: "" }] }];
+
 export function PlateEditor({
   value,
   onChange,
@@ -37,6 +39,10 @@ export function PlateEditor({
   const { user } = useIsAuthenticated();
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // 防御：确保 value 始终是有效的非空数组
+  const safeValue: Value =
+    Array.isArray(value) && value.length > 0 ? value : DEFAULT_VALUE;
 
   const editor = usePlateEditor({
     plugins: [
@@ -49,7 +55,7 @@ export function PlateEditor({
         },
       }),
     ],
-    value,
+    value: safeValue,
   });
 
   // AI 智能补全
