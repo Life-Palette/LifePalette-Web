@@ -282,7 +282,7 @@ export function MediaUploader({
   }, [unifiedMediaItems, onChange]);
 
   // 添加新文件到统一列表
-  const addFiles = async (files: File[]) => {
+  const addFiles = (files: File[]) => {
     if (files.length === 0) return;
 
     // 文件大小限制：20MB
@@ -291,10 +291,8 @@ export function MediaUploader({
     const oversizedFiles: string[] = [];
 
     files.forEach((file) => {
-      // 这里的逻辑：如果文件 > 20MB，仅当开启了大图压缩且文件为图片时才允许
       const isLarge = file.size > MAX_FILE_SIZE;
       const isImage = file.type.startsWith("image/");
-
       if (isLarge && !(compressLargeFiles && isImage)) {
         oversizedFiles.push(file.name);
       } else {
@@ -302,13 +300,11 @@ export function MediaUploader({
       }
     });
 
-    // 如果有超大文件，提示用户
     if (oversizedFiles.length > 0) {
       const isOnlyImages = oversizedFiles.every((name) => {
         const file = files.find((f) => f.name === name);
         return file?.type.startsWith("image/");
       });
-
       if (isOnlyImages && !compressLargeFiles) {
         toast.error("包含大于 20MB 的图片，请开启「大图压缩」功能");
       } else {
@@ -317,44 +313,26 @@ export function MediaUploader({
         });
       }
     }
-
-    // 如果没有有效文件，直接返回
     if (validFiles.length === 0) return;
 
-    // 计算新文件的起始索引
     const startIndex = selectedFiles.length;
-
-    // 更新原始文件列表
     const newSelectedFiles = [...selectedFiles, ...validFiles];
     setSelectedFiles(newSelectedFiles);
 
-    // 只对新添加的文件检测 Live Photo 配对
+    // Live Photo 配对
     const livePhotoPairs = detectLocalLivePhotos(validFiles);
     const livePhotoMap = new Map<number, File>();
     livePhotoPairs.forEach((pair) => {
       livePhotoMap.set(pair.imageIndex, pair.videoFile);
     });
-
-    // 过滤已配对的视频文件（只处理新添加的文件）
     const pairedVideoIndices = new Set(livePhotoPairs.map((pair) => pair.videoIndex));
     const displayFiles = validFiles.filter((_, index) => !pairedVideoIndices.has(index));
 
-    // 批量检测GPS信息（返回完整的GPS坐标对象）
-    const gpsCheckPromises = displayFiles.map(async (file) => {
-      if (file.type.startsWith("image/")) {
-        return await extractGPSFromImage(file);
-      }
-      return null;
-    });
-    const gpsResults = await Promise.all(gpsCheckPromises);
-
-    // 创建新的媒体项（只为新文件创建）
+    // 先生成预览，GPS信息设为null
     const newItems: NewMediaItem[] = displayFiles.map((file, displayIndex) => {
       const indexInValidFiles = validFiles.indexOf(file);
       const originalIndex = startIndex + indexInValidFiles;
       const videoFile = livePhotoMap.get(indexInValidFiles);
-      const gpsData = gpsResults[displayIndex];
-
       return {
         id: `new-${Date.now()}-${displayIndex}`,
         type: "new",
@@ -362,15 +340,43 @@ export function MediaUploader({
           file,
           videoFile,
           originalIndex,
-          hasGPS: gpsData !== null,
-          lat: gpsData?.lat,
-          lng: gpsData?.lng,
+          hasGPS: undefined,
+          lat: undefined,
+          lng: undefined,
         },
       };
     });
-
-    // 添加到统一列表
     setUnifiedMediaItems((prev) => [...prev, ...newItems]);
+
+    // 异步批量提取GPS，逐步补齐
+    setTimeout(() => {
+      Promise.all(
+        displayFiles.map(async (file) => {
+          if (file.type.startsWith("image/")) {
+            return await extractGPSFromImage(file);
+          }
+          return null;
+        })
+      ).then((gpsResults) => {
+        setUnifiedMediaItems((prev) => {
+          return prev.map((item, idx) => {
+            if (item.type === "new" && idx >= prev.length - newItems.length) {
+              const gpsData = gpsResults[idx - (prev.length - newItems.length)];
+              return {
+                ...item,
+                data: {
+                  ...item.data,
+                  hasGPS: gpsData !== null,
+                  lat: gpsData?.lat,
+                  lng: gpsData?.lng,
+                },
+              };
+            }
+            return item;
+          });
+        });
+      });
+    }, 0);
   };
 
   // 处理文件选择
@@ -544,7 +550,7 @@ export function MediaUploader({
       {/* 媒体预览网格 */}
       {unifiedMediaItems.length > 0 && (
         <>
-          <div className="max-h-[300px] overflow-y-auto rounded-lg border border-gray-200 p-2">
+          <div className="max-h-75 overflow-y-auto rounded-lg border border-gray-200 p-2">
             <DndContext
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
