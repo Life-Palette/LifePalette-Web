@@ -236,7 +236,7 @@ class ApiService {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/topic${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/api/v1/topics${queryString ? `?${queryString}` : ""}`;
 
     return this.request<PaginatedResponse<ApiTopic>>(endpoint);
   }
@@ -869,7 +869,7 @@ class ApiService {
     }
 
     const queryString = searchParams.toString();
-    const endpoint = `/api/tag${queryString ? `?${queryString}` : ""}`;
+    const endpoint = `/api/v1/tags${queryString ? `?${queryString}` : ""}`;
 
     return this.request<PaginatedResponse<any>>(endpoint);
   }
