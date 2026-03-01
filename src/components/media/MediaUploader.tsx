@@ -356,7 +356,7 @@ export function MediaUploader({
             return await extractGPSFromImage(file);
           }
           return null;
-        })
+        }),
       ).then((gpsResults) => {
         setUnifiedMediaItems((prev) => {
           return prev.map((item, idx) => {

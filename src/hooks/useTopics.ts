@@ -38,6 +38,7 @@ const transformApiTopicToPost = (apiTopic: ApiTopic): Post => {
     content: apiTopic.content,
     images,
     author: {
+      id: apiTopic.user?.id,
       name: apiTopic.user?.name || "未知用户",
       avatar,
     },

@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { Bookmark, Heart, MapPin, MessageCircle } from "lucide-react";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import RichTextContent from "@/components/editor/RichTextContent";
@@ -28,10 +29,20 @@ const GRADIENT_VARIANTS = [
 ];
 
 export default function PostCard({ post, onLike, onSave, onClick }: PostCardProps) {
+  const navigate = useNavigate();
+
   const handleImageClick = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     // 跳转到详情页，并传递图片索引
     onClick(post.id, e, index);
+  };
+
+  const handleUserClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate({
+      to: "/profile",
+      search: { userId: Number(post.author.id) },
+    });
   };
 
   // 根据 post.id 获取确定的渐变色索引
@@ -149,7 +160,10 @@ export default function PostCard({ post, onLike, onSave, onClick }: PostCardProp
           {/* 用户信息和互动按钮的容器 */}
           <div className="flex items-center justify-between border-border/50 pt-2">
             {/* 用户信息 */}
-            <div className="flex items-center gap-2.5 min-w-0 max-w-[40%] group/avatar">
+            <div
+              className="flex items-center gap-2.5 min-w-0 max-w-[40%] group/avatar cursor-pointer"
+              onClick={handleUserClick}
+            >
               <Avatar className="h-7 w-7 ring-2 ring-background transition-transform group-hover/avatar:scale-105">
                 <AvatarImage alt={post.author.name} src={post.author.avatar} />
                 <AvatarFallback className="bg-primary/10 text-primary text-xs">

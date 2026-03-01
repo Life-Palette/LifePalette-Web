@@ -41,8 +41,7 @@ export function PlateEditor({
   const editorRef = useRef<HTMLDivElement>(null);
 
   // 防御：确保 value 始终是有效的非空数组
-  const safeValue: Value =
-    Array.isArray(value) && value.length > 0 ? value : DEFAULT_VALUE;
+  const safeValue: Value = Array.isArray(value) && value.length > 0 ? value : DEFAULT_VALUE;
 
   const editor = usePlateEditor({
     plugins: [

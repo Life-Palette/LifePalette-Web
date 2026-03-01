@@ -304,7 +304,11 @@ export default function CreatePostModal({
                 </div>
 
                 <PlateEditor
-                  key={editMode ? `${initialData?.title ?? ""}-${(initialData?.content ?? "").slice(0, 40)}` : "create"}
+                  key={
+                    editMode
+                      ? `${initialData?.title ?? ""}-${(initialData?.content ?? "").slice(0, 40)}`
+                      : "create"
+                  }
                   onChange={setContent}
                   placeholder="分享你的想法、感受或故事..."
                   value={content}

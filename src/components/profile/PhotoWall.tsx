@@ -253,7 +253,6 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                         objectFit="cover"
                         loading="lazy"
                         quality={70}
-                       
                       />
                       {/* 私密标识 */}
                       {photo.isPrivate && (

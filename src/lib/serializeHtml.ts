@@ -109,9 +109,7 @@ function deserializeNode(node: Node): any {
   // 元素节点
   if (node.nodeType === Node.ELEMENT_NODE) {
     const el = node as Element;
-    const children = Array.from(el.childNodes)
-      .map(deserializeNode)
-      .filter(Boolean);
+    const children = Array.from(el.childNodes).map(deserializeNode).filter(Boolean);
 
     // 确保有子节点
     const validChildren = children.length > 0 ? children : [{ text: "" }];
