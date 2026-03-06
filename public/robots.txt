@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow private pages
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://lpalette.cn/sitemap.xml
