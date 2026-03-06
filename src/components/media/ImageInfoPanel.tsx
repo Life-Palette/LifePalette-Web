@@ -446,7 +446,7 @@ export default function ImageInfoPanel({ viewerItem, index }: ImageInfoPanelProp
                 marginLeft: "12px",
               }}
             >
-              {(fileDetail.fileSize / 1024 / 1024).toFixed(2)} MB
+              {((fileDetail.fileSize || (fileDetail as any).size || 0) / 1024 / 1024).toFixed(2)} MB
             </span>
           </div>
 
@@ -470,7 +470,7 @@ export default function ImageInfoPanel({ viewerItem, index }: ImageInfoPanelProp
                 fontSize: "12px",
               }}
             >
-              {fileDetail.fileName}
+              {fileDetail.fileName || (fileDetail as any).name || "未知"}
             </span>
           </div>
 

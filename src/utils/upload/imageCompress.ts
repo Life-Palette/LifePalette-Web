@@ -44,7 +44,16 @@ export async function compressImage(file: File, options: CompressOptions = {}): 
       maxSizeMB,
       maxWidthOrHeight,
       useWebWorker,
+      preserveExif: true, // 保留 EXIF 信息
     });
+
+    // 如果压缩后文件名丢失，手动创建新的 File 对象保留原始文件名
+    if (!compressedFile.name || compressedFile.name === 'undefined') {
+      return new File([compressedFile], file.name, {
+        type: compressedFile.type || file.type,
+        lastModified: file.lastModified,
+      });
+    }
 
     return compressedFile;
   } catch (error) {

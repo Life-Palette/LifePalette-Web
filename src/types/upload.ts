@@ -26,10 +26,8 @@ export interface UploadProgress {
 
 /** 上传配置 */
 export interface UploadOptions {
-  /** 是否压缩 PNG 图片 */
-  compressPNG?: boolean;
-  /** 是否压缩 JPEG 图片 */
-  compressJPEG?: boolean;
+  /** 是否压缩图片 */
+  compress?: boolean;
   /** 最大文件大小（MB） */
   maxSizeMB?: number;
   /** 是否私有文件 */

@@ -68,7 +68,7 @@ export default function CreatePostModal({
 }: CreatePostModalProps) {
   const [content, setContent] = useState<Value>(initialValue);
   const [mediaItems, setMediaItems] = useState<UnifiedMediaItem[]>([]);
-  const [isCompressMode, setIsCompressMode] = useState(false);
+  const [isCompressMode, setIsCompressMode] = useState(true);
 
   // 使用文件上传 Hook
   const { uploadState, uploadMultipleFiles } = useFileUpload();
@@ -101,8 +101,7 @@ export default function CreatePostModal({
           });
 
           const rawUploadedFiles = await uploadMultipleFiles(filesToUpload, {
-            compressPNG: isCompressMode,
-            compressJPEG: isCompressMode,
+            compress: isCompressMode,
             maxSizeMB: isCompressMode ? 20 : undefined,
           });
 
@@ -180,7 +179,7 @@ export default function CreatePostModal({
           form.reset();
           setContent(initialValue);
           setMediaItems([]);
-          setIsCompressMode(false);
+          setIsCompressMode(true);
         }
         onClose();
       } catch (error) {
@@ -212,7 +211,7 @@ export default function CreatePostModal({
       form.reset();
       setContent(initialValue);
       setMediaItems([]);
-      setIsCompressMode(false);
+      setIsCompressMode(true);
     }
   }, [isOpen, editMode, initialData]);
 
@@ -304,11 +303,7 @@ export default function CreatePostModal({
                 </div>
 
                 <PlateEditor
-                  key={
-                    editMode
-                      ? `${initialData?.title ?? ""}-${(initialData?.content ?? "").slice(0, 40)}`
-                      : "create"
-                  }
+                  key={editMode ? `${initialData?.title ?? ""}-${(initialData?.content ?? "").slice(0, 40)}` : "create"}
                   onChange={setContent}
                   placeholder="分享你的想法、感受或故事..."
                   value={content}
@@ -316,7 +311,7 @@ export default function CreatePostModal({
               </div>
 
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">媒体内容</Label>
+                <Label className="text-sm font-medium">图片压缩</Label>
                 <div className="flex items-center gap-2">
                   <Switch
                     id="compress-mode"
@@ -327,7 +322,7 @@ export default function CreatePostModal({
                     htmlFor="compress-mode"
                     className="cursor-pointer text-sm text-gray-500 font-normal"
                   >
-                    启用大图压缩（当图片 &gt;20MB）
+                    启用图片压缩（压缩至 20MB 以下）
                   </Label>
                 </div>
               </div>

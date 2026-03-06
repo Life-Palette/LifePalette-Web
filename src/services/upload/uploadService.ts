@@ -1,8 +1,8 @@
 import { getOSSSignature, saveFileInfo, uploadToOSS } from "@/services/upload/ossService";
-import type { FileItem, UploadErrorCode, UploadOptions, UploadProgress } from "@/types/upload";
+import type { FileItem, UploadErrorCode, UploadOptions } from "@/types/upload";
 import { UploadError } from "@/types/upload";
 import { generateBlurhash } from "@/utils/upload/blurhash";
-import { compressImage, shouldCompress } from "@/utils/upload/imageCompress";
+import { compressImage } from "@/utils/upload/imageCompress";
 import { calculateMD5 } from "@/utils/upload/md5";
 
 /**
@@ -27,13 +27,16 @@ function isVideoFile(file: File): boolean {
  * @returns 上传后的文件信息
  */
 export async function uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
-  const { compressPNG = false, compressJPEG = false, isPrivate, onProgress } = options;
+  const { compress = false, isPrivate, onProgress } = options;
 
   let processedFile = file;
 
   try {
     // 1. 图片压缩（如需要）
-    if ((compressPNG || compressJPEG) && shouldCompress(file)) {
+    const isImage = file.type.startsWith("image/");
+    const shouldCompressFile = isImage && compress;
+
+    if (shouldCompressFile) {
       onProgress?.({ stage: "compress", percent: 0 });
       try {
         processedFile = await compressImage(file, {

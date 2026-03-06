@@ -14,8 +14,7 @@ export const useUpdateProfile = () => {
       // 如果有头像文件，使用统一的上传服务
       if (data.avatarFile) {
         const uploadedFile = await uploadFile(data.avatarFile, {
-          compressPNG: true,
-          compressJPEG: true,
+          compress: true,
           maxSizeMB: 1,
         });
 
@@ -25,8 +24,7 @@ export const useUpdateProfile = () => {
       // 如果有背景图片文件，使用统一的上传服务
       if (data.backgroundFile) {
         const uploadedFile = await uploadFile(data.backgroundFile, {
-          compressPNG: true,
-          compressJPEG: true,
+          compress: true,
           maxSizeMB: 5,
         });
 
