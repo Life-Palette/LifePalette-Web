@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAPBOX_TOKEN } from "@/config/mapbox";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { apiService } from "@/services/api";
 import { generateOssImageParams } from "@/utils/media";
 import PhotoGallery from "./PhotoGallery";
@@ -29,19 +30,20 @@ const createPopupHTML = (
   time: string,
   photoIndex?: number,
 ) => `
-  <div>
-    <img 
-      src="${imgUrl}" 
-      style="width: 100%; height: 200px; object-fit: cover; display: block; cursor: pointer;" 
-      alt="${name}"
-      class="popup-preview-image"
-      data-photo-index="${photoIndex !== undefined ? photoIndex : ""}" 
-    />
-    <div style="padding: 15px;">
-      <div style="font-size: 14px; font-weight: 600; color: #2c3e50; margin-bottom: 8px;">${name}</div>
-      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #7f8c8d;">
-        <span>📷 ${info}</span>
-        <span style="color: #3498db;">🕐 ${time}</span>
+  <div class="map-popup-card">
+    <div class="map-popup-image-wrap">
+      <img
+        src="${imgUrl}"
+        alt="${name}"
+        class="popup-preview-image map-popup-image"
+        data-photo-index="${photoIndex !== undefined ? photoIndex : ""}"
+      />
+    </div>
+    <div class="map-popup-body">
+      <div class="map-popup-title">${name}</div>
+      <div class="map-popup-meta">
+        <span class="map-popup-badge">${info}</span>
+        <span class="map-popup-time">${time}</span>
       </div>
     </div>
   </div>
@@ -85,6 +87,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   onReady,
   showGallery = true,
 }) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -203,13 +206,19 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const showPhotoPopup = useCallback(
     (coords: [number, number], fileData: FileData, index?: number) => {
       if (!map.current) return;
+
+      // 关闭之前的弹窗
+      if (currentPopup.current) {
+        currentPopup.current.remove();
+      }
+
       const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
       const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
       const time = fileData.takenAt
         ? new Date(fileData.takenAt).toLocaleString("zh-CN")
         : "未知时间";
 
-      const popup = new mapboxgl.Popup({ offset: 25 })
+      currentPopup.current = new mapboxgl.Popup({ offset: 25, maxWidth: "none" })
         .setLngLat(coords)
         .setHTML(
           createPopupHTML(
@@ -401,7 +410,11 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         const time = fileData.takenAt
           ? new Date(fileData.takenAt).toLocaleString("zh-CN")
           : "未知时间";
-        currentPopup.current = new mapboxgl.Popup({ offset: 25, closeOnClick: true })
+        currentPopup.current = new mapboxgl.Popup({
+          offset: 25,
+          closeOnClick: true,
+          maxWidth: "none",
+        })
           .setLngLat(coords)
           .setHTML(
             createPopupHTML(popupImgUrl, fileData.name, `#${feature.properties?.index}`, time, -1),
@@ -715,8 +728,11 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   }
 
   return (
-    <div className="relative w-full" style={{ height: "100%", minHeight: "600px" }}>
-      {/* 地图容器 - 绝对定位填充整个父容器 */}
+    <div
+      className="relative w-full"
+      style={{ height: "100%", minHeight: isMobile ? "100dvh" : "600px" }}
+    >
+      {/* 地图容器 - 移动端全屏，桌面端留出侧边栏空间 */}
       <div
         ref={mapContainer}
         style={{
@@ -724,7 +740,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
           top: 0,
           left: 0,
           bottom: 0,
-          right: showGallery ? `${GALLERY_WIDTH}px` : "0",
+          right: showGallery && !isMobile ? `${GALLERY_WIDTH}px` : "0",
           backgroundColor: "#f5f5f5",
           zIndex: 0,
         }}
@@ -734,7 +750,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       {!isMapReady && (
         <div
           className="absolute inset-0 z-50 flex items-center justify-center bg-gray-100/80 pointer-events-none"
-          style={{ right: showGallery ? `${GALLERY_WIDTH}px` : "0" }}
+          style={{ right: showGallery && !isMobile ? `${GALLERY_WIDTH}px` : "0" }}
         >
           <div className="text-center">
             <div className="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600" />
@@ -756,10 +772,10 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
             }
           }
         }}
-        className={`absolute left-4 bottom-4 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all hover:shadow-lg hover:scale-110 ${
+        className={`absolute left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all hover:shadow-lg hover:scale-110 ${
           selectMode ? "bg-blue-500 text-white" : "bg-white/90 text-gray-600 backdrop-blur-sm"
-        }`}
-        style={{ right: showGallery ? `${GALLERY_WIDTH}px` : undefined }}
+        } ${isMobile ? "bottom-16" : "bottom-4"}`}
+        style={{ right: showGallery && !isMobile ? `${GALLERY_WIDTH}px` : undefined }}
         title={selectMode ? "退出圈选模式" : "圈选照片"}
       >
         <span className="text-lg leading-none">{selectMode ? "✓" : "○"}</span>
@@ -780,15 +796,16 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         }}
       />
 
-      {/* 照片画廊侧边栏 - 虚拟列表优化 */}
+      {/* 照片画廊 - 桌面端侧边栏 / 移动端底部抽屉 */}
       {showGallery && (
         <PhotoGallery
           photos={filteredFiles}
           selectedPhotos={selectedPhotos}
-          onPhotoClick={flyToLocation} // 点击卡片 - 飞到地图位置并显示弹窗
+          onPhotoClick={flyToLocation}
           onClearSelection={() => setSelectedPhotos([])}
           width={GALLERY_WIDTH}
           isDark={isDark}
+          isMobile={isMobile}
         />
       )}
     </div>
