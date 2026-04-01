@@ -1,8 +1,13 @@
-import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import type { LottieRefCurrentProps } from "lottie-react";
+import LottieModule from "lottie-react";
+
 import React, { useEffect, useMemo, useRef } from "react";
 import emptyAnimation from "@/components/lottie/animations/empty.json";
 // 导入本地动画文件
 import loadingAnimation from "@/components/lottie/animations/loading.json";
+
+// Vite 8 (Rolldown) CJS/ESM 互操作：default 可能是模块对象而非组件
+const Lottie = (LottieModule as any).default || LottieModule;
 
 export type AnimationType = "loading" | "empty" | "custom";
 

@@ -5,7 +5,6 @@ import {
   Briefcase,
   Calendar,
   Camera,
-  Github,
   Globe,
   Grid,
   Heart,
@@ -18,6 +17,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useCallback, useState } from "react";
+import { GithubIcon as Github } from "@/components/icons/GithubIcon";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import SimpleInfiniteScroll from "@/components/common/SimpleInfiniteScroll";
 import { LottieAnimation } from "@/components/lottie";

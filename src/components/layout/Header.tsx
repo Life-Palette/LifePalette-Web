@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Github, History, LogOut, Plus, Search, User } from "lucide-react";
+import { History, LogOut, Plus, Search, User } from "lucide-react";
+import { GithubIcon as Github } from "@/components/icons/GithubIcon";
 import { ModeToggle } from "@/components/common/mode-toggle";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
