@@ -20,17 +20,23 @@ import { deserializeHtml, serializeToHtml } from "@/lib/serializeHtml";
 import type { OSSFile } from "@/services/upload/ossService";
 import type { Post, PostImage } from "@/types";
 
+type EditableTopicTag =
+  | {
+      title: string;
+    }
+  | {
+      tag: {
+        title: string;
+      };
+    };
+
 interface CreatePostModalProps {
   editMode?: boolean;
   initialData?: {
     title: string;
     content: string;
     images?: PostImage[];
-    topicTags?: Array<{
-      tag: {
-        title: string;
-      };
-    }>;
+    topicTags?: EditableTopicTag[];
   };
   isOpen: boolean;
   onClose: () => void;
@@ -40,7 +46,7 @@ interface CreatePostModalProps {
       "id" | "author" | "likes" | "comments" | "saves" | "isLiked" | "isSaved" | "createdAt"
     >
   ) => void;
-  topicId?: number;
+  topicId?: string;
 }
 
 // 初始空值
@@ -57,6 +63,10 @@ const postSchema = z.object({
   tags: z.string().optional(),
   location: z.string().optional(),
 });
+
+function getTagTitle(tag: EditableTopicTag): string {
+  return "tag" in tag ? tag.tag.title : tag.title;
+}
 
 export default function CreatePostModal({
   isOpen,
@@ -134,6 +144,8 @@ export default function CreatePostModal({
             .split(",")
             .map((tag) => tag.trim())
             .filter((tag) => tag.length > 0);
+        } else if (editMode) {
+          postData.tags = [];
         }
 
         // 5. 按照 mediaItems 的顺序构建 file_sec_uids
@@ -158,7 +170,7 @@ export default function CreatePostModal({
           }
         }
 
-        if (fileSecUids.length > 0) {
+        if (fileSecUids.length > 0 || editMode) {
           postData.file_sec_uids = fileSecUids;
         }
 
@@ -193,7 +205,7 @@ export default function CreatePostModal({
 
       // 回显标签
       if (initialData.topicTags && initialData.topicTags.length > 0) {
-        const tagNames = initialData.topicTags.map((tt) => tt.tag.title);
+        const tagNames = initialData.topicTags.map(getTagTitle).filter(Boolean);
         form.setFieldValue("tags", tagNames.join(", "));
       } else {
         form.setFieldValue("tags", "");
@@ -234,7 +246,7 @@ export default function CreatePostModal({
 
   return (
     <Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
-      <DialogContent className="flex max-h-[85vh] max-w-2xl sm:max-w-2xl flex-col p-0">
+      <DialogContent className="flex max-h-[85vh] max-w-2xl flex-col p-0 sm:max-w-2xl">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-xl">{editMode ? "编辑动态" : "创建新动态"}</DialogTitle>
           <p className="mt-1 text-gray-500 text-sm">
@@ -414,7 +426,7 @@ export default function CreatePostModal({
           </div>
 
           {/* 固定底部提交按钮 */}
-          <div className="flex-shrink-0 border-gray-100 border-t p-6">
+          <div className="shrink-0 border-gray-100 border-t p-6">
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button

@@ -124,7 +124,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       images,
       loadingNode: initialOptions.loadingNode || createCustomLoadingNode(),
       renderNode: initialOptions.renderNode || createCustomRenderNode,
-      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => {}),
+      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => { }),
       infoRender: initialOptions.infoRender || createCustomInfoNode,
     };
 
@@ -193,6 +193,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
 
       return {
         ...file,
+        id: file.sec_uid,
         src: file.url,
         thumbnail: isVideoFile
           ? `${file.url}?x-oss-process=video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast`

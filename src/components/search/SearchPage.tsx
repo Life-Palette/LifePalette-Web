@@ -15,21 +15,27 @@ import { useInfiniteTopics } from "@/hooks/useTopics";
 import { topicsApi } from "@/services/api";
 
 export default function SearchPage() {
+  type EditableTopicTag =
+    | {
+        title: string;
+      }
+    | {
+        tag: {
+          title: string;
+        };
+      };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState("");
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
-  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [cardRect, setCardRect] = useState<DOMRect | null>(null);
-  const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editingTopicData, setEditingTopicData] = useState<{
     title: string;
     content: string;
     images?: any[];
-    topicTags?: Array<{
-      tag: {
-        title: string;
-      };
-    }>;
+    topicTags?: EditableTopicTag[];
   } | null>(null);
 
   const queryClient = useQueryClient();
@@ -60,7 +66,7 @@ export default function SearchPage() {
   } = useInfiniteTopics({
     size: 20,
     sort: "created_at,desc",
-    title: activeSearchQuery || undefined,
+    keywords: activeSearchQuery || undefined,
     tagId: selectedTagId || undefined,
   });
 
@@ -130,7 +136,7 @@ export default function SearchPage() {
       const rect = target.getBoundingClientRect();
       setCardRect(rect);
     }
-    setSelectedTopicId(Number(postId));
+    setSelectedTopicId(postId);
   }, []);
 
   const handleLoadMore = useCallback(() => {
@@ -189,7 +195,7 @@ export default function SearchPage() {
             <div className="py-8 text-center text-red-500">加载标签失败，请稍后重试</div>
           ) : (
             <div className="flex flex-wrap gap-4">
-              {tagsData?.list.map((tag) => (
+              {tagsData?.list.map((tag: any) => (
                 <Badge
                   className="cursor-pointer rounded-full border border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 px-6 py-3 text-lg text-primary-700 transition-all duration-300 hover:from-primary-100 hover:to-secondary-100"
                   key={tag.id}
@@ -262,13 +268,14 @@ export default function SearchPage() {
           }}
           onEdit={async (topicId) => {
             try {
-              const response = await topicsApi.getBySecUid(topicId);
+              const secUid = String(topicId);
+              const response = await topicsApi.getBySecUid(secUid);
               if (response.result) {
                 const topic = response.result;
 
                 const images = topic.files || topic.fileList || [];
 
-                setEditingTopicId(topicId);
+                setEditingTopicId(secUid);
                 setEditingTopicData({
                   title: topic.title || "",
                   content: topic.content || "",
@@ -303,7 +310,11 @@ export default function SearchPage() {
               const originalData = {
                 title: editingTopicData.title,
                 content: editingTopicData.content,
-                fileIds: editingTopicData.images?.map((img) => img.sec_uid) || [],
+                file_sec_uids: editingTopicData.images?.map((img) => img.sec_uid) || [],
+                tags:
+                  editingTopicData.topicTags?.map((tag) =>
+                    "tag" in tag ? tag.tag.title : tag.title
+                  ) || [],
               };
 
               const changes = compareObjects(originalData, postData);

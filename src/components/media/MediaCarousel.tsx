@@ -25,6 +25,7 @@ export interface MediaCarouselRef {
   pause: () => void;
   play: () => void;
   prev: () => void;
+  stopProgress: () => void;
 }
 
 interface MediaCarouselProps {
@@ -54,8 +55,12 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(
       next: () => carouselRef.current?.next(),
       prev: () => carouselRef.current?.prev(),
       goTo: (i: number) => carouselRef.current?.goTo(i),
-      pause: () => carouselRef.current?.pause(),
+      pause: () => {
+        carouselRef.current?.pause();
+        carouselRef.current?.stopSlideProgress();
+      },
       play: () => carouselRef.current?.play(),
+      stopProgress: () => carouselRef.current?.stopSlideProgress(),
     }));
 
     const advanceToNext = useCallback(() => {
@@ -63,57 +68,12 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(
     }, []);
 
     // slide 切换后，根据媒体类型决定进度条策略
+    // [暂时禁用] 自动播放下一张逻辑
     const onSlideReady = useCallback(
-      (index: number) => {
-        const item = images[index];
-        if (!item) return;
-        const type = checkIsVideo(item) ? "video" : checkIsLivePhoto(item) ? "live" : "image";
-
-        // 所有类型先进入加载状态（波纹动画）
-       carouselRef.current?.setSlideLoading && carouselRef.current?.setSlideLoading(true);
-        progressStartedForRef.current = null;
-
-        if (type === "live") {
-          const itemId = item.sec_uid;
-          setTimeout(() => {
-            if (progressStartedForRef.current === null) {
-              progressStartedForRef.current = itemId;
-              carouselRef.current?.startSlideProgress({
-                duration: 3000,
-                onComplete: advanceToNext,
-              });
-            }
-          }, FALLBACK_TIMEOUT);
-        } else if (type === "image") {
-          pendingImageLoadRef.current = item.sec_uid;
-          const itemId = item.sec_uid;
-          setTimeout(() => {
-            if (
-              pendingImageLoadRef.current !== null &&
-              String(pendingImageLoadRef.current) === String(itemId)
-            ) {
-              pendingImageLoadRef.current = null;
-              carouselRef.current?.startSlideProgress({
-                duration: imageDuration,
-                onComplete: advanceToNext,
-              });
-            }
-          }, FALLBACK_TIMEOUT);
-        } else {
-          // 视频
-          const itemId = item.sec_uid;
-          setTimeout(() => {
-            if (progressStartedForRef.current === null) {
-              progressStartedForRef.current = itemId;
-              carouselRef.current?.startSlideProgress({
-                duration: 30_000,
-                onComplete: advanceToNext,
-              });
-            }
-          }, FALLBACK_TIMEOUT);
-        }
+      (_index: number) => {
+        // 暂时不自动播放
       },
-      [images, advanceToNext, imageDuration]
+      []
     );
 
     const onSlideReadyRef = useRef(onSlideReady);
@@ -130,50 +90,33 @@ const MediaCarousel = forwardRef<MediaCarouselRef, MediaCarouselProps>(
       [onIndexChange]
     );
 
-    // 图片加载完成 → 启动默认时长进度
+    // 图片加载完成
+    // [暂时禁用] 自动启动进度条
     const handleImageLoad = useCallback(
-      (mediaId: number | string) => {
-        if (
-          pendingImageLoadRef.current !== null &&
-          String(pendingImageLoadRef.current) === String(mediaId)
-        ) {
-          pendingImageLoadRef.current = null;
-          carouselRef.current?.startSlideProgress({
-            duration: imageDuration,
-            onComplete: () => carouselRef.current?.next(),
-          });
-        }
+      (_mediaId: number | string) => {
+        // 暂时不自动播放
       },
-      [imageDuration]
+      []
     );
 
-    // 实况/视频时长回调 → 用真实时长启动进度（只启动一次）
+    // 实况/视频时长回调
+    // [暂时禁用] 自动启动进度条
     const handleDurationChange = useCallback(
-      (mediaId: number | string, duration: number) => {
-        const currentItem = images[currentIndex];
-        if (!currentItem || String(currentItem.sec_uid) !== String(mediaId)) return;
-        if (progressStartedForRef.current === mediaId) return;
-        progressStartedForRef.current = mediaId;
-
-        const carousel = carouselRef.current;
-        if (carousel) {
-          carousel.startSlideProgress({
-            duration: duration * 1000,
-            onComplete: () => carousel.next(),
-          });
-        }
+      (_mediaId: number | string, _duration: number) => {
+        // 暂时不自动播放
       },
-      [currentIndex, images]
+      []
     );
 
     const handleVideoEnded = useCallback(() => {}, []);
 
     // 初始化第一张
-    useEffect(() => {
-      if (!images.length) return;
-      const timer = setTimeout(() => onSlideReadyRef.current(initialIndex), 500);
-      return () => clearTimeout(timer);
-    }, [images.length, initialIndex]);
+    // [暂时禁用] 自动播放
+    // useEffect(() => {
+    //   if (!images.length) return;
+    //   const timer = setTimeout(() => onSlideReadyRef.current(initialIndex), 500);
+    //   return () => clearTimeout(timer);
+    // }, [images.length, initialIndex]);
 
     return (
       <ErrorBoundary>

@@ -13,11 +13,11 @@ import {
   Mail,
   Map,
   MapPin,
+  Mars,
   // MessageCircle, // 暂时屏蔽
   Plus,
   Settings,
   Venus,
-  Mars,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
@@ -26,6 +26,7 @@ import { GithubIcon as Github } from "@/components/icons/GithubIcon";
 import { LottieAnimation } from "@/components/lottie";
 import TrackPage from "@/components/map/TrackPage";
 import SimpleImageDetail from "@/components/media/SimpleImageDetail";
+import CreatePostModal from "@/components/post/CreatePostModal";
 import PhotoWall from "@/components/profile/PhotoWall";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -51,6 +52,16 @@ interface ProfilePageProps {
   userId?: string;
 }
 
+type EditableTopicTag =
+  | {
+      title: string;
+    }
+  | {
+      tag: {
+        title: string;
+      };
+    };
+
 export default function ProfilePage({ userId: propUserId, initialTab }: ProfilePageProps = {}) {
   const { user: currentUser, isLoading: isAuthLoading } = useIsAuthenticated();
   const navigate = useNavigate();
@@ -74,18 +85,14 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
     });
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [cardRect, setCardRect] = useState<DOMRect | null>(null);
-  const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editingTopicData, setEditingTopicData] = useState<{
     title: string;
     content: string;
     images?: any[];
-    topicTags?: Array<{
-      tag: {
-        title: string;
-      };
-    }>;
+    topicTags?: EditableTopicTag[];
   } | null>(null);
   const queryClient = useQueryClient();
 
@@ -190,7 +197,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
       const rect = target.getBoundingClientRect();
       setCardRect(rect);
     }
-    setSelectedTopicId(Number(postId));
+    setSelectedTopicId(postId);
   }, []);
 
   const handleLoadMore = useCallback(() => {
@@ -363,7 +370,9 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
                 </h1>
                 {/* 性别标识 */}
                 {displayUser.sex !== undefined && displayUser.sex !== 0 && (
-                  <div className={`flex h-6 w-6 items-center justify-center rounded-full ${displayUser.sex === 1 ? "bg-blue-100 text-blue-500" : "bg-pink-100 text-pink-500"}`}>
+                  <div
+                    className={`flex h-6 w-6 items-center justify-center rounded-full ${displayUser.sex === 1 ? "bg-blue-100 text-blue-500" : "bg-pink-100 text-pink-500"}`}
+                  >
                     {displayUser.sex === 1 ? <Mars size={14} /> : <Venus size={14} />}
                   </div>
                 )}
@@ -650,14 +659,15 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
           onEdit={async (topicId) => {
             try {
               // 加载话题数据
-              const response = await topicsApi.getBySecUid(topicId);
+              const secUid = String(topicId);
+              const response = await topicsApi.getBySecUid(secUid);
               if (response.result) {
                 const topic = response.result;
 
                 // 提取图片列表（从 files 字段）
                 const images = topic.files || topic.fileList || [];
 
-                setEditingTopicId(topicId);
+                setEditingTopicId(secUid);
                 setEditingTopicData({
                   title: topic.title || "",
                   content: topic.content || "",
@@ -694,7 +704,11 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
               const originalData = {
                 title: editingTopicData.title,
                 content: editingTopicData.content,
-                fileIds: editingTopicData.images?.map((img) => img.sec_uid) || [],
+                file_sec_uids: editingTopicData.images?.map((img) => img.sec_uid) || [],
+                tags:
+                  editingTopicData.topicTags?.map((tag) =>
+                    "tag" in tag ? tag.tag.title : tag.title
+                  ) || [],
               };
 
               // 对比变化

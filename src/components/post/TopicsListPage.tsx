@@ -17,6 +17,16 @@ interface TopicsListPageProps {
   title?: string;
 }
 
+type EditableTopicTag =
+  | {
+      title: string;
+    }
+  | {
+      tag: {
+        title: string;
+      };
+    };
+
 export default function TopicsListPage({
   activeTab,
   sortBy = "created_at,desc",
@@ -32,11 +42,7 @@ export default function TopicsListPage({
     title: string;
     content: string;
     images?: any[];
-    topicTags?: Array<{
-      tag: {
-        title: string;
-      };
-    }>;
+    topicTags?: EditableTopicTag[];
   } | null>(null);
   const [_isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -181,15 +187,16 @@ export default function TopicsListPage({
           }}
           onEdit={async (topicId) => {
             try {
+              const secUid = String(topicId);
               // 加载话题数据
-              const response = await topicsApi.getBySecUid(topicId);
+              const response = await topicsApi.getBySecUid(secUid);
               if (response.result) {
                 const topic = response.result;
 
                 // 提取图片列表（从 files 字段）
                 const images = topic.files || topic.fileList || [];
 
-                setEditingTopicId(topicId);
+                setEditingTopicId(secUid);
                 setEditingTopicData({
                   title: topic.title || "",
                   content: topic.content || "",
@@ -226,7 +233,11 @@ export default function TopicsListPage({
               const originalData = {
                 title: editingTopicData.title,
                 content: editingTopicData.content,
-                fileIds: editingTopicData.images?.map((img) => img.sec_uid) || [],
+                file_sec_uids: editingTopicData.images?.map((img) => img.sec_uid) || [],
+                tags:
+                  editingTopicData.topicTags?.map((tag) =>
+                    "tag" in tag ? tag.tag.title : tag.title
+                  ) || [],
               };
 
               // 对比变化

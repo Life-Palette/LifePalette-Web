@@ -288,6 +288,7 @@ export default function SimpleImageDetail({
                         onSlideClick={(index) => {
                           setPreviewImageIndex(index);
                           setImagePreviewOpen(true);
+                          carouselRef.current?.pause();
                         }}
                         ref={carouselRef}
                       />
@@ -690,7 +691,10 @@ export default function SimpleImageDetail({
           images={topic.images}
           initialIndex={previewImageIndex}
           isOpen={imagePreviewOpen}
-          onClose={() => setImagePreviewOpen(false)}
+          onClose={() => {
+            setImagePreviewOpen(false);
+            carouselRef.current?.play();
+          }}
         />
       )}
 

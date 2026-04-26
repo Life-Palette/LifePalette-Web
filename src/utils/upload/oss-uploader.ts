@@ -293,7 +293,11 @@ export function createUploader(config: UploaderConfig) {
         throw new Error(`No URL for part ${pn}`);
       }
 
-      const res = await fetch(urlInfo.url, { method: "PUT", body: chunk });
+      const res = await fetch(urlInfo.url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: chunk,
+      });
       if (!res.ok) {
         throw new Error(`Failed to upload part ${pn}`);
       }
