@@ -3,8 +3,8 @@ import { MESSAGES } from "@/constants/messages";
 import { useIsAuthenticated } from "@/hooks/useAuth";
 
 interface UserStatusProps {
-  onLogin: () => void;
   className?: string;
+  onLogin: () => void;
 }
 
 export default function UserStatus({ onLogin, className = "" }: UserStatusProps) {

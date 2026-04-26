@@ -37,18 +37,18 @@ export function isJPEG(file: File): boolean {
  * @returns 压缩后的文件
  */
 export async function compressImage(file: File, options: CompressOptions = {}): Promise<File> {
-  const { maxSizeMB = 1, maxWidthOrHeight = 1920, useWebWorker = true } = options;
+  const { maxSizeMB = 1, maxWidthOrHeight, useWebWorker = true } = options;
 
   try {
     const compressedFile = await imageCompression(file, {
       maxSizeMB,
-      maxWidthOrHeight,
+      ...(maxWidthOrHeight ? { maxWidthOrHeight } : {}),
       useWebWorker,
       preserveExif: true, // 保留 EXIF 信息
     });
 
     // 如果压缩后文件名丢失，手动创建新的 File 对象保留原始文件名
-    if (!compressedFile.name || compressedFile.name === 'undefined') {
+    if (!compressedFile.name || compressedFile.name === "undefined") {
       return new File([compressedFile], file.name, {
         type: compressedFile.type || file.type,
         lastModified: file.lastModified,

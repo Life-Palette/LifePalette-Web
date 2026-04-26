@@ -12,7 +12,7 @@ export const Route = createFileRoute("/profile")({
   ),
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      userId: search.userId as number | undefined,
+      userId: search.userId as string | undefined,
       tab: search.tab as "posts" | "photos" | "track" | "liked" | "saved" | undefined,
     };
   },

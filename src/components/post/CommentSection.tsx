@@ -1,50 +1,51 @@
 import { motion } from "framer-motion";
 import { ChevronDown, MessageCircle, Reply, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsAuthenticated } from "@/hooks/useAuth";
-import { useCommentReplies, useDeleteComment } from "@/hooks/useTopicDetail";
+import { useDeleteComment } from "@/hooks/useTopicDetail";
 import { getUserAvatar } from "@/utils/avatar";
 import { formatRelativeTime } from "@/utils/date";
 
 interface CommentUser {
-  id: number;
-  name: string;
-  username?: string;
   avatarInfo?: {
     url: string;
   };
+  id: number;
+  name: string;
+  username?: string;
 }
 
 interface CommentReply {
-  id: number;
   content: string;
-  userId: number;
   createdAt: string;
+  id: number;
   user: CommentUser;
+  userId: number;
 }
 
 interface Comment {
-  id: number;
   content: string;
-  userId: number;
-  topicId: number;
   createdAt: string;
-  user: CommentUser;
+  id: number;
   replies?: CommentReply[];
   repliesCount?: number;
+  topicId: number;
+  user: CommentUser;
+  userId: number;
 }
 
 interface CommentSectionProps {
-  topicId: number;
   comments: Comment[];
   isLoading: boolean;
   onCreateComment: (content: string) => Promise<void>;
   onCreateReply: (commentId: number, content: string, replyToUserId?: number) => Promise<void>;
+  topicId: number;
 }
 
 // 回复项组件
@@ -81,18 +82,18 @@ function ReplyItem({
     >
       <Avatar className="h-6 w-6 flex-shrink-0 rounded-full">
         <AvatarImage alt={reply.user?.name} src={getUserAvatar(reply.user)} />
-        <AvatarFallback className="bg-gray-200 text-gray-600 text-[10px]">
+        <AvatarFallback className="bg-gray-200 text-[10px] text-gray-600">
           {reply.user?.name?.charAt(0)}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           <span className="font-medium text-gray-900 text-xs">{reply.user?.name}</span>
-          <span className="text-gray-400 text-[11px]">{formatRelativeTime(reply.createdAt)}</span>
+          <span className="text-[11px] text-gray-400">{formatRelativeTime(reply.createdAt)}</span>
           {isOwnReply && (
             <>
               <button
-                className="h-5 w-5 p-0 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center"
+                className="flex h-5 w-5 items-center justify-center p-0 text-gray-400 opacity-0 transition-all hover:text-red-500 group-hover:opacity-100"
                 onClick={() => setShowDeleteConfirm(true)}
               >
                 <Trash2 size={12} />
@@ -132,27 +133,27 @@ function CommentItem({
   const [replyingTo, setReplyingTo] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(
+    (comment.replies && comment.replies.length > 0) || false
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const {
-    data: replies,
-    isLoading: repliesLoading,
-    refetch: refetchReplies,
-  } = useCommentReplies(comment.id, isExpanded);
+  const replies = comment.replies || [];
+  const repliesCount = comment.repliesCount ?? replies.length;
 
   const deleteCommentMutation = useDeleteComment();
   const isOwnComment = currentUserId === comment.userId;
 
   const handleSubmitReply = async () => {
-    if (!replyText.trim() || !isAuthenticated) return;
+    if (!(replyText.trim() && isAuthenticated)) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       await onCreateReply(comment.id, replyText.trim(), comment.userId);
       setReplyText("");
       setReplyingTo(false);
-      refetchReplies();
     } finally {
       setIsSubmitting(false);
     }
@@ -173,7 +174,7 @@ function CommentItem({
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="group border-b border-gray-100 py-4 last:border-0"
+      className="group border-gray-100 border-b py-4 last:border-0"
       initial={{ opacity: 0, y: 10 }}
       transition={{ delay: idx * 0.05 }}
     >
@@ -194,10 +195,10 @@ function CommentItem({
             {isOwnComment && (
               <>
                 <Button
-                  className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                  className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-all hover:text-red-500 group-hover:opacity-100"
+                  onClick={() => setShowDeleteConfirm(true)}
                   size="sm"
                   variant="ghost"
-                  onClick={() => setShowDeleteConfirm(true)}
                 >
                   <Trash2 size={14} />
                 </Button>
@@ -218,7 +219,7 @@ function CommentItem({
           </p>
 
           <div className="flex items-center gap-2">
-            {comment.repliesCount && comment.repliesCount > 0 ? (
+            {repliesCount > 0 ? (
               <Button className="h-auto p-0 text-xs" onClick={toggleReplies} variant="ghost">
                 <motion.div
                   animate={{
@@ -228,7 +229,7 @@ function CommentItem({
                 >
                   <ChevronDown size={12} />
                 </motion.div>
-                <span className="ml-1">{comment.repliesCount} 条回复</span>
+                <span className="ml-1">{repliesCount} 条回复</span>
               </Button>
             ) : null}
 
@@ -266,7 +267,7 @@ function CommentItem({
                 value={replyText}
               />
               <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-[11px]">{replyText.length}/1000</span>
+                <span className="text-[11px] text-gray-400">{replyText.length}/1000</span>
                 <div className="flex gap-2">
                   <Button
                     onClick={() => {
@@ -287,7 +288,7 @@ function CommentItem({
                       <LoadingSpinner size="sm" />
                     ) : (
                       <>
-                        <Send size={11} className="mr-1" />
+                        <Send className="mr-1" size={11} />
                         发送
                       </>
                     )}
@@ -304,17 +305,13 @@ function CommentItem({
               initial={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {repliesLoading ? (
-                <div className="py-6 text-center">
-                  <LoadingSpinner size="sm" />
-                </div>
-              ) : replies && replies.length > 0 ? (
+              {replies.length > 0 ? (
                 <div className="divide-y divide-border/30">
                   {replies.map((reply: any, replyIdx: number) => (
                     <ReplyItem
                       currentUserId={currentUserId}
                       key={reply.id}
-                      onDelete={refetchReplies}
+                      onDelete={() => {}}
                       reply={reply}
                       replyIdx={replyIdx}
                     />
@@ -344,12 +341,16 @@ export default function CommentSection({
   const { isAuthenticated, user } = useIsAuthenticated();
 
   const handleSubmitComment = async () => {
-    if (!commentText.trim() || !isAuthenticated) return;
+    if (!(commentText.trim() && isAuthenticated)) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       await onCreateComment(commentText.trim());
       setCommentText("");
+    } catch (error: any) {
+      toast.error(error?.message || "评论发布失败，请重试");
     } finally {
       setIsSubmitting(false);
     }
@@ -357,21 +358,21 @@ export default function CommentSection({
 
   return (
     <div className="space-y-6 pb-6">
-      <div className="border-t border-gray-200 pt-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="border-gray-200 border-t pt-8">
+        <div className="mb-6 flex items-center justify-between">
           <h3 className="font-semibold text-black text-lg">
-            评论 <span className="text-gray-500 text-base ml-2">{comments?.length || 0}</span>
+            评论 <span className="ml-2 text-base text-gray-500">{comments?.length || 0}</span>
           </h3>
           <div className="flex gap-1">
-            <div className="w-8 h-[1px] bg-black" />
-            <div className="w-3 h-[1px] bg-gray-400" />
-            <div className="w-1 h-[1px] bg-gray-300" />
+            <div className="h-[1px] w-8 bg-black" />
+            <div className="h-[1px] w-3 bg-gray-400" />
+            <div className="h-[1px] w-1 bg-gray-300" />
           </div>
         </div>
       </div>
 
       {isAuthenticated ? (
-        <div className="space-y-3 border border-gray-200 bg-white rounded-lg p-3.5">
+        <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-3.5">
           <Textarea
             className="min-h-[70px] resize-none border-0 bg-transparent text-black text-sm placeholder:text-gray-400 focus:outline-none focus-visible:ring-0"
             onChange={(e) => setCommentText(e.target.value)}
@@ -384,7 +385,7 @@ export default function CommentSection({
             placeholder="添加评论..."
             value={commentText}
           />
-          <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+          <div className="flex items-center justify-between border-gray-100 border-t pt-3">
             <span className="font-mono text-gray-400 text-xs">{commentText.length}/1000</span>
             <Button
               disabled={!commentText.trim() || isSubmitting}
@@ -396,11 +397,11 @@ export default function CommentSection({
           </div>
         </div>
       ) : (
-        <div className="border border-gray-200 bg-gray-50 rounded-lg py-12 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 border border-gray-300 bg-white rounded-full mb-3">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 py-12 text-center">
+          <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-gray-300 bg-white">
             <MessageCircle className="text-gray-400" size={20} strokeWidth={1.5} />
           </div>
-          <p className="text-gray-600 text-sm font-light">登录后参与讨论</p>
+          <p className="font-light text-gray-600 text-sm">登录后参与讨论</p>
         </div>
       )}
 
@@ -423,9 +424,9 @@ export default function CommentSection({
             ))}
           </div>
         ) : (
-          <div className="border border-dashed border-gray-200 bg-gray-50 rounded-lg py-12 text-center">
-            <div className="text-gray-300 text-3xl mb-2 font-semibold">0</div>
-            <p className="text-gray-500 text-sm font-light">暂无评论</p>
+          <div className="rounded-lg border border-gray-200 border-dashed bg-gray-50 py-12 text-center">
+            <div className="mb-2 font-semibold text-3xl text-gray-300">0</div>
+            <p className="font-light text-gray-500 text-sm">暂无评论</p>
             <p className="mt-1 text-gray-400 text-xs">成为第一个分享想法的人</p>
           </div>
         )}

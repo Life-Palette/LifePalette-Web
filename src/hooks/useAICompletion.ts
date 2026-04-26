@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getAIApiKey, getAIApiURL, getAIConfig } from "@/config/ai";
 
 interface UseAICompletionOptions {
-  enabled?: boolean;
-  debounceMs?: number;
-  minChars?: number;
   apiKey?: string;
+  debounceMs?: number;
+  enabled?: boolean;
+  minChars?: number;
 }
 
 export function useAICompletion(options: UseAICompletionOptions = {}) {
@@ -17,7 +17,7 @@ export function useAICompletion(options: UseAICompletionOptions = {}) {
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
 
   const fetchCompletion = useCallback(
-    async (text: string, context: string = "") => {
+    async (text: string, context = "") => {
       // 取消之前的请求
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -97,12 +97,14 @@ ${text}
         setIsLoading(false);
       }
     },
-    [apiKey],
+    [apiKey]
   );
 
   const requestCompletion = useCallback(
-    (text: string, context: string = "") => {
-      if (!enabled) return;
+    (text: string, context = "") => {
+      if (!enabled) {
+        return;
+      }
 
       // 清除之前的定时器
       if (debounceTimerRef.current) {
@@ -122,7 +124,7 @@ ${text}
         fetchCompletion(text, context);
       }, debounceMs);
     },
-    [enabled, debounceMs, minChars, fetchCompletion],
+    [enabled, debounceMs, minChars, fetchCompletion]
   );
 
   const acceptSuggestion = useCallback(() => {

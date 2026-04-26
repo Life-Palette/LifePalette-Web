@@ -10,23 +10,21 @@ import { Input } from "@/components/ui/input";
 import { useIsAuthenticated } from "@/hooks/useAuth";
 
 interface CityData {
-  id: number;
-  country: string;
   city: string;
-  photoCount: number;
-  firstVisitAt: string;
-  lastVisitAt: string;
-  lng?: number;
+  country: string;
   lat?: number;
+  lng?: number;
+  photo_count: number;
+  province: string;
 }
 
 interface ExportMapDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   cities: CityData[];
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
-const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, cities }) => {
+const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _cities }) => {
   const { user } = useIsAuthenticated();
   const [isExporting, setIsExporting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -67,7 +65,9 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
 
   // 添加水印到容器
   const addWatermark = (container: HTMLDivElement) => {
-    if (!watermarkConfig.enabled || !watermarkConfig.text) return;
+    if (!(watermarkConfig.enabled && watermarkConfig.text)) {
+      return;
+    }
 
     const watermark = document.createElement("div");
     watermark.style.position = "absolute";
@@ -127,15 +127,13 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
             addWatermark(exportContainer);
             resolve();
           }
-        }, 15000); // 15秒超时保护
+        }, 15_000); // 15秒超时保护
 
         root.render(
           <div style={{ width: "100%", height: "100%", position: "relative" }}>
             <TrackMapView
-              userId={user?.id}
               customCenter={[mapViewRef.current.centerLng, mapViewRef.current.centerLat]}
               customZoom={mapViewRef.current.zoom}
-              showGallery={false}
               onReady={() => {
                 if (!resolved) {
                   resolved = true;
@@ -144,8 +142,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
                   resolve();
                 }
               }}
+              showGallery={false}
+              secUid={user?.sec_uid}
             />
-          </div>,
+          </div>
         );
       });
 
@@ -205,15 +205,13 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
             addWatermark(exportContainer);
             resolve();
           }
-        }, 15000); // 15秒超时保护
+        }, 15_000); // 15秒超时保护
 
         root.render(
           <div style={{ width: "100%", height: "100%", position: "relative" }}>
             <TrackMapView
-              userId={user?.id}
               customCenter={[mapViewRef.current.centerLng, mapViewRef.current.centerLat]}
               customZoom={mapViewRef.current.zoom}
-              showGallery={false}
               onReady={() => {
                 if (!resolved) {
                   resolved = true;
@@ -222,8 +220,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
                   resolve();
                 }
               }}
+              showGallery={false}
+              secUid={user?.sec_uid}
             />
-          </div>,
+          </div>
         );
       });
 
@@ -256,7 +256,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-h-[90vh] max-w-5xl overflow-hidden">
         <DialogHeader>
           <DialogTitle>导出地图海报</DialogTitle>
         </DialogHeader>
@@ -265,10 +265,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
           {/* 左侧：配置选项 */}
           <div className="flex flex-col space-y-3">
             <div>
-              <label className="mb-2 block text-sm font-medium">尺寸设置</label>
+              <label className="mb-2 block font-medium text-sm">尺寸设置</label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">宽度 (px)</label>
+                  <label className="mb-1 block text-muted-foreground text-xs">宽度 (px)</label>
                   <Input
                     min={100}
                     onChange={(e) => handleSizeChange("width", e.target.value)}
@@ -277,7 +277,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">高度 (px)</label>
+                  <label className="mb-1 block text-muted-foreground text-xs">高度 (px)</label>
                   <Input
                     min={100}
                     onChange={(e) => handleSizeChange("height", e.target.value)}
@@ -289,26 +289,26 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium">当前视图</label>
+              <label className="mb-2 block font-medium text-sm">当前视图</label>
               <div className="space-y-2">
                 <div className="rounded-lg bg-muted p-3">
-                  <div className="mb-1 text-xs text-muted-foreground">缩放级别</div>
+                  <div className="mb-1 text-muted-foreground text-xs">缩放级别</div>
                   <div className="font-mono text-sm">{displayView.zoom.toFixed(2)}</div>
                 </div>
                 <div className="rounded-lg bg-muted p-3">
-                  <div className="mb-1 text-xs text-muted-foreground">中心坐标</div>
+                  <div className="mb-1 text-muted-foreground text-xs">中心坐标</div>
                   <div className="font-mono text-sm">
                     {displayView.centerLng.toFixed(4)}, {displayView.centerLat.toFixed(4)}
                   </div>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-muted-foreground text-xs">
                 💡 在右侧地图上拖动和缩放来调整视图
               </p>
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium">水印设置</label>
+              <label className="mb-2 block font-medium text-sm">水印设置</label>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <input
@@ -365,10 +365,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
           {/* 右侧：预览 */}
           <div className="flex flex-col space-y-2">
             <div className="flex items-center justify-between">
-              <label className="block text-sm font-medium">
+              <label className="block font-medium text-sm">
                 {showPreview ? "最终效果预览" : "地图视图调整"}
               </label>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 {exportConfig.width} × {exportConfig.height} px
               </span>
             </div>
@@ -379,10 +379,12 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
                 <img
                   alt="地图预览"
                   className="max-h-full max-w-full rounded-lg shadow-2xl"
+                  height={600}
                   src={previewImage}
                   style={{
                     objectFit: "contain",
                   }}
+                  width={800}
                 />
               </div>
             ) : (
@@ -394,15 +396,15 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, c
                 }}
               >
                 <TrackMapView
-                  userId={user?.id}
                   onViewChange={handleMapViewChange}
                   showGallery={false}
+                  secUid={user?.sec_uid}
                 />
               </div>
             )}
 
             {!showPreview && (
-              <p className="text-xs text-muted-foreground">💡 拖动和缩放地图来调整导出视图</p>
+              <p className="text-muted-foreground text-xs">💡 拖动和缩放地图来调整导出视图</p>
             )}
           </div>
         </div>

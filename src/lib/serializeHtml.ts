@@ -78,7 +78,7 @@ function escapeHtml(text: string): string {
  * @returns Plate Value (Slate 节点数组)
  */
 export function deserializeHtml(html: string): Value {
-  if (!html || !html.trim()) {
+  if (!html?.trim()) {
     return [{ type: "p", children: [{ text: "" }] }];
   }
 

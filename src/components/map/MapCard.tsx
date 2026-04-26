@@ -82,7 +82,7 @@ const MapCard: React.FC<MapCardProps> = ({ data = {}, isDark = false }) => {
         // 如果没有封面图片，使用默认样式
         dot.style.backgroundColor = "#3b82f6";
         dot.innerHTML =
-          '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">📍</div>';
+          '<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>';
       }
 
       new mapboxgl.Marker(dot).setLngLat(lnglat).addTo(map.current);

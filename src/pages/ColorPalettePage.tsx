@@ -14,7 +14,7 @@ import PageLayout from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { useIsAuthenticated } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { apiService } from "@/services/api";
+import { adaptPage, filesApi } from "@/services/api";
 
 export default function ColorPalettePage() {
   const { user } = useIsAuthenticated();
@@ -34,19 +34,15 @@ export default function ColorPalettePage() {
     queryKey: ["colorStats", user?.id],
     initialPageParam: 1,
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await apiService.getColorStats({
-        userId: user?.id,
+      const response = await filesApi.getColorStats({
         page: pageParam,
-        size: pageSize,
-        sort: "count:desc",
+        page_size: pageSize,
       });
       return response;
     },
     getNextPageParam: (lastPage) => {
-      const pagination = lastPage?.result?.pagination;
-      if (!pagination) return undefined;
-      const { page, totalPages } = pagination;
-      return page < totalPages ? page + 1 : undefined;
+      const pg = adaptPage(lastPage?.result);
+      return pg.page < pg.totalPages ? pg.page + 1 : undefined;
     },
     enabled: !!user?.id,
   });
@@ -62,24 +58,21 @@ export default function ColorPalettePage() {
     queryKey: ["colorFiles", selectedColor?.hex, user?.id],
     initialPageParam: 1,
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await apiService.getFilesByColor({
-        hex: selectedColor?.hex,
-        userId: user?.id,
+      const response = await filesApi.getByColor({
+        hex: selectedColor?.hex || "",
         page: pageParam,
-        size: 20,
+        page_size: 20,
       });
       return response;
     },
     getNextPageParam: (lastPage) => {
-      const pagination = lastPage?.result?.pagination;
-      if (!pagination) return undefined;
-      const { page, totalPages } = pagination;
-      return page < totalPages ? page + 1 : undefined;
+      const pg = adaptPage(lastPage?.result);
+      return pg.page < pg.totalPages ? pg.page + 1 : undefined;
     },
     enabled: !!selectedColor?.hex && !!user?.id,
   });
 
-  // 处理颜色数据 - API返回格式: { color: { id, hex, r, g, b }, count, file?: {...} }
+  // 处理颜色数据 - Go 后端返回格式: { color_id, hex, r, g, b, file_count, file?: { url, blurhash, width, height } }
   const colors = useMemo(() => {
     const allPages = colorStatsData?.pages || [];
     const allItems: ColorItem[] = [];
@@ -87,19 +80,17 @@ export default function ColorPalettePage() {
     allPages.forEach((page) => {
       const list = page?.result?.list || [];
       list.forEach((item: any) => {
-        // 提取代表图片
-        const file = item.file || item.representativeFile;
-        const representativeImage = file?.url
-          ? { url: file.url, blurhash: file.blurhash }
+        const representativeImage = item.file?.url
+          ? { url: item.file.url, blurhash: item.file.blurhash || "" }
           : undefined;
 
         allItems.push({
-          id: item.color?.id || item.id,
-          hex: item.color?.hex || item.hex,
-          count: item.count || item._count || 0,
+          id: item.color_id,
+          hex: item.hex,
+          count: item.file_count || 0,
           percentage: item.percentage,
-          isPrimary: item.isPrimary,
-          rgb: item.color ? { r: item.color.r, g: item.color.g, b: item.color.b } : undefined,
+          isPrimary: false,
+          rgb: { r: item.r, g: item.g, b: item.b },
           representativeImage,
         });
       });
@@ -112,7 +103,7 @@ export default function ColorPalettePage() {
   const totalColors = colorStatsData?.pages?.[0]?.result?.pagination?.total || colors.length;
   const totalImages = colors.reduce((acc, c) => acc + c.count, 0);
 
-  // 相关文件 - 转换为 PostImage 格式
+  // 相关文件 - Go 后端返回格式: { sec_uid, name, url, type, width, height, blurhash, created_at }
   const relatedFiles = useMemo(() => {
     const allPages = colorFilesData?.pages || [];
     const allFiles: FileItem[] = [];
@@ -120,15 +111,14 @@ export default function ColorPalettePage() {
     allPages.forEach((page) => {
       const list = page?.result?.list || [];
       list.forEach((item: any) => {
-        const file = item.file || item;
         allFiles.push({
-          id: file.id || item.fileId,
-          url: file.url || item.url,
-          name: file.name || file.fileName || item.name || "",
-          blurhash: file.blurhash || item.blurhash || "",
-          width: file.width || 400,
-          height: file.height || 400,
-          type: file.type || file.mimeType || "image/jpeg",
+          id: item.sec_uid || item.id,
+          url: item.url,
+          name: item.name || "",
+          blurhash: item.blurhash || "",
+          width: item.width || 400,
+          height: item.height || 400,
+          type: item.type || "image/jpeg",
         } as FileItem);
       });
     });
@@ -149,10 +139,12 @@ export default function ColorPalettePage() {
 
   // 监听滚动到底部加载更多颜色
   const virtualItems = virtualizer.getVirtualItems();
-  const lastItem = virtualItems[virtualItems.length - 1];
+  const lastItem = virtualItems.at(-1);
 
   useEffect(() => {
-    if (!lastItem) return;
+    if (!lastItem) {
+      return;
+    }
     if (lastItem.index >= rowCount - 3 && hasMoreColors && !isFetchingMoreColors) {
       fetchNextColors();
     }
@@ -170,21 +162,21 @@ export default function ColorPalettePage() {
         </div>
 
         {/* 简洁头部 */}
-        <div className="relative border-b border-border/20 bg-background/50 backdrop-blur-xl sticky top-0 z-40">
+        <div className="relative sticky top-0 z-40 border-border/20 border-b bg-background/50 backdrop-blur-xl">
           <div className="mx-auto max-w-6xl px-4 py-4">
             <div className="flex items-center justify-between">
               {/* 左侧：标题 + 统计标签 */}
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <Palette className="h-5 w-5 text-primary" />
-                  <h1 className="text-xl font-semibold">色集</h1>
+                  <h1 className="font-semibold text-xl">色集</h1>
                 </div>
                 {!isLoading && (
-                  <div className="hidden sm:flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                  <div className="hidden items-center gap-2 sm:flex">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 font-medium text-primary text-xs">
                       {totalColors} 色
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-muted-foreground text-xs">
                       {totalImages.toLocaleString()} 图
                     </span>
                   </div>
@@ -194,18 +186,18 @@ export default function ColorPalettePage() {
               {/* 右侧：视图切换 */}
               <div className="flex items-center gap-1 rounded-xl bg-muted/50 p-1">
                 <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
                   className="h-8 w-8 rounded-lg p-0"
                   onClick={() => setViewMode("grid")}
+                  size="sm"
+                  variant={viewMode === "grid" ? "default" : "ghost"}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
                   className="h-8 w-8 rounded-lg p-0"
                   onClick={() => setViewMode("list")}
+                  size="sm"
+                  variant={viewMode === "list" ? "default" : "ghost"}
                 >
                   <LayoutList className="h-4 w-4" />
                 </Button>
@@ -226,8 +218,8 @@ export default function ColorPalettePage() {
                   <Palette className="h-12 w-12 text-muted-foreground/40" />
                 </div>
               </div>
-              <h3 className="mt-6 text-lg font-semibold">暂无色彩数据</h3>
-              <p className="mt-2 max-w-xs text-center text-sm text-muted-foreground">
+              <h3 className="mt-6 font-semibold text-lg">暂无色彩数据</h3>
+              <p className="mt-2 max-w-xs text-center text-muted-foreground text-sm">
                 上传图片后，AI 将自动提取主色调
               </p>
             </div>
@@ -245,14 +237,14 @@ export default function ColorPalettePage() {
               {/* 分隔线 + 标题 */}
               <div className="mb-6 flex items-center gap-4">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-                <span className="text-xs font-medium text-muted-foreground">全部颜色</span>
+                <span className="font-medium text-muted-foreground text-xs">全部颜色</span>
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
               </div>
 
               {/* 颜色网格 */}
               <div
+                className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/30 overflow-auto"
                 ref={parentRef}
-                className="overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/30"
                 style={{ height: "calc(100vh - 520px)", minHeight: "300px" }}
               >
                 <div
@@ -268,8 +260,13 @@ export default function ColorPalettePage() {
 
                     return (
                       <div
-                        key={virtualRow.key}
+                        className={cn(
+                          viewMode === "grid"
+                            ? "grid grid-cols-3 gap-4 pb-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
+                            : "space-y-3 pb-3"
+                        )}
                         data-index={virtualRow.index}
+                        key={virtualRow.key}
                         ref={virtualizer.measureElement}
                         style={{
                           position: "absolute",
@@ -278,20 +275,15 @@ export default function ColorPalettePage() {
                           width: "100%",
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
-                        className={cn(
-                          viewMode === "grid"
-                            ? "grid grid-cols-3 gap-4 pb-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
-                            : "space-y-3 pb-3",
-                        )}
                       >
                         {rowColors.map((color, idx) => (
                           <ColorCard
-                            key={color.id}
                             color={color}
-                            onClick={() => setSelectedColor(color)}
-                            isSelected={selectedColor?.id === color.id}
-                            viewMode={viewMode}
                             index={startIndex + idx}
+                            isSelected={selectedColor?.id === color.id}
+                            key={color.id}
+                            onClick={() => setSelectedColor(color)}
+                            viewMode={viewMode}
                           />
                         ))}
                       </div>
@@ -307,7 +299,7 @@ export default function ColorPalettePage() {
                 )}
                 {!hasMoreColors && colors.length > 0 && (
                   <div className="py-6 text-center">
-                    <span className="text-xs text-muted-foreground">共 {totalColors} 种颜色</span>
+                    <span className="text-muted-foreground text-xs">共 {totalColors} 种颜色</span>
                   </div>
                 )}
               </div>
@@ -320,11 +312,11 @@ export default function ColorPalettePage() {
           <ColorDetailPanel
             color={selectedColor}
             files={relatedFiles}
-            isLoading={isLoadingFiles}
-            isFetchingMore={isFetchingMoreFiles}
             hasMore={!!hasMoreFiles}
-            onLoadMore={fetchNextFiles}
+            isFetchingMore={isFetchingMoreFiles}
+            isLoading={isLoadingFiles}
             onClose={() => setSelectedColor(null)}
+            onLoadMore={fetchNextFiles}
           />
         )}
       </div>

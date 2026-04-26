@@ -52,8 +52,8 @@ export default function ProfilePageWrapper() {
 
   return (
     <PageLayout activeTab="profile" authFallback={<AuthFallback />} requireAuth={requireAuth}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ProfilePage userId={userId} initialTab={tab} />
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <ProfilePage initialTab={tab} userId={userId} />
       </div>
     </PageLayout>
   );

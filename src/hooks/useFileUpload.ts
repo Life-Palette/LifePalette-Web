@@ -1,37 +1,21 @@
 import { useCallback, useState } from "react";
-import { uploadFile, uploadFiles } from "@/services/upload/uploadService";
-import type { FileItem, UploadOptions, UploadProgress, UploadStage } from "@/types/upload";
+import { type OSSFile, type UploadProgress, type UploadStage, uploader } from "@/services/upload";
 
-/**
- * 上传状态
- */
 interface UploadState {
-  /** 是否正在上传 */
-  isUploading: boolean;
-  /** 上传进度 (0-100) */
-  progress: number;
-  /** 当前阶段 */
-  stage: UploadStage | "";
-  /** 阶段文本 */
-  stageText: string;
-  /** 错误信息 */
   error: Error | null;
+  isUploading: boolean;
+  progress: number;
+  stage: UploadStage | "";
+  stageText: string;
 }
 
-/**
- * 阶段文本映射
- */
-const STAGE_TEXT_MAP: Record<UploadStage, string> = {
+const STAGE_TEXT: Record<UploadStage, string> = {
   compress: "压缩中...",
   md5: "计算 MD5...",
   upload: "上传中...",
-  blurhash: "生成预览...",
-  save: "保存中...",
+  complete: "完成...",
 };
 
-/**
- * 文件上传 Hook
- */
 export function useFileUpload() {
   const [uploadState, setUploadState] = useState<UploadState>({
     isUploading: false,
@@ -41,24 +25,15 @@ export function useFileUpload() {
     error: null,
   });
 
-  /**
-   * 重置上传状态
-   */
   const resetState = useCallback(() => {
-    setUploadState({
-      isUploading: false,
-      progress: 0,
-      stage: "",
-      stageText: "",
-      error: null,
-    });
+    setUploadState({ isUploading: false, progress: 0, stage: "", stageText: "", error: null });
   }, []);
 
-  /**
-   * 上传单个文件
-   */
   const uploadSingleFile = useCallback(
-    async (file: File, options?: Omit<UploadOptions, "onProgress">): Promise<FileItem | null> => {
+    async (
+      file: File,
+      options?: { compress?: boolean; maxSizeMB?: number; isPrivate?: boolean }
+    ): Promise<OSSFile | null> => {
       try {
         setUploadState({
           isUploading: true,
@@ -67,54 +42,44 @@ export function useFileUpload() {
           stageText: "准备上传...",
           error: null,
         });
-
-        const result = await uploadFile(file, {
+        const result = await uploader.upload(file, {
           ...options,
-          onProgress: (progress: UploadProgress) => {
+          onProgress: (p: UploadProgress) => {
             setUploadState({
               isUploading: true,
-              progress: progress.percent,
-              stage: progress.stage,
-              stageText: STAGE_TEXT_MAP[progress.stage] || "处理中...",
+              progress: p.percent,
+              stage: p.stage,
+              stageText: STAGE_TEXT[p.stage] || "处理中...",
               error: null,
             });
           },
         });
-
         setUploadState({
           isUploading: false,
           progress: 100,
-          stage: "save",
+          stage: "complete",
           stageText: "上传完成",
           error: null,
         });
-
         return result;
       } catch (error) {
         const err = error as Error;
-        setUploadState({
-          isUploading: false,
-          progress: 0,
-          stage: "",
-          stageText: "",
-          error: err,
-        });
-        console.error("文件上传失败:", err);
+        setUploadState({ isUploading: false, progress: 0, stage: "", stageText: "", error: err });
         return null;
       }
     },
-    [],
+    []
   );
 
-  /**
-   * 批量上传文件
-   */
   const uploadMultipleFiles = useCallback(
-    async (files: File[], options?: Omit<UploadOptions, "onProgress">): Promise<FileItem[]> => {
+    async (
+      files: File[],
+      options?: { compress?: boolean; maxSizeMB?: number; isPrivate?: boolean },
+      locationMap?: Map<File, { lat: number; lng: number }>
+    ): Promise<OSSFile[]> => {
       if (files.length === 0) {
         return [];
       }
-
       try {
         setUploadState({
           isUploading: true,
@@ -123,63 +88,46 @@ export function useFileUpload() {
           stageText: "准备上传...",
           error: null,
         });
-
-        const uploadedFiles: FileItem[] = [];
-        const totalFiles = files.length;
+        const results: OSSFile[] = [];
+        const total = files.length;
 
         for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const fileIndex = i + 1;
-
-          const result = await uploadFile(file, {
+          const fileLocation = locationMap?.get(files[i]);
+          const result = await uploader.upload(files[i], {
             ...options,
-            onProgress: (progress: UploadProgress) => {
-              // 计算总体进度
-              const fileProgress = progress.percent / 100;
-              const totalProgress = ((i + fileProgress) / totalFiles) * 100;
-
+            location: fileLocation,
+            onProgress: (p: UploadProgress) => {
+              const totalProgress = ((i + p.percent / 100) / total) * 100;
               setUploadState({
                 isUploading: true,
                 progress: Math.round(totalProgress),
-                stage: progress.stage,
-                stageText: `${STAGE_TEXT_MAP[progress.stage]} (${fileIndex}/${totalFiles})`,
+                stage: p.stage,
+                stageText: `${STAGE_TEXT[p.stage]} (${i + 1}/${total})`,
                 error: null,
               });
             },
           });
-
-          uploadedFiles.push(result);
+          results.push(result);
         }
 
         setUploadState({
           isUploading: false,
           progress: 100,
-          stage: "save",
+          stage: "complete",
           stageText: "全部上传完成",
           error: null,
         });
-
-        return uploadedFiles;
+        // 上传完成后自动关联实况照片
+        await uploader.associateLivePhotos(results);
+        return results;
       } catch (error) {
         const err = error as Error;
-        setUploadState({
-          isUploading: false,
-          progress: 0,
-          stage: "",
-          stageText: "",
-          error: err,
-        });
-        console.error("批量上传失败:", err);
+        setUploadState({ isUploading: false, progress: 0, stage: "", stageText: "", error: err });
         throw err;
       }
     },
-    [],
+    []
   );
 
-  return {
-    uploadState,
-    uploadSingleFile,
-    uploadMultipleFiles,
-    resetState,
-  };
+  return { uploadState, uploadSingleFile, uploadMultipleFiles, resetState };
 }

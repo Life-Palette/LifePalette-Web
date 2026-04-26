@@ -26,13 +26,15 @@ export default function ImagePreview({ images, initialIndex, isOpen, onClose }: 
       };
       const container = document.getElementById(`live-photo-container-${_idx}`);
 
-      if (!container) return;
+      if (!container) {
+        return;
+      }
 
       // 创建 LivePhotoViewer 实例
       new LivePhotoViewer({
         photoSrc: demoSource.photoSrc,
         videoSrc: demoSource.videoSrc,
-        container: container,
+        container,
         // width: 300,
         height: 600,
         // autoplay: false,

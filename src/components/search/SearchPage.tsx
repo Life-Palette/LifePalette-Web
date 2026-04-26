@@ -9,9 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIsAuthenticated } from "@/hooks/useAuth";
+import { useCollectTopic, useLikeTopic } from "@/hooks/useInteractions";
 import { useTags } from "@/hooks/useTags";
-import { useCollectTopic, useInfiniteTopics, useLikeTopic } from "@/hooks/useTopics";
-import { apiService } from "@/services/api";
+import { useInfiniteTopics } from "@/hooks/useTopics";
+import { topicsApi } from "@/services/api";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +45,7 @@ export default function SearchPage() {
   } = useTags({
     page: 1,
     size: 10,
-    sort: "createdAt,desc",
+    sort: "created_at,desc",
   });
 
   // 获取搜索结果
@@ -58,7 +59,7 @@ export default function SearchPage() {
     refetch,
   } = useInfiniteTopics({
     size: 20,
-    sort: "createdAt,desc",
+    sort: "created_at,desc",
     title: activeSearchQuery || undefined,
     tagId: selectedTagId || undefined,
   });
@@ -97,11 +98,11 @@ export default function SearchPage() {
       }
 
       likeMutation.mutate({
-        topicId: Number(postId),
+        topicId: postId,
         isLiked: post.isLiked,
       });
     },
-    [posts, isAuthenticated, likeMutation],
+    [posts, isAuthenticated, likeMutation]
   );
 
   const handleSave = useCallback(
@@ -116,11 +117,11 @@ export default function SearchPage() {
       }
 
       collectMutation.mutate({
-        topicId: Number(postId),
+        topicId: postId,
         isCollected: post.isSaved,
       });
     },
-    [posts, isAuthenticated, collectMutation],
+    [posts, isAuthenticated, collectMutation]
   );
 
   const handlePostClick = useCallback((postId: string, event?: React.MouseEvent) => {
@@ -142,11 +143,11 @@ export default function SearchPage() {
   const showSearchResults = activeSearchQuery || selectedTagId;
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       {/* 搜索框 */}
       <div className="relative mb-12">
         <Search
-          className="-translate-y-1/2 absolute top-1/2 left-6 transform text-gray-400"
+          className="absolute top-1/2 left-6 -translate-y-1/2 transform text-gray-400"
           size={24}
         />
         <Input
@@ -162,7 +163,7 @@ export default function SearchPage() {
         />
         {searchQuery && (
           <Button
-            className="-translate-y-1/2 absolute top-1/2 right-6 transform"
+            className="absolute top-1/2 right-6 -translate-y-1/2 transform"
             onClick={handleClearSearch}
             size="icon"
             variant="ghost"
@@ -188,7 +189,7 @@ export default function SearchPage() {
             <div className="py-8 text-center text-red-500">加载标签失败，请稍后重试</div>
           ) : (
             <div className="flex flex-wrap gap-4">
-              {tagsData?.items.map((tag) => (
+              {tagsData?.list.map((tag) => (
                 <Badge
                   className="cursor-pointer rounded-full border border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 px-6 py-3 text-lg text-primary-700 transition-all duration-300 hover:from-primary-100 hover:to-secondary-100"
                   key={tag.id}
@@ -261,18 +262,18 @@ export default function SearchPage() {
           }}
           onEdit={async (topicId) => {
             try {
-              const response = await apiService.getTopicDetail(topicId);
-              if (response.code === 200 && response.result) {
+              const response = await topicsApi.getBySecUid(topicId);
+              if (response.result) {
                 const topic = response.result;
 
-                const images = topic.fileList || [];
+                const images = topic.files || topic.fileList || [];
 
                 setEditingTopicId(topicId);
                 setEditingTopicData({
                   title: topic.title || "",
                   content: topic.content || "",
-                  images: images,
-                  topicTags: topic.topicTags || [],
+                  images,
+                  topicTags: topic.tags || topic.topicTags || [],
                 });
                 setSelectedTopicId(null);
               }
@@ -302,7 +303,7 @@ export default function SearchPage() {
               const originalData = {
                 title: editingTopicData.title,
                 content: editingTopicData.content,
-                fileIds: editingTopicData.images?.map((img) => img.id) || [],
+                fileIds: editingTopicData.images?.map((img) => img.sec_uid) || [],
               };
 
               const changes = compareObjects(originalData, postData);
@@ -311,7 +312,7 @@ export default function SearchPage() {
                 return;
               }
 
-              const response = await apiService.updateTopic(editingTopicId, changes);
+              const response = await topicsApi.update(editingTopicId, changes);
 
               if (response.code === 200) {
                 queryClient.invalidateQueries({

@@ -3,15 +3,15 @@
  */
 
 interface PerformanceMetrics {
-  FCP?: number; // First Contentful Paint
-  LCP?: number; // Largest Contentful Paint
-  FID?: number; // First Input Delay
   CLS?: number; // Cumulative Layout Shift
+  FCP?: number; // First Contentful Paint
+  FID?: number; // First Input Delay
+  LCP?: number; // Largest Contentful Paint
   TTFB?: number; // Time to First Byte
 }
 
 class PerformanceMonitor {
-  private metrics: PerformanceMetrics = {};
+  private readonly metrics: PerformanceMetrics = {};
   private observers: PerformanceObserver[] = [];
 
   /**
@@ -34,7 +34,7 @@ class PerformanceMonitor {
    * 停止监控
    */
   stop() {
-    this.observers.forEach((observer) => observer.disconnect());
+    for (const observer of this.observers) observer.disconnect();
     this.observers = [];
   }
 
@@ -75,7 +75,7 @@ class PerformanceMonitor {
   private measureLCP() {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as any;
+      const lastEntry = entries.at(-1) as any;
       this.metrics.LCP = Math.round(lastEntry.startTime);
       console.log(`LCP: ${this.metrics.LCP}ms`);
     });
@@ -191,12 +191,14 @@ export const measureComponentPerformance = (componentName: string) => {
  */
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
-  wait: number,
+  wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout | null = null;
 
   return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
+    if (timeout) {
+      clearTimeout(timeout);
+    }
     timeout = setTimeout(() => func(...args), wait);
   };
 };
@@ -206,7 +208,7 @@ export const debounce = <T extends (...args: any[]) => any>(
  */
 export const throttle = <T extends (...args: any[]) => any>(
   func: T,
-  limit: number,
+  limit: number
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle = false;
 
@@ -249,7 +251,9 @@ export const isSlowNetwork = (): boolean => {
     (navigator as any).mozConnection ||
     (navigator as any).webkitConnection;
 
-  if (!connection) return false;
+  if (!connection) {
+    return false;
+  }
 
   // 检查网络类型
   const slowTypes = ["slow-2g", "2g", "3g"];
@@ -271,8 +275,12 @@ export const isSlowNetwork = (): boolean => {
 export const getDeviceType = (): "mobile" | "tablet" | "desktop" => {
   const width = window.innerWidth;
 
-  if (width < 768) return "mobile";
-  if (width < 1024) return "tablet";
+  if (width < 768) {
+    return "mobile";
+  }
+  if (width < 1024) {
+    return "tablet";
+  }
   return "desktop";
 };
 

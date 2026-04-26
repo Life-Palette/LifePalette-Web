@@ -1,8 +1,8 @@
 import React from "react";
 
 interface ErrorBoundaryState {
-  hasError: boolean;
   error?: Error;
+  hasError: boolean;
 }
 
 interface ErrorBoundaryProps {

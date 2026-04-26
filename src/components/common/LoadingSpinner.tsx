@@ -3,10 +3,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg";
   className?: string;
-  variant?: "spinner" | "skeleton";
+  size?: "sm" | "md" | "lg";
   text?: string;
+  variant?: "spinner" | "skeleton";
 }
 
 export default function LoadingSpinner({
@@ -34,11 +34,11 @@ export default function LoadingSpinner({
   // 使用 Lottie 动画替代原来的 spinner
   return (
     <LottieAnimation
-      type="loading"
-      width={sizeMap[size]}
+      className={className}
       height={sizeMap[size]}
       loadingText={text}
-      className={className}
+      type="loading"
+      width={sizeMap[size]}
     />
   );
 }

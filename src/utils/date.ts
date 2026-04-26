@@ -19,13 +19,27 @@ export const formatRelativeTime = (dateString: string): string => {
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInHours < 1) return "刚刚";
-  if (diffInHours < 24) return `${diffInHours}小时前`;
-  if (diffInDays === 0) return "今天";
-  if (diffInDays === 1) return "昨天";
-  if (diffInDays < 7) return `${diffInDays}天前`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)}周前`;
-  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)}个月前`;
+  if (diffInHours < 1) {
+    return "刚刚";
+  }
+  if (diffInHours < 24) {
+    return `${diffInHours}小时前`;
+  }
+  if (diffInDays === 0) {
+    return "今天";
+  }
+  if (diffInDays === 1) {
+    return "昨天";
+  }
+  if (diffInDays < 7) {
+    return `${diffInDays}天前`;
+  }
+  if (diffInDays < 30) {
+    return `${Math.floor(diffInDays / 7)}周前`;
+  }
+  if (diffInDays < 365) {
+    return `${Math.floor(diffInDays / 30)}个月前`;
+  }
 
   return `${Math.floor(diffInDays / 365)}年前`;
 };
@@ -42,11 +56,21 @@ export const formatDistanceToNow = (date: Date): string => {
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInMinutes < 1) return "刚刚";
-  if (diffInMinutes < 60) return `${diffInMinutes}分钟前`;
-  if (diffInHours < 24) return `${diffInHours}小时前`;
-  if (diffInDays === 1) return "昨天";
-  if (diffInDays < 7) return `${diffInDays}天前`;
+  if (diffInMinutes < 1) {
+    return "刚刚";
+  }
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}分钟前`;
+  }
+  if (diffInHours < 24) {
+    return `${diffInHours}小时前`;
+  }
+  if (diffInDays === 1) {
+    return "昨天";
+  }
+  if (diffInDays < 7) {
+    return `${diffInDays}天前`;
+  }
 
   // 超过7天显示具体日期
   const month = date.getMonth() + 1;

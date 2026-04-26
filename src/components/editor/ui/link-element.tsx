@@ -14,8 +14,8 @@ export function LinkElement({ children, className, element, ...props }: PlateEle
     <a
       {...linkProps}
       className={cn(
-        "font-medium text-primary underline decoration-primary underline-offset-4 cursor-pointer",
-        className,
+        "cursor-pointer font-medium text-primary underline decoration-primary underline-offset-4",
+        className
       )}
       {...restProps}
     >

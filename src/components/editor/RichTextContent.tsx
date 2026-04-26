@@ -1,8 +1,8 @@
 import DOMPurify from "dompurify";
 
 interface RichTextContentProps {
-  content: string;
   className?: string;
+  content: string;
   maxLines?: number;
 }
 

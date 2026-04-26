@@ -5,6 +5,7 @@ import {
   Briefcase,
   Calendar,
   Camera,
+  Fingerprint,
   Globe,
   Grid,
   Heart,
@@ -15,41 +16,39 @@ import {
   // MessageCircle, // 暂时屏蔽
   Plus,
   Settings,
+  Venus,
+  Mars,
 } from "lucide-react";
 import { useCallback, useState } from "react";
-import { GithubIcon as Github } from "@/components/icons/GithubIcon";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import SimpleInfiniteScroll from "@/components/common/SimpleInfiniteScroll";
+import { GithubIcon as Github } from "@/components/icons/GithubIcon";
 import { LottieAnimation } from "@/components/lottie";
 import TrackPage from "@/components/map/TrackPage";
 import SimpleImageDetail from "@/components/media/SimpleImageDetail";
-import CreatePostModal from "@/components/post/CreatePostModal";
 import PhotoWall from "@/components/profile/PhotoWall";
 import ProfileEditDialog from "@/components/profile/ProfileEditDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useIsAuthenticated } from "@/hooks/useAuth";
+import { useIsAuthenticated, useUserById, useUserStats } from "@/hooks/useAuth";
+import { useCollectTopic, useLikeTopic } from "@/hooks/useInteractions";
 import {
-  useCollectTopic,
   useInfiniteCollectedTopics,
   useInfiniteLikedTopics,
   useInfiniteTopics,
-  useLikeTopic,
 } from "@/hooks/useTopics";
-import { useUserById } from "@/hooks/useUserById";
-import { useUserStats } from "@/hooks/useUserStats";
-import { apiService } from "@/services/api";
+import { topicsApi } from "@/services/api";
 import { getUserAvatar } from "@/utils/avatar";
 
 type TabType = "posts" | "photos" | "track" | "liked" | "saved";
 
 interface ProfilePageProps {
-  userId?: number;
   initialTab?: TabType;
+  userId?: string;
 }
 
 export default function ProfilePage({ userId: propUserId, initialTab }: ProfilePageProps = {}) {
@@ -75,7 +74,6 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
     });
   };
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
   const [cardRect, setCardRect] = useState<DOMRect | null>(null);
   const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
@@ -113,9 +111,9 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteTopics({
-    userId: targetUserId,
+    userSecUid: targetUserId,
     size: 20,
-    sort: "createdAt,desc",
+    sort: "created_at,desc",
   });
 
   // 获取用户喜欢的动态数据
@@ -157,28 +155,32 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
     (postId: string) => {
       const allPosts = [...posts, ...likedPosts, ...collectedPosts];
       const post = allPosts.find((p) => p.id === postId);
-      if (!post) return;
+      if (!post) {
+        return;
+      }
 
       likeMutation.mutate({
-        topicId: Number(postId),
+        topicId: postId,
         isLiked: post.isLiked,
       });
     },
-    [posts, likedPosts, collectedPosts, likeMutation],
+    [posts, likedPosts, collectedPosts, likeMutation]
   );
 
   const handleSave = useCallback(
     (postId: string) => {
       const allPosts = [...posts, ...likedPosts, ...collectedPosts];
       const post = allPosts.find((p) => p.id === postId);
-      if (!post) return;
+      if (!post) {
+        return;
+      }
 
       collectMutation.mutate({
-        topicId: Number(postId),
+        topicId: postId,
         isCollected: post.isSaved,
       });
     },
-    [posts, likedPosts, collectedPosts, collectMutation],
+    [posts, likedPosts, collectedPosts, collectMutation]
   );
 
   const handlePostClick = useCallback((postId: string, event?: React.MouseEvent) => {
@@ -200,10 +202,8 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
       if (hasNextLikedPage && !isFetchingNextLikedPage) {
         fetchNextLikedPage();
       }
-    } else if (activeTab === "saved") {
-      if (hasNextCollectedPage && !isFetchingNextCollectedPage) {
-        fetchNextCollectedPage();
-      }
+    } else if (activeTab === "saved" && hasNextCollectedPage && !isFetchingNextCollectedPage) {
+      fetchNextCollectedPage();
     }
   }, [
     activeTab,
@@ -238,14 +238,14 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
 
   // 统计数据
   const stats = [
-    { label: "动态", value: posts.length.toString() },
+    { label: "动态", value: userStats?.topic_count?.toString() || "0" },
     {
       label: "关注",
-      value: userStats?.followingCount?.toString() || "0",
+      value: userStats?.following_count?.toString() || "0",
     },
     {
       label: "粉丝",
-      value: userStats?.followerCount?.toString() || "0",
+      value: userStats?.follower_count?.toString() || "0",
     },
   ];
 
@@ -254,21 +254,21 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
       id: "posts",
       icon: Grid,
       label: "动态",
-      count: topicsData?.pages[0]?.total,
+      count: userStats?.topic_count,
     },
-    { id: "photos", icon: Image, label: "照片墙" },
-    { id: "track", icon: Map, label: "轨迹" },
+    { id: "photos", icon: Image, label: "照片墙", count: userStats?.photo_count },
+    { id: "track", icon: Map, label: "轨迹", count: userStats?.track_count },
     {
       id: "liked",
       icon: Heart,
       label: "喜欢",
-      count: userStats?.likeCount,
+      count: userStats?.like_count,
     },
     {
       id: "saved",
       icon: Bookmark,
       label: "收藏",
-      count: userStats?.collectionCount,
+      count: userStats?.collection_count,
     },
   ];
 
@@ -278,12 +278,14 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
       <Card className="group relative overflow-hidden border-border/50 transition-all hover:border-border">
         {/* 背景图片区域 - 带视差效果 */}
         <div className="relative h-52 w-full overflow-hidden rounded-t-xl">
-          {displayUser.backgroundInfo?.url ? (
+          {displayUser.background_file?.url ? (
             <>
               <img
                 alt="Background"
                 className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-                src={displayUser.backgroundInfo.url}
+                height={280}
+                src={displayUser.background_file.url}
+                width={1200}
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/0 to-background" />
             </>
@@ -301,10 +303,10 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
               {isViewingOwnProfile && (
                 <div className="flex h-full w-full items-center justify-center">
                   <div className="text-center">
-                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-dashed border-muted-foreground/30">
+                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-muted-foreground/30 border-dashed">
                       <Camera className="text-muted-foreground/50" size={28} />
                     </div>
-                    <p className="text-muted-foreground/60 text-sm font-medium">添加背景图片</p>
+                    <p className="font-medium text-muted-foreground/60 text-sm">添加背景图片</p>
                   </div>
                 </div>
               )}
@@ -314,11 +316,11 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
           {/* 编辑按钮 - 浮动设计（仅在查看自己的个人中心时显示） */}
           {isViewingOwnProfile && (
             <Button
-              variant="outline"
-              size="icon"
               aria-label="编辑个人资料"
               className="absolute top-5 right-5 h-10 w-10 rounded-xl border-border/50 bg-background/60 backdrop-blur-xl transition-all hover:border-border hover:bg-background/80 hover:shadow-lg"
               onClick={() => setIsEditDialogOpen(true)}
+              size="icon"
+              variant="outline"
             >
               <Settings className="text-foreground" size={16} />
             </Button>
@@ -335,63 +337,59 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
             <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-foreground/5 to-foreground/0" />
             {/* Avatar 组件 */}
             <Avatar
-              className={`relative h-28 w-28 border-[3px] border-background shadow-2xl ring-1 ring-foreground/5 ${isViewingOwnProfile ? "transition-all duration-300 hover:ring-primary/50 hover:shadow-primary/20" : ""}`}
+              className={`relative h-28 w-28 border-[3px] border-background shadow-2xl ring-1 ring-foreground/5 ${isViewingOwnProfile ? "transition-all duration-300 hover:shadow-primary/20 hover:ring-primary/50" : ""}`}
             >
               <AvatarImage
-                src={getUserAvatar(displayUser)}
-                alt={displayUser.name || displayUser.account}
+                alt={displayUser.username}
                 className="transition-transform duration-300 hover:scale-105"
+                src={getUserAvatar(displayUser)}
               />
               <AvatarFallback className="text-2xl">
-                {(displayUser.name || displayUser.account)?.charAt(0).toUpperCase()}
+                {displayUser.username?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             {/* 装饰元素 - 左上角 */}
-            <div className="absolute -top-1 -left-1 h-3 w-3 rounded-tl-lg border-l-2 border-t-2 border-foreground/20" />
+            <div className="absolute -top-1 -left-1 h-3 w-3 rounded-tl-lg border-foreground/20 border-t-2 border-l-2" />
             {/* 装饰元素 - 右下角 */}
-            <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-br-lg border-b-2 border-r-2 border-foreground/20" />
+            <div className="absolute -right-1 -bottom-1 h-3 w-3 rounded-br-lg border-foreground/20 border-r-2 border-b-2" />
           </div>
 
           {/* 用户名和签名 */}
           <div className="mb-8">
-            <div className="flex items-center gap-4 mb-3">
+            <div className="mb-3 flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <h1 className="font-bold text-3xl tracking-tight text-foreground">
-                  {displayUser.name || displayUser.account}
+                <h1 className="font-bold text-3xl text-foreground tracking-tight">
+                  {displayUser.username}
                 </h1>
                 {/* 性别标识 */}
-                {displayUser.sex !== undefined && (
-                  <Badge variant="outline" className="text-xs">
-                    {displayUser.sex === 0 ? "👨 男" : displayUser.sex === 1 ? "👩 女" : ""}
-                  </Badge>
+                {displayUser.sex !== undefined && displayUser.sex !== 0 && (
+                  <div className={`flex h-6 w-6 items-center justify-center rounded-full ${displayUser.sex === 1 ? "bg-blue-100 text-blue-500" : "bg-pink-100 text-pink-500"}`}>
+                    {displayUser.sex === 1 ? <Mars size={14} /> : <Venus size={14} />}
+                  </div>
                 )}
               </div>
-              {/* 发消息按钮 - 暂时屏蔽 */}
-              {/* {!isViewingOwnProfile && targetUserId && (
-                <Button
-                  onClick={handleSendMessage}
-                  className="flex items-center gap-2 rounded-full"
-                  size="sm"
-                >
-                  <MessageCircle size={16} />
-                  <span>发消息</span>
-                </Button>
-              )} */}
             </div>
-            <p className="max-w-md text-muted-foreground/80 text-sm leading-relaxed mb-4">
+            {/* LP号 */}
+            {displayUser.lp_id && (
+              <div className="mb-2 inline-flex items-center gap-1.5 text-muted-foreground/50 text-xs">
+                <Fingerprint size={12} />
+                <span className="font-mono">{displayUser.lp_id}</span>
+              </div>
+            )}
+            <p className="mb-4 max-w-md text-muted-foreground/80 text-sm leading-relaxed">
               {displayUser.signature || "记录生活中的美好时光 ✨"}
             </p>
 
             {/* 用户详细信息 - 标签式布局 */}
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="mb-6 flex flex-wrap gap-3">
               {/* 职业信息 */}
               {displayUser.job && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-secondary-foreground text-sm hover:bg-secondary/70 transition-colors">
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-secondary/50 px-3 py-1.5 text-secondary-foreground text-sm transition-colors hover:bg-secondary/70">
                   <Briefcase size={14} />
                   <span>{displayUser.job}</span>
                   {displayUser.company && (
                     <>
-                      <span className="opacity-60 mx-0.5">@</span>
+                      <span className="mx-0.5 opacity-60">@</span>
                       <span>{displayUser.company}</span>
                     </>
                   )}
@@ -400,7 +398,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
 
               {/* 位置信息 */}
               {(displayUser as any).ipInfo?.city && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-secondary-foreground text-sm hover:bg-secondary/70 transition-colors">
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-secondary/50 px-3 py-1.5 text-secondary-foreground text-sm transition-colors hover:bg-secondary/70">
                   <MapPin size={14} />
                   <span>
                     {(displayUser as any).ipInfo.city}
@@ -413,7 +411,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
 
               {/* 加入时间 */}
               {displayUser.createdAt && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 text-secondary-foreground text-sm hover:bg-secondary/70 transition-colors">
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-secondary/50 px-3 py-1.5 text-secondary-foreground text-sm transition-colors hover:bg-secondary/70">
                   <Calendar size={14} />
                   <span>{new Date(displayUser.createdAt).toLocaleDateString("zh-CN")} 加入</span>
                 </div>
@@ -421,15 +419,15 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
             </div>
 
             {/* 社交链接区域 */}
-            <div className="flex flex-wrap gap-4 mb-4">
+            <div className="mb-4 flex flex-wrap gap-4">
               {/* Email */}
               {displayUser.email && (
                 <a
+                  className="group flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-primary"
                   href={`mailto:${displayUser.email}`}
-                  className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 group-hover:bg-primary/10 transition-colors">
-                    <Mail size={15} className="group-hover:text-primary transition-colors" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 transition-colors group-hover:bg-primary/10">
+                    <Mail className="transition-colors group-hover:text-primary" size={15} />
                   </div>
                   <span className="hidden sm:inline">{displayUser.email}</span>
                 </a>
@@ -438,17 +436,17 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
               {/* 网站 */}
               {displayUser.website && (
                 <a
+                  className="group flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-primary"
                   href={
                     displayUser.website.startsWith("http")
                       ? displayUser.website
                       : `https://${displayUser.website}`
                   }
-                  target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                  target="_blank"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 group-hover:bg-primary/10 transition-colors">
-                    <Globe size={15} className="group-hover:text-primary transition-colors" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 transition-colors group-hover:bg-primary/10">
+                    <Globe className="transition-colors group-hover:text-primary" size={15} />
                   </div>
                   <span className="hidden sm:inline">
                     {displayUser.website.replace(/^https?:\/\//, "")}
@@ -459,13 +457,13 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
               {/* GitHub */}
               {displayUser.github && (
                 <a
+                  className="group flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-primary"
                   href={`https://github.com/${displayUser.github}`}
-                  target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                  target="_blank"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 group-hover:bg-primary/10 transition-colors">
-                    <Github size={15} className="group-hover:text-primary transition-colors" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/30 transition-colors group-hover:bg-primary/10">
+                    <Github className="transition-colors group-hover:text-primary" size={15} />
                   </div>
                   <span className="hidden sm:inline">{displayUser.github}</span>
                 </a>
@@ -478,18 +476,18 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
             {stats.map((stat, index) => (
               <div className="group/stat relative" key={index}>
                 <div className="flex items-baseline gap-2">
-                  <span className="font-bold text-3xl tabular-nums text-foreground transition-colors group-hover/stat:text-foreground/70">
+                  <span className="font-bold text-3xl text-foreground tabular-nums transition-colors group-hover/stat:text-foreground/70">
                     {stat.value}
                   </span>
-                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
+                  <span className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                     {stat.label}
                   </span>
                 </div>
                 {/* 分隔符 */}
                 {index < stats.length - 1 && (
                   <Separator
-                    orientation="vertical"
                     className="absolute top-1/2 -right-4 h-8 -translate-y-1/2"
+                    orientation="vertical"
                   />
                 )}
               </div>
@@ -499,20 +497,23 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
       </Card>
 
       {/* 内容切换标签 - 使用 shadcn Tabs */}
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+      <Tabs className="w-full" onValueChange={handleTabChange} value={activeTab}>
+        <TabsList className="!h-12 grid w-full grid-cols-5 p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <TabsTrigger
+                className="flex items-center justify-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 key={tab.id}
                 value={tab.id}
-                className="flex items-center justify-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <Icon size={16} />
                 <span className="font-medium text-sm">{tab.label}</span>
                 {tab.count !== undefined && tab.count > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  <Badge
+                    className="ml-1 h-5 px-1.5 text-xs data-[state=active]:bg-primary-foreground/20 data-[state=active]:text-primary-foreground"
+                    variant="secondary"
+                  >
                     {tab.count}
                   </Badge>
                 )}
@@ -522,19 +523,19 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
         </TabsList>
 
         {/* 主要内容区域 - 使用 TabsContent */}
-        <TabsContent value="photos" className="mt-6">
+        <TabsContent className="mt-6" value="photos">
           <Card className="min-h-[500px]">
             <CardContent className="p-6">
-              <PhotoWall userId={targetUserId} isOwnProfile={isViewingOwnProfile} />
+              <PhotoWall isOwnProfile={isViewingOwnProfile} userId={targetUserId} />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="track" className="mt-6">
-          <TrackPage userId={targetUserId} isOwnProfile={isViewingOwnProfile} />
+        <TabsContent className="mt-6" value="track">
+          <TrackPage isOwnProfile={isViewingOwnProfile} userId={targetUserId} />
         </TabsContent>
 
-        <TabsContent value="posts" className="mt-6">
+        <TabsContent className="mt-6" value="posts">
           <Card className="min-h-[500px]">
             <CardContent className="p-6">
               {isLoadingTopics && posts.length === 0 ? (
@@ -543,19 +544,19 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
                 </div>
               ) : posts.length === 0 ? (
                 <LottieAnimation
-                  type="empty"
-                  emptyTitle={isViewingOwnProfile ? "还没有发布内容" : "TA还没有发布内容"}
-                  emptyDescription={isViewingOwnProfile ? "记录并分享你的精彩瞬间" : ""}
-                  width={200}
-                  height={200}
                   actionButton={
                     isViewingOwnProfile ? (
-                      <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
+                      <Button className="gap-2" onClick={() => navigate({ to: "/publish" })}>
                         <Plus size={16} />
                         发布第一篇内容
                       </Button>
                     ) : undefined
                   }
+                  emptyDescription={isViewingOwnProfile ? "记录并分享你的精彩瞬间" : ""}
+                  emptyTitle={isViewingOwnProfile ? "还没有发布内容" : "TA还没有发布内容"}
+                  height={200}
+                  type="empty"
+                  width={200}
                 />
               ) : (
                 <SimpleInfiniteScroll
@@ -572,7 +573,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
           </Card>
         </TabsContent>
 
-        <TabsContent value="liked" className="mt-6">
+        <TabsContent className="mt-6" value="liked">
           <Card className="min-h-[500px]">
             <CardContent className="p-6">
               {isLoadingLikedTopics && likedPosts.length === 0 ? (
@@ -581,11 +582,11 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
                 </div>
               ) : likedPosts.length === 0 ? (
                 <LottieAnimation
-                  type="empty"
-                  emptyTitle={isViewingOwnProfile ? "还没有喜欢的内容" : "TA还没有喜欢的内容"}
                   emptyDescription={isViewingOwnProfile ? "点赞你喜欢的内容" : ""}
-                  width={200}
+                  emptyTitle={isViewingOwnProfile ? "还没有喜欢的内容" : "TA还没有喜欢的内容"}
                   height={200}
+                  type="empty"
+                  width={200}
                 />
               ) : (
                 <SimpleInfiniteScroll
@@ -602,7 +603,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
           </Card>
         </TabsContent>
 
-        <TabsContent value="saved" className="mt-6">
+        <TabsContent className="mt-6" value="saved">
           <Card className="min-h-[500px]">
             <CardContent className="p-6">
               {isLoadingCollectedTopics && collectedPosts.length === 0 ? (
@@ -611,11 +612,11 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
                 </div>
               ) : collectedPosts.length === 0 ? (
                 <LottieAnimation
-                  type="empty"
-                  emptyTitle={isViewingOwnProfile ? "还没有收藏的内容" : "TA还没有收藏的内容"}
                   emptyDescription={isViewingOwnProfile ? "收藏你感兴趣的内容" : ""}
-                  width={200}
+                  emptyTitle={isViewingOwnProfile ? "还没有收藏的内容" : "TA还没有收藏的内容"}
                   height={200}
+                  type="empty"
+                  width={200}
                 />
               ) : (
                 <SimpleInfiniteScroll
@@ -649,19 +650,19 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
           onEdit={async (topicId) => {
             try {
               // 加载话题数据
-              const response = await apiService.getTopicDetail(topicId);
-              if (response.code === 200 && response.result) {
+              const response = await topicsApi.getBySecUid(topicId);
+              if (response.result) {
                 const topic = response.result;
 
-                // 提取图片列表（从 fileList 字段）
-                const images = topic.fileList || [];
+                // 提取图片列表（从 files 字段）
+                const images = topic.files || topic.fileList || [];
 
                 setEditingTopicId(topicId);
                 setEditingTopicData({
                   title: topic.title || "",
                   content: topic.content || "",
-                  images: images,
-                  topicTags: topic.topicTags || [], // 添加标签数据
+                  images,
+                  topicTags: topic.tags || topic.topicTags || [], // 添加标签数据
                 });
                 setSelectedTopicId(null);
               }
@@ -693,7 +694,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
               const originalData = {
                 title: editingTopicData.title,
                 content: editingTopicData.content,
-                fileIds: editingTopicData.images?.map((img) => img.id) || [],
+                fileIds: editingTopicData.images?.map((img) => img.sec_uid) || [],
               };
 
               // 对比变化
@@ -707,7 +708,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
 
               console.log("🔄-----变更字段-----", changes);
 
-              const response = await apiService.updateTopic(editingTopicId, changes);
+              const response = await topicsApi.update(editingTopicId, changes);
 
               if (response.code === 200) {
                 // 刷新相关缓存
@@ -728,18 +729,7 @@ export default function ProfilePage({ userId: propUserId, initialTab }: ProfileP
         />
       )}
 
-      {/* 创建新帖子对话框 */}
-      {isViewingOwnProfile && (
-        <CreatePostModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSubmit={async () => {
-            // 刷新帖子列表
-            queryClient.invalidateQueries({ queryKey: ["topics"] });
-            fetchNextPage();
-          }}
-        />
-      )}
+      {/* 创建新帖子 - 已改为独立页面 /publish */}
     </div>
   );
 }

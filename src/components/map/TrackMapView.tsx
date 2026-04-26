@@ -1,13 +1,17 @@
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import { useQuery } from "@tanstack/react-query";
+import { Check, Circle, Map as MapIcon } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import ImageInfoPanel from "@/components/media/ImageInfoPanel";
 import { MAPBOX_TOKEN } from "@/config/mapbox";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { apiService } from "@/services/api";
+import { filesApi } from "@/services/api";
 import { generateOssImageParams } from "@/utils/media";
 import PhotoGallery from "./PhotoGallery";
+import type { FileData } from "./types";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./MapCard.css";
 
@@ -29,6 +33,7 @@ const createPopupHTML = (
   info: string,
   time: string,
   photoIndex?: number,
+  extra?: { address?: string; device?: string; params?: string }
 ) => `
   <div class="map-popup-card">
     <div class="map-popup-image-wrap">
@@ -36,7 +41,7 @@ const createPopupHTML = (
         src="${imgUrl}"
         alt="${name}"
         class="popup-preview-image map-popup-image"
-        data-photo-index="${photoIndex !== undefined ? photoIndex : ""}"
+        data-photo-index="${photoIndex === undefined ? "" : photoIndex}"
       />
     </div>
     <div class="map-popup-body">
@@ -45,36 +50,22 @@ const createPopupHTML = (
         <span class="map-popup-badge">${info}</span>
         <span class="map-popup-time">${time}</span>
       </div>
+      ${extra?.address ? `<div class="map-popup-address"><svg class="map-popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${extra.address}</div>` : ""}
+      ${extra?.device ? `<div class="map-popup-device"><svg class="map-popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>${extra.device}</div>` : ""}
+      ${extra?.params ? `<div class="map-popup-params"><svg class="map-popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="12"/></svg>${extra.params}</div>` : ""}
     </div>
   </div>
 `;
 
-interface FileData {
-  id: number;
-  name: string;
-  url: string;
-  type: string;
-  blurhash: string;
-  videoSrc?: string | null;
-  fromIphone: boolean;
-  width: number;
-  height: number;
-  lng: number;
-  lat: number;
-  takenAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 interface TrackMapViewProps {
-  userId?: number;
-  secUid?: string;
-  isDark?: boolean;
   customCenter?: [number, number]; // [lng, lat]
   customZoom?: number;
-  onViewChange?: (center: [number, number], zoom: number) => void;
+  isDark?: boolean;
   onReady?: () => void; // 地图加载完成回调
+  onViewChange?: (center: [number, number], zoom: number) => void;
+  secUid?: string;
   showGallery?: boolean;
+  userId?: number;
 }
 
 const TrackMapView: React.FC<TrackMapViewProps> = ({
@@ -99,6 +90,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const circleSelectorRef = useRef<HTMLDivElement>(null);
   const selectModeRef = useRef(selectMode);
   const filteredFilesRef = useRef<FileData[]>([]);
+  const fileDetailCache = useRef<Map<string, FileData>>(new Map());
 
   // 同步 ref 和 state
   useEffect(() => {
@@ -109,7 +101,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 清理事件处理器
   const cleanupEventHandlers = useCallback(() => {
-    if (!map.current) return;
+    if (!map.current) {
+      return;
+    }
     eventHandlers.current.forEach(({ event, handler, layer }) => {
       try {
         if (layer) {
@@ -117,7 +111,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         } else {
           map.current!.off(event as any, handler);
         }
-      } catch (e) {
+      } catch (_e) {
         /* ignore */
       }
     });
@@ -126,7 +120,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 注册事件处理器（便于统一清理）
   const registerEventHandler = useCallback((event: string, handler: any, layer?: string) => {
-    if (!map.current) return;
+    if (!map.current) {
+      return;
+    }
     if (layer) {
       map.current.on(event as any, layer, handler);
     } else {
@@ -138,24 +134,27 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   // OSS 缩略图处理函数
   const getThumbnailUrl = useCallback(
     (url: string, width: number, height: number, targetSize = 100) => {
-      if (!url) return "";
+      if (!url) {
+        return "";
+      }
       if (url.includes("aliyuncs.com")) {
         return url + generateOssImageParams(width, height, targetSize, 80);
       }
       return url;
     },
-    [],
+    []
   );
 
   // 使用 react-query 加载数据，自动去重和缓存
   const { data: filesData, isLoading: loading } = useQuery({
     queryKey: ["map-user-files", userId, secUid],
     queryFn: async () => {
-      const response = await apiService.getUserFiles({
-        userId,
-        secUid,
-        size: -1,
-        filterEmptyLocation: true,
+      const response = await filesApi.list({
+        user_sec_uid: secUid,
+        page_size: -1,
+        preset: "mini",
+        sort: "taken_at,desc",
+        has_location: true,
       });
       return response;
     },
@@ -165,7 +164,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 处理文件数据 - 保持 API 返回的顺序
   const filteredFiles = useMemo(() => {
-    if (!filesData?.result?.list) return [];
+    if (!filesData?.result?.list) {
+      return [];
+    }
     return filesData.result.list.filter((file) => file.lng && file.lat);
   }, [filesData]);
 
@@ -177,83 +178,164 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   // 打开图片预览
   const openImagePreview = useCallback((fileData: FileData) => {
     import("viewer-pro").then(({ ViewerPro }) => {
-      // 检查是否需要格式转换（HEIC等格式浏览器不支持）
       const needsFormatConversion =
         fileData.url.includes("aliyuncs.com") && /\.(heic|heif|tiff?)$/i.test(fileData.name);
 
-      // 主图：HEIC等格式需要转换为JPEG，保持高质量
       const mainSrc = needsFormatConversion
         ? `${fileData.url}?x-oss-process=image/format,jpeg/quality,q_95`
         : fileData.url;
 
+      const cached = fileDetailCache.current.get(String(fileData.id));
+      const detail = cached || fileData;
+
       const viewer = new ViewerPro({
         images: [
           {
+            id: fileData.id,
             src: mainSrc,
             thumbnail: `${fileData.url}?x-oss-process=image/resize,w_300,h_200,m_lfit/quality,q_80/format,webp`,
-            title: fileData.name,
+            title: detail.name || fileData.name,
             width: fileData.width,
             height: fileData.height,
-          },
+            address: detail.address,
+            deviceMake: detail.deviceMake,
+            deviceModel: detail.deviceModel,
+            lensModel: detail.lensModel,
+            fNumber: detail.fNumber,
+            exposureTime: detail.exposureTime,
+            iso: detail.iso,
+            focalLength: detail.focalLength,
+            takenAt: detail.takenAt,
+            lng: fileData.lng,
+            lat: fileData.lat,
+          } as any,
         ],
+        infoRender: (viewerItem: any, idx: number) => {
+          const container = document.createElement("div");
+          container.style.width = "100%";
+          container.style.height = "100%";
+          const root = createRoot(container);
+          root.render(createElement(ImageInfoPanel, { viewerItem, index: idx }));
+          return container;
+        },
       });
       viewer.init();
       viewer.open(0);
     });
   }, []);
 
-  // 显示照片弹窗（统一函数）
-  const showPhotoPopup = useCallback(
+  // 渲染弹窗内容（纯渲染，不请求接口）
+  const renderPopup = useCallback(
     (coords: [number, number], fileData: FileData, index?: number) => {
-      if (!map.current) return;
+      if (!map.current) {
+        return;
+      }
 
-      // 关闭之前的弹窗
       if (currentPopup.current) {
         currentPopup.current.remove();
       }
 
       const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
       const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
+      const displayIndex = index || photoIndex + 1;
       const time = fileData.takenAt
         ? new Date(fileData.takenAt).toLocaleString("zh-CN")
         : "未知时间";
 
+      const device = [fileData.deviceMake, fileData.deviceModel].filter(Boolean).join(" ");
+      const paramParts = [
+        fileData.fNumber ? `ƒ/${fileData.fNumber}` : "",
+        fileData.exposureTime ? `${fileData.exposureTime}s` : "",
+        fileData.iso ? `ISO ${fileData.iso}` : "",
+        fileData.focalLength ? `${fileData.focalLength}mm` : "",
+      ].filter(Boolean);
+
+      const extra = {
+        address: fileData.address || undefined,
+        device: device || undefined,
+        params: paramParts.length > 0 ? paramParts.join("  ") : undefined,
+      };
+
       currentPopup.current = new mapboxgl.Popup({ offset: 25, maxWidth: "none" })
         .setLngLat(coords)
         .setHTML(
-          createPopupHTML(
-            popupImgUrl,
-            fileData.name,
-            `#${index || photoIndex + 1}`,
-            time,
-            photoIndex,
-          ),
+          createPopupHTML(popupImgUrl, fileData.name, `#${displayIndex}`, time, photoIndex, extra)
         )
         .addTo(map.current);
 
+      const popup = currentPopup.current;
       setTimeout(() => {
         const img = popup.getElement()?.querySelector(".popup-preview-image") as HTMLElement;
         if (img && photoIndex !== -1) {
+          img.style.cursor = "pointer";
           img.addEventListener("click", () => openImagePreview(fileData));
         }
       }, 50);
     },
-    [filteredFiles, getThumbnailUrl, openImagePreview],
+    [filteredFiles, getThumbnailUrl, openImagePreview]
+  );
+
+  // 显示照片弹窗（统一入口：先展示 mini 数据，再异步拉详情刷新弹窗）
+  const showPhotoPopup = useCallback(
+    (coords: [number, number], fileData: FileData, index?: number) => {
+      const secUid = String(fileData.id);
+
+      // 如果缓存中有详情，直接用
+      const cached = fileDetailCache.current.get(secUid);
+      if (cached) {
+        renderPopup(coords, cached, index);
+        return;
+      }
+
+      // 先用现有数据立即展示弹窗
+      renderPopup(coords, fileData, index);
+
+      // 异步拉详情，拿到后缓存并刷新弹窗
+      filesApi
+        .getBySecUid(secUid)
+        .then((res) => {
+          const detail = res.result;
+          if (!detail) {
+            return;
+          }
+          const enriched: FileData = {
+            ...fileData,
+            name: detail.name || fileData.name,
+            address: detail.address,
+            deviceMake: detail.device_make,
+            deviceModel: detail.device_model,
+            lensModel: detail.lens_model,
+            fNumber: detail.f_number,
+            exposureTime: detail.exposure_time,
+            iso: detail.iso,
+            focalLength: detail.focal_length,
+            takenAt: detail.taken_at || fileData.takenAt,
+          };
+          fileDetailCache.current.set(secUid, enriched);
+          if (currentPopup.current) {
+            renderPopup(coords, enriched, index);
+          }
+        })
+        .catch(() => {});
+    },
+    [renderPopup]
   );
 
   // 飞到指定位置
   const flyToLocation = useCallback(
     (lng: number, lat: number, fileData: FileData) => {
-      if (!map.current) return;
+      if (!map.current) {
+        return;
+      }
       map.current.flyTo({ center: [lng, lat], zoom: 16, essential: true, duration: 1500 });
       setTimeout(() => showPhotoPopup([lng, lat], fileData), 1000);
     },
-    [showPhotoPopup],
+    [showPhotoPopup]
   );
 
   // 添加聚类和照片图层
   const addPhotoLayers = useCallback(() => {
-    if (!map.current || !isMapReady || filteredFiles.length === 0) {
+    if (!(map.current && isMapReady) || filteredFiles.length === 0) {
       return;
     }
 
@@ -399,42 +481,10 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
       el.onclick = (e) => {
         e.stopPropagation();
-        if (selectModeRef.current || !fileData || !map.current) return;
-
-        // 关闭之前的弹窗
-        if (currentPopup.current) {
-          currentPopup.current.remove();
+        if (selectModeRef.current || !fileData || !map.current) {
+          return;
         }
-
-        const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
-        const time = fileData.takenAt
-          ? new Date(fileData.takenAt).toLocaleString("zh-CN")
-          : "未知时间";
-        currentPopup.current = new mapboxgl.Popup({
-          offset: 25,
-          closeOnClick: true,
-          maxWidth: "none",
-        })
-          .setLngLat(coords)
-          .setHTML(
-            createPopupHTML(popupImgUrl, fileData.name, `#${feature.properties?.index}`, time, -1),
-          )
-          .addTo(map.current);
-
-        // 为弹窗图片添加点击预览
-        setTimeout(() => {
-          const img = currentPopup.current
-            ?.getElement()
-            ?.querySelector(".popup-preview-image") as HTMLElement;
-          if (img && fileData) {
-            img.style.cursor = "pointer";
-            img.onclick = (ev) => {
-              ev.stopPropagation();
-              ev.preventDefault();
-              openImagePreview(fileData);
-            };
-          }
-        }, 50);
+        showPhotoPopup(coords, fileData, feature.properties?.index);
       };
 
       markerData.push({ marker, el, coords, imgSrc, loaded: false });
@@ -443,28 +493,34 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
     // 统一的 marker 可见性更新函数
     const updateMarkersVisibility = () => {
-      if (!map.current) return;
+      if (!map.current) {
+        return;
+      }
       const zoom = map.current.getZoom();
       const bounds = map.current.getBounds();
-      if (!bounds) return;
+      if (!bounds) {
+        return;
+      }
 
       const showMarkers = zoom > MARKER_ZOOM_THRESHOLD;
       const pointLayer = map.current.getLayer(LAYER_NAMES.POINT);
       const pointOuterLayer = map.current.getLayer(LAYER_NAMES.POINT_OUTER);
 
       // 批量更新图层可见性
-      if (pointLayer)
+      if (pointLayer) {
         map.current.setLayoutProperty(
           LAYER_NAMES.POINT,
           "visibility",
-          showMarkers ? "none" : "visible",
+          showMarkers ? "none" : "visible"
         );
-      if (pointOuterLayer)
+      }
+      if (pointOuterLayer) {
         map.current.setLayoutProperty(
           LAYER_NAMES.POINT_OUTER,
           "visibility",
-          showMarkers ? "none" : "visible",
+          showMarkers ? "none" : "visible"
         );
+      }
 
       // 更新各 marker
       markerData.forEach((item) => {
@@ -474,9 +530,11 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
             item.el.src = item.imgSrc;
             item.loaded = true;
           }
-          if (!item.marker.getElement().parentNode) item.marker.addTo(map.current!);
-        } else {
-          if (item.marker.getElement().parentNode) item.marker.remove();
+          if (!item.marker.getElement().parentNode) {
+            item.marker.addTo(map.current!);
+          }
+        } else if (item.marker.getElement().parentNode) {
+          item.marker.remove();
         }
       });
     };
@@ -487,41 +545,53 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
     // 点击聚类时放大
     const clusterClickHandler = (e: mapboxgl.MapMouseEvent) => {
-      if (!map.current || selectModeRef.current) return;
+      if (!map.current || selectModeRef.current) {
+        return;
+      }
       const features = map.current.queryRenderedFeatures(e.point, {
         layers: [LAYER_NAMES.CLUSTERS],
       });
-      if (features.length === 0) return;
+      if (features.length === 0) {
+        return;
+      }
       const clusterId = features[0].properties?.cluster_id;
       (map.current.getSource("points") as mapboxgl.GeoJSONSource).getClusterExpansionZoom(
         clusterId,
         (err, zoom) => {
-          if (err || !map.current) return;
+          if (err || !map.current) {
+            return;
+          }
           map.current.easeTo({
             center: (features[0].geometry as GeoJSON.Point).coordinates as [number, number],
             zoom: zoom as number,
           });
-        },
+        }
       );
     };
     registerEventHandler("click", clusterClickHandler, LAYER_NAMES.CLUSTERS);
 
     // 点击单个点显示弹窗
     const pointClickHandler = (e: mapboxgl.MapMouseEvent) => {
-      if (!map.current || !e.features?.length || selectModeRef.current) return;
+      if (!(map.current && e.features?.length) || selectModeRef.current) {
+        return;
+      }
       const coords = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [
         number,
         number,
       ];
       const { url, index } = e.features[0].properties!;
       const fileData = filteredFiles.find((f) => f.url === url);
-      if (fileData) showPhotoPopup(coords, fileData, index);
+      if (fileData) {
+        showPhotoPopup(coords, fileData, index);
+      }
     };
     registerEventHandler("click", pointClickHandler, LAYER_NAMES.POINT);
 
     // 鼠标悬停效果
     const setCursor = (cursor: string) => () => {
-      if (map.current) map.current.getCanvas().style.cursor = cursor;
+      if (map.current) {
+        map.current.getCanvas().style.cursor = cursor;
+      }
     };
     registerEventHandler("mouseenter", setCursor("pointer"), LAYER_NAMES.CLUSTERS);
     registerEventHandler("mouseleave", setCursor(""), LAYER_NAMES.CLUSTERS);
@@ -556,7 +626,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 初始化地图
   const initMap = useCallback(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || map.current) {
+      return;
+    }
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
     try {
@@ -564,7 +636,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         container: mapContainer.current,
         style: mapStyle,
         center: customCenter || [116.4074, 39.9042],
-        zoom: customZoom !== undefined ? customZoom : 2,
+        zoom: customZoom === undefined ? 2 : customZoom,
         pitch: 0,
         bearing: 0,
         preserveDrawingBuffer: true,
@@ -605,7 +677,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
             const point = map.current!.project([file.lng, file.lat]);
             const clickPoint = map.current!.project([center.lng, center.lat]);
             const distance = Math.sqrt(
-              Math.pow(point.x - clickPoint.x, 2) + Math.pow(point.y - clickPoint.y, 2),
+              (point.x - clickPoint.x) ** 2 + (point.y - clickPoint.y) ** 2
             );
             return distance <= CIRCLE_RADIUS;
           });
@@ -642,7 +714,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 初始化地图 - 只有在数据加载完成且有数据时才初始化
   useEffect(() => {
-    if ((!userId && !secUid) || loading || filteredFiles.length === 0) return;
+    if (!(userId || secUid) || loading || filteredFiles.length === 0) {
+      return;
+    }
 
     if (!mapContainer.current) {
       const checkTimer = setTimeout(() => mapContainer.current && initMap(), 200);
@@ -687,7 +761,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const prevIsDark = useRef(isDark);
   useEffect(() => {
     // 跳过初始渲染，只处理运行时主题切换
-    if (prevIsDark.current === isDark) return;
+    if (prevIsDark.current === isDark) {
+      return;
+    }
     prevIsDark.current = isDark;
 
     if (map.current && isMapReady) {
@@ -697,7 +773,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       map.current.setStyle(newMapStyle);
 
       map.current.once("styledata", () => {
-        if (filteredFiles.length > 0) setTimeout(() => addPhotoLayers(), 100);
+        if (filteredFiles.length > 0) {
+          setTimeout(() => addPhotoLayers(), 100);
+        }
       });
     }
   }, [isDark, isMapReady, filteredFiles, addPhotoLayers]);
@@ -713,10 +791,12 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     );
   }
 
-  if ((!userId && !secUid) || filteredFiles.length === 0) {
+  if (!(userId || secUid) || filteredFiles.length === 0) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="mb-4 text-6xl">🗺️</div>
+        <div className="mb-4 flex justify-center text-gray-300">
+          <MapIcon className="h-16 w-16" strokeWidth={1} />
+        </div>
         <h3 className="mb-2 font-semibold text-gray-700 text-lg">暂无地图数据</h3>
         <p className="text-center text-gray-500 text-sm">
           上传带有GPS信息的照片后，
@@ -749,7 +829,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       {/* 调试覆盖层 - 显示地图状态 */}
       {!isMapReady && (
         <div
-          className="absolute inset-0 z-50 flex items-center justify-center bg-gray-100/80 pointer-events-none"
+          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-gray-100/80"
           style={{ right: showGallery && !isMobile ? `${GALLERY_WIDTH}px` : "0" }}
         >
           <div className="text-center">
@@ -761,6 +841,9 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
       {/* 圆形选择图标 - 极简版 */}
       <button
+        className={`absolute left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all hover:scale-110 hover:shadow-lg ${
+          selectMode ? "bg-blue-500 text-white" : "bg-white/90 text-gray-600 backdrop-blur-sm"
+        } ${isMobile ? "bottom-16" : "bottom-4"}`}
         onClick={() => {
           const newMode = !selectMode;
           setSelectMode(newMode);
@@ -772,19 +855,18 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
             }
           }
         }}
-        className={`absolute left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all hover:shadow-lg hover:scale-110 ${
-          selectMode ? "bg-blue-500 text-white" : "bg-white/90 text-gray-600 backdrop-blur-sm"
-        } ${isMobile ? "bottom-16" : "bottom-4"}`}
         style={{ right: showGallery && !isMobile ? `${GALLERY_WIDTH}px` : undefined }}
         title={selectMode ? "退出圈选模式" : "圈选照片"}
       >
-        <span className="text-lg leading-none">{selectMode ? "✓" : "○"}</span>
+        <span className="text-lg leading-none">
+          {selectMode ? <Check className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+        </span>
       </button>
 
       {/* 圆形选择器 - 性能优化：直接操作 DOM */}
       <div
-        ref={circleSelectorRef}
         className="pointer-events-none"
+        ref={circleSelectorRef}
         style={{
           position: "absolute",
           display: "none",
@@ -799,13 +881,13 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       {/* 照片画廊 - 桌面端侧边栏 / 移动端底部抽屉 */}
       {showGallery && (
         <PhotoGallery
-          photos={filteredFiles}
-          selectedPhotos={selectedPhotos}
-          onPhotoClick={flyToLocation}
-          onClearSelection={() => setSelectedPhotos([])}
-          width={GALLERY_WIDTH}
           isDark={isDark}
           isMobile={isMobile}
+          onClearSelection={() => setSelectedPhotos([])}
+          onPhotoClick={flyToLocation}
+          photos={filteredFiles}
+          selectedPhotos={selectedPhotos}
+          width={GALLERY_WIDTH}
         />
       )}
     </div>

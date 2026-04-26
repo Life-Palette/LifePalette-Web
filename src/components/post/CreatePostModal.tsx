@@ -17,20 +17,11 @@ import { TagsInput } from "@/components/ui/tags-input";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { deserializeHtml, serializeToHtml } from "@/lib/serializeHtml";
+import type { OSSFile } from "@/services/upload/ossService";
 import type { Post, PostImage } from "@/types";
-import type { FileItem } from "@/types/upload";
 
-type CreatePostModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (
-    postData: Omit<
-      Post,
-      "id" | "author" | "likes" | "comments" | "saves" | "isLiked" | "isSaved" | "createdAt"
-    >,
-  ) => void;
+interface CreatePostModalProps {
   editMode?: boolean;
-  topicId?: number;
   initialData?: {
     title: string;
     content: string;
@@ -41,7 +32,16 @@ type CreatePostModalProps = {
       };
     }>;
   };
-};
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (
+    postData: Omit<
+      Post,
+      "id" | "author" | "likes" | "comments" | "saves" | "isLiked" | "isSaved" | "createdAt"
+    >
+  ) => void;
+  topicId?: number;
+}
 
 // 初始空值
 const initialValue: Value = [
@@ -89,48 +89,31 @@ export default function CreatePostModal({
       try {
         // 1. 上传新文件
         const newItems = mediaItems.filter((item) => item.type === "new");
-        let uploadedFiles: FileItem[] = [];
+        let uploadedFiles: OSSFile[] = [];
 
         if (newItems.length > 0) {
           const filesToUpload: File[] = [];
+          const locationMap = new Map<File, { lat: number; lng: number }>();
+
           newItems.forEach((item) => {
             filesToUpload.push(item.data.file);
+            // 仅当 EXIF 中没有 GPS 且用户手动设置了位置时，才传给后端
+            if (!item.data.hasGPS && item.data.lat != null && item.data.lng != null) {
+              locationMap.set(item.data.file, { lat: item.data.lat, lng: item.data.lng });
+            }
             if (item.data.videoFile) {
               filesToUpload.push(item.data.videoFile);
             }
           });
 
-          const rawUploadedFiles = await uploadMultipleFiles(filesToUpload, {
-            compress: isCompressMode,
-            maxSizeMB: isCompressMode ? 20 : undefined,
-          });
-
-          // 处理 Live Photo 文件关联
-          const { processLivePhotoFiles } = await import("../../utils/upload/fileProcessor");
-          uploadedFiles = await processLivePhotoFiles(rawUploadedFiles);
-
-          // 为有位置信息的文件更新位置（并行处理）
-          const { apiService } = await import("@/services/api");
-          const locationUpdatePromises = newItems
-            .map((item, index) => {
-              if (item.type === "new" && item.data.lat && item.data.lng) {
-                const fileId = uploadedFiles[index].id;
-                return apiService
-                  .updateFileLocation(Number(fileId), {
-                    lat: item.data.lat,
-                    lng: item.data.lng,
-                  })
-                  .catch((error) => {
-                    console.error(`更新文件 ${fileId} 位置失败:`, error);
-                  });
-              }
-              return null;
-            })
-            .filter(Boolean);
-
-          if (locationUpdatePromises.length > 0) {
-            await Promise.all(locationUpdatePromises);
-          }
+          uploadedFiles = await uploadMultipleFiles(
+            filesToUpload,
+            {
+              compress: isCompressMode,
+              maxSizeMB: isCompressMode ? 20 : undefined,
+            },
+            locationMap.size > 0 ? locationMap : undefined
+          );
         }
 
         // 2. 将 Plate Value 转换为 HTML 字符串
@@ -146,28 +129,37 @@ export default function CreatePostModal({
         };
 
         // 处理标签
-        if (value.tags && value.tags.trim()) {
+        if (value.tags?.trim()) {
           postData.tags = value.tags
             .split(",")
             .map((tag) => tag.trim())
             .filter((tag) => tag.length > 0);
         }
 
-        // 5. 按照 mediaItems 的顺序构建 fileIds
-        const fileIds: number[] = [];
-        let newFileIndex = 0;
+        // 5. 按照 mediaItems 的顺序构建 file_sec_uids
+        const fileSecUids: string[] = [];
+        let uploadedFileOffset = 0;
 
         for (const item of mediaItems) {
           if (item.type === "existing") {
-            fileIds.push(item.data.id);
+            // 已有文件的 sec_uid
+            if (item.data.sec_uid) {
+              fileSecUids.push(item.data.sec_uid);
+            }
           } else {
-            fileIds.push(Number(uploadedFiles[newFileIndex].id));
-            newFileIndex++;
+            if (uploadedFiles[uploadedFileOffset]) {
+              fileSecUids.push(uploadedFiles[uploadedFileOffset].sec_uid);
+            }
+            // 跳过图片，如果有配对的视频文件也跳过
+            uploadedFileOffset++;
+            if (item.data.videoFile) {
+              uploadedFileOffset++;
+            }
           }
         }
 
-        if (fileIds.length > 0) {
-          postData.fileIds = fileIds.reverse();
+        if (fileSecUids.length > 0) {
+          postData.file_sec_uids = fileSecUids;
         }
 
         // 6. 实际提交
@@ -213,7 +205,13 @@ export default function CreatePostModal({
       setMediaItems([]);
       setIsCompressMode(true);
     }
-  }, [isOpen, editMode, initialData]);
+  }, [
+    isOpen,
+    editMode,
+    initialData,
+    form.setFieldValue, // 创建模式：重置表单
+    form.reset,
+  ]);
 
   if (!isOpen) {
     return null;
@@ -236,7 +234,7 @@ export default function CreatePostModal({
 
   return (
     <Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
-      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0">
+      <DialogContent className="flex max-h-[85vh] max-w-2xl sm:max-w-2xl flex-col p-0">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-xl">{editMode ? "编辑动态" : "创建新动态"}</DialogTitle>
           <p className="mt-1 text-gray-500 text-sm">
@@ -275,14 +273,14 @@ export default function CreatePostModal({
                         标题 <span className="text-red-500">*</span>
                       </FieldLabel>
                       <Input
+                        aria-invalid={isInvalid}
+                        disabled={uploadState.isUploading}
                         id={field.name}
                         name={field.name}
-                        value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
                         placeholder="给你的动态起个吸引人的标题..."
-                        disabled={uploadState.isUploading}
-                        aria-invalid={isInvalid}
+                        value={field.state.value}
                       />
                       {isInvalid && (
                         <FieldError
@@ -303,7 +301,11 @@ export default function CreatePostModal({
                 </div>
 
                 <PlateEditor
-                  key={editMode ? `${initialData?.title ?? ""}-${(initialData?.content ?? "").slice(0, 40)}` : "create"}
+                  key={
+                    editMode
+                      ? `${initialData?.title ?? ""}-${(initialData?.content ?? "").slice(0, 40)}`
+                      : "create"
+                  }
                   onChange={setContent}
                   placeholder="分享你的想法、感受或故事..."
                   value={content}
@@ -311,16 +313,16 @@ export default function CreatePostModal({
               </div>
 
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">图片压缩</Label>
+                <Label className="font-medium text-sm">图片压缩</Label>
                 <div className="flex items-center gap-2">
                   <Switch
-                    id="compress-mode"
                     checked={isCompressMode}
+                    id="compress-mode"
                     onCheckedChange={setIsCompressMode}
                   />
                   <Label
+                    className="cursor-pointer font-normal text-gray-500 text-sm"
                     htmlFor="compress-mode"
-                    className="cursor-pointer text-sm text-gray-500 font-normal"
                   >
                     启用图片压缩（压缩至 20MB 以下）
                   </Label>
@@ -329,15 +331,15 @@ export default function CreatePostModal({
 
               {/* 媒体上传区域 */}
               <MediaUploader
+                compressLargeFiles={isCompressMode}
                 disabled={uploadState.isUploading}
                 initialImages={initialData?.images}
                 onChange={setMediaItems}
-                compressLargeFiles={isCompressMode}
               />
 
               {/* 上传进度 */}
               {uploadState.isUploading && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
+                <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Loader2 className="animate-spin text-blue-600" size={16} />
@@ -345,7 +347,7 @@ export default function CreatePostModal({
                         {uploadState.stageText}
                       </span>
                     </div>
-                    <span className="text-blue-700 text-sm font-medium">
+                    <span className="font-medium text-blue-700 text-sm">
                       {uploadState.progress}%
                     </span>
                   </div>
@@ -359,15 +361,15 @@ export default function CreatePostModal({
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name} className="flex items-center gap-1.5">
+                      <FieldLabel className="flex items-center gap-1.5" htmlFor={field.name}>
                         <Hash size={14} />
                         标签
                       </FieldLabel>
                       <TagsInput
-                        value={field.state.value}
-                        onChange={field.handleChange}
-                        onBlur={field.handleBlur}
                         disabled={uploadState.isUploading}
+                        onBlur={field.handleBlur}
+                        onChange={field.handleChange}
+                        value={field.state.value}
                       />
                       {isInvalid && (
                         <FieldError
@@ -412,7 +414,7 @@ export default function CreatePostModal({
           </div>
 
           {/* 固定底部提交按钮 */}
-          <div className="flex-shrink-0 border-t border-gray-100 p-6">
+          <div className="flex-shrink-0 border-gray-100 border-t p-6">
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button

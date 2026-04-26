@@ -3,8 +3,8 @@ import { useActivate } from "react-activation";
 
 interface ScrollRestoreContainerProps {
   children: ReactNode;
-  pageKey: string;
   className?: string;
+  pageKey: string;
 }
 
 const STORAGE_KEY = "page-scroll-positions";
@@ -120,7 +120,8 @@ export default function ScrollRestoreContainer({
         clearTimeout(debounceRef.current);
       }
     };
-  }, [getSavedPosition, initialScrollSet, restoreScrollPosition, saveScrollPosition]);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: scroll restore functions use refs intentionally
+  }, [initialScrollSet, saveScrollPosition, restoreScrollPosition, getSavedPosition]);
 
   return (
     <div className="relative">

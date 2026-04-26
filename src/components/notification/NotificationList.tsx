@@ -7,10 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { NotificationMessage } from "@/types";
 
 interface NotificationListProps {
-  notifications: NotificationMessage[];
   hasMore: boolean;
-  isLoading: boolean;
   isFetchingNextPage: boolean;
+  isLoading: boolean;
+  notifications: NotificationMessage[];
   onLoadMore: () => void;
   onRefresh?: () => void;
 }
@@ -38,7 +38,7 @@ export default function NotificationList({
   isLoading,
   isFetchingNextPage,
   onLoadMore,
-  onRefresh,
+  onRefresh: _onRefresh,
 }: NotificationListProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -52,10 +52,12 @@ export default function NotificationList({
 
   // 监听滚动到底部，触发加载更多
   const virtualItems = virtualizer.getVirtualItems();
-  const lastItem = virtualItems[virtualItems.length - 1];
+  const lastItem = virtualItems.at(-1);
 
   useEffect(() => {
-    if (!lastItem) return;
+    if (!lastItem) {
+      return;
+    }
 
     // 当滚动到最后5个项目时，触发加载更多
     if (lastItem.index >= notifications.length - 5 && hasMore && !isFetchingNextPage) {
@@ -91,8 +93,8 @@ export default function NotificationList({
     <div>
       {/* 虚拟化通知列表 */}
       <div
-        ref={parentRef}
         className="overflow-auto"
+        ref={parentRef}
         style={{
           height: "calc(100vh - 200px)", // 根据实际布局调整
         }}
@@ -108,8 +110,9 @@ export default function NotificationList({
             const notification = notifications[virtualItem.index];
             return (
               <div
-                key={virtualItem.key}
+                className="border-border border-b"
                 data-index={virtualItem.index}
+                key={virtualItem.key}
                 ref={virtualizer.measureElement}
                 style={{
                   position: "absolute",
@@ -118,7 +121,6 @@ export default function NotificationList({
                   width: "100%",
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
-                className="border-b border-border"
               >
                 <NotificationItem notification={notification} />
               </div>

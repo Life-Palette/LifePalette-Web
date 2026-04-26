@@ -17,21 +17,27 @@ export const queryClient = new QueryClient({
       // 智能重试策略
       retry: (failureCount, error: any) => {
         // 认证错误不重试
-        if (error?.message?.includes("登录已过期")) return false;
-        if (error?.message?.includes("权限不足")) return false;
+        if (error?.message?.includes("登录已过期")) {
+          return false;
+        }
+        if (error?.message?.includes("权限不足")) {
+          return false;
+        }
 
         // 最多重试2次
         return failureCount < 2;
       },
 
       // 重试延迟：指数退避策略
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
 
       // 窗口聚焦时智能重新获取
       refetchOnWindowFocus: (query) => {
         // 只有数据过期超过10分钟才在窗口聚焦时重新获取
         const state = query.state;
-        if (!state.dataUpdatedAt) return false;
+        if (!state.dataUpdatedAt) {
+          return false;
+        }
         const timeSinceUpdate = Date.now() - state.dataUpdatedAt;
         return timeSinceUpdate > 10 * 60 * 1000;
       },

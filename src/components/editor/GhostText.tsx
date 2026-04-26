@@ -3,7 +3,9 @@ interface GhostTextProps {
 }
 
 export function GhostText({ suggestion }: GhostTextProps) {
-  if (!suggestion) return null;
+  if (!suggestion) {
+    return null;
+  }
 
   return (
     <style>

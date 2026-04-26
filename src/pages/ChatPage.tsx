@@ -6,7 +6,7 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import PageLayout from "@/components/layout/PageLayout";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
-import { apiService } from "@/services/api";
+import { chatApi } from "@/services/api";
 import type { ChatMessage, ChatRoom } from "@/types/chat";
 
 export default function ChatPage() {
@@ -19,9 +19,9 @@ export default function ChatPage() {
   if (isLoadingUser) {
     return (
       <PageLayout activeTab="chat">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex min-h-[60vh] items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 dark:border-white mx-auto mb-4"></div>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-neutral-900 border-b-2 dark:border-white" />
             <p className="text-neutral-600 dark:text-neutral-400">加载中...</p>
           </div>
         </div>
@@ -33,9 +33,9 @@ export default function ChatPage() {
   if (!currentUserId) {
     return (
       <PageLayout activeTab="chat">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex min-h-[60vh] items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">
+            <h2 className="mb-2 font-semibold text-neutral-900 text-xl dark:text-white">
               请先登录
             </h2>
             <p className="text-neutral-600 dark:text-neutral-400">您需要登录后才能使用聊天功能</p>
@@ -67,7 +67,7 @@ function ChatPageContent({ currentUserId }: { currentUserId: number }) {
   // 获取聊天室列表
   const { data: roomsData } = useQuery({
     queryKey: ["chatRooms", roomListVersion],
-    queryFn: () => apiService.getChatRooms({ page: 1, size: 50 }),
+    queryFn: () => chatApi.getRooms({ page: 1, page_size: 50 }),
   });
 
   const rooms = roomsData?.result?.list || [];
@@ -117,19 +117,19 @@ function ChatPageContent({ currentUserId }: { currentUserId: number }) {
 
       // 加载消息
       try {
-        const response = await apiService.getChatMessages(room.id, {
+        const response = await chatApi.getMessages(room.id, {
           page: 1,
-          size: 50,
+          page_size: 50,
         });
         const messageList = response.result?.list || [];
         // 确保消息按时间正序排列（旧消息在前）
         const sortedMessages = [...messageList].sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
         setMessages(sortedMessages);
 
         // 标记为已读
-        await apiService.markChatRoomAsRead(room.id);
+        await chatApi.markAsRead(room.id);
 
         // 刷新房间列表以更新未读数
         setRoomListVersion((v) => v + 1);
@@ -138,13 +138,15 @@ function ChatPageContent({ currentUserId }: { currentUserId: number }) {
         toast.error("加载消息失败");
       }
     },
-    [joinRoom],
+    [joinRoom]
   );
 
   // 发送消息
   const handleSendMessage = useCallback(
     (message: string, type: "TEXT" | "IMAGE" | "FILE", file?: any) => {
-      if (!currentRoom) return;
+      if (!currentRoom) {
+        return;
+      }
 
       switch (type) {
         case "TEXT":
@@ -158,61 +160,61 @@ function ChatPageContent({ currentUserId }: { currentUserId: number }) {
           break;
       }
     },
-    [currentRoom, currentUserId, sendTextMessage, sendImageMessage, sendFileMessage],
+    [currentRoom, sendTextMessage, sendImageMessage, sendFileMessage]
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex gap-6 h-[calc(100vh-200px)]">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex h-[calc(100vh-200px)] gap-6">
         {/* 左侧：聊天室列表 */}
         <div className="w-80 flex-shrink-0">
-          <div className="h-full rounded-2xl overflow-hidden shadow-sm border border-neutral-200/50 dark:border-neutral-800">
+          <div className="h-full overflow-hidden rounded-2xl border border-neutral-200/50 shadow-sm dark:border-neutral-800">
             <ChatRoomList
-              rooms={rooms}
               currentRoomId={currentRoom?.id}
               onSelectRoom={handleSelectRoom}
+              rooms={rooms}
             />
           </div>
         </div>
 
         {/* 右侧：聊天窗口 */}
-        <div className="flex-1 min-w-0">
-          <div className="h-full rounded-2xl overflow-hidden shadow-sm border border-neutral-200/50 dark:border-neutral-800">
+        <div className="min-w-0 flex-1">
+          <div className="h-full overflow-hidden rounded-2xl border border-neutral-200/50 shadow-sm dark:border-neutral-800">
             {currentRoom ? (
               <ChatWindow
-                room={currentRoom}
-                messages={messages}
                 currentUserId={currentUserId}
+                messages={messages}
                 onSendMessage={handleSendMessage}
+                room={currentRoom}
               />
             ) : (
-              <div className="flex items-center justify-center h-full bg-white dark:bg-neutral-900">
+              <div className="flex h-full items-center justify-center bg-white dark:bg-neutral-900">
                 <div className="text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 flex items-center justify-center">
+                  <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700">
                     <svg
-                      className="w-12 h-12 text-neutral-400 dark:text-neutral-500"
+                      className="h-12 w-12 text-neutral-400 dark:text-neutral-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">
+                  <h3 className="mb-2 font-medium text-lg text-neutral-900 dark:text-white">
                     选择一个聊天
                   </h3>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="text-neutral-600 text-sm dark:text-neutral-400">
                     从左侧列表中选择一个聊天室开始对话
                   </p>
                   {!isConnected && (
-                    <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-50 dark:bg-red-900/20">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                      <span className="text-sm text-red-600 dark:text-red-400">聊天服务未连接</span>
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 dark:bg-red-900/20">
+                      <div className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                      <span className="text-red-600 text-sm dark:text-red-400">聊天服务未连接</span>
                     </div>
                   )}
                 </div>

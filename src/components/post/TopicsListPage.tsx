@@ -5,29 +5,29 @@ import SimpleInfiniteScroll from "@/components/common/SimpleInfiniteScroll";
 import PageLayout from "@/components/layout/PageLayout";
 import SimpleImageDetail from "@/components/media/SimpleImageDetail";
 import CreatePostModal from "@/components/post/CreatePostModal";
-import { usePostActions } from "@/hooks/usePostActions";
+import { usePostActions } from "@/hooks/useInteractions";
 import { useInfiniteTopics } from "@/hooks/useTopics";
-import { apiService } from "@/services/api";
+import { topicsApi } from "@/services/api";
 
 interface TopicsListPageProps {
   activeTab: "home" | "trending" | "likes" | "saved";
+  emptyMessage?: string;
+  icon?: React.ReactNode;
   sortBy?: string;
   title?: string;
-  icon?: React.ReactNode;
-  emptyMessage?: string;
 }
 
 export default function TopicsListPage({
   activeTab,
-  sortBy = "createdAt,desc",
+  sortBy = "created_at,desc",
   title,
   icon,
   emptyMessage = "暂无内容",
 }: TopicsListPageProps) {
-  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [initialImageIndex, setInitialImageIndex] = useState<number>(0);
   const [cardRect, setCardRect] = useState<DOMRect | null>(null);
-  const [editingTopicId, setEditingTopicId] = useState<number | null>(null);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editingTopicData, setEditingTopicData] = useState<{
     title: string;
     content: string;
@@ -65,21 +65,25 @@ export default function TopicsListPage({
   const handleLike = useCallback(
     (postId: string) => {
       const post = posts.find((p) => p.id === postId);
-      if (!post) return;
+      if (!post) {
+        return;
+      }
 
-      postActions.handleLike(Number(postId), post.isLiked);
+      postActions.handleLike(postId, post.isLiked);
     },
-    [posts, postActions],
+    [posts, postActions]
   );
 
   const handleSave = useCallback(
     (postId: string) => {
       const post = posts.find((p) => p.id === postId);
-      if (!post) return;
+      if (!post) {
+        return;
+      }
 
-      postActions.handleSave(Number(postId), post.isSaved);
+      postActions.handleSave(postId, post.isSaved);
     },
-    [posts, postActions],
+    [posts, postActions]
   );
 
   const handlePostClick = useCallback(
@@ -92,9 +96,9 @@ export default function TopicsListPage({
       }
       // 保存点击的图片索引，如果没有则默认为 0
       setInitialImageIndex(imageIndex ?? 0);
-      setSelectedTopicId(Number(postId));
+      setSelectedTopicId(postId);
     },
-    [],
+    []
   );
 
   const handleLoadMore = useCallback(() => {
@@ -106,7 +110,7 @@ export default function TopicsListPage({
   if (isLoading && posts.length === 0) {
     return (
       <PageLayout activeTab={activeTab}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-20">
             <LoadingSpinner size="lg" />
           </div>
@@ -118,7 +122,7 @@ export default function TopicsListPage({
   if (error) {
     return (
       <PageLayout activeTab={activeTab}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <p className="mb-4 text-red-600">加载失败</p>
@@ -137,7 +141,7 @@ export default function TopicsListPage({
 
   return (
     <PageLayout activeTab={activeTab}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {title && (
           <div className="mb-8 flex items-center gap-3">
             {icon}
@@ -168,8 +172,8 @@ export default function TopicsListPage({
 
       {selectedTopicId && (
         <SimpleImageDetail
-          isOpen={!!selectedTopicId}
           initialImageIndex={initialImageIndex}
+          isOpen={!!selectedTopicId}
           onClose={() => {
             setSelectedTopicId(null);
             setCardRect(null);
@@ -178,19 +182,19 @@ export default function TopicsListPage({
           onEdit={async (topicId) => {
             try {
               // 加载话题数据
-              const response = await apiService.getTopicDetail(topicId);
-              if (response.code === 200 && response.result) {
+              const response = await topicsApi.getBySecUid(topicId);
+              if (response.result) {
                 const topic = response.result;
 
-                // 提取图片列表（从 fileList 字段）
-                const images = topic.fileList || [];
+                // 提取图片列表（从 files 字段）
+                const images = topic.files || topic.fileList || [];
 
                 setEditingTopicId(topicId);
                 setEditingTopicData({
                   title: topic.title || "",
                   content: topic.content || "",
-                  images: images,
-                  topicTags: topic.topicTags || [], // 添加标签数据
+                  images,
+                  topicTags: topic.tags || topic.topicTags || [], // 添加标签数据
                 });
                 setSelectedTopicId(null);
               }
@@ -222,7 +226,7 @@ export default function TopicsListPage({
               const originalData = {
                 title: editingTopicData.title,
                 content: editingTopicData.content,
-                fileIds: editingTopicData.images?.map((img) => img.id) || [],
+                fileIds: editingTopicData.images?.map((img) => img.sec_uid) || [],
               };
 
               // 对比变化
@@ -236,7 +240,7 @@ export default function TopicsListPage({
 
               console.log("🔄-----变更字段-----", changes);
 
-              const response = await apiService.updateTopic(editingTopicId, changes);
+              const response = await topicsApi.update(editingTopicId, changes);
 
               if (response.code === 200) {
                 // 刷新相关缓存

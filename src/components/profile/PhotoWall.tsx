@@ -30,16 +30,17 @@ import {
   useDeleteFile,
   useInfiniteUserFiles,
   useUpdateFileVisibility,
-} from "@/hooks/useUserFiles";
+} from "@/hooks/useFiles";
+
 import PhotoWallUploader from "./PhotoWallUploader";
 
 // 网格列数配置
 const COLUMNS = 6;
 
 interface PhotoWallProps {
-  userId?: number;
   isOwnProfile?: boolean; // 是否是自己的个人中心
   onImageClick?: (image: UserFileImage, index: number) => void;
+  userId?: number;
 }
 
 export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }: PhotoWallProps) {
@@ -57,7 +58,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
     isFetchingNextPage,
   } = useInfiniteUserFiles(userId, {
     size: 30,
-    sort: "createdAt,desc",
+    sort: "created_at,desc",
     filterEmptyLocation: false,
   });
 
@@ -86,10 +87,12 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
 
   // 监听滚动到底部，触发加载更多
   const virtualItems = virtualizer.getVirtualItems();
-  const lastItem = virtualItems[virtualItems.length - 1];
+  const lastItem = virtualItems.at(-1);
 
   useEffect(() => {
-    if (!lastItem) return;
+    if (!lastItem) {
+      return;
+    }
     // 当滚动到最后3行时，触发加载更多
     if (lastItem.index >= rows.length - 3 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -106,7 +109,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
         setPreviewOpen(true);
       }
     },
-    [onImageClick],
+    [onImageClick]
   );
 
   // 复制图片 URL
@@ -130,21 +133,23 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
           isPrivate: !photo.isPrivate,
         });
         toast.success(photo.isPrivate ? "已设为公开" : "已设为仅自己可见");
-      } catch (error) {
+      } catch (_error) {
         toast.error("操作失败，请重试");
       }
     },
-    [updateVisibilityMutation],
+    [updateVisibilityMutation]
   );
 
   // 确认删除
   const handleConfirmDelete = useCallback(async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {
+      return;
+    }
     try {
       await deleteFileMutation.mutateAsync({ fileId: deleteTarget.id });
       toast.success("删除成功");
       setDeleteTarget(null);
-    } catch (error) {
+    } catch (_error) {
       toast.error("删除失败，请重试");
     }
   }, [deleteTarget, deleteFileMutation]);
@@ -152,7 +157,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
   // 上传成功回调
   const handleUploadSuccess = useCallback(() => {
     // 刷新文件列表
-    queryClient.invalidateQueries({ queryKey: queryKeys.files.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.files.all, refetchType: "all" });
   }, [queryClient]);
 
   if (isLoading && photos.length === 0) {
@@ -166,11 +171,11 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
   if (photos.length === 0) {
     return (
       <LottieAnimation
-        type="empty"
-        emptyTitle="还没有照片"
         emptyDescription="上传的照片将会在这里展示"
-        width={200}
+        emptyTitle="还没有照片"
         height={200}
+        type="empty"
+        width={200}
       />
     );
   }
@@ -185,10 +190,10 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
         </p>
         {isOwnProfile && (
           <Button
+            className="gap-1.5"
+            onClick={() => setUploadDialogOpen(true)}
             size="sm"
             variant="outline"
-            onClick={() => setUploadDialogOpen(true)}
-            className="gap-1.5"
           >
             <Plus size={14} />
             上传图片
@@ -199,7 +204,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       {/* 隐私说明 */}
       {isOwnProfile && (
         <div className="flex items-start gap-2 rounded-lg border border-border/50 bg-muted/30 p-3">
-          <Info size={16} className="mt-0.5 shrink-0 text-muted-foreground" />
+          <Info className="mt-0.5 shrink-0 text-muted-foreground" size={16} />
           <div className="text-muted-foreground text-xs leading-relaxed">
             <p>
               非动态发布上传的文件默认为
@@ -215,7 +220,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       )}
 
       {/* 虚拟列表容器 */}
-      <div ref={parentRef} className="h-[calc(100vh-280px)] overflow-auto">
+      <div className="h-[calc(100vh-280px)] overflow-auto" ref={parentRef}>
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
@@ -227,8 +232,9 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
             const rowPhotos = rows[virtualRow.index];
             return (
               <div
-                key={virtualRow.key}
+                className="grid grid-cols-3 gap-1 pb-1 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
                 data-index={virtualRow.index}
+                key={virtualRow.key}
                 ref={virtualizer.measureElement}
                 style={{
                   position: "absolute",
@@ -237,27 +243,26 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                   width: "100%",
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
-                className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 pb-1"
               >
                 {rowPhotos.map((photo) => {
                   const globalIndex = photos.findIndex((p) => p.id === photo.id);
                   return (
                     <div
-                      key={photo.id}
                       className="group relative aspect-square cursor-pointer overflow-hidden rounded-md bg-muted transition-all hover:z-10 hover:shadow-lg"
+                      key={photo.id}
                       onClick={() => handleImageClick(photo, globalIndex)}
                     >
                       <OptimizedImage
-                        image={photo}
                         className="h-full w-full transition-transform duration-300 group-hover:scale-105"
-                        objectFit="cover"
+                        image={photo}
                         loading="lazy"
+                        objectFit="cover"
                         quality={70}
                       />
                       {/* 私密标识 */}
                       {photo.isPrivate && (
                         <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 backdrop-blur-sm">
-                          <EyeOff size={10} className="text-white/90" />
+                          <EyeOff className="text-white/90" size={10} />
                           <span className="text-[10px] text-white/90">仅自己</span>
                         </div>
                       )}
@@ -270,22 +275,22 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                               className="rounded bg-black/60 p-1 hover:bg-black/80"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MoreVertical size={14} className="text-white" />
+                              <MoreVertical className="text-white" size={14} />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={(e) => handleCopyUrl(photo, e)}>
-                                <Copy size={14} className="mr-2" />
+                                <Copy className="mr-2" size={14} />
                                 复制链接
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={(e) => handleToggleVisibility(photo, e)}>
                                 {photo.isPrivate ? (
                                   <>
-                                    <Eye size={14} className="mr-2" />
+                                    <Eye className="mr-2" size={14} />
                                     设为公开
                                   </>
                                 ) : (
                                   <>
-                                    <EyeOff size={14} className="mr-2" />
+                                    <EyeOff className="mr-2" size={14} />
                                     设为仅自己可见
                                   </>
                                 )}
@@ -297,7 +302,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                                   setDeleteTarget(photo);
                                 }}
                               >
-                                <Trash2 size={14} className="mr-2" />
+                                <Trash2 className="mr-2" size={14} />
                                 删除
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -324,7 +329,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       </div>
 
       {/* 删除确认对话框 */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      <AlertDialog onOpenChange={(open) => !open && setDeleteTarget(null)} open={!!deleteTarget}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>确认删除</AlertDialogTitle>
@@ -341,8 +346,8 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleConfirmDelete}
             >
               {deleteFileMutation.isPending ? "删除中..." : "确认删除"}
             </AlertDialogAction>
@@ -361,9 +366,9 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       {/* 上传对话框 */}
       {isOwnProfile && (
         <PhotoWallUploader
-          open={uploadDialogOpen}
           onOpenChange={setUploadDialogOpen}
           onUploadSuccess={handleUploadSuccess}
+          open={uploadDialogOpen}
         />
       )}
     </div>

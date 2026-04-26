@@ -7,13 +7,13 @@ import { isValidBlurhash } from "@/utils/blurhash";
 import { generateOssImageParams } from "@/utils/media";
 
 interface LazyImageProps {
-  image: PostImage;
-  width?: number;
-  height?: number;
   className?: string;
-  quality?: number;
+  height?: number;
+  image: PostImage;
   onClick?: () => void;
   priority?: boolean;
+  quality?: number;
+  width?: number;
 }
 
 /**
@@ -57,7 +57,9 @@ const LazyImage = memo(
 
     // 生成优化的图片 URL
     const optimizedUrl = useMemo(() => {
-      if (!image.url) return "";
+      if (!image.url) {
+        return "";
+      }
 
       // 如果是 OSS 图片，添加处理参数
       if (image.url.includes("aliyuncs.com") || image.url.includes("oss")) {
@@ -71,7 +73,7 @@ const LazyImage = memo(
 
     // 计算容器尺寸
     const containerStyle = useMemo(() => {
-      if (!width && !height) {
+      if (!(width || height)) {
         return {};
       }
 
@@ -89,21 +91,21 @@ const LazyImage = memo(
 
     return (
       <div
-        ref={ref}
         className={cn("relative overflow-hidden bg-gray-100", className)}
-        style={containerStyle}
         onClick={onClick}
+        ref={ref}
+        style={containerStyle}
       >
         {/* Blurhash 占位符 */}
         {validBlurhash && !loaded && !error && (
           <div className="absolute inset-0">
             <Blurhash
               hash={validBlurhash}
-              width="100%"
               height="100%"
+              punch={1}
               resolutionX={32}
               resolutionY={32}
-              punch={1}
+              width="100%"
             />
           </div>
         )}
@@ -118,17 +120,19 @@ const LazyImage = memo(
         {/* 实际图片 - 只在进入视口或优先加载时渲染 */}
         {(isInView || priority) && !error && (
           <img
-            src={optimizedUrl}
             alt={image.name || ""}
-            loading={priority ? "eager" : "lazy"}
-            decoding="async"
-            onLoad={() => setLoaded(true)}
-            onError={() => setError(true)}
             className={cn(
               "h-full w-full object-cover transition-opacity duration-300",
-              loaded ? "opacity-100" : "opacity-0",
+              loaded ? "opacity-100" : "opacity-0"
             )}
+            decoding="async"
+            height={image.height || 300}
+            loading={priority ? "eager" : "lazy"}
+            onError={() => setError(true)}
+            onLoad={() => setLoaded(true)}
+            src={optimizedUrl}
             style={containerStyle}
+            width={image.width || 300}
           />
         )}
       </div>
@@ -137,7 +141,7 @@ const LazyImage = memo(
   // 自定义比较函数，避免不必要的重渲染
   (prevProps, nextProps) => {
     return (
-      prevProps.image.id === nextProps.image.id &&
+      prevProps.image.sec_uid === nextProps.image.sec_uid &&
       prevProps.image.url === nextProps.image.url &&
       prevProps.width === nextProps.width &&
       prevProps.height === nextProps.height &&
@@ -145,7 +149,7 @@ const LazyImage = memo(
       prevProps.quality === nextProps.quality &&
       prevProps.priority === nextProps.priority
     );
-  },
+  }
 );
 
 LazyImage.displayName = "LazyImage";

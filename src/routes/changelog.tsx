@@ -41,7 +41,7 @@ function ChangelogPage() {
       <div className="p-4" id="changelog-scroll-container">
         <ChangelogList
           changelogs={changelogs}
-          hasMore={hasNextPage || false}
+          hasMore={hasNextPage}
           isLoading={isLoading}
           onLoadMore={() => fetchNextPage()}
         />

@@ -3,8 +3,8 @@ import MasonryLayout from "@/components/common/MasonryLayout";
 
 interface ResponsiveMasonryProps {
   children: ReactNode[];
-  gap?: number;
   className?: string;
+  gap?: number;
 }
 
 export default function ResponsiveMasonry({

@@ -60,7 +60,7 @@ export async function batchCheckGPS(files: File[]): Promise<Map<File, GPSCoordin
     files.map(async (file) => {
       const gps = await extractGPSFromImage(file);
       results.set(file, gps);
-    }),
+    })
   );
 
   return results;

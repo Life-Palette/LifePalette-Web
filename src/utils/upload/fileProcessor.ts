@@ -6,12 +6,12 @@ import type { FileItem } from "@/types/upload";
  * 文件名信息
  */
 interface FileNameInfo {
-  /** 文件名(不含扩展名) */
-  name: string;
   /** 文件扩展名 */
   extension: string;
   /** 是否为视频文件 */
   isVideo: boolean;
+  /** 文件名(不含扩展名) */
+  name: string;
 }
 
 /**
@@ -65,7 +65,13 @@ export async function processLivePhotoFiles(uploadedFiles: FileItem[]): Promise<
       // 查找对应的图片文件
       const matchingImageIndex = findMatchingImageFile(file, uploadedFiles);
 
-      if (matchingImageIndex !== -1) {
+      if (matchingImageIndex === -1) {
+        // 没有找到匹配的图片，添加视频文件本身
+        if (!processedIds.has(file.id)) {
+          processedFiles.push(file);
+          processedIds.add(file.id);
+        }
+      } else {
         const imageFile = uploadedFiles[matchingImageIndex];
 
         // 如果图片文件已经有视频源，直接使用该图片文件，跳过视频文件
@@ -89,10 +95,10 @@ export async function processLivePhotoFiles(uploadedFiles: FileItem[]): Promise<
 
           const existingIndex = processedFiles.findIndex((item) => item.id === updatedImageFile.id);
 
-          if (existingIndex !== -1) {
-            processedFiles[existingIndex] = updatedImageFile;
-          } else {
+          if (existingIndex === -1) {
             processedFiles.push(updatedImageFile);
+          } else {
+            processedFiles[existingIndex] = updatedImageFile;
           }
 
           processedIds.add(imageFile.id);
@@ -113,13 +119,13 @@ export async function processLivePhotoFiles(uploadedFiles: FileItem[]): Promise<
 
               // 如果该图片已经被处理过，替换它
               const existingIndex = processedFiles.findIndex(
-                (item) => item.id === updatedImageFile.id,
+                (item) => item.id === updatedImageFile.id
               );
 
-              if (existingIndex !== -1) {
-                processedFiles[existingIndex] = updatedImageFile;
-              } else {
+              if (existingIndex === -1) {
                 processedFiles.push(updatedImageFile);
+              } else {
+                processedFiles[existingIndex] = updatedImageFile;
               }
 
               processedIds.add(imageFile.id);
@@ -133,19 +139,11 @@ export async function processLivePhotoFiles(uploadedFiles: FileItem[]): Promise<
             }
           }
         }
-      } else {
-        // 没有找到匹配的图片，添加视频文件本身
-        if (!processedIds.has(file.id)) {
-          processedFiles.push(file);
-          processedIds.add(file.id);
-        }
       }
-    } else {
+    } else if (!processedIds.has(file.id)) {
       // 非 MOV 文件，直接添加
-      if (!processedIds.has(file.id)) {
-        processedFiles.push(file);
-        processedIds.add(file.id);
-      }
+      processedFiles.push(file);
+      processedIds.add(file.id);
     }
   }
 
@@ -218,8 +216,8 @@ export function findMatchingLocalImageFile(videoFile: File, fileList: File[]): n
  */
 export interface LocalLivePhotoInfo {
   imageFile: File;
-  videoFile: File;
   imageIndex: number;
+  videoFile: File;
   videoIndex: number;
 }
 

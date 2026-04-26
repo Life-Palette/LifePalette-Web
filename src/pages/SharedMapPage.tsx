@@ -1,4 +1,5 @@
 import { getRouteApi } from "@tanstack/react-router";
+import { MapPinOff } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { ThemeProvider, useTheme } from "@/components/common/theme-provider";
 import TrackMapView from "@/components/map/TrackMapView";
@@ -27,7 +28,7 @@ function SharedMapContent() {
       setTheme(initialTheme);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setTheme]);
 
   // 监听父页面 iframe postMessage 主题切换
   useEffect(() => {
@@ -46,8 +47,12 @@ function SharedMapContent() {
 
   // 判断是否为深色模式
   const isDark = useMemo(() => {
-    if (theme === "dark") return true;
-    if (theme === "light") return false;
+    if (theme === "dark") {
+      return true;
+    }
+    if (theme === "light") {
+      return false;
+    }
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   }, [theme]);
 
@@ -55,8 +60,10 @@ function SharedMapContent() {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="mb-4 text-6xl">🗺️</div>
-          <h1 className="mb-2 text-xl font-semibold text-foreground">无效的链接</h1>
+          <div className="mb-4 flex justify-center text-muted-foreground">
+            <MapPinOff className="h-16 w-16" strokeWidth={1} />
+          </div>
+          <h1 className="mb-2 font-semibold text-foreground text-xl">无效的链接</h1>
           <p className="text-muted-foreground">请检查链接是否正确</p>
         </div>
       </div>
@@ -65,7 +72,7 @@ function SharedMapContent() {
 
   return (
     <div className="h-screen w-screen bg-background">
-      <TrackMapView secUid={secUid} isDark={isDark} showGallery={true} />
+      <TrackMapView isDark={isDark} secUid={secUid} showGallery={true} />
     </div>
   );
 }

@@ -19,15 +19,9 @@ interface BindEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  userId: number;
 }
 
-export default function BindEmailModal({
-  isOpen,
-  onClose,
-  onSuccess,
-  userId,
-}: BindEmailModalProps) {
+export default function BindEmailModal({ isOpen, onClose, onSuccess }: BindEmailModalProps) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -50,7 +44,7 @@ export default function BindEmailModal({
     }
 
     try {
-      const result = await sendCodeMutation.mutateAsync(email);
+      const result = await sendCodeMutation.mutateAsync({ email, purpose: "bind_email" });
       if (result.code === 200) {
         toast.success(MESSAGES.EMAIL_BIND.CODE_SENT);
         // 开始倒计时
@@ -74,14 +68,13 @@ export default function BindEmailModal({
 
   // 绑定邮箱
   const handleBindEmail = async () => {
-    if (!email || !code) {
+    if (!(email && code)) {
       toast.error("请填写邮箱和验证码");
       return;
     }
 
     try {
       const result = await updateEmailMutation.mutateAsync({
-        userId,
         email,
         code,
       });
@@ -106,11 +99,11 @@ export default function BindEmailModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog onOpenChange={handleClose} open={isOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Mail className="w-5 h-5 text-primary" />
+            <Mail className="h-5 w-5 text-primary" />
             {MESSAGES.EMAIL_BIND.TITLE}
           </DialogTitle>
           <DialogDescription>{MESSAGES.EMAIL_BIND.DESCRIPTION}</DialogDescription>
@@ -121,10 +114,10 @@ export default function BindEmailModal({
             <Label htmlFor="bind-email">{MESSAGES.FORM.EMAIL}</Label>
             <Input
               id="bind-email"
-              type="email"
-              placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_EMAIL}
-              value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_EMAIL}
+              type="email"
+              value={email}
             />
           </div>
 
@@ -132,24 +125,24 @@ export default function BindEmailModal({
             <Label htmlFor="bind-code">{MESSAGES.FORM.CODE}</Label>
             <div className="flex gap-2">
               <Input
+                className="flex-1"
                 id="bind-code"
-                type="text"
                 inputMode="numeric"
-                maxLength={4}
-                placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_CODE}
-                value={code}
+                maxLength={6}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                   setCode(value);
                 }}
-                className="flex-1"
+                placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_CODE}
+                type="text"
+                value={code}
               />
               <Button
+                className="whitespace-nowrap"
+                disabled={sendCodeMutation.isPending || countdown > 0 || !email}
+                onClick={handleSendCode}
                 type="button"
                 variant="outline"
-                onClick={handleSendCode}
-                disabled={sendCodeMutation.isPending || countdown > 0 || !email}
-                className="whitespace-nowrap"
               >
                 {countdown > 0
                   ? MESSAGES.FORM.RESEND_CODE(countdown)
@@ -162,12 +155,12 @@ export default function BindEmailModal({
         </div>
 
         <DialogFooter className="flex gap-2 sm:gap-0">
-          <Button variant="ghost" onClick={handleClose}>
+          <Button onClick={handleClose} variant="ghost">
             {MESSAGES.EMAIL_BIND.LATER}
           </Button>
           <Button
-            onClick={handleBindEmail}
             disabled={updateEmailMutation.isPending || !email || !code}
+            onClick={handleBindEmail}
           >
             {updateEmailMutation.isPending
               ? MESSAGES.FORM.PROCESSING

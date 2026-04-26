@@ -1,7 +1,8 @@
 import type { LottieRefCurrentProps } from "lottie-react";
 import LottieModule from "lottie-react";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import type React from "react";
+import { useEffect, useMemo, useRef } from "react";
 import emptyAnimation from "@/components/lottie/animations/empty.json";
 // 导入本地动画文件
 import loadingAnimation from "@/components/lottie/animations/loading.json";
@@ -12,22 +13,22 @@ const Lottie = (LottieModule as any).default || LottieModule;
 export type AnimationType = "loading" | "empty" | "custom";
 
 interface LottieAnimationProps {
-  type?: AnimationType;
+  actionButton?: React.ReactNode;
   animationData?: any; // 仅在 type 为 'custom' 时需要
-  width?: number | string;
-  height?: number | string;
-  loop?: boolean;
   autoplay?: boolean;
   className?: string;
-  style?: React.CSSProperties;
-  speed?: number;
-  onClick?: () => void;
-  // 用于加载动画的文字
-  loadingText?: string;
+  emptyDescription?: string;
   // 用于空状态的文字和按钮
   emptyTitle?: string;
-  emptyDescription?: string;
-  actionButton?: React.ReactNode;
+  height?: number | string;
+  // 用于加载动画的文字
+  loadingText?: string;
+  loop?: boolean;
+  onClick?: () => void;
+  speed?: number;
+  style?: React.CSSProperties;
+  type?: AnimationType;
+  width?: number | string;
 }
 
 const LottieAnimation: React.FC<LottieAnimationProps> = ({
@@ -88,15 +89,15 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
       <div className={`flex flex-col items-center justify-center ${className}`}>
         <div onClick={onClick}>
           <Lottie
-            lottieRef={lottieRef}
             animationData={animationData}
-            loop={loop}
             autoplay={autoplay}
+            loop={loop}
+            lottieRef={lottieRef}
             style={defaultStyle}
           />
         </div>
         {loadingText && (
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">{loadingText}</p>
+          <p className="mt-4 text-gray-500 text-sm dark:text-gray-400">{loadingText}</p>
         )}
       </div>
     );
@@ -107,20 +108,20 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
       <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
         <div onClick={onClick}>
           <Lottie
-            lottieRef={lottieRef}
             animationData={animationData}
-            loop={loop}
             autoplay={autoplay}
+            loop={loop}
+            lottieRef={lottieRef}
             style={defaultStyle}
           />
         </div>
         {emptyTitle && (
-          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="mt-4 font-medium text-gray-900 text-lg dark:text-gray-100">
             {emptyTitle}
           </h3>
         )}
         {emptyDescription && (
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+          <p className="mt-2 text-center text-gray-500 text-sm dark:text-gray-400">
             {emptyDescription}
           </p>
         )}
@@ -133,10 +134,10 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
   return (
     <div className={className} onClick={onClick}>
       <Lottie
-        lottieRef={lottieRef}
         animationData={animationData}
-        loop={loop}
         autoplay={autoplay}
+        loop={loop}
+        lottieRef={lottieRef}
         style={defaultStyle}
       />
     </div>

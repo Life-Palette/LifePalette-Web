@@ -35,7 +35,7 @@ export default defineConfig({
             return "query";
           }
           // UI 组件库 - Radix UI
-          if (id.includes("@radix-ui/")) {
+          if (id.includes("radix-ui") || id.includes("@radix-ui/")) {
             return "radix-ui";
           }
           // 地图相关
@@ -69,6 +69,6 @@ export default defineConfig({
     drop: ["console", "debugger"],
   },
   server: {
-    port: 9527,
+    port: 9595,
   },
 });

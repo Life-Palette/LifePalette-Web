@@ -1,53 +1,30 @@
-import { getOSSSignature, saveFileInfo, uploadToOSS } from "@/services/upload/ossService";
-import type { FileItem, UploadErrorCode, UploadOptions } from "@/types/upload";
-import { UploadError } from "@/types/upload";
+import { type OSSFile, type UploadLocation, uploadToOSS } from "@/services/upload/ossService";
+import type { UploadOptions } from "@/types/upload";
+import { UploadError, UploadErrorCode } from "@/types/upload";
 import { generateBlurhash } from "@/utils/upload/blurhash";
 import { compressImage } from "@/utils/upload/imageCompress";
 import { calculateMD5 } from "@/utils/upload/md5";
 
 /**
- * 获取文件类型
+ * 上传单个文件到 Go 后端
+ * 流程: 压缩(可选) → MD5 → init(秒传检查) → 上传 OSS → complete → blurhash(可选)
  */
-function getFileType(file: File): string {
-  const type = file.type.split("/")[0];
-  return type.toUpperCase();
-}
-
-/**
- * 判断是否为视频文件
- */
-function isVideoFile(file: File): boolean {
-  return file.type.startsWith("video/");
-}
-
-/**
- * 上传单个文件
- * @param file 文件对象
- * @param options 上传配置
- * @returns 上传后的文件信息
- */
-export async function uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
-  const { compress = false, isPrivate, onProgress } = options;
-
+export async function uploadFile(file: File, options: UploadOptions = {}): Promise<OSSFile> {
+  const { compress = false, onProgress } = options;
   let processedFile = file;
 
   try {
-    // 1. 图片压缩（如需要）
-    const isImage = file.type.startsWith("image/");
-    const shouldCompressFile = isImage && compress;
-
-    if (shouldCompressFile) {
+    // 1. 图片压缩
+    if (file.type.startsWith("image/") && compress) {
       onProgress?.({ stage: "compress", percent: 0 });
       try {
         processedFile = await compressImage(file, {
           maxSizeMB: options.maxSizeMB || 1,
-          maxWidthOrHeight: 1920,
         });
-        onProgress?.({ stage: "compress", percent: 100 });
-      } catch (error) {
-        console.warn("图片压缩失败，使用原文件:", error);
+      } catch {
         processedFile = file;
       }
+      onProgress?.({ stage: "compress", percent: 100 });
     }
 
     // 2. 计算 MD5
@@ -56,104 +33,55 @@ export async function uploadFile(file: File, options: UploadOptions = {}): Promi
       onProgress?.({ stage: "md5", percent });
     });
 
-    // 3. 获取 OSS 签名
-    const signatureResponse = await getOSSSignature(md5);
-
-    if (signatureResponse.code !== 200) {
-      throw new UploadError(
-        signatureResponse.msg || "获取 OSS 签名失败",
-        "SIGNATURE_FAILED" as UploadErrorCode,
-        "upload",
-      );
-    }
-
-    const ossData = signatureResponse.result;
-
-    // 4. 检查是否已上传
-    if (ossData.hasUpload && ossData.url) {
-      // 文件已存在，直接返回完整的文件信息
-      return {
-        ...ossData,
-        id: ossData.id || md5,
-        name: file.name,
-        type: file.type,
-        url: ossData.url,
-        size: file.size,
-        md5,
-        hasUpload: true,
-      } as FileItem;
-    }
-
-    // 5. 上传到 OSS
+    // 3. 上传到 OSS（init → upload → complete）
     onProgress?.({ stage: "upload", percent: 0 });
-    const fileUrl = await uploadToOSS(processedFile, ossData, (percent) => {
-      onProgress?.({ stage: "upload", percent });
-    });
+    const ossFile = await uploadToOSS(
+      processedFile,
+      md5,
+      (percent) => {
+        onProgress?.({ stage: "upload", percent });
+      },
+      options.isPrivate,
+      options.location as UploadLocation | undefined
+    );
 
-    // 6. 生成 Blurhash（仅图片）
-    let blurhash: string | undefined;
-    if (!isVideoFile(processedFile)) {
+    // 4. 生成 Blurhash（仅图片）
+    if (processedFile.type.startsWith("image/")) {
       try {
         onProgress?.({ stage: "blurhash", percent: 0 });
-        blurhash = await generateBlurhash(processedFile);
+        const blurhash = await generateBlurhash(processedFile);
+        if (blurhash) {
+          ossFile.blurhash = blurhash;
+        }
         onProgress?.({ stage: "blurhash", percent: 100 });
-      } catch (error) {
-        console.warn("Blurhash 生成失败:", error);
+      } catch {
+        // blurhash 失败不影响上传
       }
     }
 
-    // 7. 保存文件信息到服务器
-    onProgress?.({ stage: "save", percent: 0 });
-    const saveResponse = await saveFileInfo({
-      fileUrl,
-      fileMd5: md5,
-      size: processedFile.size,
-      type: processedFile.type,
-      name: processedFile.name,
-      dir: ossData.dir,
-      hashCode: blurhash,
-      isPrivate,
-    });
-
-    if (saveResponse.code !== 200) {
-      throw new UploadError(
-        saveResponse.msg || "保存文件信息失败",
-        "SAVE_FAILED" as UploadErrorCode,
-        "save",
-      );
-    }
-
     onProgress?.({ stage: "save", percent: 100 });
-
-    // 8. 返回文件信息
-    return saveResponse.result;
+    return ossFile;
   } catch (error) {
     if (error instanceof UploadError) {
       throw error;
     }
-
-    // 包装其他错误
     throw new UploadError(
       error instanceof Error ? error.message : "上传失败",
-      "UPLOAD_FAILED" as UploadErrorCode,
-      "upload",
+      UploadErrorCode.UPLOAD_FAILED,
+      "upload"
     );
   }
 }
 
 /**
  * 批量上传文件（带重试机制）
- * @param files 文件列表
- * @param options 上传配置
- * @param maxRetries 最大重试次数
- * @returns 上传后的文件信息列表
  */
 export async function uploadFiles(
   files: File[],
   options: UploadOptions = {},
-  maxRetries = 3,
-): Promise<FileItem[]> {
-  const results: FileItem[] = [];
+  maxRetries = 3
+): Promise<OSSFile[]> {
+  const results: OSSFile[] = [];
 
   for (const file of files) {
     let retries = 0;
@@ -168,17 +96,13 @@ export async function uploadFiles(
       } catch (error) {
         lastError = error as Error;
         retries++;
-
         if (retries < maxRetries) {
-          console.warn(`文件 ${file.name} 上传失败，正在重试 (${retries}/${maxRetries})...`);
-          // 等待一段时间后重试
           await new Promise((resolve) => setTimeout(resolve, 1000 * retries));
         }
       }
     }
 
     if (!success && lastError) {
-      console.error(`文件 ${file.name} 上传失败:`, lastError);
       throw lastError;
     }
   }

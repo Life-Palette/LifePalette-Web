@@ -23,7 +23,9 @@ export default function ColorPaletteWheel({
   // 中心显示的颜色
   const centerColor = hoveredColor || selectedColor || paletteColors[0];
 
-  if (paletteColors.length === 0) return null;
+  if (paletteColors.length === 0) {
+    return null;
+  }
 
   const centerLuminance = centerColor ? getLuminance(centerColor.hex) : 0.5;
   const centerTextColor = centerLuminance > 0.5 ? "text-black/80" : "text-white/90";
@@ -76,14 +78,17 @@ export default function ColorPaletteWheel({
 
             return (
               <div
-                key={color.id}
                 className={cn(
                   "absolute cursor-pointer rounded-full transition-all duration-300 ease-out",
                   "hover:z-30 hover:scale-[1.3]",
                   isHovered && "z-30 scale-[1.3]",
                   isSelected &&
-                    "z-30 scale-[1.2] ring-[3px] ring-primary ring-offset-2 ring-offset-background",
+                    "z-30 scale-[1.2] ring-[3px] ring-primary ring-offset-2 ring-offset-background"
                 )}
+                key={color.id}
+                onClick={() => onColorClick(color)}
+                onMouseEnter={() => setHoveredColor(color)}
+                onMouseLeave={() => setHoveredColor(null)}
                 style={{
                   backgroundColor: color.hex,
                   width: `${size}px`,
@@ -92,11 +97,8 @@ export default function ColorPaletteWheel({
                   top: `calc(50% + ${y}px - ${size / 2}px)`,
                   boxShadow: isHovered
                     ? `0 0 24px ${color.hex}90, 0 8px 16px rgba(0,0,0,0.25)`
-                    : `0 2px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)`,
+                    : "0 2px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)",
                 }}
-                onClick={() => onColorClick(color)}
-                onMouseEnter={() => setHoveredColor(color)}
-                onMouseLeave={() => setHoveredColor(null)}
               />
             );
           })}
@@ -106,24 +108,24 @@ export default function ColorPaletteWheel({
         {centerColor && (
           <div
             className={cn(
-              "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
               "flex h-[100px] w-[100px] flex-col items-center justify-center rounded-full",
-              "shadow-2xl transition-all duration-500 cursor-pointer",
-              "hover:scale-105 active:scale-100",
+              "cursor-pointer shadow-2xl transition-all duration-500",
+              "hover:scale-105 active:scale-100"
             )}
+            onClick={handleCopyColor}
             style={{
               backgroundColor: centerColor.hex,
               boxShadow: `0 0 60px ${centerColor.hex}50, 0 12px 40px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.1)`,
             }}
-            onClick={handleCopyColor}
           >
-            <span className={cn("font-mono text-[13px] font-bold tracking-wider", centerTextColor)}>
+            <span className={cn("font-bold font-mono text-[13px] tracking-wider", centerTextColor)}>
               {copied ? "已复制!" : centerColor.hex.toUpperCase()}
             </span>
             <div
               className={cn(
                 "mt-1.5 flex items-center gap-1.5 text-[11px] opacity-70",
-                centerTextColor,
+                centerTextColor
               )}
             >
               {copied ? (

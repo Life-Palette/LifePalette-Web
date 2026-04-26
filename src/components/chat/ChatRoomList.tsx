@@ -7,9 +7,9 @@ import { getUserAvatar } from "@/utils/avatar";
 import { formatDistanceToNow } from "@/utils/date";
 
 interface ChatRoomListProps {
-  rooms: ChatRoom[];
   currentRoomId?: number;
   onSelectRoom: (room: ChatRoom) => void;
+  rooms: ChatRoom[];
 }
 
 export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: ChatRoomListProps) {
@@ -45,34 +45,34 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-neutral-900">
+    <div className="flex h-full flex-col bg-white dark:bg-neutral-900">
       {/* 头部 */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">
-        <h2 className="text-xl font-bold text-neutral-900 dark:text-white">消息</h2>
+      <div className="flex items-center justify-between border-neutral-100 border-b px-5 py-4 dark:border-neutral-800">
+        <h2 className="font-bold text-neutral-900 text-xl dark:text-white">消息</h2>
       </div>
 
       {/* 聊天室列表 */}
       {rooms.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-          <div className="w-16 h-16 mb-3 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+        <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+          <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
             <svg
-              className="w-8 h-8 text-neutral-400"
+              className="h-8 w-8 text-neutral-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
             </svg>
           </div>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">暂无聊天</p>
+          <p className="text-neutral-500 text-sm dark:text-neutral-400">暂无聊天</p>
         </div>
       ) : (
-        <div ref={parentRef} className="flex-1 overflow-auto py-2">
+        <div className="flex-1 overflow-auto py-2" ref={parentRef}>
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
@@ -88,8 +88,8 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
 
               return (
                 <div
-                  key={virtualItem.key}
                   data-index={virtualItem.index}
+                  key={virtualItem.key}
                   ref={virtualizer.measureElement}
                   style={{
                     position: "absolute",
@@ -100,16 +100,16 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
                   }}
                 >
                   <div
-                    onClick={() => onSelectRoom(room)}
-                    className={`
-                      flex items-start gap-3 px-4 py-3 mx-2 my-1 cursor-pointer transition-all rounded-xl
-                      ${isActive ? "bg-neutral-100 dark:bg-neutral-800 shadow-sm" : "hover:bg-neutral-50 dark:hover:bg-neutral-800/30"}
+                    className={`mx-2 my-1 flex cursor-pointer items-start gap-3 rounded-xl px-4 py-3 transition-all ${isActive ? "bg-neutral-100 shadow-sm dark:bg-neutral-800" : "hover:bg-neutral-50 dark:hover:bg-neutral-800/30"}
                     `}
+                    onClick={() => onSelectRoom(room)}
                   >
                     {/* 头像 */}
                     <div className="relative flex-shrink-0">
                       {avatarUrl ? (
                         <OptimizedImage
+                          className="h-12 w-12 rounded-full object-cover"
+                          height={48}
                           image={{
                             id: room.id,
                             url: avatarUrl,
@@ -120,20 +120,18 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
                             name: getRoomName(room),
                           }}
                           width={48}
-                          height={48}
-                          className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center">
-                          <span className="text-lg font-semibold text-neutral-600 dark:text-neutral-300">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700">
+                          <span className="font-semibold text-lg text-neutral-600 dark:text-neutral-300">
                             {getRoomName(room).charAt(0)}
                           </span>
                         </div>
                       )}
                       {room.unreadCount > 0 && (
                         <Badge
+                          className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 font-bold text-[10px]"
                           variant="destructive"
-                          className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
                         >
                           {room.unreadCount > 99 ? "99+" : room.unreadCount}
                         </Badge>
@@ -141,22 +139,22 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
                     </div>
 
                     {/* 内容 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="font-semibold text-neutral-900 dark:text-white truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-center justify-between">
+                        <h3 className="truncate font-semibold text-neutral-900 dark:text-white">
                           {getRoomName(room)}
                         </h3>
                         {room.lastMessageTime && (
-                          <span className="text-xs text-neutral-400 dark:text-neutral-500 flex-shrink-0 ml-2">
+                          <span className="ml-2 flex-shrink-0 text-neutral-400 text-xs dark:text-neutral-500">
                             {formatDistanceToNow(new Date(room.lastMessageTime))}
                           </span>
                         )}
                       </div>
                       {room.lastMessage && (
                         <p
-                          className={`text-sm truncate ${
+                          className={`truncate text-sm ${
                             room.unreadCount > 0
-                              ? "text-neutral-900 dark:text-neutral-100 font-medium"
+                              ? "font-medium text-neutral-900 dark:text-neutral-100"
                               : "text-neutral-500 dark:text-neutral-400"
                           }`}
                         >

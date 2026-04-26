@@ -11,13 +11,13 @@ export const DEFAULT_AVATAR = {
  */
 export function getUserAvatar(
   user?: {
-    avatarInfo?: { url: string } | null;
+    avatar_file?: { url: string } | null;
     sex?: number;
-  } | null,
+  } | null
 ): string {
   // 如果有自定义头像，使用自定义头像
-  if (user?.avatarInfo?.url) {
-    return user.avatarInfo.url;
+  if (user?.avatar_file?.url) {
+    return user.avatar_file.url;
   }
 
   // 根据性别返回默认头像

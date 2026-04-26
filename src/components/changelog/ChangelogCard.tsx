@@ -38,7 +38,9 @@ const typeConfig: Record<
 
 // 格式化日期
 function formatDate(dateString: string | null): string {
-  if (!dateString) return "";
+  if (!dateString) {
+    return "";
+  }
   const date = new Date(dateString);
   return date.toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -52,13 +54,13 @@ export default function ChangelogCard({ changelog }: ChangelogCardProps) {
 
   return (
     <Link params={{ version: changelog.version }} to="/changelog/$version">
-      <Card className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/30">
+      <Card className="group cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md">
         <div className="p-5">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               {/* 版本和类型 */}
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <span className="font-mono font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="font-mono font-semibold text-foreground text-lg transition-colors group-hover:text-primary">
                   {changelog.version}
                 </span>
                 <Badge
@@ -71,13 +73,13 @@ export default function ChangelogCard({ changelog }: ChangelogCardProps) {
               </div>
 
               {/* 标题 */}
-              <h3 className="font-medium text-foreground text-base line-clamp-2">
+              <h3 className="line-clamp-2 font-medium text-base text-foreground">
                 {changelog.title}
               </h3>
 
               {/* 发布时间 */}
               {changelog.publishedAt && (
-                <div className="flex items-center gap-1.5 mt-2 text-muted-foreground text-sm">
+                <div className="mt-2 flex items-center gap-1.5 text-muted-foreground text-sm">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>{formatDate(changelog.publishedAt)}</span>
                 </div>
@@ -85,8 +87,8 @@ export default function ChangelogCard({ changelog }: ChangelogCardProps) {
             </div>
 
             {/* 箭头指示 */}
-            <div className="flex-shrink-0 p-1.5 rounded-full bg-muted/50 group-hover:bg-primary/10 transition-colors">
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div className="flex-shrink-0 rounded-full bg-muted/50 p-1.5 transition-colors group-hover:bg-primary/10">
+              <ChevronRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
             </div>
           </div>
         </div>

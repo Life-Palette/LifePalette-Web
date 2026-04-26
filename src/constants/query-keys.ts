@@ -1,101 +1,75 @@
 /**
- * 集中管理所有 React Query 的查询键
- * 使用工厂函数模式，确保类型安全和一致性
+ * React Query 查询键工厂
+ * 所有 ID 统一为 string (sec_uid)
  */
-
 export const queryKeys = {
-  // 话题相关
   topics: {
     all: ["topics"] as const,
-    lists: () => [...queryKeys.topics.all, "list"] as const,
-    list: (params?: any) => [...queryKeys.topics.lists(), params] as const,
-    infiniteLists: () => [...queryKeys.topics.all, "infinite"] as const,
-    infiniteList: (params?: any) => [...queryKeys.topics.infiniteLists(), params] as const,
-    details: () => [...queryKeys.topics.all, "detail"] as const,
-    detail: (id: number) => [...queryKeys.topics.details(), id] as const,
+    list: (params?: any) => ["topics", "list", params] as const,
+    infinite: (params?: any) => ["topics", "infinite", params] as const,
+    detail: (secUid: string) => ["topics", "detail", secUid] as const,
   },
 
-  // 用户相关
   users: {
     all: ["users"] as const,
-    current: () => [...queryKeys.users.all, "current"] as const,
-    detail: (id: number) => [...queryKeys.users.all, id] as const,
-    stats: (id: number) => [...queryKeys.users.all, id, "stats"] as const,
-    cities: (id: number, params?: any) => [...queryKeys.users.all, id, "cities", params] as const,
-    travelStats: (id: number) => [...queryKeys.users.all, id, "travel-stats"] as const,
+    me: () => ["users", "me"] as const,
+    detail: (secUid: string) => ["users", "detail", secUid] as const,
+    stats: (secUid: string) => ["users", "stats", secUid] as const,
+    travelStats: (secUid: string) => ["users", "travel-stats", secUid] as const,
+    cities: (secUid: string, params?: any) => ["users", "cities", secUid, params] as const,
   },
 
-  // 点赞相关
   likes: {
     all: ["likes"] as const,
-    byUser: (userId: number, params?: any) =>
-      [...queryKeys.likes.all, "user", userId, params] as const,
-    infiniteByUser: (userId: number, params?: any) =>
-      [...queryKeys.likes.all, "infinite", "user", userId, params] as const,
-    stats: (topicId: number) => [...queryKeys.likes.all, "stats", topicId] as const,
+    byUser: (secUid: string, params?: any) => ["likes", "user", secUid, params] as const,
+    infinite: (secUid: string, params?: any) => ["likes", "infinite", secUid, params] as const,
   },
 
-  // 收藏相关
   collections: {
     all: ["collections"] as const,
-    lists: () => [...queryKeys.collections.all, "list"] as const,
-    list: (params?: any) => [...queryKeys.collections.lists(), params] as const,
-    byUser: (userId: number, params?: any) =>
-      [...queryKeys.collections.all, "user", userId, params] as const,
-    infiniteByUser: (userId: number, params?: any) =>
-      [...queryKeys.collections.all, "infinite", "user", userId, params] as const,
+    byUser: (secUid: string, params?: any) => ["collections", "user", secUid, params] as const,
+    infinite: (secUid: string, params?: any) =>
+      ["collections", "infinite", secUid, params] as const,
   },
 
-  // 通知相关
-  notifications: {
-    all: ["notifications"] as const,
-    lists: () => [...queryKeys.notifications.all, "list"] as const,
-    list: (params?: any) => [...queryKeys.notifications.lists(), params] as const,
-    infiniteLists: () => [...queryKeys.notifications.all, "infinite"] as const,
-    infiniteList: (params?: any) => [...queryKeys.notifications.infiniteLists(), params] as const,
-    unreadCount: () => [...queryKeys.notifications.all, "unreadCount"] as const,
-  },
-
-  // 标签相关
-  tags: {
-    all: ["tags"] as const,
-    lists: () => [...queryKeys.tags.all, "list"] as const,
-    list: (params?: any) => [...queryKeys.tags.lists(), params] as const,
-  },
-
-  // 评论相关
-  comments: {
-    all: ["comments"] as const,
-    lists: () => [...queryKeys.comments.all, "list"] as const,
-    list: (params?: any) => [...queryKeys.comments.lists(), params] as const,
-    byTopic: (topicId: number, params?: any) =>
-      [...queryKeys.comments.all, "topic", topicId, params] as const,
-  },
-
-  // 文件相关
   files: {
     all: ["files"] as const,
-    detail: (id: number) => [...queryKeys.files.all, id] as const,
-    byUser: (userId: number, params?: any) =>
-      [...queryKeys.files.all, "user", userId, params] as const,
-    infiniteByUser: (userId: number, params?: any) =>
-      [...queryKeys.files.all, "infinite", "user", userId, params] as const,
+    detail: (secUid: string) => ["files", "detail", secUid] as const,
+    byUser: (secUid: string, params?: any) => ["files", "user", secUid, params] as const,
+    infinite: (secUid: string, params?: any) => ["files", "infinite", secUid, params] as const,
+    colorStats: (params?: any) => ["files", "color-stats", params] as const,
+    byColor: (hex: string, params?: any) => ["files", "by-color", hex, params] as const,
   },
 
-  // 二维码登录相关
-  qrCode: {
-    all: ["qrCode"] as const,
-    status: (key: string) => [...queryKeys.qrCode.all, "status", key] as const,
+  comments: {
+    all: ["comments"] as const,
+    byTopic: (topicSecUid: string, params?: any) =>
+      ["comments", "topic", topicSecUid, params] as const,
   },
 
-  // 更新日志相关
+  tags: {
+    all: ["tags"] as const,
+    list: (params?: any) => ["tags", "list", params] as const,
+  },
+
+  notifications: {
+    all: ["notifications"] as const,
+    infinite: (params?: any) => ["notifications", "infinite", params] as const,
+    unreadCount: () => ["notifications", "unread"] as const,
+  },
+
   changelog: {
     all: ["changelog"] as const,
-    lists: () => [...queryKeys.changelog.all, "list"] as const,
-    list: (params?: any) => [...queryKeys.changelog.lists(), params] as const,
-    infiniteLists: () => [...queryKeys.changelog.all, "infinite"] as const,
-    infiniteList: (params?: any) => [...queryKeys.changelog.infiniteLists(), params] as const,
-    latest: () => [...queryKeys.changelog.all, "latest"] as const,
-    detail: (id: number) => [...queryKeys.changelog.all, id] as const,
+    infinite: (params?: any) => ["changelog", "infinite", params] as const,
+    latest: () => ["changelog", "latest"] as const,
+    detail: (id: string) => ["changelog", "detail", id] as const,
+  },
+
+  follows: {
+    check: (secUid: string) => ["follows", "check", secUid] as const,
+  },
+
+  qrCode: {
+    status: (key: string) => ["qr", "status", key] as const,
   },
 } as const;

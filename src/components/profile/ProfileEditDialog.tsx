@@ -8,6 +8,7 @@ import BackgroundUpload from "@/components/media/BackgroundUpload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -29,38 +30,39 @@ import type { ApiUser } from "@/services/api";
 import { getUserAvatar } from "@/utils/avatar";
 
 interface ProfileEditDialogProps {
-  user: ApiUser;
-  open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  open: boolean;
+  user: ApiUser;
 }
 
 // Zod schema for validation
 const profileSchema = z.object({
+  lp_id: z.string().min(3, "LP号至少3个字符").max(20, "LP号不能超过20个字符").optional(),
   name: z
     .string()
     .min(1, "昵称不能为空")
     .max(
       PROFILE_VALIDATION.NAME.MAX_LENGTH,
-      `昵称不能超过${PROFILE_VALIDATION.NAME.MAX_LENGTH}个字符`,
+      `昵称不能超过${PROFILE_VALIDATION.NAME.MAX_LENGTH}个字符`
     ),
   signature: z
     .string()
     .max(
       PROFILE_VALIDATION.SIGNATURE.MAX_LENGTH,
-      `签名不能超过${PROFILE_VALIDATION.SIGNATURE.MAX_LENGTH}个字符`,
+      `签名不能超过${PROFILE_VALIDATION.SIGNATURE.MAX_LENGTH}个字符`
     )
     .optional(),
   email: z.string().email("请输入有效的邮箱地址").optional().or(z.literal("")),
   mobile: z.string().optional(),
+  sex: z.number().min(0).max(2).optional(),
+  birthday: z.string().optional(),
   city: z.string().optional(),
   job: z.string().optional(),
   company: z.string().optional(),
   website: z.string().url("请输入有效的网址").optional().or(z.literal("")),
   github: z.string().optional(),
 });
-
-type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function ProfileEditDialog({
   user,
@@ -73,10 +75,13 @@ export default function ProfileEditDialog({
 
   const form = useForm({
     defaultValues: {
-      name: user.name || "",
+      lp_id: user.lp_id || "",
+      name: user.username || "",
       signature: user.signature || "",
       email: user.email || "",
       mobile: user.mobile || "",
+      sex: user.sex ?? 0,
+      birthday: user.birthday || "",
       city: user.city || "",
       job: user.job || "",
       company: user.company || "",
@@ -87,14 +92,39 @@ export default function ProfileEditDialog({
       try {
         // Only send changed values
         const updates: any = {};
-        if (value.name !== user.name) updates.name = value.name;
-        if (value.signature !== (user.signature || "")) updates.signature = value.signature;
-        if (value.mobile !== (user.mobile || "")) updates.mobile = value.mobile;
-        if (value.city !== (user.city || "")) updates.city = value.city;
-        if (value.job !== (user.job || "")) updates.job = value.job;
-        if (value.company !== (user.company || "")) updates.company = value.company;
-        if (value.website !== (user.website || "")) updates.website = value.website;
-        if (value.github !== (user.github || "")) updates.github = value.github;
+        if (value.lp_id !== (user.lp_id || "")) {
+          updates.lp_id = value.lp_id;
+        }
+        if (value.name !== user.username) {
+          updates.name = value.name;
+        }
+        if (value.signature !== (user.signature || "")) {
+          updates.signature = value.signature;
+        }
+        if (value.mobile !== (user.mobile || "")) {
+          updates.mobile = value.mobile;
+        }
+        if (value.sex !== (user.sex ?? 0)) {
+          updates.sex = value.sex;
+        }
+        if (value.birthday !== (user.birthday || "")) {
+          updates.birthday = value.birthday;
+        }
+        if (value.city !== (user.city || "")) {
+          updates.city = value.city;
+        }
+        if (value.job !== (user.job || "")) {
+          updates.job = value.job;
+        }
+        if (value.company !== (user.company || "")) {
+          updates.company = value.company;
+        }
+        if (value.website !== (user.website || "")) {
+          updates.website = value.website;
+        }
+        if (value.github !== (user.github || "")) {
+          updates.github = value.github;
+        }
 
         // 邮箱更改需要验证码
         const emailChanged = value.email !== (user.email || "") && value.email !== "";
@@ -104,12 +134,16 @@ export default function ProfileEditDialog({
             return;
           }
           updates.email = value.email;
-          updates.code = emailCode;
+          updates.verification_code = emailCode;
         }
 
         // Add file uploads if any
-        if (avatarFile) updates.avatarFile = avatarFile;
-        if (backgroundFile) updates.backgroundFile = backgroundFile;
+        if (avatarFile) {
+          updates.avatarFile = avatarFile;
+        }
+        if (backgroundFile) {
+          updates.backgroundFile = backgroundFile;
+        }
 
         await updateProfile.mutateAsync(updates);
 
@@ -155,7 +189,7 @@ export default function ProfileEditDialog({
       setEmailCode("");
       setEmailCountdown(0);
     }
-  }, [open, user]);
+  }, [open, form.reset]);
 
   // 发送邮箱验证码
   const handleSendEmailCode = async () => {
@@ -173,7 +207,7 @@ export default function ProfileEditDialog({
     }
 
     try {
-      const result = await sendEmailCodeMutation.mutateAsync(email);
+      const result = await sendEmailCodeMutation.mutateAsync({ email, purpose: "bind_email" });
       if (result.code === 200) {
         toast.success(MESSAGES.EMAIL_BIND.CODE_SENT);
         // 开始倒计时
@@ -235,12 +269,12 @@ export default function ProfileEditDialog({
       {/* Background Upload */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="h-6 px-2">
+          <Badge className="h-6 px-2" variant="secondary">
             背景图片
           </Badge>
         </div>
         <BackgroundUpload
-          currentBackground={user.backgroundInfo?.url}
+          currentBackground={user.background_file?.url}
           error={backgroundError}
           onBackgroundChange={(file, preview) => {
             setBackgroundFile(file);
@@ -260,11 +294,34 @@ export default function ProfileEditDialog({
       {/* Basic Information */}
       <div className="space-y-5">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="h-6 px-2">
+          <Badge className="h-6 px-2" variant="secondary">
             基本信息
           </Badge>
         </div>
         <FieldGroup className="grid gap-6 md:grid-cols-2">
+          <form.Field name="lp_id">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>LP号</FieldLabel>
+                  <Input
+                    aria-invalid={isInvalid}
+                    id={field.name}
+                    maxLength={20}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="LP_XXXXXXXXXX"
+                    value={field.state.value}
+                  />
+                  <FieldDescription>唯一标识，类似抖音号</FieldDescription>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </Field>
+              );
+            }}
+          </form.Field>
+
           <form.Field
             name="name"
             validators={{
@@ -282,14 +339,14 @@ export default function ProfileEditDialog({
                     昵称 <span className="text-red-500">*</span>
                   </FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
+                    maxLength={20}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="请输入昵称"
-                    maxLength={20}
-                    aria-invalid={isInvalid}
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -306,10 +363,9 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>邮箱</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    type="email"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => {
                       field.handleChange(e.target.value);
@@ -319,40 +375,41 @@ export default function ProfileEditDialog({
                       }
                     }}
                     placeholder="example@email.com"
-                    aria-invalid={isInvalid}
+                    type="email"
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   {emailHasChanged && (
-                    <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border/50 space-y-3">
-                      <p className="text-xs text-muted-foreground">
+                    <div className="mt-3 space-y-3 rounded-lg border border-border/50 bg-muted/50 p-3">
+                      <p className="text-muted-foreground text-xs">
                         更改邮箱需要验证码校验，用于与微信小程序互通关联
                       </p>
                       <div className="flex items-end gap-2">
                         <div className="flex-1">
-                          <FieldLabel htmlFor="email-code" className="text-xs">
+                          <FieldLabel className="text-xs" htmlFor="email-code">
                             {MESSAGES.FORM.CODE}
                           </FieldLabel>
                           <Input
+                            className="mt-1"
                             id="email-code"
-                            type="text"
                             inputMode="numeric"
-                            maxLength={4}
-                            placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_CODE}
-                            value={emailCode}
+                            maxLength={6}
                             onChange={(e) => {
-                              const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                              const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                               setEmailCode(value);
                             }}
-                            className="mt-1"
+                            placeholder={MESSAGES.EMAIL_BIND.PLACEHOLDER_CODE}
+                            type="text"
+                            value={emailCode}
                           />
                         </div>
                         <Button
+                          className="h-9 whitespace-nowrap"
+                          disabled={sendEmailCodeMutation.isPending || emailCountdown > 0}
+                          onClick={handleSendEmailCode}
+                          size="sm"
                           type="button"
                           variant="outline"
-                          size="sm"
-                          onClick={handleSendEmailCode}
-                          disabled={sendEmailCodeMutation.isPending || emailCountdown > 0}
-                          className="whitespace-nowrap h-9"
                         >
                           {emailCountdown > 0
                             ? MESSAGES.FORM.RESEND_CODE(emailCountdown)
@@ -375,19 +432,60 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>手机号</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    type="tel"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="请输入手机号"
-                    aria-invalid={isInvalid}
+                    type="tel"
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}
+          </form.Field>
+
+          <form.Field name="sex">
+            {(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>性别</FieldLabel>
+                <div className="flex gap-2">
+                  {[
+                    { value: 0, label: "未设置" },
+                    { value: 1, label: "男" },
+                    { value: 2, label: "女" },
+                  ].map((option) => (
+                    <Button
+                      className="flex-1"
+                      key={option.value}
+                      onClick={() => field.handleChange(option.value)}
+                      size="sm"
+                      type="button"
+                      variant={field.state.value === option.value ? "default" : "outline"}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="birthday">
+            {(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>生日</FieldLabel>
+                <DatePicker
+                  onChange={(date) => {
+                    field.handleChange(date ? date.toISOString() : "");
+                  }}
+                  placeholder="选择生日"
+                  value={field.state.value ? new Date(field.state.value) : undefined}
+                />
+              </Field>
+            )}
           </form.Field>
 
           <form.Field name="city">
@@ -397,13 +495,13 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>城市</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="请输入城市"
-                    aria-invalid={isInvalid}
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -423,18 +521,18 @@ export default function ProfileEditDialog({
             {(field) => {
               const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
               return (
-                <Field data-invalid={isInvalid} className="md:col-span-2">
+                <Field className="md:col-span-2" data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>个性签名</FieldLabel>
                   <Textarea
+                    aria-invalid={isInvalid}
+                    className="min-h-[80px] resize-none"
                     id={field.name}
+                    maxLength={100}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="记录生活中的美好时光 ✨"
-                    maxLength={100}
-                    className="min-h-[80px] resize-none"
-                    aria-invalid={isInvalid}
+                    value={field.state.value}
                   />
                   <FieldDescription className="text-right tabular-nums">
                     {field.state.value.length}/100
@@ -452,7 +550,7 @@ export default function ProfileEditDialog({
       {/* Professional Information */}
       <div className="space-y-5">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="h-6 px-2">
+          <Badge className="h-6 px-2" variant="secondary">
             职业信息
           </Badge>
         </div>
@@ -464,13 +562,13 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>职业</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="请输入职业"
-                    aria-invalid={isInvalid}
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -485,13 +583,13 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>公司</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="请输入公司"
-                    aria-invalid={isInvalid}
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -506,7 +604,7 @@ export default function ProfileEditDialog({
       {/* Social Information */}
       <div className="space-y-5">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="h-6 px-2">
+          <Badge className="h-6 px-2" variant="secondary">
             社交信息
           </Badge>
         </div>
@@ -518,14 +616,14 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>个人网站</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    type="url"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="https://example.com"
-                    aria-invalid={isInvalid}
+                    type="url"
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -540,13 +638,13 @@ export default function ProfileEditDialog({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>GitHub</FieldLabel>
                   <Input
+                    aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="请输入 GitHub 用户名"
-                    aria-invalid={isInvalid}
+                    value={field.state.value}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
@@ -561,7 +659,7 @@ export default function ProfileEditDialog({
   const footerButtons = (
     <>
       <Button
-        className="h-11 flex-1 md:flex-none md:min-w-[120px]"
+        className="h-11 flex-1 md:min-w-[120px] md:flex-none"
         disabled={updateProfile.isPending}
         onClick={handleCancel}
         type="button"
@@ -572,7 +670,7 @@ export default function ProfileEditDialog({
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting, state.isDirty]}>
         {([canSubmit, isSubmitting, isDirty]) => (
           <Button
-            className="h-11 flex-1 md:flex-none md:min-w-[120px]"
+            className="h-11 flex-1 md:min-w-[120px] md:flex-none"
             disabled={!canSubmit || (!isDirty && avatarFile === null && backgroundFile === null)}
             onClick={form.handleSubmit}
             type="button"
@@ -596,7 +694,7 @@ export default function ProfileEditDialog({
   if (isDesktop) {
     return (
       <Dialog onOpenChange={onOpenChange} open={open}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle className="text-xl">编辑个人资料</DialogTitle>
           </DialogHeader>

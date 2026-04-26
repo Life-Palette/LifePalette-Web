@@ -1,43 +1,22 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
-import { apiService } from "@/services/api";
+import { notificationsApi } from "@/services/api";
 import type { NotificationMessage } from "@/types";
+import { useInfiniteList } from "./useInfiniteList";
 
 // 获取通知列表的hook（无限滚动版本）
-export const useNotifications = (params?: {
-  type?: string;
-  isRead?: boolean;
-  pageSize?: number;
-}) => {
-  return useInfiniteQuery({
-    queryKey: queryKeys.notifications.infiniteList(params),
-    initialPageParam: 1,
-    queryFn: async ({ pageParam = 1 }) => {
-      const response = await apiService.getNotifications({
-        ...params,
-        page: pageParam,
-        pageSize: params?.pageSize || 10,
-      });
-
-      if (response.code === 200 && response.result) {
-        return {
-          items: response.result.list as NotificationMessage[],
-          total: response.result.pagination.total,
-          page: response.result.pagination.page,
-          pageSize: response.result.pagination.pageSize,
-          totalPages: response.result.pagination.totalPages,
-          hasNextPage: response.result.pagination.page < response.result.pagination.totalPages,
-        };
-      }
-      throw new Error(response.message || "获取通知列表失败");
-    },
-    getNextPageParam: (lastPage) => (lastPage.hasNextPage ? lastPage.page + 1 : undefined),
-    staleTime: 5 * 60 * 1000, // 5分钟内数据被认为是新鲜的
-    gcTime: 15 * 60 * 1000, // 15分钟垃圾回收
-    retry: 2,
-    refetchOnWindowFocus: false,
-  });
-};
+export const useNotifications = (params?: { type?: string; isRead?: boolean; pageSize?: number }) =>
+  useInfiniteList<NotificationMessage>(
+    queryKeys.notifications.infinite(params),
+    (page) =>
+      notificationsApi.list({
+        page,
+        page_size: params?.pageSize || 10,
+        type: params?.type,
+        is_read: params?.isRead,
+      }),
+    { staleTime: 5 * 60 * 1000 }
+  );
 
 // 获取未读通知数量的hook
 export const useUnreadCount = () => {
@@ -45,21 +24,21 @@ export const useUnreadCount = () => {
     queryKey: queryKeys.notifications.unreadCount(),
     queryFn: async () => {
       try {
-        const response = await apiService.getUnreadNotificationCount();
-        if (response.code === 200 && response.result !== undefined && response.result !== null) {
-          return response.result.count ?? 0;
+        const res = await notificationsApi.getUnreadCount();
+        if (res.result !== undefined && res.result !== null) {
+          return res.result.count ?? 0;
         }
         return 0;
       } catch (error) {
         console.error("获取未读通知数量失败:", error);
-        return 0; // 确保总是返回一个数字
+        return 0;
       }
     },
-    staleTime: 2 * 60 * 1000, // 2分钟内数据被认为是新鲜的
-    gcTime: 10 * 60 * 1000, // 10分钟垃圾回收
+    staleTime: 2 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: 1,
-    refetchOnWindowFocus: true, // 窗口聚焦时重新获取
-    refetchInterval: 5 * 60 * 1000, // 每5分钟轮询一次
+    refetchOnWindowFocus: true,
+    refetchInterval: 5 * 60 * 1000,
   });
 };
 
@@ -68,34 +47,25 @@ export const useMarkAsRead = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (notificationId: number) => {
-      return await apiService.markNotificationAsRead(notificationId);
+    mutationFn: async (notificationId: string) => {
+      return await notificationsApi.markAsRead(notificationId);
     },
     onMutate: async (notificationId) => {
-      // 乐观更新：立即更新UI
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.all });
 
-      // 保存之前的数据以便回滚
-      const previousNotifications = queryClient.getQueryData(
-        queryKeys.notifications.infiniteLists(),
-      );
+      const previousNotifications = queryClient.getQueryData(queryKeys.notifications.infinite());
 
-      // 更新通知列表缓存
-      queryClient.setQueryData(queryKeys.notifications.infiniteLists(), (oldData: any) => {
+      queryClient.setQueryData(queryKeys.notifications.infinite(), (oldData: any) => {
         if (!oldData) {
           return oldData;
         }
-
         return {
           ...oldData,
           pages: oldData.pages.map((page: any) => ({
             ...page,
             items: page.items.map((notification: NotificationMessage) => {
               if (notification.id === notificationId) {
-                return {
-                  ...notification,
-                  isRead: true,
-                };
+                return { ...notification, isRead: true };
               }
               return notification;
             }),
@@ -103,28 +73,19 @@ export const useMarkAsRead = () => {
         };
       });
 
-      // 更新未读数量
-      queryClient.setQueryData(queryKeys.notifications.unreadCount(), (oldCount: number = 0) =>
-        Math.max(0, oldCount - 1),
+      queryClient.setQueryData(queryKeys.notifications.unreadCount(), (oldCount = 0) =>
+        Math.max(0, oldCount - 1)
       );
 
       return { previousNotifications };
     },
     onError: (_error, _notificationId, context) => {
-      // 发生错误时回滚
       if (context?.previousNotifications) {
-        queryClient.setQueryData(
-          queryKeys.notifications.infiniteLists(),
-          context.previousNotifications,
-        );
+        queryClient.setQueryData(queryKeys.notifications.infinite(), context.previousNotifications);
       }
-      // 重新获取未读数量
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.notifications.unreadCount(),
-      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount() });
     },
     onSettled: () => {
-      // 无论成功或失败，都重新获取数据以确保同步
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
   });
@@ -136,21 +97,17 @@ export const useMarkAllAsRead = () => {
 
   return useMutation({
     mutationFn: async () => {
-      return await apiService.markAllNotificationsAsRead();
+      return await notificationsApi.markAllAsRead();
     },
     onMutate: async () => {
-      // 乐观更新：立即更新UI
-      await queryClient.cancelQueries({ queryKey: ["notifications"] });
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.all });
 
-      // 保存之前的数据以便回滚
-      const previousNotifications = queryClient.getQueryData(["notifications", "infinite"]);
+      const previousNotifications = queryClient.getQueryData(queryKeys.notifications.infinite());
 
-      // 更新通知列表缓存，将所有通知标记为已读
-      queryClient.setQueryData(["notifications", "infinite"], (oldData: any) => {
+      queryClient.setQueryData(queryKeys.notifications.infinite(), (oldData: any) => {
         if (!oldData) {
           return oldData;
         }
-
         return {
           ...oldData,
           pages: oldData.pages.map((page: any) => ({
@@ -163,24 +120,18 @@ export const useMarkAllAsRead = () => {
         };
       });
 
-      // 将未读数量设置为0
-      queryClient.setQueryData(["notifications", "unreadCount"], 0);
+      queryClient.setQueryData(queryKeys.notifications.unreadCount(), 0);
 
       return { previousNotifications };
     },
     onError: (_error, _variables, context) => {
-      // 发生错误时回滚
       if (context?.previousNotifications) {
-        queryClient.setQueryData(["notifications", "infinite"], context.previousNotifications);
+        queryClient.setQueryData(queryKeys.notifications.infinite(), context.previousNotifications);
       }
-      // 重新获取未读数量
-      queryClient.invalidateQueries({
-        queryKey: ["notifications", "unreadCount"],
-      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount() });
     },
     onSettled: () => {
-      // 无论成功或失败，都重新获取数据以确保同步
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
   });
 };

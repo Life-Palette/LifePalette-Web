@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/dialog";
 
 interface AvatarCropDialogProps {
-  open: boolean;
   imageSrc: string;
   onClose: () => void;
   onCropComplete: (croppedImage: Blob) => void;
+  open: boolean;
 }
 
 // 创建裁剪后的图片
@@ -40,7 +40,7 @@ const createCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Bl
     0,
     0,
     pixelCrop.width,
-    pixelCrop.height,
+    pixelCrop.height
   );
 
   // 转换为 Blob
@@ -54,7 +54,7 @@ const createCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Bl
         }
       },
       "image/jpeg",
-      0.95,
+      0.95
     );
   });
 };
@@ -92,7 +92,9 @@ export default function AvatarCropDialog({
   }, []);
 
   const handleConfirm = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels) {
+      return;
+    }
 
     try {
       setIsProcessing(true);
@@ -128,7 +130,7 @@ export default function AvatarCropDialog({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">缩放</label>
+          <label className="font-medium text-sm">缩放</label>
           <input
             className="w-full"
             max={3}

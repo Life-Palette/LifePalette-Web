@@ -2,9 +2,9 @@ import { Children, type ReactNode, useMemo } from "react";
 
 interface MasonryLayoutProps {
   children: ReactNode[];
+  className?: string;
   columns?: number;
   gap?: number;
-  className?: string;
 }
 
 export default function MasonryLayout({

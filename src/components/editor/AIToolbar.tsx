@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface AIToolbarProps {
-  onAIAction: (action: AIAction, selectedText: string) => void;
   disabled?: boolean;
+  onAIAction: (action: AIAction, selectedText: string) => void;
 }
 
 export type AIAction = "improve" | "simplify" | "translate" | "summarize";
@@ -32,7 +32,7 @@ export function AIToolbar({ onAIAction, disabled }: AIToolbarProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" disabled={disabled} className="gap-1.5">
+        <Button className="gap-1.5" disabled={disabled} size="sm" variant="ghost">
           <Sparkles className="h-4 w-4" />
           AI 助手
         </Button>

@@ -23,7 +23,7 @@ export default function EmailBindChecker() {
     // 检查用户是否最近已经关闭过提醒
     const dismissedTime = localStorage.getItem(`${EMAIL_BIND_DISMISSED_KEY}_${user.id}`);
     if (dismissedTime) {
-      const dismissedAt = parseInt(dismissedTime, 10);
+      const dismissedAt = Number.parseInt(dismissedTime, 10);
       if (Date.now() - dismissedAt < EMAIL_BIND_DISMISS_DURATION) {
         return;
       }
@@ -57,12 +57,5 @@ export default function EmailBindChecker() {
     return null;
   }
 
-  return (
-    <BindEmailModal
-      isOpen={showBindModal}
-      onClose={handleClose}
-      onSuccess={handleSuccess}
-      userId={user.id}
-    />
-  );
+  return <BindEmailModal isOpen={showBindModal} onClose={handleClose} onSuccess={handleSuccess} />;
 }

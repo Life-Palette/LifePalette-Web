@@ -49,7 +49,7 @@ function NotificationsPage() {
     try {
       await markAllAsReadMutation.mutateAsync();
       toast.success("已将所有通知标记为已读");
-    } catch (error) {
+    } catch (_error) {
       toast.error("操作失败，请重试");
     }
   };
@@ -92,7 +92,7 @@ function NotificationsPage() {
         {/* 通知列表 */}
         <Suspense fallback={<LoadingSpinner />}>
           <NotificationList
-            hasMore={hasNextPage || false}
+            hasMore={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             isLoading={isLoading}
             notifications={notifications}

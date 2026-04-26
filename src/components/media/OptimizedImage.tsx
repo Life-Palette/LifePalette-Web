@@ -1,6 +1,6 @@
 import { registerComponents } from "@eosjs/components";
 import { Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PostImage } from "@/types";
 import { generateOssImageParams, getVideoThumbnailUrl, isVideo } from "@/utils/media";
 
@@ -32,21 +32,21 @@ declare global {
 }
 
 interface OptimizedImageProps {
-  image: PostImage;
-  width?: number;
-  height?: number;
   className?: string;
-  onClick?: () => void;
-  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
-  placeholderType?: "blurhash" | "color" | "none";
+  height?: number;
+  image: PostImage;
   loading?: "lazy" | "eager";
-  showDelay?: number;
-  placeholderFill?: boolean;
-  quality?: number; // 图片质量 1-100，默认 10
   noResize?: boolean; // 是否跳过尺寸缩放（详情页使用）
+  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
+  onClick?: () => void;
   onLoad?: () => void; // 图片加载完成回调
   onProgress?: (progress: { loaded: number; total: number; percent: number }) => void; // 图片加载进度回调
+  placeholderFill?: boolean;
+  placeholderType?: "blurhash" | "color" | "none";
+  quality?: number; // 图片质量 1-100，默认 10
+  showDelay?: number;
   showProgress?: boolean; // 是否显示进度指示器
+  width?: number;
 }
 
 export default function OptimizedImage({
@@ -64,11 +64,11 @@ export default function OptimizedImage({
   noResize = false,
   onLoad,
   onProgress,
-  showProgress = false,
+  _showProgress = false,
 }: OptimizedImageProps) {
   const imageRef = useRef<HTMLElement>(null);
-  const [progress, setProgress] = useState({ loaded: 0, total: 0, percent: 0 });
-  const [loadingState, setLoadingState] = useState<"loading" | "loaded" | "error">("loading");
+  const [_progress, setProgress] = useState({ loaded: 0, total: 0, percent: 0 });
+  const [_loadingState, setLoadingState] = useState<"loading" | "loaded" | "error">("loading");
 
   // 如果没有指定宽度，使用响应式
   const isResponsive = !(width || height);
@@ -89,28 +89,33 @@ export default function OptimizedImage({
         ? `${image.url}?x-oss-process=image/resize,w_1600,m_lfit/format,webp`
         : image.url + generateOssImageParams(image.width, image.height, targetWidth, quality);
 
-  const handleLoad = () => {
+  const handleLoad = useCallback(() => {
     setLoadingState("loaded");
     onLoad?.();
-  };
+  }, [onLoad]);
 
-  const handleError = () => {
+  const handleError = useCallback(() => {
     setLoadingState("error");
     onLoad?.();
-  };
+  }, [onLoad]);
 
-  const handleProgress = (e: CustomEvent) => {
-    const { loaded, total } = e.detail;
-    const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
-    const progressData = { loaded, total, percent };
-    setProgress(progressData);
-    onProgress?.(progressData);
-  };
+  const handleProgress = useCallback(
+    (e: CustomEvent) => {
+      const { loaded, total } = e.detail;
+      const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
+      const progressData = { loaded, total, percent };
+      setProgress(progressData);
+      onProgress?.(progressData);
+    },
+    [onProgress]
+  );
 
   // 设置图片事件处理器
   useEffect(() => {
     const element = imageRef.current as any;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     element.onimageload = handleLoad;
     element.onimageerror = handleError;
@@ -121,7 +126,7 @@ export default function OptimizedImage({
       element.onimageerror = null;
       element.onimageprogress = null;
     };
-  }, [image.url]); // 依赖图片 URL，确保每次图片变化都重新绑定
+  }, [handleProgress, handleLoad, handleError]); // 依赖图片 URL，确保每次图片变化都重新绑定
 
   const containerStyle = isResponsive
     ? {}
@@ -157,16 +162,16 @@ export default function OptimizedImage({
         <>
           {/* 视频缩略图使用 eos-image */}
           <eos-image
-            ref={imageRef}
-            src={optimizedUrl}
             alt={image.name}
-            width={isResponsive ? "100%" : width}
             height={isResponsive ? "100%" : height}
             loading={loading}
             object-fit={objectFit}
-            placeholder-type={placeholderType}
             placeholder={placeholderType === "blurhash" ? image.blurhash : undefined}
             placeholder-fill={placeholderFill}
+            placeholder-type={placeholderType}
+            ref={imageRef}
+            src={optimizedUrl}
+            width={isResponsive ? "100%" : width}
           />
 
           {/* 视频播放图标覆盖层 */}
@@ -179,17 +184,17 @@ export default function OptimizedImage({
       ) : (
         /* 图片使用 eos-image */
         <eos-image
-          ref={imageRef}
-          src={optimizedUrl}
           alt={image.name}
-          show-delay={showDelay}
-          width={isResponsive ? "100%" : width}
           height={isResponsive ? "100%" : height}
           loading={loading}
           object-fit={objectFit}
-          placeholder-type={placeholderType}
           placeholder={placeholderType === "blurhash" ? image.blurhash : undefined}
           placeholder-fill={placeholderFill}
+          placeholder-type={placeholderType}
+          ref={imageRef}
+          show-delay={showDelay}
+          src={optimizedUrl}
+          width={isResponsive ? "100%" : width}
         />
       )}
     </div>

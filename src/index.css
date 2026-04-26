@@ -1,18 +1,26 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
-
-@plugin "tailwindcss-animate";
 
 @layer base {
   * {
     scroll-behavior: smooth;
+    @apply border-border outline-ring/50;
   }
 
   body {
     font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
-      sans-serif;
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", sans-serif;
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
@@ -54,28 +62,28 @@
   }
 
   .glass-effect {
-    backdrop-filter: blur(20px);
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
   }
 
   .glass-dark {
-    backdrop-filter: blur(20px);
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
   }
 
   .text-gradient {
+    -webkit-text-fill-color: transparent;
     background: linear-gradient(135deg, #1e293b, #475569, #1e293b);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .text-gradient-blue {
+    -webkit-text-fill-color: transparent;
     background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
@@ -92,10 +100,10 @@
   }
 
   .border-gradient {
-    border: 1px solid transparent;
     background:
       linear-gradient(white, white) padding-box,
       linear-gradient(135deg, #3b82f6, #8b5cf6) border-box;
+    border: 1px solid transparent;
   }
 
   .hover-lift {
@@ -105,8 +113,8 @@
   }
 
   .hover-lift:hover {
-    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
   }
 }
 
@@ -227,6 +235,11 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-brand: var(--brand);
   --color-highlight: var(--highlight);
+  --font-heading: var(--font-sans);
+  --font-sans: "Geist Variable", sans-serif;
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
@@ -249,11 +262,11 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -268,51 +281,51 @@
 
 .dark {
   /* 背景色：提亮，不再是深黑，改为舒适的深蓝灰 */
-  --background: oklch(0.17 0.02 265);
+  --background: oklch(0.145 0 0);
   /* 前景色：稍微柔和的白色，减少视觉疲劳 */
-  --foreground: oklch(0.95 0.01 265);
+  --foreground: oklch(0.985 0 0);
 
   /* 卡片：比背景稍亮，层次分明 */
-  --card: oklch(0.23 0.03 265);
-  --card-foreground: oklch(0.95 0.01 265);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
 
-  --popover: oklch(0.23 0.03 265);
-  --popover-foreground: oklch(0.95 0.01 265);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
 
-  --primary: oklch(0.65 0.2 265);
-  --primary-foreground: oklch(1 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
 
   /* 次要元素：用于按钮背景等 */
-  --secondary: oklch(0.28 0.04 265);
-  --secondary-foreground: oklch(0.95 0.01 265);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
 
-  --muted: oklch(0.28 0.04 265);
-  --muted-foreground: oklch(0.7 0.03 265);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
 
-  --accent: oklch(0.28 0.04 265);
-  --accent-foreground: oklch(0.95 0.01 265);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
 
-  --destructive: oklch(0.6 0.2 20);
+  --destructive: oklch(0.704 0.191 22.216);
 
   /* 边框：提高亮度，确保可见性 */
-  --border: oklch(0.3 0.03 265);
-  --input: oklch(0.3 0.03 265);
-  --ring: oklch(0.65 0.2 265);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
 
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
 
-  --sidebar: oklch(0.2 0.03 265);
-  --sidebar-foreground: oklch(0.95 0.01 265);
-  --sidebar-primary: oklch(0.65 0.2 265);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.28 0.04 265);
-  --sidebar-accent-foreground: oklch(0.95 0.01 265);
-  --sidebar-border: oklch(0.3 0.03 265);
-  --sidebar-ring: oklch(0.65 0.2 265);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 
   --brand: oklch(0.707 0.165 254.624);
   --highlight: oklch(0.852 0.199 91.936);
@@ -394,8 +407,8 @@
 
 .rich-text-content ul,
 .rich-text-content ol {
-  margin-left: 1.5em;
   margin-bottom: 0.5em;
+  margin-left: 1.5em;
 }
 
 .rich-text-content ul {
@@ -411,32 +424,32 @@
 }
 
 .rich-text-content blockquote {
-  border-left: 3px solid #e5e7eb;
   padding-left: 1em;
   margin: 0.5em 0;
-  color: #6b7280;
   font-style: italic;
+  color: #6b7280;
+  border-left: 3px solid #e5e7eb;
 }
 
 .rich-text-content code {
-  background-color: #f3f4f6;
   padding: 0.125em 0.25em;
-  border-radius: 0.25em;
   font-family: monospace;
   font-size: 0.875em;
+  background-color: #f3f4f6;
+  border-radius: 0.25em;
 }
 
 .rich-text-content pre {
-  background-color: #f3f4f6;
   padding: 1em;
-  border-radius: 0.5em;
-  overflow-x: auto;
   margin: 0.5em 0;
+  overflow-x: auto;
+  background-color: #f3f4f6;
+  border-radius: 0.5em;
 }
 
 .rich-text-content pre code {
-  background-color: transparent;
   padding: 0;
+  background-color: transparent;
 }
 
 .rich-text-content h1,
@@ -445,9 +458,9 @@
 .rich-text-content h4,
 .rich-text-content h5,
 .rich-text-content h6 {
-  font-weight: 600;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
+  font-weight: 600;
 }
 
 .rich-text-content h1 {
@@ -464,8 +477,8 @@
 
 /* 暗色模式下的样式 */
 .dark .rich-text-content blockquote {
-  border-left-color: #374151;
   color: #9ca3af;
+  border-left-color: #374151;
 }
 
 .dark .rich-text-content code {

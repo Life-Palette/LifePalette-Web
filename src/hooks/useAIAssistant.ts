@@ -5,8 +5,8 @@ import { getAIApiKey, getAIApiURL, getAIConfig } from "@/config/ai";
 
 interface UseAIAssistantOptions {
   apiKey?: string;
-  onSuccess?: (result: string) => void;
   onError?: (error: Error) => void;
+  onSuccess?: (result: string) => void;
 }
 
 export function useAIAssistant(options: UseAIAssistantOptions = {}) {

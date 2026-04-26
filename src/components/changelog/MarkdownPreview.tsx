@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import "highlight.js/styles/github-dark.css";
 
 interface MarkdownPreviewProps {
-  content: string;
   className?: string;
+  content: string;
 }
 
 // 生成标题 ID
@@ -27,7 +27,7 @@ const components: Components = {
     const text = typeof children === "string" ? children : String(children);
     const id = generateId(text);
     return (
-      <h1 className="text-2xl font-bold text-foreground mt-6 mb-4 text-center" id={id} {...props}>
+      <h1 className="mt-6 mb-4 text-center font-bold text-2xl text-foreground" id={id} {...props}>
         {children}
       </h1>
     );
@@ -37,7 +37,7 @@ const components: Components = {
     const id = generateId(text);
     return (
       <h2
-        className="text-xl font-semibold text-foreground mt-10 mb-5 pb-3 border-b border-border scroll-mt-20"
+        className="mt-10 mb-5 scroll-mt-20 border-border border-b pb-3 font-semibold text-foreground text-xl"
         id={id}
         {...props}
       >
@@ -50,7 +50,7 @@ const components: Components = {
     const id = generateId(text);
     return (
       <h3
-        className="text-lg font-semibold text-foreground mt-10 mb-4 pl-3 border-l-2 border-primary scroll-mt-20"
+        className="mt-10 mb-4 scroll-mt-20 border-primary border-l-2 pl-3 font-semibold text-foreground text-lg"
         id={id}
         {...props}
       >
@@ -63,7 +63,7 @@ const components: Components = {
     const id = generateId(text);
     return (
       <h4
-        className="text-base font-semibold text-foreground mt-6 mb-3 scroll-mt-20"
+        className="mt-6 mb-3 scroll-mt-20 font-semibold text-base text-foreground"
         id={id}
         {...props}
       >
@@ -73,7 +73,7 @@ const components: Components = {
   },
   blockquote: ({ children, ...props }) => (
     <blockquote
-      className="my-6 py-3 px-4 border-l-2 border-muted-foreground/40 bg-muted/30 rounded-r text-muted-foreground italic"
+      className="my-6 rounded-r border-muted-foreground/40 border-l-2 bg-muted/30 px-4 py-3 text-muted-foreground italic"
       {...props}
     >
       {children}
@@ -86,17 +86,17 @@ const components: Components = {
   ),
   li: ({ children, ...props }) => (
     <li className="flex items-start gap-3 text-muted-foreground leading-relaxed" {...props}>
-      <span className="inline-block w-2 h-2 rounded-full bg-foreground/40 mt-[0.45rem] shrink-0" />
+      <span className="mt-[0.45rem] inline-block h-2 w-2 shrink-0 rounded-full bg-foreground/40" />
       <span className="flex-1">{children}</span>
     </li>
   ),
-  hr: ({ ...props }) => <hr className="my-8 border-t border-border/60" {...props} />,
+  hr: ({ ...props }) => <hr className="my-8 border-border/60 border-t" {...props} />,
   a: ({ children, href, ...props }) => (
     <a
+      className="font-medium text-primary transition-colors hover:underline"
       href={href}
-      className="text-primary font-medium hover:underline transition-colors"
-      target={href?.startsWith("http") ? "_blank" : undefined}
       rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+      target={href?.startsWith("http") ? "_blank" : undefined}
       {...props}
     >
       {children}
@@ -116,19 +116,19 @@ const components: Components = {
   ),
   th: ({ children, ...props }) => (
     <th
-      className="px-4 py-3 text-left font-semibold text-foreground border-b border-border"
+      className="border-border border-b px-4 py-3 text-left font-semibold text-foreground"
       {...props}
     >
       {children}
     </th>
   ),
   td: ({ children, ...props }) => (
-    <td className="px-4 py-3 text-muted-foreground border-b border-border/50" {...props}>
+    <td className="border-border/50 border-b px-4 py-3 text-muted-foreground" {...props}>
       {children}
     </td>
   ),
   tr: ({ children, ...props }) => (
-    <tr className="hover:bg-muted/30 transition-colors" {...props}>
+    <tr className="transition-colors hover:bg-muted/30" {...props}>
       {children}
     </tr>
   ),
@@ -141,25 +141,25 @@ export default function MarkdownPreview({ content, className }: MarkdownPreviewP
         "prose prose-sm dark:prose-invert max-w-none",
         // 标题样式
         "prose-headings:font-semibold prose-headings:text-foreground",
-        "prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-6 prose-h1:text-center",
+        "prose-h1:mt-6 prose-h1:mb-4 prose-h1:text-center prose-h1:text-2xl",
         // 段落样式
-        "prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-5",
+        "prose-p:mb-5 prose-p:text-muted-foreground prose-p:leading-relaxed",
         // 列表样式 - 由自定义组件处理
-        "prose-ol:my-5 prose-ol:list-decimal prose-ol:pl-6 prose-ol:space-y-2",
+        "prose-ol:my-5 prose-ol:list-decimal prose-ol:space-y-2 prose-ol:pl-6",
         // 代码样式
-        "prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono",
-        "prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto",
+        "prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-foreground prose-code:text-sm",
+        "prose-pre:overflow-x-auto prose-pre:rounded-lg prose-pre:bg-muted prose-pre:p-4",
         // 链接样式
         "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
         // 强调样式
-        "prose-strong:text-foreground prose-strong:font-semibold",
+        "prose-strong:font-semibold prose-strong:text-foreground",
         // 分割线样式
-        "prose-hr:border-t prose-hr:border-border prose-hr:my-8",
+        "prose-hr:my-8 prose-hr:border-border prose-hr:border-t",
         // 表格样式
         "prose-table:w-full prose-table:border-collapse",
-        "prose-th:bg-muted/50 prose-th:p-2 prose-th:text-left prose-th:font-medium prose-th:border-b prose-th:border-border",
-        "prose-td:p-2 prose-td:border-b prose-td:border-border/50",
-        className,
+        "prose-th:border-border prose-th:border-b prose-th:bg-muted/50 prose-th:p-2 prose-th:text-left prose-th:font-medium",
+        "prose-td:border-border/50 prose-td:border-b prose-td:p-2",
+        className
       )}
     >
       <ReactMarkdown

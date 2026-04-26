@@ -4,15 +4,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { apiService } from "@/services/api";
+import { chatApi } from "@/services/api";
 import type { ChatMessage as ChatMessageType, ChatRoom } from "@/types/chat";
 import ChatMessage from "./ChatMessage";
 
 interface ChatWindowProps {
-  room: ChatRoom;
-  messages: ChatMessageType[];
   currentUserId: number;
+  messages: ChatMessageType[];
   onSendMessage: (message: string, type: "TEXT" | "IMAGE" | "FILE", file?: any) => void;
+  room: ChatRoom;
 }
 
 export default function ChatWindow({
@@ -29,13 +29,9 @@ export default function ChatWindow({
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   // 自动滚动到底部
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   const getRoomName = () => {
     if (room.type === "PRIVATE") {
@@ -45,13 +41,15 @@ export default function ChatWindow({
   };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() && !previewFile) return;
+    if (!(inputMessage.trim() || previewFile)) {
+      return;
+    }
 
     if (previewFile) {
       // 上传文件
       setIsUploading(true);
       try {
-        const response = await apiService.uploadChatFile(previewFile);
+        const response = await chatApi.uploadFile(previewFile);
         const fileInfo = response.result;
 
         const messageType = previewFile.type.startsWith("image/") ? "IMAGE" : "FILE";
@@ -94,13 +92,13 @@ export default function ChatWindow({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-neutral-900">
+    <div className="flex h-full flex-col bg-white dark:bg-neutral-900">
       {/* 头部 */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-800">
+      <div className="flex items-center justify-between border-neutral-100 border-b px-6 py-4 dark:border-neutral-800">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-white">{getRoomName()}</h2>
+          <h2 className="font-bold text-neutral-900 text-xl dark:text-white">{getRoomName()}</h2>
           {room.type === "GROUP" && room.members && (
-            <span className="text-sm text-neutral-400 dark:text-neutral-500 font-medium">
+            <span className="font-medium text-neutral-400 text-sm dark:text-neutral-500">
               {room.members.length} 成员
             </span>
           )}
@@ -108,18 +106,18 @@ export default function ChatWindow({
       </div>
 
       {/* 消息列表 */}
-      <ScrollArea className="flex-1 px-6 py-6 bg-neutral-50/30 dark:bg-neutral-900/50">
+      <ScrollArea className="flex-1 bg-neutral-50/30 px-6 py-6 dark:bg-neutral-900/50">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-neutral-500 dark:text-neutral-400">
+          <div className="flex h-full items-center justify-center text-neutral-500 dark:text-neutral-400">
             暂无消息，开始聊天吧
           </div>
         ) : (
           <>
             {messages.map((message) => (
               <ChatMessage
+                isMine={message.userId === currentUserId}
                 key={message.id}
                 message={message}
-                isMine={message.userId === currentUserId}
               />
             ))}
             <div ref={messagesEndRef} />
@@ -129,79 +127,79 @@ export default function ChatWindow({
 
       {/* 文件预览 */}
       {previewFile && (
-        <div className="px-6 py-3 border-t border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900">
-          <div className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-xl">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
+        <div className="border-neutral-100 border-t bg-white px-6 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 dark:bg-neutral-800">
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-neutral-900 text-sm dark:text-white">
                 {previewFile.name}
               </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <p className="text-neutral-500 text-xs dark:text-neutral-400">
                 {(previewFile.size / 1024).toFixed(1)} KB
               </p>
             </div>
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setPreviewFile(null)}
               className="h-6 w-6 rounded-full"
+              onClick={() => setPreviewFile(null)}
+              size="icon"
+              variant="ghost"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
       {/* 输入区域 */}
-      <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900">
+      <div className="border-neutral-100 border-t bg-white px-6 py-4 dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex items-center gap-3">
           {/* 附件按钮 */}
           <div className="flex gap-2">
             <input
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageSelect}
               ref={imageInputRef}
               type="file"
-              accept="image/*"
-              onChange={handleImageSelect}
-              className="hidden"
             />
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => imageInputRef.current?.click()}
               disabled={isUploading}
+              onClick={() => imageInputRef.current?.click()}
+              size="icon"
               title="发送图片"
+              variant="ghost"
             >
-              <ImageIcon className="w-5 h-5" />
+              <ImageIcon className="h-5 w-5" />
             </Button>
 
-            <input ref={fileInputRef} type="file" onChange={handleFileSelect} className="hidden" />
+            <input className="hidden" onChange={handleFileSelect} ref={fileInputRef} type="file" />
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              size="icon"
               title="发送文件"
+              variant="ghost"
             >
-              <Paperclip className="w-5 h-5" />
+              <Paperclip className="h-5 w-5" />
             </Button>
           </div>
 
           {/* 输入框 */}
           <Textarea
-            value={inputMessage}
+            className="max-h-[120px] min-h-[35px] flex-1 resize-none"
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="输入消息..."
-            className="flex-1 min-h-[35px] max-h-[120px] resize-none"
+            value={inputMessage}
           />
 
           {/* 发送按钮 */}
           <Button
-            onClick={handleSendMessage}
-            disabled={(!inputMessage.trim() && !previewFile) || isUploading}
-            size="icon"
             className="h-[44px] w-[44px]"
+            disabled={!(inputMessage.trim() || previewFile) || isUploading}
+            onClick={handleSendMessage}
+            size="icon"
           >
-            <Send className="w-5 h-5" />
+            <Send className="h-5 w-5" />
           </Button>
         </div>
       </div>

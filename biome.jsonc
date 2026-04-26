@@ -1,65 +1,19 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "files": {
-    "includes": ["src/**"],
-    "maxSize": 2097152
-  },
-  "formatter": {
-    "enabled": true,
-    "formatWithErrors": false,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 100
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double",
-      "semicolons": "always"
-    }
-  },
-  "css": {
-    "parser": {
-      "cssModules": false,
-      "tailwindDirectives": true
-    }
-  },
+  "extends": ["ultracite/biome/core", "ultracite/biome/react"],
+  "files": { "includes": ["src/**"], "maxSize": 2097152 },
+  "formatter": { "lineWidth": 100 },
+  "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "always" } },
+  "css": { "parser": { "cssModules": false } },
   "linter": {
-    "enabled": false,
     "rules": {
-      "style": {
-        "useFilenamingConvention": "off",
-        "useNamingConvention": "off",
-        "noMagicNumbers": "off",
-        "noNestedTernary": "off",
-        "useForOf": "off",
-        "noNonNullAssertion": "off"
-      },
-      "suspicious": {
-        "noExplicitAny": "off",
-        "useAwait": "off",
-        "noArrayIndexKey": "off",
-        "noEmptyBlockStatements": "off",
-        "noShadowRestrictedNames": "off",
-        "noImplicitAnyLet": "off",
-        "useIterableCallbackReturn": "off"
-      },
-      "complexity": {
-        "noExcessiveCognitiveComplexity": "off",
-        "noForEach": "off",
-        "noImportantStyles": "off"
-      },
-      "a11y": {
-        "useButtonType": "off",
-        "noStaticElementInteractions": "off",
-        "useKeyWithClickEvents": "off",
-        "noLabelWithoutControl": "off"
-      },
-      "security": {
-        "noDangerouslySetInnerHtml": "off"
-      },
-      "correctness": {
-        "useExhaustiveDependencies": "warn"
-      }
+      "style": { "noNonNullAssertion": "off", "useFilenamingConvention": "off", "useNamingConvention": "off", "noNestedTernary": "off", "noEnum": "off", "noParameterProperties": "off", "useBlockStatements": "off", "useConsistentMemberAccessibility": "off", "useDefaultSwitchClause": "off", "useReadonlyClassProperties": "off", "noNamespace": "off" },
+      "suspicious": { "noExplicitAny": "off", "noArrayIndexKey": "off", "noImplicitAnyLet": "off", "noEvolvingTypes": "off", "useAwait": "off", "noEmptyBlockStatements": "off", "useIterableCallbackReturn": "off", "noAssignInExpressions": "off", "noShadowRestrictedNames": "off", "noAlert": "off" },
+      "complexity": { "noForEach": "off", "noExcessiveCognitiveComplexity": "off", "noUselessFragments": "warn" },
+      "a11y": { "useButtonType": "off", "noStaticElementInteractions": "off", "useKeyWithClickEvents": "off", "noNoninteractiveElementInteractions": "off", "noSvgWithoutTitle": "off", "noLabelWithoutControl": "off", "useMediaCaption": "off", "useSemanticElements": "off" },
+      "security": { "noDangerouslySetInnerHtml": "off" },
+      "correctness": { "useExhaustiveDependencies": "warn", "noNestedComponentDefinitions": "warn", "useImageSize": "warn", "noUnusedFunctionParameters": "warn", "noInvalidUseBeforeDeclaration": "off" },
+      "performance": { "noBarrelFile": "off", "useTopLevelRegex": "off", "noNamespaceImport": "off" }
     }
   }
 }

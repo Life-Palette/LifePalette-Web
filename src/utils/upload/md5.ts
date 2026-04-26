@@ -8,7 +8,7 @@ import SparkMD5 from "spark-md5";
  */
 export async function calculateMD5(
   file: File,
-  onProgress?: (percent: number) => void,
+  onProgress?: (percent: number) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const fileReader = new FileReader();

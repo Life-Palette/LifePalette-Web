@@ -6,9 +6,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { config } from "@/config/env";
 import { MESSAGES } from "@/constants/messages";
-import { useLogin, useLoginByCode, useRegister, useResetPassword } from "@/hooks/useAuth";
+import {
+  useLogin,
+  useLoginByCode,
+  useRegister,
+  useResetPassword,
+  useSendEmailCode,
+} from "@/hooks/useAuth";
 import { useQRCodeLogin } from "@/hooks/useQRCodeLogin";
 import { cn } from "@/lib/utils";
 
@@ -19,27 +24,27 @@ interface LoginModalProps {
 }
 
 interface QRCodeOverlayProps {
-  status: "confirm" | "timeout" | "success";
   onRefresh: () => void;
+  status: "confirm" | "timeout" | "success";
 }
 
 function QRCodeOverlay({ status, onRefresh }: QRCodeOverlayProps) {
   const overlayConfig = {
     confirm: {
       maskColor: "bg-white/80",
-      icon: <CheckCircle className="w-12 h-12 text-green-500" />,
+      icon: <CheckCircle className="h-12 w-12 text-green-500" />,
       text: null,
       clickable: false,
     },
     timeout: {
       maskColor: "bg-black/50",
-      icon: <AlertCircle className="w-12 h-12 text-red-500" />,
+      icon: <AlertCircle className="h-12 w-12 text-red-500" />,
       text: MESSAGES.QRCODE_LOGIN.REFRESH_TIP,
       clickable: true,
     },
     success: {
       maskColor: "bg-white/80",
-      icon: <Smile className="w-12 h-12 text-green-500" />,
+      icon: <Smile className="h-12 w-12 text-green-500" />,
       text: null,
       clickable: false,
     },
@@ -51,14 +56,14 @@ function QRCodeOverlay({ status, onRefresh }: QRCodeOverlayProps) {
     <div
       className={cn(
         "absolute inset-0 flex flex-col items-center justify-center",
-        config.clickable && "cursor-pointer",
+        config.clickable && "cursor-pointer"
       )}
       onClick={config.clickable ? onRefresh : undefined}
     >
       <div className={cn("absolute inset-0", config.maskColor)} />
       <div className="relative z-10 flex flex-col items-center space-y-2">
         {config.icon}
-        {config.text && <p className="text-sm text-white font-medium">{config.text}</p>}
+        {config.text && <p className="font-medium text-sm text-white">{config.text}</p>}
       </div>
     </div>
   );
@@ -83,6 +88,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
   const loginByCodeMutation = useLoginByCode();
   const registerMutation = useRegister();
   const resetPasswordMutation = useResetPassword();
+  const sendEmailCodeMutation = useSendEmailCode();
 
   // 二维码登录Hook
   const {
@@ -112,18 +118,17 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
       return;
     }
 
+    // 根据场景确定 purpose
+    const purpose = isResetPassword ? "reset_password" : isLogin ? "login" : "register";
+
     setSendingCode(true);
     try {
-      const response = await fetch(`${config.API_BASE_URL}/api/code/sendEmail`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: emailOrAccount }),
+      const response = await sendEmailCodeMutation.mutateAsync({
+        email: emailOrAccount,
+        purpose,
       });
 
-      const data = await response.json();
-      if (data.code === 200) {
+      if (response.code === 200) {
         toast.success("验证码已发送，请查收邮箱");
         // 开始倒计时
         setCountdown(60);
@@ -137,17 +142,12 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
           });
         }, 1000);
       } else {
-        // 处理错误
-        if (Array.isArray(data.msg) && data.msg.length > 0) {
-          const errorMessages = data.msg.map((err: any) => err.message).join(", ");
-          toast.error(errorMessages);
-        } else {
-          toast.error(data.msg || data.message || "发送验证码失败");
-        }
+        toast.error(response.message || "发送验证码失败");
       }
     } catch (error) {
       console.error("发送验证码失败:", error);
-      toast.error("发送验证码失败，请重试");
+      const errorMessage = error instanceof Error ? error.message : "发送验证码失败，请重试";
+      toast.error(errorMessage);
     } finally {
       setSendingCode(false);
     }
@@ -222,7 +222,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
           code: formData.code,
         });
 
-        if (result.code === 200) {
+        if (result.code === 200 || result.code === 201) {
           // 检查是否返回了 token（自动登录）
           if (result.result?.token?.access_token) {
             toast.success("注册成功，已自动登录");
@@ -282,11 +282,11 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <>
                   {/* 重置密码表单 */}
                   <div className="space-y-2">
-                    <Label htmlFor="account">{MESSAGES.FORM.ACCOUNT}</Label>
+                    <Label htmlFor="account">邮箱</Label>
                     <Input
                       id="account"
                       onChange={(e) => setFormData({ ...formData, account: e.target.value })}
-                      placeholder={MESSAGES.FORM.PLACEHOLDER.ACCOUNT}
+                      placeholder="请输入邮箱"
                       required
                       type="text"
                       value={formData.account}
@@ -300,9 +300,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                         className="flex-1"
                         id="code"
                         inputMode="numeric"
-                        maxLength={4}
+                        maxLength={6}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                           setFormData({ ...formData, code: value });
                         }}
                         placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}
@@ -356,84 +356,82 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                   </div>
                 </>
               ) : isLogin ? (
-                <>
-                  {useCodeLogin ? (
-                    <>
-                      {/* 验证码登录 */}
-                      <div className="space-y-2">
-                        <Label htmlFor="account">{MESSAGES.FORM.ACCOUNT}</Label>
+                useCodeLogin ? (
+                  <>
+                    {/* 验证码登录 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="account">{MESSAGES.FORM.ACCOUNT}</Label>
+                      <Input
+                        id="account"
+                        onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+                        placeholder={MESSAGES.FORM.PLACEHOLDER.ACCOUNT}
+                        required
+                        type="text"
+                        value={formData.account}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="code">{MESSAGES.FORM.CODE}</Label>
+                      <div className="flex gap-2">
                         <Input
-                          id="account"
-                          onChange={(e) => setFormData({ ...formData, account: e.target.value })}
-                          placeholder={MESSAGES.FORM.PLACEHOLDER.ACCOUNT}
+                          className="flex-1"
+                          id="code"
+                          inputMode="numeric"
+                          maxLength={6}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                            setFormData({ ...formData, code: value });
+                          }}
+                          placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}
                           required
                           type="text"
-                          value={formData.account}
+                          value={formData.code}
                         />
+                        <Button
+                          className="whitespace-nowrap"
+                          disabled={sendingCode || countdown > 0 || !formData.account}
+                          onClick={handleSendCode}
+                          type="button"
+                          variant="outline"
+                        >
+                          {countdown > 0
+                            ? MESSAGES.FORM.RESEND_CODE(countdown)
+                            : sendingCode
+                              ? MESSAGES.FORM.SENDING_CODE
+                              : MESSAGES.FORM.SEND_CODE}
+                        </Button>
                       </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* 账号密码登录 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="account">{MESSAGES.FORM.ACCOUNT}</Label>
+                      <Input
+                        id="account"
+                        onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+                        placeholder={MESSAGES.FORM.PLACEHOLDER.ACCOUNT}
+                        required
+                        type="text"
+                        value={formData.account}
+                      />
+                    </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="code">{MESSAGES.FORM.CODE}</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            className="flex-1"
-                            id="code"
-                            inputMode="numeric"
-                            maxLength={4}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/\D/g, "").slice(0, 4);
-                              setFormData({ ...formData, code: value });
-                            }}
-                            placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}
-                            required
-                            type="text"
-                            value={formData.code}
-                          />
-                          <Button
-                            className="whitespace-nowrap"
-                            disabled={sendingCode || countdown > 0 || !formData.account}
-                            onClick={handleSendCode}
-                            type="button"
-                            variant="outline"
-                          >
-                            {countdown > 0
-                              ? MESSAGES.FORM.RESEND_CODE(countdown)
-                              : sendingCode
-                                ? MESSAGES.FORM.SENDING_CODE
-                                : MESSAGES.FORM.SEND_CODE}
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {/* 账号密码登录 */}
-                      <div className="space-y-2">
-                        <Label htmlFor="account">{MESSAGES.FORM.ACCOUNT}</Label>
-                        <Input
-                          id="account"
-                          onChange={(e) => setFormData({ ...formData, account: e.target.value })}
-                          placeholder={MESSAGES.FORM.PLACEHOLDER.ACCOUNT}
-                          required
-                          type="text"
-                          value={formData.account}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="password">{MESSAGES.FORM.PASSWORD}</Label>
-                        <Input
-                          id="password"
-                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                          placeholder={MESSAGES.FORM.PLACEHOLDER.PASSWORD}
-                          required
-                          type="password"
-                          value={formData.password}
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">{MESSAGES.FORM.PASSWORD}</Label>
+                      <Input
+                        id="password"
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder={MESSAGES.FORM.PLACEHOLDER.PASSWORD}
+                        required
+                        type="password"
+                        value={formData.password}
+                      />
+                    </div>
+                  </>
+                )
               ) : (
                 <>
                   <div className="space-y-2">
@@ -455,9 +453,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                         className="flex-1"
                         id="code"
                         inputMode="numeric"
-                        maxLength={4}
+                        maxLength={6}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          const value = e.target.value.replace(/\D/g, "").slice(0, 6);
                           setFormData({ ...formData, code: value });
                         }}
                         placeholder={MESSAGES.FORM.PLACEHOLDER.CODE}
@@ -539,10 +537,10 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
           <TabsContent value="qrcode">
             <div className="flex flex-col items-center justify-center space-y-4 py-6">
-              <p className="text-sm text-muted-foreground">{MESSAGES.QRCODE_LOGIN.SCAN_TIP}</p>
+              <p className="text-muted-foreground text-sm">{MESSAGES.QRCODE_LOGIN.SCAN_TIP}</p>
 
               <div
-                className="relative w-[300px] h-[300px] border border-border rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors"
+                className="relative h-[300px] w-[300px] cursor-pointer overflow-hidden rounded-lg border border-border transition-colors hover:border-primary"
                 onClick={() => {
                   if (!qrLoading && qrStatus !== "success") {
                     refreshQRCode();
@@ -552,14 +550,16 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
               >
                 {qrLoading || !qrImageUrl ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                    <div className="h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
                   </div>
                 ) : (
                   <>
                     <img
                       alt="登录二维码"
-                      className="w-full h-full object-contain"
+                      className="h-full w-full object-contain"
+                      height={200}
                       src={qrImageUrl}
+                      width={200}
                     />
 
                     {/* 状态遮罩层 */}
@@ -570,16 +570,16 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 )}
               </div>
 
-              {qrError && <p className="text-sm text-destructive">{qrError}</p>}
+              {qrError && <p className="text-destructive text-sm">{qrError}</p>}
 
               {!qrLoading && qrStatus === "pending" && (
-                <p className="text-xs text-muted-foreground">点击二维码可刷新</p>
+                <p className="text-muted-foreground text-xs">点击二维码可刷新</p>
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="account" className="mt-0">
-            <div className="text-center space-y-2">
+          <TabsContent className="mt-0" value="account">
+            <div className="space-y-2 text-center">
               {isResetPassword ? (
                 <Button
                   className="text-sm"

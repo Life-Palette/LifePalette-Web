@@ -6,10 +6,10 @@ import { PROFILE_VALIDATION, VALIDATION_MESSAGES } from "@/constants/validation"
 
 interface AvatarUploadProps {
   currentAvatar?: string;
-  previewAvatar?: string | null;
+  error?: string;
   onAvatarChange: (file: File, preview: string) => void;
   onError: (error: string) => void;
-  error?: string;
+  previewAvatar?: string | null;
 }
 
 export default function AvatarUpload({
@@ -30,7 +30,9 @@ export default function AvatarUpload({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     // 验证文件类型
     if (!(PROFILE_VALIDATION.AVATAR.ALLOWED_TYPES as readonly string[]).includes(file.type)) {
@@ -95,7 +97,7 @@ export default function AvatarUpload({
             <AvatarFallback className="bg-muted text-2xl">头像</AvatarFallback>
           </Avatar>
           <button
-            className="absolute -bottom-1 -right-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-110 hover:bg-primary/90"
+            className="absolute -right-1 -bottom-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-110 hover:bg-primary/90"
             onClick={handleClick}
             type="button"
           >
@@ -111,7 +113,7 @@ export default function AvatarUpload({
         </div>
         <p className="text-center text-muted-foreground text-xs">点击相机图标更换头像</p>
         {error && (
-          <p className="text-center text-sm text-red-500" role="alert">
+          <p className="text-center text-red-500 text-sm" role="alert">
             {error}
           </p>
         )}

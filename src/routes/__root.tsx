@@ -4,11 +4,13 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { AliveScope } from "react-activation";
 import EmailBindChecker from "@/components/auth/EmailBindChecker";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
 
 export const Route = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
       <ErrorBoundary>
         <AliveScope>
           <div className="min-h-screen bg-background text-foreground">
@@ -18,6 +20,7 @@ export const Route = createRootRoute({
           <EmailBindChecker />
         </AliveScope>
       </ErrorBoundary>
+      </TooltipProvider>
       {/* React Query DevTools - 仅在开发环境显示 */}
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

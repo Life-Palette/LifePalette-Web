@@ -26,8 +26,8 @@ import type { ChangelogType } from "@/types";
 // 大纲项类型
 interface TocItem {
   id: string;
-  text: string;
   level: number;
+  text: string;
 }
 
 // 从 Markdown 内容中提取标题
@@ -65,11 +65,13 @@ function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId
     }
   };
 
-  if (headings.length === 0) return null;
+  if (headings.length === 0) {
+    return null;
+  }
 
   return (
     <nav className="space-y-1">
-      <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-3">
+      <div className="mb-3 flex items-center gap-2 font-medium text-foreground text-sm">
         <List className="h-4 w-4" />
         <span>目录</span>
       </div>
@@ -78,21 +80,21 @@ function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId
           const isNewSection = heading.level === 1 && index > 0;
           return (
             <div key={heading.id}>
-              {isNewSection && <div className="my-4 border-t border-border/40" />}
+              {isNewSection && <div className="my-4 border-border/40 border-t" />}
               <button
-                onClick={() => handleClick(heading.id)}
                 className={cn(
-                  "block w-full text-left py-1.5 px-2 rounded transition-colors",
+                  "block w-full rounded px-2 py-1.5 text-left transition-colors",
                   // 层级缩进
-                  heading.level === 1 && "font-semibold text-foreground mt-3 mb-1",
+                  heading.level === 1 && "mt-3 mb-1 font-semibold text-foreground",
                   heading.level === 2 && "pl-4 font-medium",
                   heading.level === 3 && "pl-7 text-muted-foreground",
-                  heading.level === 4 && "pl-10 text-muted-foreground/80 text-[13px]",
+                  heading.level === 4 && "pl-10 text-[13px] text-muted-foreground/80",
                   // 激活状态
                   activeId === heading.id
-                    ? "text-primary bg-primary/5"
-                    : "hover:text-foreground hover:bg-muted/50",
+                    ? "bg-primary/5 text-primary"
+                    : "hover:bg-muted/50 hover:text-foreground"
                 )}
+                onClick={() => handleClick(heading.id)}
                 type="button"
               >
                 <span className="line-clamp-1">{heading.text}</span>
@@ -138,7 +140,9 @@ const typeConfig: Record<
 
 // 格式化日期
 function formatDate(dateString: string | null): string {
-  if (!dateString) return "";
+  if (!dateString) {
+    return "";
+  }
   const date = new Date(dateString);
   return date.toLocaleDateString("zh-CN", {
     year: "numeric",
@@ -164,16 +168,22 @@ function ChangelogDetailPage() {
 
   // 提取大纲
   const headings = useMemo(() => {
-    if (!changelog?.content) return [];
+    if (!changelog?.content) {
+      return [];
+    }
     return extractHeadings(changelog.content);
   }, [changelog?.content]);
 
   // 页面加载时，根据 URL hash 滚动到对应锚点
   useEffect(() => {
-    if (hasScrolledToHash.current || headings.length === 0) return;
+    if (hasScrolledToHash.current || headings.length === 0) {
+      return;
+    }
 
     const hash = window.location.hash.slice(1); // 移除 # 前缀
-    if (!hash) return;
+    if (!hash) {
+      return;
+    }
 
     // 解码 URL 编码的 hash（如 %E4%B8%AA%E4%BA%BA%E7%A9%BA%E9%97%B4 -> 个人空间）
     const decodedHash = decodeURIComponent(hash);
@@ -254,7 +264,7 @@ function ChangelogDetailPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
         <div className="text-center">
-          <h2 className="mb-2 text-2xl font-semibold text-foreground">未找到该版本</h2>
+          <h2 className="mb-2 font-semibold text-2xl text-foreground">未找到该版本</h2>
           <p className="mb-6 text-muted-foreground">版本 {version} 不存在或已被删除</p>
           <Link to="/changelog">
             <Button>
@@ -272,7 +282,7 @@ function ChangelogDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* 顶部导航 */}
-      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-10 border-border border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link to="/changelog">
             <Button className="gap-2" size="sm" variant="ghost">
@@ -294,11 +304,11 @@ function ChangelogDetailPage() {
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex gap-8">
           {/* 主内容区域 */}
-          <main className="flex-1 min-w-0">
+          <main className="min-w-0 flex-1">
             {/* 版本信息头部 */}
             <div className={cn("mb-8 rounded-2xl bg-gradient-to-b p-8", config.bgClass)}>
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <h1 className="font-mono text-3xl font-bold text-foreground sm:text-4xl">
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <h1 className="font-bold font-mono text-3xl text-foreground sm:text-4xl">
                   {changelog.version}
                 </h1>
                 <Badge
@@ -310,7 +320,7 @@ function ChangelogDetailPage() {
                 </Badge>
               </div>
 
-              <h2 className="mb-4 text-xl font-medium text-foreground sm:text-2xl">
+              <h2 className="mb-4 font-medium text-foreground text-xl sm:text-2xl">
                 {changelog.title}
               </h2>
 
@@ -336,18 +346,18 @@ function ChangelogDetailPage() {
               {prevLog ? (
                 <Link
                   className="group"
-                  to="/changelog/$version"
                   params={{ version: prevLog.version }}
+                  to="/changelog/$version"
                 >
                   <Card className="h-full p-4 transition-colors hover:bg-muted/50">
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                    <div className="mb-1 flex items-center gap-2 text-muted-foreground text-sm">
                       <ChevronLeft className="h-4 w-4" />
                       <span>上一版本</span>
                     </div>
-                    <div className="font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
+                    <div className="font-mono font-semibold text-foreground transition-colors group-hover:text-primary">
                       {prevLog.version}
                     </div>
-                    <div className="text-muted-foreground text-sm line-clamp-1 mt-1">
+                    <div className="mt-1 line-clamp-1 text-muted-foreground text-sm">
                       {prevLog.title}
                     </div>
                   </Card>
@@ -359,18 +369,18 @@ function ChangelogDetailPage() {
               {nextLog ? (
                 <Link
                   className="group"
-                  to="/changelog/$version"
                   params={{ version: nextLog.version }}
+                  to="/changelog/$version"
                 >
-                  <Card className="h-full p-4 transition-colors hover:bg-muted/50 text-right">
-                    <div className="flex items-center justify-end gap-2 text-muted-foreground text-sm mb-1">
+                  <Card className="h-full p-4 text-right transition-colors hover:bg-muted/50">
+                    <div className="mb-1 flex items-center justify-end gap-2 text-muted-foreground text-sm">
                       <span>下一版本</span>
                       <ChevronRight className="h-4 w-4" />
                     </div>
-                    <div className="font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
+                    <div className="font-mono font-semibold text-foreground transition-colors group-hover:text-primary">
                       {nextLog.version}
                     </div>
-                    <div className="text-muted-foreground text-sm line-clamp-1 mt-1">
+                    <div className="mt-1 line-clamp-1 text-muted-foreground text-sm">
                       {nextLog.title}
                     </div>
                   </Card>
@@ -383,9 +393,9 @@ function ChangelogDetailPage() {
 
           {/* 侧边大纲 - 仅在大屏显示 */}
           {headings.length > 0 && (
-            <aside className="hidden lg:block w-64 shrink-0">
+            <aside className="hidden w-64 shrink-0 lg:block">
               <div className="sticky top-20">
-                <Card className="p-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
+                <Card className="max-h-[calc(100vh-6rem)] overflow-y-auto p-4">
                   <TableOfContents activeId={activeId} headings={headings} />
                 </Card>
               </div>

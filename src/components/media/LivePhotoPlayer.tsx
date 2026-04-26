@@ -3,23 +3,33 @@ import { useEffect, useRef } from "react";
 import type { PostImage } from "@/types";
 
 interface LivePhotoPlayerProps {
-  image: PostImage;
+  autoplay?: boolean;
   className?: string;
+  image: PostImage;
   isActive?: boolean;
-  onDurationChange?: (duration: number) => void; // 实况照片视频时长（秒）
+  onCanPlay?: () => void;
+  onDurationChange?: (duration: number) => void;
+  onEnded?: () => void;
+  onPhotoLoad?: () => void;
 }
 
 export default function LivePhotoPlayer({
   image,
   className = "",
   isActive = true,
+  autoplay = true,
   onDurationChange,
+  onEnded,
+  onPhotoLoad,
+  onCanPlay,
 }: LivePhotoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<LivePhotoViewer | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || !image.videoSrc) return;
+    if (!(containerRef.current && image.videoSrc)) {
+      return;
+    }
 
     const container = containerRef.current;
 
@@ -27,18 +37,20 @@ export default function LivePhotoPlayer({
     container.innerHTML = "";
 
     // 只在激活时创建实例
-    if (!isActive) return;
+    if (!isActive) {
+      return;
+    }
 
     // 创建新的 LivePhotoViewer 实例
     try {
       viewerRef.current = new LivePhotoViewer({
         photoSrc: image.url,
         videoSrc: image.videoSrc,
-        container: container,
+        container,
         borderRadius: "0px",
         height: "100%",
-        // width: "400px",
         width: "100%",
+        autoplay,
         imageCustomization: {
           styles: {
             objectFit: "contain",
@@ -51,10 +63,18 @@ export default function LivePhotoPlayer({
             objectFit: "contain",
           },
         },
-        // @ts-ignore - live-photo 库的 onVideoLoad 实际上会传递 duration 参数
+        onPhotoLoad() {
+          onPhotoLoad?.();
+        },
+        onCanPlay() {
+          onCanPlay?.();
+        },
+        onEnded() {
+          onEnded?.();
+        },
+        // @ts-expect-error - live-photo 库的 onVideoLoad 实际上会传递 duration 参数
         onVideoLoad(duration: number) {
-          // 将视频时长传递给父组件
-          if (duration && isFinite(duration)) {
+          if (duration && Number.isFinite(duration)) {
             onDurationChange?.(duration);
           }
         },
@@ -70,12 +90,21 @@ export default function LivePhotoPlayer({
       }
       viewerRef.current = null;
     };
-  }, [image.url, image.videoSrc, image.name, isActive]);
+  }, [
+    image.url,
+    image.videoSrc,
+    isActive,
+    autoplay,
+    onDurationChange,
+    onEnded,
+    onPhotoLoad,
+    onCanPlay,
+  ]);
 
   return (
     <div
-      ref={containerRef}
       className={className}
+      ref={containerRef}
       style={{
         width: "100%",
         height: "100%",

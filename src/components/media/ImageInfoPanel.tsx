@@ -1,533 +1,316 @@
-import { getObjVal } from "@iceywu/utils";
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
+import {
+  Aperture,
+  Calendar,
+  Camera,
+  Expand,
+  FileText,
+  Focus,
+  Gauge,
+  MapPin,
+  Mountain,
+  Ruler,
+  Timer,
+} from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ViewerItem } from "viewer-pro";
 import { MAPBOX_TOKEN } from "@/config/mapbox";
-import { apiService } from "@/services/api";
+import { filesApi } from "@/services/api";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-interface ImageInfoPanelProps {
-  viewerItem: ViewerItem;
-  index: number;
-}
-
 interface FileDetail {
-  id: number;
-  fileName: string;
-  filePath: string;
-  fileSize: number;
-  mimeType: string;
-  fileMd5: string;
-  blurhash: string;
-  width: number;
-  height: number;
-  createdAt: string;
-  updatedAt: string;
-  exif?: Record<string, any>;
-  lng?: number;
-  lat?: number;
   address?: string;
-  city?: string;
-  country?: string;
-  province?: string;
-  district?: string;
   altitude?: number;
+  city?: string;
+  colors?: Array<{ color?: { hex: string }; rank: number }>;
+  country?: string;
+  createdAt: string;
   deviceMake?: string;
   deviceModel?: string;
+  exposureTime?: string;
+  fNumber?: string;
+  focalLength?: string;
+  height: number;
+  iso?: number;
+  lat?: number;
   lensModel?: string;
+  lng?: number;
+  name: string;
+  province?: string;
+  secUid: string;
+  size: number;
+  takenAt?: string;
+  type: string;
+  width: number;
 }
 
-interface MetadataItem {
-  key: string;
-  label: string;
+const fmtSize = (b: number) =>
+  b ? (b < 1_048_576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1_048_576).toFixed(1)} MB`) : "--";
+const fmtDate = (s?: string) =>
+  s
+    ? new Date(s).toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "--";
+
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between border-white/[0.04] border-b px-3 py-2">
+      <div className="flex shrink-0 items-center gap-2 text-slate-400">
+        <span className="opacity-60">{icon}</span>
+        <span className="text-xs">{label}</span>
+      </div>
+      <span className="max-w-[60%] truncate text-right text-slate-200 text-xs">
+        {value || "--"}
+      </span>
+    </div>
+  );
+}
+
+function ParamCell({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
   value: string;
-  valFormat?: (val: string) => string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 bg-white/[0.03] p-2.5">
+      <span className="shrink-0 text-blue-400">{icon}</span>
+      <div>
+        <div className="font-semibold text-slate-100 text-sm">{value}</div>
+        <div className="text-[10px] text-slate-500 uppercase">{label}</div>
+      </div>
+    </div>
+  );
 }
 
-export default function ImageInfoPanel({ viewerItem, index }: ImageInfoPanelProps) {
-  const [fileDetail, setFileDetail] = useState<FileDetail | null>(null);
+export default function ImageInfoPanel({ viewerItem }: { viewerItem: ViewerItem; index: number }) {
+  const [detail, setDetail] = useState<FileDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
 
   useEffect(() => {
-    const fileId = (viewerItem as any).id;
-    if (!fileId) return;
-
-    setLoading(true);
-    apiService
-      .getFileDetail(fileId)
-      .then((response) => {
-        console.log("🌈-----response-----", response);
-        if (response.code === 200 && response.result) {
-          setFileDetail(response.result);
-        }
-      })
-      .catch((error) => {
-        console.error("获取文件详情失败:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [viewerItem]);
-
-  const imgMetaData = useMemo(() => {
-    if (!fileDetail?.exif) return [];
-
-    const info_enum: MetadataItem[] = [
-      {
-        key: "Model",
-        label: "拍摄设备",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "LensModel",
-        label: "镜头型号",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "ISOSpeedRatings",
-        label: "ISO",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "FocalLengthIn35mmFilm",
-        label: "焦距",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "FNumber",
-        label: "光圈",
-        value: "",
-        valFormat: (val: string) => {
-          try {
-            const num = eval(val) || 0;
-            return `f/${num?.toFixed(1)}`;
-          } catch {
-            return val || "--";
-          }
-        },
-      },
-      {
-        key: "ShutterSpeedValue",
-        label: "快门",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "GPSAltitude",
-        label: "海拔",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "DateTimeOriginal",
-        label: "拍摄时间",
-        value: "",
-        valFormat: (val: string) => val || "--",
-      },
-      {
-        key: "location",
-        label: "拍摄地点",
-        value: "",
-        valFormat: (val: string) => val || "未知",
-      },
-    ];
-
-    const exifData = fileDetail.exif || {};
-    info_enum.forEach((item) => {
-      const rawValueObj = getObjVal(exifData, item.key, { value: "" });
-      const rawValue = rawValueObj?.value || "";
-      item.value = item.valFormat ? item.valFormat(String(rawValue)) : String(rawValue);
-    });
-
-    return info_enum;
-  }, [fileDetail]);
-
-  const getMetaByKey = (key: string) => {
-    return (
-      imgMetaData.find((item) => item.key === key) || {
-        key: "",
-        label: "",
-        value: "",
-      }
-    );
-  };
-
-  // 初始化地图
-  const initMap = useCallback(() => {
-    if (!fileDetail?.lng || !fileDetail?.lat || !mapContainer.current) {
+    const secUid = (viewerItem as any).id;
+    if (!secUid) {
       return;
     }
+    setLoading(true);
+    filesApi
+      .getBySecUid(String(secUid))
+      .then((res) => {
+        if (!res.result) {
+          return;
+        }
+        const d = res.result;
+        setDetail({
+          secUid: d.sec_uid,
+          name: d.name || "",
+          type: d.type || "",
+          size: d.size || 0,
+          width: d.width || 0,
+          height: d.height || 0,
+          createdAt: d.created_at || "",
+          takenAt: d.taken_at,
+          deviceMake: d.device_make,
+          deviceModel: d.device_model,
+          lensModel: d.lens_model,
+          fNumber: d.f_number,
+          exposureTime: d.exposure_time,
+          iso: d.iso,
+          focalLength: d.focal_length,
+          lng: d.lng,
+          lat: d.lat,
+          address: d.address,
+          city: d.city,
+          province: d.province,
+          country: d.country,
+          altitude: d.altitude,
+          colors: d.colors,
+        });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [viewerItem]);
 
-    // 如果地图已存在，先清理
-    if (map.current) {
-      map.current.remove();
-      map.current = null;
+  const initMap = useCallback(() => {
+    if (!(detail?.lng && detail?.lat && mapContainer.current)) {
+      return;
     }
-
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+    }
     mapboxgl.accessToken = MAPBOX_TOKEN;
-
     try {
-      map.current = new mapboxgl.Map({
+      mapRef.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/light-v11",
-        center: [fileDetail.lng, fileDetail.lat],
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [detail.lng, detail.lat],
         zoom: 12,
-        pitch: 0,
-        bearing: 0,
+        interactive: false,
+        attributionControl: false,
       });
-
-      map.current.on("error", (_e) => {});
-
-      map.current.addControl(new MapboxLanguage({ defaultLanguage: "zh-Hans" }));
-
-      map.current.on("load", () => {
-        // 添加标记
+      mapRef.current.addControl(new MapboxLanguage({ defaultLanguage: "zh-Hans" }));
+      mapRef.current.on("load", () => {
         new mapboxgl.Marker({ color: "#60a5fa" })
-          .setLngLat([fileDetail.lng!, fileDetail.lat!])
-          .addTo(map.current!);
+          .setLngLat([detail.lng!, detail.lat!])
+          .addTo(mapRef.current!);
       });
-    } catch (_error) {
-      console.error("地图初始化失败:", _error);
-    }
-  }, [fileDetail]);
+    } catch (_) {}
+  }, [detail]);
 
-  // 初始化地图
   useEffect(() => {
-    if (fileDetail?.lng && fileDetail?.lat) {
-      setTimeout(() => {
-        initMap();
-      }, 100);
+    if (detail?.lng && detail?.lat) {
+      setTimeout(initMap, 100);
     }
-
     return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
       }
     };
-  }, [fileDetail, initMap]);
+  }, [detail, initMap]);
+
+  const device = useMemo(() => {
+    if (!detail) {
+      return null;
+    }
+    return [detail.deviceMake, detail.deviceModel].filter(Boolean).join(" ") || null;
+  }, [detail]);
+
+  if (loading) {
+    return <div className="p-6 text-sm text-white/50">加载中...</div>;
+  }
+  if (!detail) {
+    return <div className="p-6 text-sm text-white/50">{viewerItem.title || "未命名"}</div>;
+  }
+
+  const hasParams = detail.fNumber || detail.exposureTime || detail.iso || detail.focalLength;
+  const hasLocation = detail.lng && detail.lat;
+  const locationText =
+    detail.address || [detail.city, detail.province, detail.country].filter(Boolean).join(", ");
+  const sortedColors = detail.colors?.slice().sort((a, b) => a.rank - b.rank);
+
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        padding: "20px",
-        color: "#fff",
-        backgroundColor: "transparent",
-        display: "flex",
-        flexDirection: "column",
-        fontSize: "14px",
-        overflowY: "auto",
-      }}
-    >
-      {loading && <div style={{ color: "rgba(255, 255, 255, 0.6)" }}>加载中...</div>}
-
-      {fileDetail && imgMetaData.length > 0 && (
-        <div style={{ padding: "12px 0" }}>
-          {/* 相机信息 */}
-          <div
-            style={{
-              marginBottom: "12px",
-              paddingBottom: "12px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.15)",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "#60a5fa",
-                }}
-              >
-                {getMetaByKey("Model")?.value}
-              </div>
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "rgba(255, 255, 255, 0.7)",
-                }}
-              >
-                {getMetaByKey("LensModel")?.value}
-              </div>
-            </div>
-          </div>
-
-          {/* 曝光参数 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-around",
-              padding: "12px",
-              marginBottom: "12px",
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              borderRadius: "6px",
-            }}
-          >
-            <div style={{ flex: 1, textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  marginBottom: "4px",
-                  color: "#60a5fa",
-                }}
-              >
-                {getMetaByKey("ISOSpeedRatings")?.value}
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: "rgba(255, 255, 255, 0.5)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {getMetaByKey("ISOSpeedRatings")?.label}
-              </div>
-            </div>
-            <div style={{ flex: 1, textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  marginBottom: "4px",
-                  color: "#60a5fa",
-                }}
-              >
-                {getMetaByKey("FNumber")?.value}
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: "rgba(255, 255, 255, 0.5)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {getMetaByKey("FNumber")?.label}
-              </div>
-            </div>
-            <div style={{ flex: 1, textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  marginBottom: "4px",
-                  color: "#60a5fa",
-                }}
-              >
-                {getMetaByKey("ShutterSpeedValue")?.value}
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: "rgba(255, 255, 255, 0.5)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {getMetaByKey("ShutterSpeedValue")?.label}
-              </div>
-            </div>
-          </div>
-
-          {/* 焦距 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "6px 0",
-              fontSize: "13px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <span style={{ color: "rgba(255, 255, 255, 0.6)", flexShrink: 0 }}>
-              {getMetaByKey("FocalLengthIn35mmFilm")?.label}:
-            </span>
-            <span
-              style={{
-                color: "rgba(255, 255, 255, 0.9)",
-                textAlign: "right",
-                marginLeft: "12px",
-              }}
-            >
-              {getMetaByKey("FocalLengthIn35mmFilm")?.value}
-            </span>
-          </div>
-
-          {/* 海拔 */}
-          {fileDetail.altitude && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "6px 0",
-                fontSize: "13px",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-              }}
-            >
-              <span style={{ color: "rgba(255, 255, 255, 0.6)", flexShrink: 0 }}>⛰️ 海拔:</span>
-              <span
-                style={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  textAlign: "right",
-                  marginLeft: "12px",
-                }}
-              >
-                {fileDetail.altitude.toFixed(0)}m
-              </span>
-            </div>
-          )}
-
-          {/* 拍摄时间 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "6px 0",
-              fontSize: "13px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <span style={{ color: "rgba(255, 255, 255, 0.6)", flexShrink: 0 }}>🕒 拍摄时间:</span>
-            <span
-              style={{
-                color: "rgba(255, 255, 255, 0.9)",
-                textAlign: "right",
-                marginLeft: "12px",
-              }}
-            >
-              {getMetaByKey("DateTimeOriginal")?.value}
-            </span>
-          </div>
-
-          {/* 文件信息 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "6px 0",
-              fontSize: "13px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <span style={{ color: "rgba(255, 255, 255, 0.6)", flexShrink: 0 }}>📐 尺寸:</span>
-            <span
-              style={{
-                color: "rgba(255, 255, 255, 0.9)",
-                textAlign: "right",
-                marginLeft: "12px",
-              }}
-            >
-              {fileDetail.width} × {fileDetail.height}
-            </span>
-          </div>
-
-          {/* 文件大小 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "6px 0",
-              fontSize: "13px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <span style={{ color: "rgba(255, 255, 255, 0.6)", flexShrink: 0 }}>💾 文件大小:</span>
-            <span
-              style={{
-                color: "rgba(255, 255, 255, 0.9)",
-                textAlign: "right",
-                marginLeft: "12px",
-              }}
-            >
-              {((fileDetail.fileSize || (fileDetail as any).size || 0) / 1024 / 1024).toFixed(2)} MB
-            </span>
-          </div>
-
-          {/* 文件名 */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "6px 0",
-              fontSize: "13px",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <span style={{ color: "rgba(255, 255, 255, 0.6)", flexShrink: 0 }}>📄 文件名:</span>
-            <span
-              style={{
-                color: "rgba(255, 255, 255, 0.9)",
-                textAlign: "right",
-                marginLeft: "12px",
-                wordBreak: "break-all",
-                fontSize: "12px",
-              }}
-            >
-              {fileDetail.fileName || (fileDetail as any).name || "未知"}
-            </span>
-          </div>
-
-          {/* 位置信息 */}
-          {fileDetail.address && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                padding: "6px 0",
-                fontSize: "13px",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-                gap: "4px",
-              }}
-            >
-              <span style={{ color: "rgba(255, 255, 255, 0.6)" }}>📍 拍摄地点:</span>
-              <span
-                style={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  fontSize: "12px",
-                  lineHeight: "1.5",
-                }}
-              >
-                {fileDetail.address}
-              </span>
-            </div>
-          )}
-
-          {/* 小地图 */}
-          {fileDetail.lng && fileDetail.lat && (
-            <div
-              style={{
-                marginTop: "12px",
-                borderRadius: "8px",
-                overflow: "hidden",
-                height: "180px",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-              }}
-            >
-              <div ref={mapContainer} style={{ width: "100%", height: "100%" }} />
-            </div>
-          )}
-        </div>
-      )}
-
-      {!loading && !fileDetail && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+    <div className="size-full overflow-y-auto text-[13px] text-slate-200 leading-relaxed">
+      <div className="space-y-5 p-5 pb-6">
+        {/* 设备 + 镜头 */}
+        {device && (
           <div>
-            <span style={{ color: "#9ca3af" }}>标题: </span>
-            <span>{viewerItem.title || "未命名"}</span>
+            <div className="mb-1 flex items-center gap-2">
+              <Camera className="shrink-0 text-blue-400" size={16} />
+              <span className="font-semibold text-[15px] text-slate-100">{device}</span>
+            </div>
+            {detail.lensModel && (
+              <div className="pl-6 text-slate-400 text-xs">{detail.lensModel}</div>
+            )}
           </div>
+        )}
+
+        {/* 拍摄参数 2x2 网格 */}
+        {hasParams && (
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] bg-white/[0.06]">
+            {detail.fNumber && (
+              <ParamCell icon={<Aperture size={14} />} label="光圈" value={`f/${detail.fNumber}`} />
+            )}
+            {detail.exposureTime && (
+              <ParamCell
+                icon={<Timer size={14} />}
+                label="快门"
+                value={`${detail.exposureTime}s`}
+              />
+            )}
+            {detail.iso && (
+              <ParamCell icon={<Gauge size={14} />} label="ISO" value={String(detail.iso)} />
+            )}
+            {detail.focalLength && (
+              <ParamCell
+                icon={<Focus size={14} />}
+                label="焦距"
+                value={`${detail.focalLength}mm`}
+              />
+            )}
+          </div>
+        )}
+
+        {/* 颜色调色板 */}
+        {sortedColors && sortedColors.length > 0 && (
           <div>
-            <span style={{ color: "#9ca3af" }}>索引: </span>
-            <span>{index + 1}</span>
+            <div className="mb-2 text-[11px] text-slate-500 uppercase tracking-wider">色彩</div>
+            <div className="flex gap-1 overflow-hidden rounded-lg">
+              {sortedColors.map((c, i) => (
+                <div
+                  className="h-7 flex-1 cursor-default"
+                  key={i}
+                  style={{ backgroundColor: c.color?.hex || "#333" }}
+                  title={c.color?.hex}
+                />
+              ))}
+            </div>
+            <div className="mt-1 flex gap-1">
+              {sortedColors.map((c, i) => (
+                <div className="flex-1 text-center font-mono text-[10px] text-slate-500" key={i}>
+                  {c.color?.hex}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 文件信息 */}
+        <div>
+          <div className="mb-2 text-[11px] text-slate-500 uppercase tracking-wider">文件信息</div>
+          <div className="overflow-hidden rounded-[10px] bg-white/[0.04]">
+            <InfoRow icon={<FileText size={13} />} label="文件名" value={detail.name} />
+            <InfoRow
+              icon={<Expand size={13} />}
+              label="分辨率"
+              value={`${detail.width} × ${detail.height}`}
+            />
+            <InfoRow icon={<Ruler size={13} />} label="文件大小" value={fmtSize(detail.size)} />
+            <InfoRow
+              icon={<Calendar size={13} />}
+              label="拍摄时间"
+              value={fmtDate(detail.takenAt)}
+            />
+            {detail.altitude != null && detail.altitude > 0 && (
+              <InfoRow
+                icon={<Mountain size={13} />}
+                label="海拔"
+                value={`${detail.altitude.toFixed(0)} m`}
+              />
+            )}
           </div>
         </div>
-      )}
+
+        {/* 位置 + 地图 */}
+        {hasLocation && (
+          <div>
+            <div className="mb-2 text-[11px] text-slate-500 uppercase tracking-wider">拍摄地点</div>
+            {locationText && (
+              <div className="mb-2.5 flex items-start gap-2 text-slate-300 text-xs leading-relaxed">
+                <MapPin className="mt-0.5 shrink-0 text-blue-400" size={14} />
+                <span>{locationText}</span>
+              </div>
+            )}
+            <div className="h-40 overflow-hidden rounded-[10px] border border-white/[0.08]">
+              <div className="size-full" ref={mapContainer} />
+            </div>
+            <div className="mt-1.5 text-center font-mono text-[10px] text-slate-600">
+              {detail.lat?.toFixed(6)}, {detail.lng?.toFixed(6)}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

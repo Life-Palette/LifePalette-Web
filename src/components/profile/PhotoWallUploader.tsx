@@ -16,15 +16,15 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { extractGPSFromImage } from "@/utils/upload/gpsExtractor";
 
 interface PhotoWallUploaderProps {
-  open: boolean;
   onOpenChange: (open: boolean) => void;
   onUploadSuccess?: () => void;
+  open: boolean;
 }
 
 interface PreviewFile {
   file: File;
-  preview: string;
   hasGPS: boolean;
+  preview: string;
 }
 
 export default function PhotoWallUploader({
@@ -70,7 +70,9 @@ export default function PhotoWallUploader({
       });
     }
 
-    if (validFiles.length === 0) return;
+    if (validFiles.length === 0) {
+      return;
+    }
 
     // 检测 GPS 信息并创建预览
     const previewFiles: PreviewFile[] = await Promise.all(
@@ -82,7 +84,7 @@ export default function PhotoWallUploader({
           preview,
           hasGPS: gps !== null,
         };
-      }),
+      })
     );
 
     setSelectedFiles((prev) => [...prev, ...previewFiles]);
@@ -168,7 +170,7 @@ export default function PhotoWallUploader({
   }, [selectedFiles, uploadMultipleFiles, handleReset, onOpenChange, onUploadSuccess, isPrivate]);
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog onOpenChange={handleClose} open={open}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>上传图片到照片墙</DialogTitle>
@@ -194,7 +196,7 @@ export default function PhotoWallUploader({
                 <Image className="text-muted-foreground" size={20} />
               </div>
               <p className="text-foreground text-sm">点击或拖拽上传图片</p>
-              <p className="text-muted-foreground text-xs mt-1">
+              <p className="mt-1 text-muted-foreground text-xs">
                 支持 JPG、PNG、WEBP 等格式，单文件需要小于 20MB
               </p>
             </label>
@@ -214,16 +216,16 @@ export default function PhotoWallUploader({
           {selectedFiles.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  已选择 <span className="text-foreground font-medium">{selectedFiles.length}</span>{" "}
+                <p className="text-muted-foreground text-sm">
+                  已选择 <span className="font-medium text-foreground">{selectedFiles.length}</span>{" "}
                   张图片
                 </p>
                 {!uploadState.isUploading && (
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleReset}
                     className="text-muted-foreground"
+                    onClick={handleReset}
+                    size="sm"
+                    variant="ghost"
                   >
                     清空
                   </Button>
@@ -234,13 +236,15 @@ export default function PhotoWallUploader({
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
                   {selectedFiles.map((file, index) => (
                     <div
-                      key={`${file.file.name}-${index}`}
                       className="group relative aspect-square overflow-hidden rounded-md bg-muted"
+                      key={`${file.file.name}-${index}`}
                     >
                       <img
-                        src={file.preview}
                         alt={file.file.name}
                         className="h-full w-full object-cover"
+                        height={120}
+                        src={file.preview}
+                        width={120}
                       />
                       {/* GPS 标识 */}
                       {file.hasGPS && (
@@ -251,7 +255,7 @@ export default function PhotoWallUploader({
                       {/* 删除按钮 */}
                       {!uploadState.isUploading && (
                         <button
-                          className="absolute top-1 right-1 rounded-full bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/70"
+                          className="absolute top-1 right-1 rounded-full bg-black/50 p-1 opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
                           onClick={() => handleRemoveFile(index)}
                           type="button"
                         >
@@ -269,15 +273,15 @@ export default function PhotoWallUploader({
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div className="flex items-center gap-3">
               {isPrivate ? (
-                <EyeOff size={18} className="text-muted-foreground" />
+                <EyeOff className="text-muted-foreground" size={18} />
               ) : (
-                <Globe size={18} className="text-muted-foreground" />
+                <Globe className="text-muted-foreground" size={18} />
               )}
               <div>
-                <Label htmlFor="private-switch" className="text-sm font-medium cursor-pointer">
+                <Label className="cursor-pointer font-medium text-sm" htmlFor="private-switch">
                   {isPrivate ? "仅自己可见" : "公开"}
                 </Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {isPrivate
                     ? "上传的图片仅自己可见，不会纳入「色集」与「轨迹」的数据统计"
                     : "上传的图片将公开展示，并纳入「色集」与「轨迹」的数据统计"}
@@ -285,10 +289,10 @@ export default function PhotoWallUploader({
               </div>
             </div>
             <Switch
-              id="private-switch"
               checked={isPrivate}
-              onCheckedChange={setIsPrivate}
               disabled={uploadState.isUploading}
+              id="private-switch"
+              onCheckedChange={setIsPrivate}
             />
           </div>
 
@@ -297,22 +301,22 @@ export default function PhotoWallUploader({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{uploadState.stageText}</span>
-                <span className="text-foreground font-medium">{uploadState.progress}%</span>
+                <span className="font-medium text-foreground">{uploadState.progress}%</span>
               </div>
-              <Progress value={uploadState.progress} className="h-2" />
+              <Progress className="h-2" value={uploadState.progress} />
             </div>
           )}
 
           {/* 操作按钮 */}
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={handleClose} disabled={uploadState.isUploading}>
+            <Button disabled={uploadState.isUploading} onClick={handleClose} variant="outline">
               取消
             </Button>
             <Button
-              onClick={handleUpload}
               disabled={selectedFiles.length === 0 || uploadState.isUploading}
+              onClick={handleUpload}
             >
-              <Upload size={16} className="mr-2" />
+              <Upload className="mr-2" size={16} />
               {uploadState.isUploading ? "上传中..." : `上传 ${selectedFiles.length} 张图片`}
             </Button>
           </div>

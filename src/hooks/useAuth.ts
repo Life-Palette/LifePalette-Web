@@ -1,23 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiService } from "@/services/api";
+import { queryKeys } from "@/constants/query-keys";
+import { authApi, http, usersApi } from "@/services/api";
 
 // 获取当前用户信息的hook
 export const useCurrentUser = () => {
   return useQuery({
-    queryKey: ["currentUser"],
+    queryKey: queryKeys.users.me(),
     queryFn: async () => {
       try {
-        const response = await apiService.getCurrentUser();
-        if (response.code === 200 && response.result) {
-          return response.result;
+        const res = await usersApi.getMe();
+        if (!res.result) {
+          return null;
         }
-        return null;
+        // 静默解析用户 IP 地理位置（页面刷新/首次加载时）
+        http.get("/common/ip").catch(() => { });
+        // 统一 id 为 sec_uid
+        return { ...res.result, id: res.result.sec_uid };
       } catch (_error) {
         return null;
       }
     },
-    staleTime: 10 * 60 * 1000, // 10分钟内数据被认为是新鲜的
-    retry: false, // 不重试，避免频繁的401错误
+    staleTime: 10 * 60 * 1000,
+    retry: false,
   });
 };
 
@@ -36,13 +40,20 @@ export const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ account, password }: { account: string; password: string }) =>
-      await apiService.login(account, password),
+    mutationFn: async ({ account, password }: { account: string; password: string }) => {
+      const res = await authApi.login(account, password);
+      const token = res.result?.token?.access_token || res.result?.access_token;
+      if (token) {
+        http.setToken(token);
+      }
+      return res;
+    },
     onSuccess: (data) => {
       if (data.code === 200 && data.result) {
-        // 登录成功后，刷新当前用户信息
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        queryClient.invalidateQueries({ queryKey: ["topics"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.topics.all });
+        // 静默解析用户 IP 地理位置
+        http.get("/common/ip").catch(() => { });
       }
     },
   });
@@ -53,13 +64,20 @@ export const useLoginByCode = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ account, code }: { account: string; code: string }) =>
-      await apiService.loginByCode(account, code),
+    mutationFn: async ({ account, code }: { account: string; code: string }) => {
+      const res = await authApi.loginByCode(account, code);
+      const token = res.result?.token?.access_token || res.result?.access_token;
+      if (token) {
+        http.setToken(token);
+      }
+      return res;
+    },
     onSuccess: (data) => {
       if (data.code === 200 && data.result) {
-        // 登录成功后，刷新当前用户信息
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        queryClient.invalidateQueries({ queryKey: ["topics"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.topics.all });
+        // 静默解析用户 IP 地理位置
+        http.get("/common/ip").catch(() => { });
       }
     },
   });
@@ -73,7 +91,7 @@ export const useResetPassword = () => {
       code: string;
       password: string;
       password_confirm: string;
-    }) => await apiService.resetPassword(data),
+    }) => await authApi.resetPassword(data),
   });
 };
 
@@ -87,12 +105,17 @@ export const useRegister = () => {
       password: string;
       password_confirm: string;
       code: string;
-    }) => await apiService.register(data),
+    }) => {
+      const res = await authApi.register(data);
+      if (res.result?.token?.access_token) {
+        http.setToken(res.result.token.access_token);
+      }
+      return res;
+    },
     onSuccess: (data) => {
-      if (data.code === 200 && data.result) {
-        // 注册成功后，刷新当前用户信息
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-        queryClient.invalidateQueries({ queryKey: ["topics"] });
+      if ((data.code === 200 || data.code === 201) && data.result) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.topics.all });
       }
     },
   });
@@ -104,13 +127,13 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      await apiService.logout();
+      await authApi.logout();
+      http.clearToken();
     },
     onSuccess: () => {
-      // 清除所有用户相关的缓存
-      queryClient.setQueryData(["currentUser"], null);
-      queryClient.invalidateQueries({ queryKey: ["topics"] });
-      queryClient.clear(); // 清除所有缓存
+      queryClient.setQueryData(queryKeys.users.me(), null);
+      queryClient.invalidateQueries({ queryKey: queryKeys.topics.all });
+      queryClient.clear();
     },
   });
 };
@@ -120,12 +143,11 @@ export const useUpdateUserEmail = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ userId, email, code }: { userId: number; email: string; code: string }) =>
-      await apiService.updateUser(userId, { email, code }),
+    mutationFn: async ({ email, code }: { email: string; code: string }) =>
+      await usersApi.updateMe({ email, verification_code: code }),
     onSuccess: (data) => {
       if (data.code === 200) {
-        // 更新成功后，刷新当前用户信息
-        queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
       }
     },
   });
@@ -134,6 +156,27 @@ export const useUpdateUserEmail = () => {
 // 发送邮箱验证码 hook
 export const useSendEmailCode = () => {
   return useMutation({
-    mutationFn: async (email: string) => await apiService.sendEmailCode(email),
+    mutationFn: async ({ email, purpose = "register" }: { email: string; purpose?: string }) =>
+      await authApi.sendEmailCode(email, purpose),
   });
 };
+
+// ============ 用户查询 ============
+
+/** 根据 sec_uid 获取用户信息 */
+export const useUserById = (secUid?: string) =>
+  useQuery({
+    queryKey: queryKeys.users.detail(secUid!),
+    queryFn: async () => (await usersApi.getBySecUid(secUid!)).result,
+    enabled: !!secUid,
+    staleTime: 5 * 60 * 1000,
+  });
+
+/** 用户互动统计 */
+export const useUserStats = (secUid?: string) =>
+  useQuery({
+    queryKey: queryKeys.users.stats(secUid!),
+    queryFn: async () => (await usersApi.getStats(secUid!)).result,
+    enabled: !!secUid,
+    staleTime: 5 * 60 * 1000,
+  });

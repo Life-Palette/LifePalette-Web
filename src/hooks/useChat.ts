@@ -12,13 +12,13 @@ import type {
 } from "@/types/chat";
 
 interface UseChatOptions {
-  userId: number;
-  onMessage?: (message: ChatMessage) => void;
-  onUserJoined?: (data: UserJoinedEvent) => void;
-  onMentioned?: (data: MentionedEvent) => void;
-  onError?: (error: WebSocketError) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
+  onError?: (error: WebSocketError) => void;
+  onMentioned?: (data: MentionedEvent) => void;
+  onMessage?: (message: ChatMessage) => void;
+  onUserJoined?: (data: UserJoinedEvent) => void;
+  userId: number;
 }
 
 export function useChat(options: UseChatOptions) {
@@ -68,7 +68,7 @@ export function useChat(options: UseChatOptions) {
     });
 
     // 断开连接
-    socket.on("disconnect", (reason) => {
+    socket.on("disconnect", (_reason) => {
       setIsConnected(false);
       onDisconnect?.();
     });
@@ -99,7 +99,7 @@ export function useChat(options: UseChatOptions) {
       reconnectAttemptsRef.current += 1;
       console.error(
         `连接错误 (${reconnectAttemptsRef.current}/${maxReconnectAttempts}):`,
-        error.message,
+        error.message
       );
       setIsConnected(false);
 
@@ -121,7 +121,7 @@ export function useChat(options: UseChatOptions) {
       hasInitializedRef.current = false; // 重置初始化标记
       socket.disconnect();
     };
-  }, [userId]); // 只依赖 userId，避免回调变化导致重新连接
+  }, [userId, onMessage, onDisconnect, onUserJoined, onMentioned, onError, onConnect]); // 只依赖 userId，避免回调变化导致重新连接
 
   // 加入房间
   const joinRoom = useCallback(
@@ -138,7 +138,7 @@ export function useChat(options: UseChatOptions) {
       socketRef.current.emit("joinRoom", data);
       setCurrentRoomId(roomId);
     },
-    [userId],
+    [userId]
   );
 
   // 离开房间
@@ -153,13 +153,13 @@ export function useChat(options: UseChatOptions) {
         setCurrentRoomId(null);
       }
     },
-    [userId, currentRoomId],
+    [userId, currentRoomId]
   );
 
   // 发送消息
   const sendMessage = useCallback(
     (data: Omit<ChatEvent, "userId">) => {
-      if (!socketRef.current || !isConnected) {
+      if (!(socketRef.current && isConnected)) {
         return;
       }
 
@@ -170,7 +170,7 @@ export function useChat(options: UseChatOptions) {
 
       socketRef.current.emit("chat", chatEvent);
     },
-    [userId, isConnected],
+    [userId, isConnected]
   );
 
   // 发送文本消息（便捷方法）
@@ -182,7 +182,7 @@ export function useChat(options: UseChatOptions) {
         type: "TEXT",
       });
     },
-    [sendMessage],
+    [sendMessage]
   );
 
   // 发送图片消息（便捷方法）
@@ -195,7 +195,7 @@ export function useChat(options: UseChatOptions) {
         file: fileInfo,
       });
     },
-    [sendMessage],
+    [sendMessage]
   );
 
   // 发送文件消息（便捷方法）
@@ -208,7 +208,7 @@ export function useChat(options: UseChatOptions) {
         file: fileInfo,
       });
     },
-    [sendMessage],
+    [sendMessage]
   );
 
   return {

@@ -1,9 +1,8 @@
 "use client";
 
-import * as ToolbarPrimitive from "@radix-ui/react-toolbar";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
+import { Toolbar as ToolbarPrimitive, Tooltip as TooltipPrimitive } from "radix-ui";
 import * as React from "react";
 
 import {
@@ -21,7 +20,7 @@ export function Toolbar({
 }: React.ComponentProps<typeof ToolbarPrimitive.Root>) {
   return (
     <ToolbarPrimitive.Root
-      className={cn("relative flex items-center select-none", className)}
+      className={cn("relative flex select-none items-center", className)}
       {...props}
     />
   );
@@ -65,7 +64,7 @@ export function ToolbarSeparator({
 
 // From toggleVariants
 const toolbarButtonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[color,box-shadow] outline-none hover:bg-muted hover:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-checked:bg-accent aria-checked:text-accent-foreground aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-[color,box-shadow] hover:bg-muted hover:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-checked:bg-accent aria-checked:text-accent-foreground aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     defaultVariants: {
       size: "default",
@@ -83,12 +82,12 @@ const toolbarButtonVariants = cva(
           "border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground",
       },
     },
-  },
+  }
 );
 
 const dropdownArrowVariants = cva(
   cn(
-    "inline-flex items-center justify-center rounded-r-md text-sm font-medium text-foreground transition-colors disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center rounded-r-md font-medium text-foreground text-sm transition-colors disabled:pointer-events-none disabled:opacity-50"
   ),
   {
     defaultVariants: {
@@ -105,10 +104,10 @@ const dropdownArrowVariants = cva(
         default:
           "bg-transparent hover:bg-muted hover:text-muted-foreground aria-checked:bg-accent aria-checked:text-accent-foreground",
         outline:
-          "border border-l-0 border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+          "border border-input border-l-0 bg-transparent hover:bg-accent hover:text-accent-foreground",
       },
     },
-  },
+  }
 );
 
 type ToolbarButtonProps = {
@@ -135,7 +134,7 @@ export const ToolbarButton = withTooltip(function ToolbarButton({
             variant,
           }),
           isDropdown && "justify-between gap-1 pr-1",
-          className,
+          className
         )}
         value={pressed ? "single" : ""}
         {...props}
@@ -160,7 +159,7 @@ export const ToolbarButton = withTooltip(function ToolbarButton({
           variant,
         }),
         isDropdown && "pr-1",
-        className,
+        className
       )}
       {...props}
     >
@@ -203,7 +202,7 @@ export function ToolbarSplitButtonPrimary({
         }),
         "rounded-r-none",
         "group-data-[pressed=true]:bg-accent group-data-[pressed=true]:text-accent-foreground",
-        className,
+        className
       )}
       {...props}
     >
@@ -226,10 +225,11 @@ export function ToolbarSplitButtonSecondary({
           variant,
         }),
         "group-data-[pressed=true]:bg-accent group-data-[pressed=true]:text-accent-foreground",
-        className,
+        className
       )}
       onClick={(e) => e.stopPropagation()}
       role="button"
+      tabIndex={0}
       {...props}
     >
       <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
@@ -257,7 +257,7 @@ export function ToolbarGroup({ children, className }: React.ComponentProps<"div"
     <div className={cn("group/toolbar-group", "relative hidden has-[button]:flex", className)}>
       <div className="flex items-center">{children}</div>
 
-      <div className="mx-1.5 py-0.5 group-last/toolbar-group:hidden!">
+      <div className="group-last/toolbar-group:hidden! mx-1.5 py-0.5">
         <Separator orientation="vertical" />
       </div>
     </div>
@@ -314,8 +314,8 @@ function TooltipContent({
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
         className={cn(
-          "z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md bg-primary px-3 py-1.5 text-xs text-balance text-primary-foreground",
-          className,
+          "z-50 w-fit origin-(--radix-tooltip-content-transform-origin) text-balance rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-xs",
+          className
         )}
         data-slot="tooltip-content"
         sideOffset={sideOffset}
@@ -340,7 +340,7 @@ export function ToolbarMenuGroup({
       <DropdownMenuSeparator
         className={cn(
           "hidden",
-          "mb-0 shrink-0 peer-has-[[role=menuitem]]/menu-group:block peer-has-[[role=menuitemradio]]/menu-group:block peer-has-[[role=option]]/menu-group:block",
+          "mb-0 shrink-0 peer-has-[[role=menuitem]]/menu-group:block peer-has-[[role=menuitemradio]]/menu-group:block peer-has-[[role=option]]/menu-group:block"
         )}
       />
 
@@ -349,11 +349,11 @@ export function ToolbarMenuGroup({
         className={cn(
           "hidden",
           "peer/menu-group group/menu-group my-1.5 has-[[role=menuitem]]:block has-[[role=menuitemradio]]:block has-[[role=option]]:block",
-          className,
+          className
         )}
       >
         {label && (
-          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground select-none">
+          <DropdownMenuLabel className="select-none font-semibold text-muted-foreground text-xs">
             {label}
           </DropdownMenuLabel>
         )}

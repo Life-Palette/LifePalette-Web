@@ -5,14 +5,14 @@ import PostCard from "@/components/post/PostCard";
 import type { Post } from "@/types";
 
 interface SimpleInfiniteScrollProps {
-  posts: Post[];
+  className?: string;
   hasMore: boolean;
   isLoading: boolean;
-  onLoadMore: () => void;
   onLike: (postId: string) => void;
-  onSave: (postId: string) => void;
+  onLoadMore: () => void;
   onPostClick: (postId: string, event?: React.MouseEvent) => void;
-  className?: string;
+  onSave: (postId: string) => void;
+  posts: Post[];
 }
 
 export default function SimpleInfiniteScroll({
@@ -34,7 +34,7 @@ export default function SimpleInfiniteScroll({
         onLoadMore();
       }
     },
-    [hasMore, isLoading, onLoadMore],
+    [hasMore, isLoading, onLoadMore]
   );
 
   useEffect(() => {

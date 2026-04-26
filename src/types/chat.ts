@@ -25,13 +25,13 @@ export type MessageStatus = "sending" | "sent" | "failed" | "read";
  * 聊天消息
  */
 export interface ChatMessage {
+  content: string;
+  createdAt: string;
+  file?: string; // JSON string containing file info
   id: number;
   roomId: number;
-  userId: number;
-  content: string;
+  status?: MessageStatus;
   type: MessageType;
-  file?: string; // JSON string containing file info
-  createdAt: string;
   updatedAt: string;
   user: {
     id: number;
@@ -42,22 +42,27 @@ export interface ChatMessage {
       blurhash: string;
     };
   };
-  status?: MessageStatus;
+  userId: number;
 }
 
 /**
  * 聊天室
  */
 export interface ChatRoom {
-  id: number;
-  name?: string;
   avatar?: string;
-  type: ChatRoomType;
   createdAt: string;
-  updatedAt: string;
+  id: number;
   lastMessage?: ChatMessage;
   lastMessageTime?: string;
-  unreadCount: number;
+  // 群聊成员
+  members?: Array<{
+    id: number;
+    userId: number;
+    roomId: number;
+    role: "OWNER" | "ADMIN" | "MEMBER";
+    user: ApiUser;
+  }>;
+  name?: string;
   // 私聊时的对方用户信息
   otherUser?: {
     id: number;
@@ -68,28 +73,23 @@ export interface ChatRoom {
       blurhash: string;
     };
   };
-  // 群聊成员
-  members?: Array<{
-    id: number;
-    userId: number;
-    roomId: number;
-    role: "OWNER" | "ADMIN" | "MEMBER";
-    user: ApiUser;
-  }>;
+  type: ChatRoomType;
+  unreadCount: number;
+  updatedAt: string;
 }
 
 /**
  * 文件信息
  */
 export interface ChatFileInfo {
+  blurhash?: string;
+  height?: number;
   id?: number;
   name: string;
-  url: string;
   size?: number;
   type?: string;
+  url: string;
   width?: number;
-  height?: number;
-  blurhash?: string;
 }
 
 // ============ API 请求/响应类型 ============
@@ -115,11 +115,11 @@ export interface GetMessagesParams {
  * 发送消息参数
  */
 export interface SendMessageParams {
-  roomId: number;
-  userId: number;
-  message: string;
-  type: MessageType;
   file?: ChatFileInfo;
+  message: string;
+  roomId: number;
+  type: MessageType;
+  userId: number;
 }
 
 /**
@@ -133,9 +133,9 @@ export interface CreatePrivateChatParams {
  * 创建群聊房间参数
  */
 export interface CreateGroupChatParams {
-  name: string;
   avatar?: string;
   memberIds: number[];
+  name: string;
 }
 
 // ============ WebSocket 事件类型 ============
@@ -159,11 +159,11 @@ export interface JoinRoomEvent {
  * 发送消息事件
  */
 export interface ChatEvent {
-  roomId: number;
-  userId: number;
-  message: string;
-  type: MessageType;
   file?: ChatFileInfo;
+  message: string;
+  roomId: number;
+  type: MessageType;
+  userId: number;
 }
 
 /**
@@ -178,10 +178,10 @@ export interface UserJoinedEvent {
  * 提及事件
  */
 export interface MentionedEvent {
-  roomId: number;
-  messageId: number;
-  fromUser: ApiUser;
   content: string;
+  fromUser: ApiUser;
+  messageId: number;
+  roomId: number;
 }
 
 /**

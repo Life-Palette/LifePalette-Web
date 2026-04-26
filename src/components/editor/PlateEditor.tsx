@@ -9,22 +9,22 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { type AIAction, AIToolbar } from "@/components/editor/AIToolbar";
 import { GhostText } from "@/components/editor/GhostText";
-import { Editor, EditorContainer } from "@/components/ui/editor";
-import { FixedToolbar } from "@/components/ui/fixed-toolbar";
-import { LinkElement } from "@/components/ui/link-element";
-import { LinkToolbarButton } from "@/components/ui/link-toolbar-button";
-import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button";
+import { Editor, EditorContainer } from "@/components/editor/ui/editor";
+import { FixedToolbar } from "@/components/editor/ui/fixed-toolbar";
+import { LinkElement } from "@/components/editor/ui/link-element";
+import { LinkToolbarButton } from "@/components/editor/ui/link-toolbar-button";
+import { MarkToolbarButton } from "@/components/editor/ui/mark-toolbar-button";
 import { Separator } from "@/components/ui/separator";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
 import { useAICompletion } from "@/hooks/useAICompletion";
 import { useIsAuthenticated } from "@/hooks/useAuth";
 
 interface PlateEditorProps {
-  value: Value;
-  onChange: (value: Value) => void;
-  placeholder?: string;
   enableAI?: boolean;
   enableCompletion?: boolean;
+  onChange: (value: Value) => void;
+  placeholder?: string;
+  value: Value;
 }
 
 const DEFAULT_VALUE: Value = [{ type: "p", children: [{ text: "" }] }];
@@ -101,7 +101,9 @@ export function PlateEditor({
 
   // 监听编辑器内容变化，触发智能补全
   useEffect(() => {
-    if (!enableCompletion || !enableAI) return;
+    if (!(enableCompletion && enableAI)) {
+      return;
+    }
 
     // 获取当前文本内容
     const getText = () => {
@@ -125,14 +127,14 @@ export function PlateEditor({
 
     // 获取最后一段文本作为上下文
     const lines = text.split("\n");
-    const lastLine = lines[lines.length - 1] || "";
+    const lastLine = lines.at(-1) || "";
     const context = lines.slice(0, -1).join("\n");
 
     // 请求补全
     if (lastLine.trim()) {
       requestCompletion(lastLine, context);
     }
-  }, [value, enableCompletion, enableAI, editor, requestCompletion]);
+  }, [enableCompletion, enableAI, editor, requestCompletion]);
 
   // 处理键盘事件
   useEffect(() => {
@@ -169,10 +171,10 @@ export function PlateEditor({
   return (
     <Plate editor={editor} onChange={({ value }) => onChange(value)}>
       <div
-        ref={editorRef}
         className="w-full overflow-hidden rounded-xl border-0 bg-secondary/30 transition-all focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/20"
+        ref={editorRef}
       >
-        <FixedToolbar className="flex justify-between items-center gap-1 border-0 border-b border-border bg-transparent px-3 py-2">
+        <FixedToolbar className="flex items-center justify-between gap-1 border-0 border-border border-b bg-transparent px-3 py-2">
           <div className="flex items-center gap-1">
             <MarkToolbarButton nodeType="bold" tooltip="粗体 (⌘+B)">
               <Bold size={16} />
@@ -191,15 +193,15 @@ export function PlateEditor({
 
             {enableAI && (
               <>
-                <Separator orientation="vertical" className="mx-1 h-6" />
-                <AIToolbar onAIAction={handleAIAction} disabled={isAIProcessing} />
+                <Separator className="mx-1 h-6" orientation="vertical" />
+                <AIToolbar disabled={isAIProcessing} onAIAction={handleAIAction} />
               </>
             )}
           </div>
 
           {/* AI 补全状态指示 */}
           {enableCompletion && enableAI && (
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-gray-500 text-xs">
               {isCompletionLoading && (
                 <div className="flex items-center gap-1">
                   <Sparkles className="h-3 w-3 animate-pulse" />
@@ -216,7 +218,7 @@ export function PlateEditor({
           )}
         </FixedToolbar>
 
-        <EditorContainer className="w-full border-0 bg-transparent relative">
+        <EditorContainer className="relative w-full border-0 bg-transparent">
           <Editor
             className="min-h-[120px] w-full px-4 py-3 text-base"
             placeholder={placeholder}

@@ -2,68 +2,36 @@ import { registerComponents } from "@eosjs/components";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Edit, Heart, Trash2, User } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import ErrorBoundary from "@/components/common/ErrorBoundary";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import MarkdownRenderer from "@/components/editor/MarkdownRenderer";
 import ImagePreview from "@/components/media/ImagePreview";
-import MediaPlayer from "@/components/media/MediaPlayer";
+import MediaCarousel from "@/components/media/MediaCarousel";
+import type { MediaCarouselRef } from "@/components/media/MediaCarousel";
 import CommentSection from "@/components/post/CommentSection";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsAuthenticated } from "@/hooks/useAuth";
-import { usePostActions } from "@/hooks/usePostActions";
+import { usePostActions } from "@/hooks/useInteractions";
 import {
   useComments,
   useCreateComment,
   useDeleteTopic,
   useTopicDetail,
 } from "@/hooks/useTopicDetail";
-import { isLivePhoto as checkIsLivePhoto, isVideo as checkIsVideo } from "@/utils/media";
 
 // 注册 Eos Web Components
 registerComponents();
 
-// TypeScript 类型声明
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "eos-carousel": React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
-          autoplay?: boolean;
-          interval?: number;
-          loop?: boolean;
-          "show-controls"?: boolean;
-          "indicator-style"?: string;
-          "initial-index"?: number;
-          ref?: React.Ref<HTMLElement>;
-        },
-        HTMLElement
-      >;
-    }
-  }
-}
-
-// 扩展 React 的 CSSProperties 类型以支持自定义 CSS 变量
-declare module "react" {
-  interface CSSProperties {
-    "--carousel-height"?: string;
-    "--progress-bar-height"?: string;
-    "--progress-bar-gap"?: string;
-    "--progress-bar-color"?: string;
-    "--progress-bar-active-color"?: string;
-    "--carousel-transition"?: string;
-  }
-}
-
 interface SimpleImageDetailProps {
-  topicId: number;
+  initialImageIndex?: number;
   isOpen: boolean;
   onClose: () => void;
-  onEdit?: (topicId: number) => void;
-  originRect?: DOMRect | null; // 卡片的位置信息
-  initialImageIndex?: number; // 初始显示的图片索引
+  onEdit?: (topicId: number | string) => void;
+  originRect?: DOMRect | null;
+  topicId: number | string;
 }
 
 export default function SimpleImageDetail({
@@ -76,28 +44,13 @@ export default function SimpleImageDetail({
 }: SimpleImageDetailProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFloatingHearts, setShowFloatingHearts] = useState(false);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isMountedRef = useRef(true);
-  // 存储每个视频的时长（以秒为单位），使用 id 作为 key
-  const [videoDurations, setVideoDurations] = useState<Record<number, number>>({});
-  // 存储等待启动进度条的图片 ID
-  const pendingProgressStartRef = useRef<number | null>(null);
 
-  // Carousel ref - 新的 API
-  const carouselRef = useRef<
-    HTMLElement & {
-      next: () => void;
-      prev: () => void;
-      goTo: (index: number) => void;
-      play: () => void;
-      pause: () => void;
-      startSlideProgress: (options?: { duration?: number; onComplete?: () => void }) => void;
-      updateProgress: (progress: number) => void;
-    }
-  >(null);
+  // Carousel ref
+  const carouselRef = useRef<MediaCarouselRef>(null);
 
   const { isAuthenticated, user } = useIsAuthenticated();
   const { data: topic, isLoading, error } = useTopicDetail(topicId, user?.id);
@@ -107,76 +60,6 @@ export default function SimpleImageDetail({
   const postActions = usePostActions({ debounceMs: 300 });
   const navigate = useNavigate();
 
-  // 事件处理器
-  const handleChange = (e: Event) => {
-    const customEvent = e as CustomEvent;
-    setCurrentImageIndex(customEvent.detail.currentIndex);
-  };
-
-  const handleSlideActive = (e: Event) => {
-    const customEvent = e as CustomEvent;
-    const { index } = customEvent.detail;
-    const currentItem = topic?.images?.[index];
-    if (!currentItem) return;
-
-    const mediaType = checkIsVideo(currentItem)
-      ? "video"
-      : checkIsLivePhoto(currentItem)
-        ? "video"
-        : "image";
-
-    setCurrentImageIndex(index);
-
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-
-    if (mediaType === "image") {
-      // 图片类型：标记等待图片加载完成
-      pendingProgressStartRef.current = currentItem.id;
-      // 注意：实际的 startSlideProgress 会在 handleImageLoad 中调用
-    } else if (mediaType === "video") {
-      // 视频类型：使用视频的实际时长，如果还没获取到则使用默认 30 秒（会在元数据加载后重新启动）
-      const videoDuration = videoDurations[currentItem.id];
-      const durationMs = videoDuration ? videoDuration * 1000 : 30000;
-
-      carousel.startSlideProgress({
-        duration: durationMs,
-        onComplete: () => {
-          carousel.next();
-        },
-      });
-
-      // 确保视频自动播放
-      setIsAutoPlaying(true);
-    }
-  };
-
-  const handleSlideClick = () => {
-    // 点击时暂停自动播放
-    const carousel = carouselRef.current;
-    if (carousel) {
-      carousel.pause();
-      setIsAutoPlaying(false);
-    }
-  };
-
-  // 处理图片加载完成
-  const handleImageLoad = useCallback((mediaId: number) => {
-    // 只有当这个图片是等待启动进度的图片时才启动
-    if (pendingProgressStartRef.current === mediaId) {
-      const carousel = carouselRef.current;
-      if (carousel) {
-        carousel.startSlideProgress({
-          duration: 3000,
-          onComplete: () => {
-            carousel.next();
-          },
-        });
-      }
-      pendingProgressStartRef.current = null;
-    }
-  }, []);
-
   // 键盘快捷键
   useHotkeys("esc", onClose, { enabled: isOpen });
   useHotkeys("left", () => prevImage(), { enabled: isOpen });
@@ -184,7 +67,7 @@ export default function SimpleImageDetail({
 
   // 使用统一的点赞和收藏操作
   const handleLike = () => {
-    if (!topic || !isAuthenticated) {
+    if (!(topic && isAuthenticated)) {
       return;
     }
     setShowFloatingHearts(true);
@@ -196,7 +79,7 @@ export default function SimpleImageDetail({
   };
 
   const handleSave = () => {
-    if (!topic || !isAuthenticated) {
+    if (!(topic && isAuthenticated)) {
       return;
     }
     postActions.handleSave(topicId, topic.isSaved);
@@ -211,8 +94,7 @@ export default function SimpleImageDetail({
       createCommentMutation.mutate(
         {
           content: content.trim(),
-          userId: user.id,
-          topicId,
+          topicSecUid: String(topicId),
         },
         {
           onSuccess: () => {
@@ -221,12 +103,12 @@ export default function SimpleImageDetail({
           onError: (error) => {
             reject(error);
           },
-        },
+        }
       );
     });
   };
 
-  const handleSubmitReply = async (commentId: number, content: string, replyToUserId?: number) => {
+  const handleSubmitReply = async (commentId: number, content: string, _replyToUserId?: number) => {
     if (!(content.trim() && isAuthenticated && user)) {
       return;
     }
@@ -235,10 +117,8 @@ export default function SimpleImageDetail({
       createCommentMutation.mutate(
         {
           content: content.trim(),
-          userId: user.id,
-          topicId,
-          parentId: commentId,
-          replyToUserId,
+          topicSecUid: String(topicId),
+          parentSecUid: String(commentId),
         },
         {
           onSuccess: () => {
@@ -247,7 +127,7 @@ export default function SimpleImageDetail({
           onError: (error) => {
             reject(error);
           },
-        },
+        }
       );
     });
   };
@@ -263,50 +143,12 @@ export default function SimpleImageDetail({
   };
 
   const nextImage = () => {
-    if (carouselRef.current) {
-      carouselRef.current.next();
-      carouselRef.current.pause();
-      setIsAutoPlaying(false);
-    }
+    carouselRef.current?.next();
   };
 
   const prevImage = () => {
-    if (carouselRef.current) {
-      carouselRef.current.prev();
-      carouselRef.current.pause();
-      setIsAutoPlaying(false);
-    }
+    carouselRef.current?.prev();
   };
-
-  // 处理视频播放结束 - 视频播放完成后的回调
-  const handleVideoEnded = useCallback(() => {
-    // startSlideProgress 的 onComplete 会自动触发切换
-  }, [currentImageIndex]);
-
-  // 处理视频时长变化 - 存储每个视频的实际时长
-  const handleDurationChange = useCallback(
-    (mediaId: number, duration: number) => {
-      setVideoDurations((prev) => ({
-        ...prev,
-        [mediaId]: duration,
-      }));
-
-      // 如果这个视频是当前激活的幻灯片，重新启动进度条使用正确的时长
-      const currentItem = topic?.images?.[currentImageIndex];
-      if (currentItem && currentItem.id === mediaId) {
-        const carousel = carouselRef.current;
-        if (carousel) {
-          carousel.startSlideProgress({
-            duration: duration * 1000,
-            onComplete: () => {
-              carousel.next();
-            },
-          });
-        }
-      }
-    },
-    [currentImageIndex, topic?.images],
-  );
 
   // 清理：组件卸载时的清理工作
   useEffect(() => {
@@ -316,79 +158,18 @@ export default function SimpleImageDetail({
     };
   }, []);
 
-  if (isLoading && isOpen) {
-    return (
-      <AnimatePresence>
-        <motion.div
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md"
-          exit={{ opacity: 0 }}
-          initial={{ opacity: 0 }}
-          onClick={onClose}
-        />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div
-            animate={{ scale: 1, opacity: 1 }}
-            className="max-h-[90vh] max-w-6xl rounded-lg bg-background p-8 shadow-2xl"
-            exit={{ scale: 0.9, opacity: 0 }}
-            initial={{ scale: 0.9, opacity: 0 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-center py-20">
-              <div className="space-y-4 text-center">
-                <LoadingSpinner size="lg" />
-                <p className="animate-pulse text-muted-foreground">正在加载精彩内容...</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </AnimatePresence>
-    );
+  // 非打开状态且无数据时不渲染
+  if (!isOpen && !topic) {
+    return null;
   }
 
-  if ((error || !topic) && isOpen) {
-    return (
-      <AnimatePresence>
-        <motion.div
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md"
-          exit={{ opacity: 0 }}
-          initial={{ opacity: 0 }}
-          onClick={onClose}
-        />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div
-            animate={{ scale: 1, opacity: 1 }}
-            className="max-w-md rounded-lg bg-background p-8 shadow-2xl"
-            exit={{ scale: 0.9, opacity: 0 }}
-            initial={{ scale: 0.9, opacity: 0 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="py-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-                <span className="text-2xl">😕</span>
-              </div>
-              <p className="mb-4 text-red-600">内容加载失败</p>
-              <Button
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                onClick={() => window.location.reload()}
-              >
-                重新加载
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </AnimatePresence>
-    );
-  }
-
-  if (!topic) return null;
-
-  const hasImages = topic.images && topic.images.length > 0;
+  const hasImages = topic?.images && topic.images.length > 0;
 
   // 计算动画的初始位置
   const getInitialPosition = () => {
-    if (!originRect) return { scale: 0.9, opacity: 0, y: 20 };
+    if (!originRect) {
+      return { scale: 0.9, opacity: 0, y: 20 };
+    }
 
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
@@ -398,13 +179,17 @@ export default function SimpleImageDetail({
     // 计算缩放比例 - 从卡片大小到对话框大小
     // 根据屏幕宽度选择合适的最大宽度
     let maxDialogWidth = 1400;
-    if (!hasImages) {
+    if (isLoading || !topic) {
+      maxDialogWidth = 1152; // max-w-6xl
+    } else if (!hasImages) {
       maxDialogWidth = 672; // max-w-2xl (42rem)
-    } else if (window.innerWidth >= 1536)
+    } else if (window.innerWidth >= 1536) {
       maxDialogWidth = 1800; // 2xl
-    else if (window.innerWidth >= 1280)
+    } else if (window.innerWidth >= 1280) {
       maxDialogWidth = 1600; // xl
-    else if (window.innerWidth >= 1024) maxDialogWidth = 1400; // lg
+    } else if (window.innerWidth >= 1024) {
+      maxDialogWidth = 1400; // lg
+    }
 
     const dialogWidth = Math.min(window.innerWidth * 0.85, maxDialogWidth);
     const scaleX = originRect.width / dialogWidth;
@@ -423,7 +208,7 @@ export default function SimpleImageDetail({
     return {
       x: cardCenterX - centerX,
       y: cardCenterY - centerY,
-      scale: scale,
+      scale,
       opacity: 0,
     };
   };
@@ -439,18 +224,21 @@ export default function SimpleImageDetail({
               className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md"
               exit={{ opacity: 0 }}
               initial={{ opacity: 0 }}
+              key="backdrop"
               onClick={onClose}
               transition={{ duration: 0.2 }}
             />
 
             {/* 对话框内容 */}
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" key="dialog">
               <motion.div
                 animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
                 className={`relative w-full overflow-hidden rounded-lg border-0 bg-background shadow-2xl ${
-                  hasImages
-                    ? "h-[95vh] max-w-[85vw] md:max-w-[80vw] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px]"
-                    : "h-auto max-h-[85vh] max-w-2xl my-8"
+                  isLoading || error || !topic
+                    ? "max-h-[90vh] max-w-6xl"
+                    : hasImages
+                      ? "h-[95vh] max-w-[85vw] md:max-w-[80vw] lg:max-w-[1200px] xl:max-w-[1400px] 2xl:max-w-[1600px]"
+                      : "my-8 h-auto max-h-[85vh] max-w-2xl"
                 }`}
                 exit={getInitialPosition()}
                 initial={getInitialPosition()}
@@ -465,81 +253,52 @@ export default function SimpleImageDetail({
                 {/* 隐藏的标题用于可访问性 */}
                 <span className="sr-only">{topic?.title || "话题详情"}</span>
 
-                {/* 左右分栏布局 */}
+                {/* 加载中 / 错误 / 正常内容 */}
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="space-y-4 text-center">
+                      <LoadingSpinner size="lg" />
+                      <p className="animate-pulse text-muted-foreground">正在加载精彩内容...</p>
+                    </div>
+                  </div>
+                ) : error || !topic ? (
+                  <div className="py-8 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                      <span className="text-2xl">😕</span>
+                    </div>
+                    <p className="mb-4 text-red-600">内容加载失败</p>
+                    <Button
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      onClick={() => window.location.reload()}
+                    >
+                      重新加载
+                    </Button>
+                  </div>
+                ) : (
                 <div
-                  className={`relative flex w-full overflow-hidden ${hasImages ? "h-full" : "h-auto flex-col"}`}
+                  className={`relative flex w-full ${hasImages ? "h-full overflow-hidden flex-col lg:flex-row" : "max-h-[85vh] overflow-hidden flex-col"}`}
                 >
                   {/* 左侧：图片区域 */}
                   {hasImages && (
-                    <div className="relative flex flex-1 items-center justify-center bg-black overflow-hidden">
-                      <ErrorBoundary>
-                        <eos-carousel
-                          autoplay={isAutoPlaying}
-                          indicator-style="tiktok"
-                          interval={1500}
-                          loop={true}
-                          initial-index={initialImageIndex}
-                          ref={carouselRef}
-                          show-controls={false}
-                          onchange={handleChange as any}
-                          onslide-active={handleSlideActive as any}
-                          onslide-click={handleSlideClick as any}
-                          style={
-                            {
-                              "--carousel-height": "100%",
-                              "--progress-bar-height": "2px",
-                              "--progress-bar-gap": "6px",
-                              "--progress-bar-color": "rgba(255, 255, 255, 0.2)",
-                              "--progress-bar-active-color": "#ffffff",
-                              "--carousel-transition": "0.3s ease-in-out",
-                              width: "100%",
-                              height: "100%",
-                            } as React.CSSProperties
-                          }
-                        >
-                          {topic.images?.map((image, index) => (
-                            <div
-                              data-media-type={checkIsVideo(image) ? "video" : "image"}
-                              key={`${image.id}-${index}`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                setPreviewImageIndex(index);
-                                setImagePreviewOpen(true);
-                              }}
-                            >
-                              <MediaPlayer
-                                media={image}
-                                className="h-full w-full"
-                                isActive={index === currentImageIndex}
-                                isPlaying={
-                                  index === currentImageIndex &&
-                                  (checkIsVideo(image) ? true : isAutoPlaying)
-                                }
-                                onEnded={handleVideoEnded}
-                                onDurationChange={(duration) =>
-                                  handleDurationChange(image.id, duration)
-                                }
-                                onImageLoad={() => handleImageLoad(image.id)}
-                              />
-                            </div>
-                          ))}
-                        </eos-carousel>
-                      </ErrorBoundary>
+                    <div className="relative flex h-[40vh] items-center justify-center overflow-hidden bg-black lg:h-full lg:flex-1">
+                      <MediaCarousel
+                        images={topic.images || []}
+                        initialIndex={initialImageIndex}
+                        onIndexChange={setCurrentImageIndex}
+                        onSlideClick={(index) => {
+                          setPreviewImageIndex(index);
+                          setImagePreviewOpen(true);
+                        }}
+                        ref={carouselRef}
+                      />
                     </div>
                   )}
 
                   {/* 右侧：信息面板 */}
                   <motion.div
                     animate={{ x: 0, opacity: 1 }}
-                    className={`relative flex w-full flex-col bg-white shrink-0 ${
-                      hasImages ? "lg:w-[450px] h-full" : "w-full h-auto"
+                    className={`relative flex w-full shrink-0 flex-col bg-white ${
+                      hasImages ? "min-h-0 flex-1 lg:h-full lg:w-[450px] lg:flex-none" : "max-h-[85vh] w-full"
                     }`}
                     initial={{ x: 100, opacity: 0 }}
                     transition={{
@@ -553,45 +312,45 @@ export default function SimpleImageDetail({
                     {/* 极简几何背景 */}
                     <div className="pointer-events-none absolute inset-0">
                       {/* 顶部细线网格 */}
-                      <svg className="absolute top-0 left-0 w-full h-32 opacity-[0.02]">
+                      <svg className="absolute top-0 left-0 h-32 w-full opacity-[0.02]">
                         <defs>
-                          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                          <pattern height="20" id="grid" patternUnits="userSpaceOnUse" width="20">
                             <rect
-                              width="20"
-                              height="20"
                               fill="none"
+                              height="20"
                               stroke="#000"
                               strokeWidth="0.5"
+                              width="20"
                             />
                           </pattern>
                         </defs>
-                        <rect width="100%" height="100%" fill="url(#grid)" />
+                        <rect fill="url(#grid)" height="100%" width="100%" />
                       </svg>
                       {/* 侧边竖线 */}
-                      <div className="absolute top-0 left-8 w-[1px] h-full bg-gradient-to-b from-black/10 via-black/5 to-transparent" />
+                      <div className="absolute top-0 left-8 h-full w-[1px] bg-gradient-to-b from-black/10 via-black/5 to-transparent" />
                     </div>
 
                     {/* 头部区域 */}
-                    <div className="relative border-b border-gray-200">
+                    <div className="relative border-gray-200 border-b">
                       {/* 关闭按钮 - 移到左上角 */}
                       <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center group hover:bg-gray-100 rounded-full transition-colors"
                         aria-label="关闭"
+                        className="group absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
+                        onClick={onClose}
                       >
-                        <div className="relative w-5 h-5">
-                          <span className="absolute top-1/2 left-0 w-full h-[1.5px] bg-gray-600 group-hover:bg-black transform -translate-y-1/2 rotate-45 transition-all"></span>
-                          <span className="absolute top-1/2 left-0 w-full h-[1.5px] bg-gray-600 group-hover:bg-black transform -translate-y-1/2 -rotate-45 transition-all"></span>
+                        <div className="relative h-5 w-5">
+                          <span className="absolute top-1/2 left-0 h-[1.5px] w-full -translate-y-1/2 rotate-45 transform bg-gray-600 transition-all group-hover:bg-black" />
+                          <span className="absolute top-1/2 left-0 h-[1.5px] w-full -translate-y-1/2 -rotate-45 transform bg-gray-600 transition-all group-hover:bg-black" />
                         </div>
                       </button>
 
                       {/* 编号和日期 */}
-                      <div className="pl-10 pr-16 pt-8 pb-2">
+                      <div className="pt-8 pr-16 pb-2 pl-10">
                         <div className="flex items-baseline justify-between gap-4">
                           <span className="text-[11px] text-gray-400">
                             编号 · {String(topicId).padStart(5, "0")}
                           </span>
-                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <div className="flex flex-shrink-0 flex-col items-end gap-1">
                             <span className="text-[11px] text-gray-500">
                               {new Date(topic.createdAt).toLocaleDateString("zh-CN", {
                                 year: "numeric",
@@ -603,8 +362,8 @@ export default function SimpleImageDetail({
                             </span>
                             {topic.updatedAt &&
                               // 比较到分钟级别，避免毫秒差异导致显示相同时间
-                              Math.floor(new Date(topic.updatedAt).getTime() / 60000) !==
-                                Math.floor(new Date(topic.createdAt).getTime() / 60000) && (
+                              Math.floor(new Date(topic.updatedAt).getTime() / 60_000) !==
+                                Math.floor(new Date(topic.createdAt).getTime() / 60_000) && (
                                 <span className="text-[10px] text-gray-400">
                                   更新于{" "}
                                   {new Date(topic.updatedAt).toLocaleDateString("zh-CN", {
@@ -620,11 +379,11 @@ export default function SimpleImageDetail({
                       </div>
 
                       {/* 作者信息 - 极简布局 */}
-                      <div className="pl-10 pr-8 pb-6">
+                      <div className="pr-8 pb-6 pl-10">
                         <div className="flex items-end justify-between">
                           <div className="flex items-center gap-3">
                             <div
-                              className="relative cursor-pointer group"
+                              className="group relative cursor-pointer"
                               onClick={() => {
                                 onClose();
                                 setTimeout(() => {
@@ -635,25 +394,27 @@ export default function SimpleImageDetail({
                                 }, 100);
                               }}
                             >
-                              <div className="w-10 h-10 overflow-hidden bg-gray-200 group-hover:bg-gray-300 transition-all rounded-lg">
+                              <div className="h-10 w-10 overflow-hidden rounded-lg bg-gray-200 transition-all group-hover:bg-gray-300">
                                 {topic.author.avatar ? (
                                   <img
-                                    src={topic.author.avatar}
                                     alt={topic.author.name}
-                                    className="w-full h-full object-cover"
+                                    className="h-full w-full object-cover"
+                                    height={40}
+                                    src={topic.author.avatar}
+                                    width={40}
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-white">
+                                  <div className="flex h-full w-full items-center justify-center text-white">
                                     <User size={16} strokeWidth={1} />
                                   </div>
                                 )}
                               </div>
-                              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-black rounded-sm" />
+                              <div className="absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-sm bg-black" />
                             </div>
 
                             <div>
                               <h3
-                                className="font-medium text-gray-900 text-sm cursor-pointer hover:text-black hover:underline underline-offset-4 transition-colors"
+                                className="cursor-pointer font-medium text-gray-900 text-sm underline-offset-4 transition-colors hover:text-black hover:underline"
                                 onClick={() => {
                                   onClose();
                                   setTimeout(() => {
@@ -677,15 +438,15 @@ export default function SimpleImageDetail({
                             {user && topic.author && user.id === topic.author.id && (
                               <>
                                 <button
+                                  className="text-gray-400 transition-colors hover:text-black"
                                   onClick={() => onEdit?.(topicId)}
-                                  className="text-gray-400 hover:text-black transition-colors"
                                   title="编辑"
                                 >
                                   <Edit size={14} strokeWidth={1.5} />
                                 </button>
                                 <button
+                                  className="text-gray-400 transition-colors hover:text-red-500"
                                   onClick={() => setShowDeleteConfirm(true)}
-                                  className="text-gray-400 hover:text-red-500 transition-colors"
                                   title="删除"
                                 >
                                   <Trash2 size={14} strokeWidth={1.5} />
@@ -698,21 +459,21 @@ export default function SimpleImageDetail({
                     </div>
 
                     {/* 中间：可滚动内容区域 */}
-                    <ScrollArea className={`flex-1 ${!hasImages && "min-h-[300px]"}`}>
-                      <div className="pl-10 pr-8 py-8">
+                    <ScrollArea className={`min-h-0 flex-1 overflow-auto ${!hasImages && "min-h-[300px]"}`}>
+                      <div className="py-8 pr-8 pl-10">
                         {/* 标题区 - 分栏式设计 */}
                         <div className="mb-8">
                           <div className="grid grid-cols-12 gap-4">
                             <div className="col-span-1 pt-2">
-                              <div className="w-full h-[1px] bg-gray-300" />
+                              <div className="h-[1px] w-full bg-gray-300" />
                             </div>
                             <div className="col-span-11">
-                              <h1 className="text-2xl font-semibold text-black leading-snug">
+                              <h1 className="font-semibold text-2xl text-black leading-snug">
                                 {topic.title}
                               </h1>
                               <div className="mt-3 flex items-center gap-3">
                                 <span className="text-[11px] text-gray-600">文章</span>
-                                <div className="w-4 h-[1px] bg-gray-300" />
+                                <div className="h-[1px] w-4 bg-gray-300" />
                                 <span className="text-[11px] text-gray-500">
                                   {topic.images?.length || 0} 张图片
                                 </span>
@@ -728,17 +489,24 @@ export default function SimpleImageDetail({
                               <span className="text-[10px] text-gray-400">01</span>
                             </div>
                             <div className="col-span-11">
-                              <div
-                                className="prose prose-sm max-w-none text-gray-800 leading-relaxed [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80"
-                                dangerouslySetInnerHTML={{ __html: topic.content }}
-                              />
+                              {topic.contentType === "markdown" ? (
+                                <MarkdownRenderer
+                                  className="text-gray-800 leading-relaxed [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80"
+                                  content={topic.content}
+                                />
+                              ) : (
+                                <div
+                                  className="prose prose-sm max-w-none text-gray-800 leading-relaxed [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-primary/80"
+                                  dangerouslySetInnerHTML={{ __html: topic.content }}
+                                />
+                              )}
                             </div>
                           </div>
                         </div>
 
                         {/* 标签 */}
                         {topic.tags && topic.tags.length > 0 && (
-                          <div className="mb-8 pb-6 border-b border-gray-100">
+                          <div className="mb-8 border-gray-100 border-b pb-6">
                             <div className="grid grid-cols-12 gap-4">
                               <div className="col-span-1 text-right">
                                 <span className="text-[10px] text-gray-400">02</span>
@@ -747,8 +515,8 @@ export default function SimpleImageDetail({
                                 <div className="flex flex-wrap gap-2">
                                   {topic.tags.map((tag, index) => (
                                     <span
+                                      className="inline-flex cursor-pointer items-center rounded-md bg-gray-100 px-2.5 py-1 font-medium text-gray-700 text-xs transition-all hover:bg-gray-900 hover:text-white"
                                       key={index}
-                                      className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-900 hover:text-white transition-all cursor-pointer"
                                     >
                                       {tag}
                                     </span>
@@ -760,7 +528,7 @@ export default function SimpleImageDetail({
                         )}
 
                         {/* 互动统计 */}
-                        <div className="mb-6 border-t border-gray-200 py-4">
+                        <div className="mb-6 border-gray-200 border-t py-4">
                           <div className="grid grid-cols-12 gap-4">
                             <div className="col-span-1 text-right">
                               <span className="text-[10px] text-gray-400">03</span>
@@ -768,19 +536,19 @@ export default function SimpleImageDetail({
                             <div className="col-span-11">
                               <div className="grid grid-cols-3 gap-6">
                                 <div>
-                                  <div className="text-xl font-semibold text-black">
+                                  <div className="font-semibold text-black text-xl">
                                     {topic.likes.toLocaleString()}
                                   </div>
                                   <div className="mt-0.5 text-[10px] text-gray-500">赞赏</div>
                                 </div>
                                 <div>
-                                  <div className="text-xl font-semibold text-black">
+                                  <div className="font-semibold text-black text-xl">
                                     {(comments?.length || 0).toLocaleString()}
                                   </div>
                                   <div className="mt-0.5 text-[10px] text-gray-500">回应</div>
                                 </div>
                                 <div>
-                                  <div className="text-xl font-semibold text-black">
+                                  <div className="font-semibold text-black text-xl">
                                     {topic.saves.toLocaleString()}
                                   </div>
                                   <div className="mt-0.5 text-[10px] text-gray-500">收藏</div>
@@ -798,19 +566,19 @@ export default function SimpleImageDetail({
                               <div className="flex gap-2.5">
                                 {/* 赞赏按钮 */}
                                 <motion.button
-                                  onClick={handleLike}
-                                  className={`group relative flex-1 px-4 py-2 flex items-center justify-center gap-2 rounded-lg font-medium text-sm transition-all duration-300 overflow-hidden ${
+                                  className={`group relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg px-4 py-2 font-medium text-sm transition-all duration-300 ${
                                     topic.isLiked
                                       ? "bg-black text-white shadow-md"
-                                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-400 hover:shadow-sm"
+                                      : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400 hover:shadow-sm"
                                   }`}
                                   disabled={postActions.isLoading}
-                                  whileTap={{ scale: 0.96 }}
+                                  onClick={handleLike}
                                   whileHover={{ scale: 1.01 }}
+                                  whileTap={{ scale: 0.96 }}
                                 >
                                   {/* 微妙的背景效果 */}
                                   {!topic.isLiked && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                   )}
 
                                   <motion.div
@@ -818,13 +586,13 @@ export default function SimpleImageDetail({
                                     transition={{ duration: 0.3 }}
                                   >
                                     <Heart
-                                      size={16}
-                                      strokeWidth={2}
                                       className={`transition-all duration-200 ${
                                         topic.isLiked
                                           ? "fill-white stroke-white"
                                           : "stroke-gray-600 group-hover:stroke-black"
                                       }`}
+                                      size={16}
+                                      strokeWidth={2}
                                     />
                                   </motion.div>
                                   <span className="relative z-10">
@@ -834,19 +602,19 @@ export default function SimpleImageDetail({
 
                                 {/* 收藏按钮 */}
                                 <motion.button
-                                  onClick={handleSave}
-                                  className={`group relative flex-1 px-4 py-2 flex items-center justify-center gap-2 rounded-lg font-medium text-sm transition-all duration-300 overflow-hidden ${
+                                  className={`group relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg px-4 py-2 font-medium text-sm transition-all duration-300 ${
                                     topic.isSaved
                                       ? "bg-black text-white shadow-md"
-                                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-400 hover:shadow-sm"
+                                      : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400 hover:shadow-sm"
                                   }`}
                                   disabled={postActions.isLoading}
-                                  whileTap={{ scale: 0.96 }}
+                                  onClick={handleSave}
                                   whileHover={{ scale: 1.01 }}
+                                  whileTap={{ scale: 0.96 }}
                                 >
                                   {/* 微妙的背景效果 */}
                                   {!topic.isSaved && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                   )}
 
                                   <motion.div
@@ -854,13 +622,13 @@ export default function SimpleImageDetail({
                                     transition={{ duration: 0.3 }}
                                   >
                                     <Bookmark
-                                      size={16}
-                                      strokeWidth={2}
                                       className={`transition-all duration-200 ${
                                         topic.isSaved
                                           ? "fill-white stroke-white"
                                           : "stroke-gray-600 group-hover:stroke-black"
                                       }`}
+                                      size={16}
+                                      strokeWidth={2}
                                     />
                                   </motion.div>
                                   <span className="relative z-10">
@@ -909,6 +677,7 @@ export default function SimpleImageDetail({
                     </ScrollArea>
                   </motion.div>
                 </div>
+                )}
               </motion.div>
             </div>
           </>
@@ -927,12 +696,12 @@ export default function SimpleImageDetail({
 
       {/* 删除确认对话框 */}
       <ConfirmDialog
-        open={showDeleteConfirm}
-        onOpenChange={setShowDeleteConfirm}
-        title="确定要删除这条动态吗？"
+        confirmText="删除"
         description="删除后将无法恢复，所有相关的评论和点赞也会一并删除。"
         onConfirm={handleDelete}
-        confirmText="删除"
+        onOpenChange={setShowDeleteConfirm}
+        open={showDeleteConfirm}
+        title="确定要删除这条动态吗？"
         variant="destructive"
       />
     </>

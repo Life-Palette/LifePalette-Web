@@ -1,39 +1,23 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Camera, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import OptimizedImage from "@/components/media/OptimizedImage";
 import type { PostImage } from "@/types";
-
-interface FileData {
-  id: number;
-  name: string;
-  url: string;
-  type: string;
-  blurhash: string;
-  videoSrc?: string | null;
-  fromIphone: boolean;
-  width: number;
-  height: number;
-  lng: number;
-  lat: number;
-  takenAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { FileData } from "./types";
 
 interface PhotoGalleryProps {
-  photos: FileData[];
-  selectedPhotos: FileData[];
-  onPhotoClick: (lng: number, lat: number, file: FileData) => void;
-  onClearSelection: () => void;
-  width?: number;
   isDark?: boolean;
   isMobile?: boolean;
+  onClearSelection: () => void;
+  onPhotoClick: (lng: number, lat: number, file: FileData) => void;
+  photos: FileData[];
+  selectedPhotos: FileData[];
+  width?: number;
 }
 
 // 工具函数：FileData转PostImage
 const fileToPostImage = (file: FileData): PostImage => ({
-  id: file.id,
+  sec_uid: file.id,
   url: file.url,
   width: file.width,
   height: file.height,
@@ -87,7 +71,7 @@ export default function PhotoGallery({
       touchStartY.current = e.touches[0].clientY;
       touchStartState.current = sheetState;
     },
-    [sheetState],
+    [sheetState]
   );
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
@@ -96,20 +80,30 @@ export default function PhotoGallery({
 
     if (deltaY > threshold) {
       // 上滑 - 展开
-      if (touchStartState.current === "collapsed") setSheetState("half");
-      else if (touchStartState.current === "half") setSheetState("expanded");
+      if (touchStartState.current === "collapsed") {
+        setSheetState("half");
+      } else if (touchStartState.current === "half") {
+        setSheetState("expanded");
+      }
     } else if (deltaY < -threshold) {
       // 下滑 - 收起
-      if (touchStartState.current === "expanded") setSheetState("half");
-      else if (touchStartState.current === "half") setSheetState("collapsed");
+      if (touchStartState.current === "expanded") {
+        setSheetState("half");
+      } else if (touchStartState.current === "half") {
+        setSheetState("collapsed");
+      }
     }
   }, []);
 
   // 移动端切换抽屉状态
   const toggleSheet = useCallback(() => {
     setSheetState((prev) => {
-      if (prev === "collapsed") return "half";
-      if (prev === "half") return "expanded";
+      if (prev === "collapsed") {
+        return "half";
+      }
+      if (prev === "half") {
+        return "expanded";
+      }
       return "collapsed";
     });
   }, []);
@@ -118,9 +112,11 @@ export default function PhotoGallery({
   const handleMobilePhotoClick = useCallback(
     (lng: number, lat: number, file: FileData) => {
       onPhotoClick(lng, lat, file);
-      if (isMobile) setSheetState("collapsed");
+      if (isMobile) {
+        setSheetState("collapsed");
+      }
     },
-    [onPhotoClick, isMobile],
+    [onPhotoClick, isMobile]
   );
 
   // 移动端底部抽屉高度
@@ -139,7 +135,7 @@ export default function PhotoGallery({
   if (isMobile) {
     return (
       <div
-        className={`absolute left-0 right-0 bottom-0 z-30 flex flex-col rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] ${
+        className={`absolute right-0 bottom-0 left-0 z-30 flex flex-col rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] ${
           isDark ? "bg-gray-900/95 backdrop-blur-md" : "bg-white/95 backdrop-blur-md"
         }`}
         style={{
@@ -151,9 +147,9 @@ export default function PhotoGallery({
         {/* 拖拽手柄 + 头部 */}
         <div
           className="flex-shrink-0 cursor-grab active:cursor-grabbing"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
           onClick={toggleSheet}
+          onTouchEnd={handleTouchEnd}
+          onTouchStart={handleTouchStart}
         >
           {/* 拖拽指示条 */}
           <div className="flex justify-center pt-2 pb-1">
@@ -163,9 +159,9 @@ export default function PhotoGallery({
           {/* 头部信息 */}
           <div className="flex items-center justify-between px-4 pb-2">
             <div className="flex items-center gap-2">
-              <span className="text-base">📷</span>
+              <Camera className="h-4 w-4 opacity-60" />
               {selectedPhotos.length > 0 ? (
-                <span className="font-semibold text-sm text-blue-500">
+                <span className="font-semibold text-blue-500 text-sm">
                   已选 {selectedPhotos.length} 张
                 </span>
               ) : (
@@ -186,11 +182,11 @@ export default function PhotoGallery({
             <div className="flex items-center gap-2">
               {selectedPhotos.length > 0 && (
                 <button
+                  className="text-blue-500 text-xs"
                   onClick={(e) => {
                     e.stopPropagation();
                     onClearSelection();
                   }}
-                  className="text-xs text-blue-500"
                 >
                   清除
                 </button>
@@ -206,7 +202,7 @@ export default function PhotoGallery({
 
         {/* 照片列表 - 仅在展开时渲染 */}
         {sheetState !== "collapsed" && (
-          <div ref={parentRef} className="flex-1 overflow-auto overscroll-contain">
+          <div className="flex-1 overflow-auto overscroll-contain" ref={parentRef}>
             <div
               style={{
                 height: `${virtualizer.getTotalSize()}px`,
@@ -220,8 +216,9 @@ export default function PhotoGallery({
 
                 return (
                   <div
-                    key={virtualItem.key}
+                    className="px-3 pb-1.5"
                     data-index={virtualItem.index}
+                    key={virtualItem.key}
                     ref={virtualizer.measureElement}
                     style={{
                       position: "absolute",
@@ -230,7 +227,6 @@ export default function PhotoGallery({
                       width: "100%",
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
-                    className="px-3 pb-1.5"
                   >
                     {/* 移动端紧凑横向卡片 */}
                     <div
@@ -243,12 +239,12 @@ export default function PhotoGallery({
                     >
                       {/* 缩略图 */}
                       <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg">
-                        <span className="absolute left-0.5 top-0.5 z-10 rounded bg-black/60 px-1 py-0.5 font-bold text-white text-[10px] leading-none">
+                        <span className="absolute top-0.5 left-0.5 z-10 rounded bg-black/60 px-1 py-0.5 font-bold text-[10px] text-white leading-none">
                           {globalIndex + 1}
                         </span>
                         <OptimizedImage
-                          image={fileToPostImage(file)}
                           className="h-full w-full"
+                          image={fileToPostImage(file)}
                           loading="lazy"
                           quality={60}
                         />
@@ -277,7 +273,7 @@ export default function PhotoGallery({
                       </div>
                       {/* 箭头指示 */}
                       <ChevronUp
-                        className={`h-4 w-4 -rotate-45 flex-shrink-0 ${
+                        className={`h-4 w-4 flex-shrink-0 -rotate-45 ${
                           isDark ? "text-gray-600" : "text-gray-300"
                         }`}
                       />
@@ -295,7 +291,7 @@ export default function PhotoGallery({
   // ========== 桌面端侧边栏布局（保持不变） ==========
   return (
     <div
-      className={`absolute right-0 top-0 bottom-0 flex flex-col border-l shadow-2xl ${
+      className={`absolute top-0 right-0 bottom-0 flex flex-col border-l shadow-2xl ${
         isDark ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"
       }`}
       style={{ width: `${width}px` }}
@@ -311,16 +307,16 @@ export default function PhotoGallery({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-lg">✓</span>
+                <Check className="h-4.5 w-4.5 text-blue-600" />
                 <span className="font-semibold text-blue-600">
                   已选择 {selectedPhotos.length} 张
                 </span>
               </div>
               <button
-                onClick={onClearSelection}
                 className={`text-xs ${
                   isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"
                 }`}
+                onClick={onClearSelection}
               >
                 清除
               </button>
@@ -333,7 +329,7 @@ export default function PhotoGallery({
           // 正常模式
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-lg">📷</span>
+              <Camera className="h-4.5 w-4.5 opacity-60" />
               <span className={`font-semibold ${isDark ? "text-gray-100" : "text-gray-900"}`}>
                 旅行相册
               </span>
@@ -350,7 +346,7 @@ export default function PhotoGallery({
       </div>
 
       {/* 虚拟列表容器 */}
-      <div ref={parentRef} className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto" ref={parentRef}>
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
@@ -365,8 +361,9 @@ export default function PhotoGallery({
 
             return (
               <div
-                key={virtualItem.key}
+                className="px-2 pb-2"
                 data-index={virtualItem.index}
+                key={virtualItem.key}
                 ref={virtualizer.measureElement}
                 style={{
                   position: "absolute",
@@ -375,7 +372,6 @@ export default function PhotoGallery({
                   width: "100%",
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
-                className="px-2 pb-2"
               >
                 <div
                   className={`group cursor-pointer overflow-hidden rounded-lg transition-all hover:shadow-lg ${
@@ -385,12 +381,12 @@ export default function PhotoGallery({
                 >
                   {/* 图片区域 */}
                   <div className="relative aspect-[4/3]">
-                    <span className="absolute left-2 top-2 z-10 rounded bg-black/70 px-2 py-1 font-bold text-white text-xs backdrop-blur-sm">
+                    <span className="absolute top-2 left-2 z-10 rounded bg-black/70 px-2 py-1 font-bold text-white text-xs backdrop-blur-sm">
                       #{globalIndex + 1}
                     </span>
                     <OptimizedImage
-                      image={fileToPostImage(file)}
                       className="h-full w-full"
+                      image={fileToPostImage(file)}
                       loading="lazy"
                       quality={80}
                     />

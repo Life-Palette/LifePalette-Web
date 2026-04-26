@@ -9,7 +9,7 @@ export default function ColorPaletteSkeleton({ viewMode }: ColorPaletteSkeletonP
     return (
       <div className="space-y-3">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="flex items-center gap-4 rounded-xl border border-border/50 p-3">
+          <div className="flex items-center gap-4 rounded-xl border border-border/50 p-3" key={i}>
             <Skeleton className="h-12 w-12 rounded-lg" />
             <div className="flex-1">
               <Skeleton className="h-4 w-20" />
@@ -24,7 +24,7 @@ export default function ColorPaletteSkeleton({ viewMode }: ColorPaletteSkeletonP
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-        <Skeleton key={i} className="aspect-square rounded-2xl" />
+        <Skeleton className="aspect-square rounded-2xl" key={i} />
       ))}
     </div>
   );

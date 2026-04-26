@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Camera, Clock, Download, Globe, Link2, Map, MapPin, Search, Star } from "lucide-react";
+import { Camera, Download, Globe, Link2, Map, MapPin, Search } from "lucide-react";
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -14,37 +14,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useIsAuthenticated } from "@/hooks/useAuth";
-import { apiService } from "@/services/api";
+import { usersApi } from "@/services/api";
 
-// 城市数据类型
+// 城市数据类型（对齐后端 snake_case）
 interface CityData {
-  id: number;
-  country: string;
   city: string;
-  photoCount: number;
-  firstVisitAt: string;
-  lastVisitAt: string;
-  lng?: number;
+  country: string;
   lat?: number;
+  lng?: number;
+  photo_count: number;
+  province: string;
 }
 
-// 旅行统计数据类型
+// 旅行统计数据类型（对齐后端）
 interface TravelStats {
-  totalCities: number;
-  totalPhotos: number;
-  totalCountries: number;
-  recentCities: CityData[];
-  topCities: CityData[];
-  countryBreakdown: Array<{
-    country: string;
-    cityCount: number;
-    photoCount: number;
-  }>;
+  cities_visited: CityData[];
+  total_cities: number;
+  total_photos: number;
 }
 
 interface TrackPageProps {
-  userId?: number;
   isOwnProfile?: boolean;
+  userId?: number;
 }
 
 const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile = false }) => {
@@ -53,14 +44,18 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
 
   // 判断是否为深色模式
   const isDark = useMemo(() => {
-    if (theme === "dark") return true;
-    if (theme === "light") return false;
+    if (theme === "dark") {
+      return true;
+    }
+    if (theme === "light") {
+      return false;
+    }
     // system 模式下检查系统偏好
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   }, [theme]);
 
   // 如果传入了 userId，则查看其他用户的轨迹；否则查看当前用户的
-  const targetUserId = propUserId || user?.id;
+  const targetUserId = propUserId || user?.sec_uid;
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [sortBy, setSortBy] = useState<"photoCount" | "lastVisitAt" | "firstVisitAt">("photoCount");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -76,34 +71,17 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
       if (!targetUserId) {
         throw new Error("User not found");
       }
-      return apiService.getUserTravelStats(targetUserId);
+      return usersApi.getTravelStats(targetUserId);
     },
     enabled: !!targetUserId,
   });
 
   const travelStats = travelStatsResponse?.result as TravelStats;
 
-  // 获取用户访问过的城市
-  const { data: citiesResponse, isLoading: citiesLoading } = useQuery({
-    queryKey: ["user-cities", targetUserId, sortBy, sortOrder, countryFilter],
-    queryFn: async () => {
-      if (!targetUserId) {
-        throw new Error("User not found");
-      }
-      return apiService.getUserCities(targetUserId, {
-        page: 1,
-        limit: 100,
-        sortBy,
-        sortOrder,
-        country: countryFilter || undefined,
-      });
-    },
-    enabled: !!targetUserId,
-  });
+  // 直接从 travel-stats 获取城市列表，不需要单独的 cities 接口
+  const citiesData = travelStats?.cities_visited;
 
-  const citiesData = citiesResponse?.result?.data as CityData[];
-
-  const isLoading = statsLoading || citiesLoading;
+  const isLoading = statsLoading;
 
   const handleCityClick = (city: CityData) => {
     setSelectedCity(city);
@@ -116,7 +94,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
 
   // 复制分享链接
   const handleCopyShareLink = useCallback(() => {
-    const secUid = user?.secUid;
+    const secUid = user?.sec_uid;
     if (!secUid) {
       toast.error("无法生成链接，请稍后再试");
       return;
@@ -130,16 +108,16 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
       .catch(() => {
         toast.error("复制失败，请手动复制链接");
       });
-  }, [user?.secUid]);
+  }, [user?.sec_uid]);
 
-  const formatDate = (dateString: string) =>
+  const _formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("zh-CN", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
 
-  const formatRelativeTime = (dateString: string) => {
+  const _formatRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -183,7 +161,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
   };
 
   // 城市坐标映射（用于地图显示）
-  const getCityCoordinates = (city: string): [number, number] | null => {
+  const getCityCoordinates = useCallback((city: string): [number, number] | null => {
     const cityCoords: Record<string, [number, number]> = {
       // 中国主要城市
       北京市: [116.4074, 39.9042],
@@ -282,7 +260,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
 
     const key = `${city}`;
     return cityCoords[key] || null;
-  };
+  }, []);
 
   // 为城市数据添加坐标并进行搜索过滤
   const citiesWithCoords = useMemo(() => {
@@ -298,7 +276,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
       cities = cities.filter(
         (city) =>
           city.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          city.country.toLowerCase().includes(searchQuery.toLowerCase()),
+          city.country.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -321,24 +299,23 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
     );
   }
 
-  if (!travelStats || travelStats.totalCities === 0) {
+  if (!travelStats || travelStats.total_cities === 0) {
     return (
       <Card className="min-h-[500px]">
         <CardContent className="p-6">
           <LottieAnimation
-            type="empty"
-            emptyTitle={isOwnProfile ? "还没有旅行足迹" : "TA还没有旅行足迹"}
-            emptyDescription={isOwnProfile ? "上传带有GPS信息的照片，记录你走过的每一个地方" : ""}
-            width={200}
-            height={200}
             actionButton={
               isOwnProfile ? (
-                <Button variant="outline" className="rounded-full">
-                  <Camera size={16} className="mr-2" />
+                <Button className="rounded-full" variant="outline">
+                  <Camera className="mr-2" size={16} />
                   拍照记录足迹
                 </Button>
               ) : undefined
             }
+            emptyDescription={isOwnProfile ? "上传带有GPS信息的照片，记录你走过的每一个地方" : ""}
+            emptyTitle={isOwnProfile ? "还没有旅行足迹" : "TA还没有旅行足迹"}
+            height={200}
+            type="empty"
           />
         </CardContent>
       </Card>
@@ -367,7 +344,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
                 <MapPin className="text-slate-600" size={24} />
               </div>
               <div className="mb-1 font-bold text-3xl text-slate-700">
-                {travelStats.totalCities}
+                {travelStats.total_cities}
               </div>
               <div className="text-muted-foreground text-sm">个城市</div>
             </div>
@@ -377,7 +354,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
                 <Camera className="text-slate-600" size={24} />
               </div>
               <div className="mb-1 font-bold text-3xl text-slate-700">
-                {travelStats.totalPhotos}
+                {travelStats.total_photos}
               </div>
               <div className="text-muted-foreground text-sm">张照片</div>
             </div>
@@ -387,7 +364,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
                 <Globe className="text-slate-600" size={24} />
               </div>
               <div className="mb-1 font-bold text-3xl text-slate-700">
-                {travelStats.totalCountries}
+                {[...new Set(travelStats.cities_visited?.map((c) => c.country))].length}
               </div>
               <div className="text-muted-foreground text-sm">个国家</div>
             </div>
@@ -455,7 +432,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
             {/* 搜索框 */}
             <div className="relative min-w-[200px] flex-1">
               <Search
-                className="-translate-y-1/2 absolute top-1/2 left-3 transform text-muted-foreground"
+                className="absolute top-1/2 left-3 -translate-y-1/2 transform text-muted-foreground"
                 size={16}
               />
               <Input
@@ -509,7 +486,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
                 return (
                   <Card
                     className="group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-                    key={city.id}
+                    key={city.city}
                     onClick={() => handleCityClick(city)}
                   >
                     <CardContent className="p-4">
@@ -525,28 +502,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
                           </div>
                         </div>
 
-                        <Badge variant="secondary">{city.photoCount} 张</Badge>
-                      </div>
-
-                      {/* 访问时间信息 */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Star size={14} />
-                            <span>首次访问</span>
-                          </div>
-                          <span className="font-medium">{formatDate(city.firstVisitAt)}</span>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Clock size={14} />
-                            <span>最近访问</span>
-                          </div>
-                          <span className="font-medium">
-                            {formatRelativeTime(city.lastVisitAt)}
-                          </span>
-                        </div>
+                        <Badge variant="secondary">{city.photo_count} 张</Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -556,7 +512,7 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
           ) : (
             /* 地图视图 */
             <div style={{ height: "600px", overflow: "hidden", borderRadius: "0.5rem" }}>
-              <TrackMapView userId={targetUserId} isDark={isDark} showGallery={true} />
+              <TrackMapView isDark={isDark} secUid={targetUserId} showGallery={true} />
             </div>
           )}
 
@@ -593,41 +549,6 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
         </CardContent>
       </Card>
 
-      {/* 国家统计 */}
-      {travelStats.countryBreakdown && travelStats.countryBreakdown.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="text-slate-600" size={20} />
-              国家分布
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {travelStats.countryBreakdown.map((country) => (
-                <div
-                  className="flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-sm"
-                  key={country.country}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{getCityFlag(country.country)}</span>
-                    <div>
-                      <h4 className="font-medium">{country.country}</h4>
-                      <p className="text-muted-foreground text-sm">{country.cityCount} 个城市</p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="font-bold text-lg">{country.photoCount}</div>
-                    <div className="text-muted-foreground text-xs">张照片</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* 导出配置对话框 */}
       <ExportMapDialog
         cities={citiesWithCoords}
@@ -653,43 +574,10 @@ const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile 
           {selectedCity && (
             <div className="space-y-6">
               {/* 统计信息 */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="rounded-lg bg-muted p-4 text-center">
-                  <div className="mb-1 font-bold text-2xl">{selectedCity.photoCount}</div>
+                  <div className="mb-1 font-bold text-2xl">{selectedCity.photo_count}</div>
                   <div className="text-muted-foreground text-xs">张照片</div>
-                </div>
-                <div className="rounded-lg bg-muted p-4 text-center">
-                  <div className="mb-1 font-bold text-2xl">
-                    {Math.ceil(
-                      (new Date(selectedCity.lastVisitAt).getTime() -
-                        new Date(selectedCity.firstVisitAt).getTime()) /
-                        (1000 * 60 * 60 * 24),
-                    ) || 1}
-                  </div>
-                  <div className="text-muted-foreground text-xs">天跨度</div>
-                </div>
-              </div>
-
-              {/* 访问记录 */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="flex items-center gap-2">
-                    <Star className="text-muted-foreground" size={16} />
-                    <span className="text-sm">首次访问</span>
-                  </div>
-                  <span className="font-medium text-sm">
-                    {formatDate(selectedCity.firstVisitAt)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="text-muted-foreground" size={16} />
-                    <span className="text-sm">最近访问</span>
-                  </div>
-                  <span className="font-medium text-sm">
-                    {formatRelativeTime(selectedCity.lastVisitAt)}
-                  </span>
                 </div>
               </div>
 

@@ -67,7 +67,7 @@ const formatRelativeTime = (dateString: string): string => {
 };
 
 export default function NotificationItem({ notification, onClick }: NotificationItemProps) {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const markAsReadMutation = useMarkAsRead();
   const typeConfig = NOTIFICATION_TYPE_MAP[notification.type];
   const TypeIcon = typeConfig?.icon || Heart;
@@ -85,7 +85,7 @@ export default function NotificationItem({ notification, onClick }: Notification
   return (
     <div
       className={`block cursor-pointer border-border border-b p-4 transition-colors hover:bg-accent ${
-        !notification.isRead ? "bg-blue-50/50 dark:bg-blue-950/20" : ""
+        notification.isRead ? "" : "bg-blue-50/50 dark:bg-blue-950/20"
       }`}
       onClick={handleClick}
     >
@@ -129,7 +129,7 @@ export default function NotificationItem({ notification, onClick }: Notification
             <div className="mt-2 rounded-lg bg-muted/50 p-2">
               <p className="line-clamp-1 font-medium text-sm">{notification.objInfo.title}</p>
               {notification.objInfo.content && (
-                <p className="line-clamp-2 mt-1 text-muted-foreground text-xs">
+                <p className="mt-1 line-clamp-2 text-muted-foreground text-xs">
                   {notification.objInfo.content}
                 </p>
               )}

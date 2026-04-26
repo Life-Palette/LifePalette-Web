@@ -7,9 +7,9 @@ export type AIProvider = "deepseek" | "siliconflow" | "openai" | "zhipu";
 
 export interface AIConfig {
   baseURL: string;
+  maxTokens: number;
   model: string;
   temperature: number;
-  maxTokens: number;
 }
 
 /**
@@ -67,7 +67,7 @@ export function getAIConfig(overrides?: Partial<AIConfig>): AIConfig {
 /**
  * 构建 AI API 请求 URL
  */
-export function getAIApiURL(endpoint: string = "/chat/completions"): string {
+export function getAIApiURL(endpoint = "/chat/completions"): string {
   const config = getAIConfig();
   return `${config.baseURL}/v1${endpoint}`;
 }

@@ -1,8 +1,8 @@
 /* 确保地图容器有正确的尺寸 */
 .map-temp-box {
+  position: relative !important;
   width: 100% !important;
   height: 100% !important;
-  position: relative !important;
 }
 
 /* 隐藏Mapbox的底部控件 */
@@ -22,19 +22,19 @@
 }
 
 .marker-dot {
-  height: 24px;
-  width: 24px;
-  border-radius: 50%;
-  overflow: hidden;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
   position: absolute;
   top: 0px;
   left: 0px;
-  border: 2px solid white;
-  cursor: pointer;
   z-index: 999;
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: 2px solid white;
+  border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -45,23 +45,27 @@
 .mapboxgl-popup-content {
   padding: 0;
   overflow: visible;
-  border-radius: 20px;
   background: transparent;
+  border-radius: 20px;
   box-shadow: none;
 }
 
 .mapboxgl-popup-tip {
-  border-top-color: #0f172a !important;
+  display: none;
 }
 
 .map-popup-card {
   width: min(320px, calc(100vw - 32px));
   overflow: hidden;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 0.96) 100%);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.38);
   color: #e2e8f0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.98) 0%,
+    rgba(17, 24, 39, 0.96) 100%
+  );
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.38);
 }
 
 .map-popup-image-wrap {
@@ -75,8 +79,8 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   cursor: pointer;
+  object-fit: cover;
 }
 
 .map-popup-body {
@@ -88,19 +92,19 @@
 
 .map-popup-title {
   overflow: hidden;
-  color: #f8fafc;
+  text-overflow: ellipsis;
   font-size: 20px;
   font-weight: 700;
   line-height: 1.25;
-  text-overflow: ellipsis;
+  color: #f8fafc;
   white-space: nowrap;
 }
 
 .map-popup-meta {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
 }
 
 .map-popup-badge,
@@ -113,11 +117,11 @@
 }
 
 .map-popup-badge {
-  border-radius: 9999px;
-  background: rgba(59, 130, 246, 0.14);
   padding: 6px 10px;
-  color: #bfdbfe;
   font-weight: 600;
+  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.14);
+  border-radius: 9999px;
 }
 
 .map-popup-time {
@@ -128,28 +132,30 @@
 }
 
 .mapboxgl-popup-close-button {
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: rgba(255, 255, 255, 0.95);
-  color: #475569;
-  font-size: 20px;
-  font-weight: 500;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 16px;
+  font-weight: 400;
   line-height: 1;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
-  z-index: 10;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  transition: background 0.15s;
 }
 
 .mapboxgl-popup-close-button:hover {
-  background: #ffffff;
-  color: #0f172a;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.65);
 }
 
 @media (max-width: 640px) {
@@ -169,11 +175,48 @@
 
   .map-popup-meta {
     flex-direction: column;
-    align-items: flex-start;
     gap: 8px;
+    align-items: flex-start;
   }
 
   .map-popup-time {
     justify-content: flex-start;
   }
+}
+
+/* 弹窗详情信息 */
+.map-popup-address,
+.map-popup-device,
+.map-popup-params {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.map-popup-icon {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  opacity: 0.5;
+}
+
+.map-popup-address {
+  color: #cbd5e1;
+}
+
+.map-popup-address .map-popup-icon {
+  opacity: 0.6;
+}
+
+.map-popup-params {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: #64748b;
+  letter-spacing: 0.02em;
 }

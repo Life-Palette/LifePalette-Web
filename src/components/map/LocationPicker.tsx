@@ -1,6 +1,6 @@
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import mapboxgl from "mapbox-gl";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,16 @@ import { DEFAULT_CENTER, MAPBOX_TOKEN } from "@/config/mapbox";
 import "./MapCard.css";
 
 interface LocationPickerProps {
+  initialLocation?: { lat: number; lng: number };
   isOpen: boolean;
   onClose: () => void;
   onLocationSelect: (location: { lat: number; lng: number; address?: string }) => void;
-  initialLocation?: { lat: number; lng: number };
 }
 
 interface SearchResult {
+  center: [number, number];
   id: string;
   place_name: string;
-  center: [number, number];
 }
 
 export function LocationPicker({
@@ -39,13 +39,36 @@ export function LocationPicker({
     address?: string;
   } | null>(initialLocation || null);
 
+  // 反向地理编码（获取地址）
+  const reverseGeocode = useCallback(async (lng: number, lat: number) => {
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=zh-CN`
+      );
+      const data = await response.json();
+      if (data.features && data.features.length > 0) {
+        setSelectedLocation({
+          lat,
+          lng,
+          address: data.features[0].place_name,
+        });
+      }
+    } catch (error) {
+      console.error("反向地理编码失败:", error);
+    }
+  }, []);
+
   // 初始化地图
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     // 延迟初始化，确保 Dialog 已完全渲染
     const timer = setTimeout(() => {
-      if (!mapContainer.current || map.current) return;
+      if (!mapContainer.current || map.current) {
+        return;
+      }
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
 
@@ -76,7 +99,9 @@ export function LocationPicker({
 
         // 监听标记拖拽
         marker.current.on("dragend", () => {
-          if (!marker.current) return;
+          if (!marker.current) {
+            return;
+          }
           const lngLat = marker.current.getLngLat();
           setSelectedLocation({
             lat: lngLat.lat,
@@ -87,7 +112,9 @@ export function LocationPicker({
 
         // 监听地图点击
         map.current.on("click", (e) => {
-          if (!marker.current) return;
+          if (!marker.current) {
+            return;
+          }
           marker.current.setLngLat([e.lngLat.lng, e.lngLat.lat]);
           setSelectedLocation({
             lat: e.lngLat.lat,
@@ -108,29 +135,10 @@ export function LocationPicker({
       }
       marker.current = null;
     };
-  }, [isOpen, initialLocation]);
-
-  // 反向地理编码（获取地址）
-  const reverseGeocode = async (lng: number, lat: number) => {
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=zh-CN`,
-      );
-      const data = await response.json();
-      if (data.features && data.features.length > 0) {
-        setSelectedLocation({
-          lat,
-          lng,
-          address: data.features[0].place_name,
-        });
-      }
-    } catch (error) {
-      console.error("反向地理编码失败:", error);
-    }
-  };
+  }, [isOpen, initialLocation, reverseGeocode]);
 
   // 搜索地点
-  const handleSearch = async (query: string) => {
+  const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
       return;
@@ -138,7 +146,7 @@ export function LocationPicker({
 
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&language=zh-CN&limit=5`,
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&language=zh-CN&limit=5`
       );
       const data = await response.json();
       setSearchResults(data.features || []);
@@ -146,7 +154,7 @@ export function LocationPicker({
       console.error("搜索失败:", error);
       setSearchResults([]);
     }
-  };
+  }, []);
 
   // 选择搜索结果
   const handleSelectSearchResult = (result: SearchResult) => {
@@ -182,39 +190,39 @@ export function LocationPicker({
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, handleSearch]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[600px] p-0 flex flex-col">
-        <DialogHeader className="px-6 py-4 border-b">
+    <Dialog onOpenChange={onClose} open={isOpen}>
+      <DialogContent className="flex h-[600px] max-w-4xl flex-col p-0">
+        <DialogHeader className="border-b px-6 py-4">
           <DialogTitle className="flex items-center gap-2">
             <MapPin size={20} />
             选择地理位置
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
           {/* 搜索栏 */}
-          <div className="px-6 py-3 border-b">
+          <div className="border-b px-6 py-3">
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
                 size={18}
               />
               <Input
+                className="pr-10 pl-10"
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="搜索地点..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10"
               />
               {searchQuery && (
                 <button
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   onClick={() => {
                     setSearchQuery("");
                     setSearchResults([]);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   type="button"
                 >
                   <X size={18} />
@@ -224,16 +232,16 @@ export function LocationPicker({
 
             {/* 搜索结果 */}
             {searchResults.length > 0 && (
-              <div className="absolute z-10 mt-2 w-[calc(100%-3rem)] bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 mt-2 max-h-60 w-[calc(100%-3rem)] overflow-y-auto rounded-lg border bg-white shadow-lg">
                 {searchResults.map((result) => (
                   <button
+                    className="w-full border-b px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-gray-50"
                     key={result.id}
                     onClick={() => handleSelectSearchResult(result)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b last:border-b-0 transition-colors"
                     type="button"
                   >
                     <div className="flex items-start gap-2">
-                      <MapPin size={16} className="text-gray-400 mt-1 flex-shrink-0" />
+                      <MapPin className="mt-1 flex-shrink-0 text-gray-400" size={16} />
                       <span className="text-sm">{result.place_name}</span>
                     </div>
                   </button>
@@ -243,20 +251,20 @@ export function LocationPicker({
           </div>
 
           {/* 地图容器 */}
-          <div className="flex-1 relative">
-            <div ref={mapContainer} className="map-temp-box w-full h-full" />
+          <div className="relative flex-1">
+            <div className="map-temp-box h-full w-full" ref={mapContainer} />
           </div>
 
           {/* 选中的位置信息 */}
           {selectedLocation && (
-            <div className="px-6 py-3 border-t bg-gray-50">
-              <div className="text-sm text-gray-600">
-                <div className="flex items-center gap-2 mb-1">
+            <div className="border-t bg-gray-50 px-6 py-3">
+              <div className="text-gray-600 text-sm">
+                <div className="mb-1 flex items-center gap-2">
                   <MapPin size={14} />
                   <span className="font-medium">选中位置</span>
                 </div>
                 {selectedLocation.address && (
-                  <p className="text-gray-700 mb-1">{selectedLocation.address}</p>
+                  <p className="mb-1 text-gray-700">{selectedLocation.address}</p>
                 )}
                 <p className="text-gray-500 text-xs">
                   经度: {selectedLocation.lng.toFixed(6)}, 纬度: {selectedLocation.lat.toFixed(6)}
@@ -267,11 +275,11 @@ export function LocationPicker({
         </div>
 
         {/* 底部按钮 */}
-        <div className="px-6 py-4 border-t flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex justify-end gap-3 border-t px-6 py-4">
+          <Button onClick={onClose} variant="outline">
             取消
           </Button>
-          <Button onClick={handleConfirm} disabled={!selectedLocation}>
+          <Button disabled={!selectedLocation} onClick={handleConfirm}>
             确认选择
           </Button>
         </div>

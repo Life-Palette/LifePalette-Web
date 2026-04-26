@@ -12,10 +12,14 @@ export function LinkToolbarButton(props: React.ComponentProps<typeof ToolbarButt
 
   const handleClick = () => {
     const url = window.prompt("请输入链接地址：", "https://");
-    if (!url) return;
+    if (!url) {
+      return;
+    }
 
     const { selection } = editor;
-    if (!selection) return;
+    if (!selection) {
+      return;
+    }
 
     const isCollapsed =
       selection.anchor.offset === selection.focus.offset &&
@@ -28,7 +32,7 @@ export function LinkToolbarButton(props: React.ComponentProps<typeof ToolbarButt
           type: LinkPlugin.key,
           url,
           children: [{ text: url }],
-        } as any,
+        } as any
       );
     } else {
       Transforms.wrapNodes(editor as any, { type: LinkPlugin.key, url, children: [] } as any, {

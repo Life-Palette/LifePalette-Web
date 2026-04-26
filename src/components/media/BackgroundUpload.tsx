@@ -5,11 +5,11 @@ import { PROFILE_VALIDATION, VALIDATION_MESSAGES } from "@/constants/validation"
 
 interface BackgroundUploadProps {
   currentBackground?: string;
-  previewBackground?: string | null;
+  error?: string;
   onBackgroundChange: (file: File, preview: string) => void;
   onError: (error: string) => void;
   onRemove?: () => void;
-  error?: string;
+  previewBackground?: string | null;
 }
 
 export default function BackgroundUpload({
@@ -31,7 +31,9 @@ export default function BackgroundUpload({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     // 验证文件类型
     if (!(PROFILE_VALIDATION.AVATAR.ALLOWED_TYPES as readonly string[]).includes(file.type)) {
@@ -91,13 +93,15 @@ export default function BackgroundUpload({
   return (
     <>
       <div className="space-y-3">
-        <div className="relative h-48 w-full overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted transition-colors hover:border-primary">
+        <div className="relative h-48 w-full overflow-hidden rounded-lg border-2 border-border border-dashed bg-muted transition-colors hover:border-primary">
           {displayBackground ? (
             <>
               <img
                 alt="Background"
                 className="h-full w-full object-cover"
+                height={192}
                 src={displayBackground}
+                width={800}
               />
               <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity hover:opacity-100">
                 <Button
@@ -142,7 +146,7 @@ export default function BackgroundUpload({
           />
         </div>
         {error && (
-          <p className="text-center text-sm text-red-500" role="alert">
+          <p className="text-center text-red-500 text-sm" role="alert">
             {error}
           </p>
         )}
@@ -171,10 +175,10 @@ import {
 } from "@/components/ui/dialog";
 
 interface BackgroundCropDialogProps {
-  open: boolean;
   imageSrc: string;
   onClose: () => void;
   onCropComplete: (croppedImage: Blob) => void;
+  open: boolean;
 }
 
 // 创建裁剪后的图片
@@ -199,7 +203,7 @@ const createCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Bl
     0,
     0,
     pixelCrop.width,
-    pixelCrop.height,
+    pixelCrop.height
   );
 
   return new Promise((resolve, reject) => {
@@ -212,7 +216,7 @@ const createCroppedImage = async (imageSrc: string, pixelCrop: Area): Promise<Bl
         }
       },
       "image/jpeg",
-      0.95,
+      0.95
     );
   });
 };
@@ -249,7 +253,9 @@ function BackgroundCropDialog({
   }, []);
 
   const handleConfirm = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels) {
+      return;
+    }
 
     try {
       setIsProcessing(true);
@@ -285,7 +291,7 @@ function BackgroundCropDialog({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">缩放</label>
+          <label className="font-medium text-sm">缩放</label>
           <input
             className="w-full"
             max={3}

@@ -5,7 +5,7 @@ import ImageInfoPanel from "@/components/media/ImageInfoPanel";
 import type { PostImage } from "@/types";
 import { isVideo } from "@/utils/media";
 
-export type { ImageObj, ViewerProOptions };
+export type { ImageObj, ViewerProOptions } from "viewer-pro";
 
 export function useImageViewer(initialOptions: ViewerProOptions = {}) {
   const [images, setImages] = useState<ImageObj[]>(initialOptions.images || []);
@@ -130,7 +130,13 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
 
     viewerRef.current = new ViewerPro(viewerOptions);
     viewerRef.current.init();
-  }, [images, initialOptions, createCustomLoadingNode, createCustomRenderNode]);
+  }, [
+    images,
+    initialOptions,
+    createCustomLoadingNode,
+    createCustomRenderNode,
+    createCustomInfoNode,
+  ]);
 
   // 打开图片预览
   const openPreview = useCallback(
@@ -139,7 +145,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
         viewerRef.current.open(index);
       }
     },
-    [images.length],
+    [images.length]
   );
 
   // 关闭图片预览
@@ -165,7 +171,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
   // 根据图片 URL 查找索引
   const findImageIndex = useCallback(
     (src: string) => images.findIndex((img) => img.src === src),
-    [images],
+    [images]
   );
 
   // 打开指定 URL 的图片
@@ -176,7 +182,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
         openPreview(index);
       }
     },
-    [findImageIndex, openPreview],
+    [findImageIndex, openPreview]
   );
 
   // 从 PostImage 数组转换为 ImageObj 数组
@@ -205,7 +211,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       const imageObjs = convertPostImagesToImageObj(postImages);
       updateImages(imageObjs);
     },
-    [convertPostImagesToImageObj, updateImages],
+    [convertPostImagesToImageObj, updateImages]
   );
 
   // 初始化和清理
@@ -226,7 +232,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       renderedRoots.current.clear();
       renderedContainers.current.clear();
     },
-    [],
+    []
   );
 
   return {

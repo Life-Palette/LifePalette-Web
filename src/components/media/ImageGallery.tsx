@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import type { PostImage } from "@/types";
 
 interface ImageGalleryProps {
+  className?: string;
   images: PostImage[];
   maxDisplay?: number;
-  className?: string;
   onImageClick?: (index: number, e: React.MouseEvent) => void;
 }
 
@@ -87,7 +87,7 @@ export default function ImageGallery({
           // 注意：避免 <button> 内再嵌套 <button> 导致的 hydration 报错。
           // 结构：外层 div 容器；内部一个铺满的 button 处理图片点击；当为最后一张且有剩余时，再渲染一个覆盖层 button（兄弟节点）。
           return (
-            <div className="relative overflow-hidden rounded-lg" key={`${image.id}-${index}`}>
+            <div className="relative overflow-hidden rounded-lg" key={`${image.sec_uid}-${index}`}>
               {/* 基础图片点击区域 */}
               <button
                 className={`block h-full w-full transition-opacity ${

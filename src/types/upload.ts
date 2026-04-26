@@ -1,16 +1,16 @@
 /** 文件项 */
 export interface FileItem {
+  blurhash?: string;
+  height?: number;
   id: string;
+  md5?: string;
   name: string;
+  size: number;
+  thumbnail?: string;
   type: string;
   url: string;
-  size: number;
-  md5?: string;
-  blurhash?: string;
   videoSrc?: string;
-  thumbnail?: string;
   width?: number;
-  height?: number;
   [key: string]: any;
 }
 
@@ -19,19 +19,21 @@ export type UploadStage = "compress" | "md5" | "upload" | "blurhash" | "save";
 
 /** 上传进度 */
 export interface UploadProgress {
-  stage: UploadStage;
-  percent: number;
   currentFile?: string;
+  percent: number;
+  stage: UploadStage;
 }
 
 /** 上传配置 */
 export interface UploadOptions {
   /** 是否压缩图片 */
   compress?: boolean;
-  /** 最大文件大小（MB） */
-  maxSizeMB?: number;
   /** 是否私有文件 */
   isPrivate?: boolean;
+  /** 手动地理位置（经纬度） */
+  location?: { lat: number; lng: number };
+  /** 最大文件大小（MB） */
+  maxSizeMB?: number;
   /** 进度回调 */
   onProgress?: (progress: UploadProgress) => void;
 }
@@ -39,19 +41,19 @@ export interface UploadOptions {
 /** OSS 签名数据 */
 export interface OSSSignature {
   accessId: string;
+  baseHost: string;
+  blurhash?: string;
+  dir: string;
+  fileUrl?: string;
+  hasUpload?: boolean;
+  height?: number;
+  host: string;
+  id?: string;
   policy: string;
   signature: string;
-  dir: string;
-  host: string;
-  baseHost: string;
-  hasUpload?: boolean;
-  fileUrl?: string;
   url?: string;
-  id?: string;
   videoSrc?: string;
-  blurhash?: string;
   width?: number;
-  height?: number;
   [key: string]: any;
 }
 
@@ -70,7 +72,7 @@ export class UploadError extends Error {
   constructor(
     message: string,
     public code: UploadErrorCode,
-    public stage: UploadStage,
+    public stage: UploadStage
   ) {
     super(message);
     this.name = "UploadError";

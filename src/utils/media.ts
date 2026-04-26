@@ -6,7 +6,7 @@ import type { PostImage } from "@/types";
  * @returns true if the image is a video file, false otherwise
  */
 export function isVideo(image: PostImage): boolean {
-  return image.type?.startsWith("video/") || false;
+  return image.type?.startsWith("video/");
 }
 
 /**
@@ -54,8 +54,11 @@ export function generateOssImageParams(
   originalWidth: number,
   originalHeight: number,
   targetWidth: number,
-  quality: number = 10,
+  quality = 10
 ): string {
+  if (!(originalWidth && originalHeight)) {
+    return `?x-oss-process=image/resize,w_${targetWidth},m_lfit/quality,q_${quality}/format,webp`;
+  }
   const targetHeight = Math.round((originalHeight / originalWidth) * targetWidth);
   return `?x-oss-process=image/resize,w_${targetWidth},h_${targetHeight},m_lfit/quality,q_${quality}/format,webp`;
 }

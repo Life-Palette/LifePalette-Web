@@ -20,7 +20,7 @@ import { GripVertical, Image, MapPin, Video, X } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 import { LocationPicker } from "@/components/map/LocationPicker";
-import { apiService } from "@/services/api";
+import { filesApi } from "@/services/api";
 import type { PostImage } from "@/types";
 import { detectLocalLivePhotos } from "@/utils/upload/fileProcessor";
 import { extractGPSFromImage } from "@/utils/upload/gpsExtractor";
@@ -34,12 +34,11 @@ interface BaseMediaItem {
 }
 
 interface ExistingMediaItem extends BaseMediaItem {
-  type: "existing";
   data: PostImage;
+  type: "existing";
 }
 
 interface NewMediaItem extends BaseMediaItem {
-  type: "new";
   data: {
     file: File;
     videoFile?: File;
@@ -48,6 +47,7 @@ interface NewMediaItem extends BaseMediaItem {
     lat?: number;
     lng?: number;
   };
+  type: "new";
 }
 
 export type UnifiedMediaItem = ExistingMediaItem | NewMediaItem;
@@ -55,8 +55,8 @@ export type UnifiedMediaItem = ExistingMediaItem | NewMediaItem;
 // 统一的媒体项组件
 interface UnifiedSortableMediaItemProps {
   item: UnifiedMediaItem;
-  onRemove: () => void;
   onLocationAdd?: (itemId: string, location: { lat: number; lng: number }) => void;
+  onRemove: () => void;
 }
 
 function UnifiedSortableMediaItem({
@@ -161,7 +161,9 @@ function UnifiedSortableMediaItem({
           <img
             alt={item.type === "existing" ? item.data.name : ""}
             className="h-full w-full object-cover"
+            height={120}
             src={imageUrl}
+            width={120}
           />
         )
       )}
@@ -170,14 +172,14 @@ function UnifiedSortableMediaItem({
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+        className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100"
       >
         <GripVertical className="text-white" size={16} />
       </div>
 
       {/* 删除按钮 */}
       <button
-        className="absolute top-2 right-2 rounded-full bg-black/50 p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/70"
+        className="absolute top-2 right-2 rounded-full bg-black/50 p-1 opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
         onClick={onRemove}
         type="button"
       >
@@ -186,7 +188,7 @@ function UnifiedSortableMediaItem({
 
       {/* 视频标识 */}
       {isVideo && !isLivePhoto && (
-        <div className="absolute bottom-2 right-2 rounded bg-black/50 px-2 py-1">
+        <div className="absolute right-2 bottom-2 rounded bg-black/50 px-2 py-1">
           <Video className="text-white" size={12} />
         </div>
       )}
@@ -195,23 +197,23 @@ function UnifiedSortableMediaItem({
       <div className="absolute bottom-2 left-2">
         {hasLocation ? (
           <div
-            className="rounded bg-black/50 px-2 py-1 flex items-center gap-1 cursor-pointer hover:bg-black/70 transition-colors backdrop-blur-sm"
-            title="包含地理位置信息，点击修改"
+            className="flex cursor-pointer items-center gap-1 rounded bg-black/50 px-2 py-1 backdrop-blur-sm transition-colors hover:bg-black/70"
             onClick={(e) => {
               e.stopPropagation();
               setShowLocationPicker(true);
             }}
+            title="包含地理位置信息，点击修改"
           >
             <MapPin className="text-white" size={12} />
           </div>
         ) : (
           <button
-            className="rounded bg-black/50 px-2 py-1 flex items-center gap-1 hover:bg-black/70 transition-colors backdrop-blur-sm opacity-0 group-hover:opacity-100"
-            title="添加地理位置"
+            className="flex items-center gap-1 rounded bg-black/50 px-2 py-1 opacity-0 backdrop-blur-sm transition-colors hover:bg-black/70 group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               setShowLocationPicker(true);
             }}
+            title="添加地理位置"
             type="button"
           >
             <MapPin className="text-white/70" size={12} />
@@ -223,9 +225,9 @@ function UnifiedSortableMediaItem({
       {/* 位置选择器 */}
       {showLocationPicker && (
         <LocationPicker
+          initialLocation={initialLocation}
           isOpen={showLocationPicker}
           onClose={() => setShowLocationPicker(false)}
-          initialLocation={initialLocation}
           onLocationSelect={(location) => {
             onLocationAdd?.(item.id, location);
             setShowLocationPicker(false);
@@ -238,11 +240,11 @@ function UnifiedSortableMediaItem({
 
 // MediaUploader 组件 Props
 interface MediaUploaderProps {
-  initialImages?: PostImage[];
-  disabled?: boolean;
-  onChange?: (items: UnifiedMediaItem[]) => void;
   /** 是否允许压缩大于 20MB 的图片 */
   compressLargeFiles?: boolean;
+  disabled?: boolean;
+  initialImages?: PostImage[];
+  onChange?: (items: UnifiedMediaItem[]) => void;
 }
 
 export function MediaUploader({
@@ -261,14 +263,14 @@ export function MediaUploader({
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   // 初始化已有图片
   React.useEffect(() => {
     if (initialImages.length > 0) {
       const existingItems: ExistingMediaItem[] = initialImages.map((img) => ({
-        id: `existing-${img.id}`,
+        id: `existing-${img.sec_uid}`,
         type: "existing",
         data: img,
       }));
@@ -283,7 +285,9 @@ export function MediaUploader({
 
   // 添加新文件到统一列表
   const addFiles = (files: File[]) => {
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      return;
+    }
 
     // 文件大小限制：20MB
     const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
@@ -313,7 +317,9 @@ export function MediaUploader({
         });
       }
     }
-    if (validFiles.length === 0) return;
+    if (validFiles.length === 0) {
+      return;
+    }
 
     const startIndex = selectedFiles.length;
     const newSelectedFiles = [...selectedFiles, ...validFiles];
@@ -356,7 +362,7 @@ export function MediaUploader({
             return await extractGPSFromImage(file);
           }
           return null;
-        }),
+        })
       ).then((gpsResults) => {
         setUnifiedMediaItems((prev) => {
           return prev.map((item, idx) => {
@@ -406,7 +412,7 @@ export function MediaUploader({
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files).filter(
-      (file) => file.type.startsWith("image/") || file.type.startsWith("video/"),
+      (file) => file.type.startsWith("image/") || file.type.startsWith("video/")
     );
 
     addFiles(files);
@@ -429,7 +435,9 @@ export function MediaUploader({
   const handleRemoveMediaItem = (itemId: string) => {
     setUnifiedMediaItems((prev) => {
       const item = prev.find((i) => i.id === itemId);
-      if (!item) return prev;
+      if (!item) {
+        return prev;
+      }
 
       // 如果是新文件，从 selectedFiles 中移除
       if (item.type === "new") {
@@ -454,12 +462,14 @@ export function MediaUploader({
   const handleLocationAdd = async (itemId: string, location: { lat: number; lng: number }) => {
     // 先找到对应的 item
     const item = unifiedMediaItems.find((i) => i.id === itemId);
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     // 如果是已上传的图片，先调用API更新
     if (item.type === "existing") {
       try {
-        await apiService.updateFileLocation(item.data.id, {
+        await filesApi.update(item.data.sec_uid, {
           lat: location.lat,
           lng: location.lng,
         });
@@ -472,7 +482,9 @@ export function MediaUploader({
     // API 更新成功后，再更新本地状态
     setUnifiedMediaItems((prev) =>
       prev.map((i) => {
-        if (i.id !== itemId) return i;
+        if (i.id !== itemId) {
+          return i;
+        }
 
         if (i.type === "existing") {
           return {
@@ -493,7 +505,7 @@ export function MediaUploader({
             lng: location.lng,
           },
         } as NewMediaItem;
-      }),
+      })
     );
   };
 
@@ -565,8 +577,8 @@ export function MediaUploader({
                     <UnifiedSortableMediaItem
                       item={item}
                       key={item.id}
-                      onRemove={() => handleRemoveMediaItem(item.id)}
                       onLocationAdd={handleLocationAdd}
+                      onRemove={() => handleRemoveMediaItem(item.id)}
                     />
                   ))}
                 </div>
@@ -575,9 +587,9 @@ export function MediaUploader({
           </div>
 
           {/* 地理位置说明 */}
-          <div className="flex items-start gap-2 text-xs text-gray-500 mt-2">
+          <div className="mt-2 flex items-start gap-2 text-gray-500 text-xs">
             <p>
-              <MapPin size={12} className="inline mx-0.5 -mt-0.5" />
+              <MapPin className="mx-0.5 -mt-0.5 inline" size={12} />
               表示该图片已添加地理位置信息，点击可进行修改；如果图片没有添加地理位置信息，
               可悬浮到对应图片上，点击“添加位置”进行编辑，相关信息会用于您的轨迹统计。
             </p>

@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 
 interface NotificationFilterProps {
   activeType: string;
-  onTypeChange: (type: string) => void;
   counts: Record<string, number>;
+  onTypeChange: (type: string) => void;
 }
 
 const FILTER_OPTIONS = [

@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
@@ -18,11 +19,11 @@ const PREDEFINED_TAGS = [
 ];
 
 interface TagsInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
   disabled?: boolean;
+  onBlur?: () => void;
+  onChange: (value: string) => void;
   placeholder?: string;
+  value: string;
 }
 
 export function TagsInput({
@@ -56,7 +57,7 @@ export function TagsInput({
     (newTags: string[]) => {
       onChange(newTags.join(", "));
     },
-    [onChange],
+    [onChange]
   );
 
   // 添加标签
@@ -71,7 +72,7 @@ export function TagsInput({
       setInputValue("");
       setShowSuggestions(false);
     },
-    [tags, updateValue],
+    [tags, updateValue]
   );
 
   // 删除标签
@@ -81,7 +82,7 @@ export function TagsInput({
       setTags(newTags);
       updateValue(newTags);
     },
-    [tags, updateValue],
+    [tags, updateValue]
   );
 
   // 处理输入
@@ -106,7 +107,7 @@ export function TagsInput({
       }
     } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
       // 删除最后一个标签
-      removeTag(tags[tags.length - 1]);
+      removeTag(tags.at(-1));
     }
   };
 
@@ -115,7 +116,7 @@ export function TagsInput({
     (tag) =>
       tag.toLowerCase().includes(inputValue.toLowerCase()) &&
       !tags.includes(tag) &&
-      inputValue.trim() !== "",
+      inputValue.trim() !== ""
   );
 
   // 点击外部关闭建议
@@ -131,7 +132,7 @@ export function TagsInput({
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div className="relative w-full" ref={containerRef}>
       <div
         className={`flex min-h-10 w-full flex-wrap items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ${
           disabled ? "cursor-not-allowed opacity-50" : ""
@@ -139,16 +140,16 @@ export function TagsInput({
         onClick={() => inputRef.current?.focus()}
       >
         {tags.map((tag) => (
-          <Badge key={tag} variant="secondary" className="gap-1 rounded-md">
+          <Badge className="gap-1 rounded-md" key={tag} variant="secondary">
             {tag}
             {!disabled && (
               <button
-                type="button"
+                className="ml-1 rounded-sm hover:bg-muted"
                 onClick={(e) => {
                   e.stopPropagation();
                   removeTag(tag);
                 }}
-                className="ml-1 rounded-sm hover:bg-muted"
+                type="button"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -156,15 +157,15 @@ export function TagsInput({
           </Badge>
         ))}
         <Input
+          className="h-7 flex-1 border-0 p-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          disabled={disabled}
+          onBlur={onBlur}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder={tags.length === 0 ? placeholder : ""}
           ref={inputRef}
           type="text"
           value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onBlur={onBlur}
-          disabled={disabled}
-          placeholder={tags.length === 0 ? placeholder : ""}
-          className="h-7 flex-1 border-0 p-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </div>
 
@@ -173,10 +174,10 @@ export function TagsInput({
         <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 shadow-md">
           {suggestions.map((suggestion) => (
             <button
-              key={suggestion}
-              type="button"
-              onClick={() => addTag(suggestion)}
               className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+              key={suggestion}
+              onClick={() => addTag(suggestion)}
+              type="button"
             >
               {suggestion}
             </button>
