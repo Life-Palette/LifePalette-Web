@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Eye, Hash, Loader2, PenLine } from "lucide-react";
+import { Eye, Hash, PenLine } from "lucide-react";
 import type { Value } from "platejs";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import MarkdownRenderer from "@/components/editor/MarkdownRenderer";
@@ -9,10 +9,10 @@ import { PlateEditor } from "@/components/editor/PlateEditor";
 import RichTextContent from "@/components/editor/RichTextContent";
 import PageLayout from "@/components/layout/PageLayout";
 import { MediaUploader, type UnifiedMediaItem } from "@/components/media/MediaUploader";
+import { UploadOverlay } from "@/components/common/UploadOverlay";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TagsInput } from "@/components/ui/tags-input";
@@ -44,6 +44,16 @@ export default function PublishPage() {
   const [isCompressMode, setIsCompressMode] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showUploadComplete, setShowUploadComplete] = useState(false);
+
+  // 上传完成后短暂显示完成状态，再自动消失
+  useEffect(() => {
+    if (!uploadState.isUploading && uploadState.stage === "complete" && uploadState.progress === 100) {
+      setShowUploadComplete(true);
+      const timer = setTimeout(() => setShowUploadComplete(false), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadState.isUploading, uploadState.stage, uploadState.progress]);
 
   if (!isAuthenticated) {
     navigate({ to: "/" });
@@ -143,6 +153,13 @@ export default function PublishPage() {
 
   return (
     <PageLayout activeTab="publish">
+      {/* 全屏上传进度遮罩 */}
+      <UploadOverlay
+        isComplete={showUploadComplete}
+        isUploading={uploadState.isUploading}
+        progress={uploadState.progress}
+        stageText={uploadState.stageText}
+      />
       <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className={`grid gap-6 ${showPreview ? "grid-cols-1 lg:grid-cols-2" : "mx-auto max-w-2xl grid-cols-1"}`}>
           {/* 编辑区 */}
@@ -232,20 +249,6 @@ export default function PublishPage() {
 
             {/* 媒体上传 */}
             <MediaUploader compressLargeFiles={isCompressMode} disabled={uploadState.isUploading} onChange={setMediaItems} />
-
-            {/* 上传进度 */}
-            {uploadState.isUploading && (
-              <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="animate-spin text-blue-600" size={16} />
-                    <span className="font-medium text-blue-900 text-sm">{uploadState.stageText}</span>
-                  </div>
-                  <span className="font-medium text-blue-700 text-sm">{uploadState.progress}%</span>
-                </div>
-                <Progress className="h-2" value={uploadState.progress} />
-              </div>
-            )}
 
             {/* 标签 */}
             <div className="space-y-1.5">
