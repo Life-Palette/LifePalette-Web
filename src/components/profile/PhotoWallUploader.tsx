@@ -1,6 +1,7 @@
-import { EyeOff, Globe, Image, Upload, X } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { EyeOff, Globe, Upload } from "lucide-react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { MediaUploader, type UnifiedMediaItem } from "@/components/media/MediaUploader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { useFileUpload } from "@/hooks/useFileUpload";
-import { extractGPSFromImage } from "@/utils/upload/gpsExtractor";
 
 interface PhotoWallUploaderProps {
   onOpenChange: (open: boolean) => void;
@@ -21,120 +21,22 @@ interface PhotoWallUploaderProps {
   open: boolean;
 }
 
-interface PreviewFile {
-  file: File;
-  hasGPS: boolean;
-  preview: string;
-}
-
 export default function PhotoWallUploader({
   open,
   onOpenChange,
   onUploadSuccess,
 }: PhotoWallUploaderProps) {
-  const [selectedFiles, setSelectedFiles] = useState<PreviewFile[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const [mediaItems, setMediaItems] = useState<UnifiedMediaItem[]>([]);
   const [isPrivate, setIsPrivate] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { uploadState, uploadMultipleFiles, resetState } = useFileUpload();
 
-  // 文件大小限制：20MB
-  const MAX_FILE_SIZE = 20 * 1024 * 1024;
-
-  // 添加文件
-  const addFiles = useCallback(async (files: File[]) => {
-    // 只接受图片
-    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
-
-    if (imageFiles.length === 0) {
-      toast.error("请选择图片文件");
-      return;
-    }
-
-    // 检查文件大小
-    const validFiles: File[] = [];
-    const oversizedFiles: string[] = [];
-
-    imageFiles.forEach((file) => {
-      if (file.size > MAX_FILE_SIZE) {
-        oversizedFiles.push(file.name);
-      } else {
-        validFiles.push(file);
-      }
-    });
-
-    if (oversizedFiles.length > 0) {
-      toast.error("文件大小超出限制", {
-        description: `以下文件超过 20MB 已被忽略：${oversizedFiles.join(", ")}`,
-      });
-    }
-
-    if (validFiles.length === 0) {
-      return;
-    }
-
-    // 检测 GPS 信息并创建预览
-    const previewFiles: PreviewFile[] = await Promise.all(
-      validFiles.map(async (file) => {
-        const preview = URL.createObjectURL(file);
-        const gps = await extractGPSFromImage(file);
-        return {
-          file,
-          preview,
-          hasGPS: gps !== null,
-        };
-      })
-    );
-
-    setSelectedFiles((prev) => [...prev, ...previewFiles]);
-  }, []);
-
-  // 处理文件选择
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    addFiles(files);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  // 处理拖拽
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith("image/"));
-    addFiles(files);
-  };
-
-  // 移除文件
-  const handleRemoveFile = useCallback((index: number) => {
-    setSelectedFiles((prev) => {
-      const file = prev[index];
-      URL.revokeObjectURL(file.preview);
-      return prev.filter((_, i) => i !== index);
-    });
-  }, []);
-
   // 重置状态
   const handleReset = useCallback(() => {
-    selectedFiles.forEach((file) => URL.revokeObjectURL(file.preview));
-    setSelectedFiles([]);
+    setMediaItems([]);
     setIsPrivate(true);
     resetState();
-  }, [selectedFiles, resetState]);
+  }, [resetState]);
 
   // 关闭对话框
   const handleClose = useCallback(() => {
@@ -146,17 +48,34 @@ export default function PhotoWallUploader({
 
   // 上传文件
   const handleUpload = useCallback(async () => {
-    if (selectedFiles.length === 0) {
-      toast.error("请先选择图片");
+    const newItems = mediaItems.filter((item) => item.type === "new");
+    if (newItems.length === 0) {
+      toast.error("请先选择图片或视频");
       return;
     }
 
     try {
-      const files = selectedFiles.map((f) => f.file);
-      await uploadMultipleFiles(files, { isPrivate });
+      const filesToUpload: File[] = [];
+      const locationMap = new Map<File, { lat: number; lng: number }>();
+
+      newItems.forEach((item) => {
+        filesToUpload.push(item.data.file);
+        if (!item.data.hasGPS && item.data.lat != null && item.data.lng != null) {
+          locationMap.set(item.data.file, { lat: item.data.lat, lng: item.data.lng });
+        }
+        if (item.data.videoFile) {
+          filesToUpload.push(item.data.videoFile);
+        }
+      });
+
+      await uploadMultipleFiles(
+        filesToUpload,
+        { compress: true, isPrivate, maxSizeMB: 20 },
+        locationMap.size > 0 ? locationMap : undefined
+      );
 
       toast.success("上传成功", {
-        description: `已成功上传 ${files.length} 张图片`,
+        description: `已成功上传 ${newItems.length} 个媒体文件`,
       });
 
       handleReset();
@@ -167,7 +86,7 @@ export default function PhotoWallUploader({
         description: error instanceof Error ? error.message : "请稍后重试",
       });
     }
-  }, [selectedFiles, uploadMultipleFiles, handleReset, onOpenChange, onUploadSuccess, isPrivate]);
+  }, [mediaItems, uploadMultipleFiles, handleReset, onOpenChange, onUploadSuccess, isPrivate]);
 
   return (
     <Dialog onOpenChange={handleClose} open={open}>
@@ -180,94 +99,11 @@ export default function PhotoWallUploader({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* 上传区域 */}
-          <div
-            className={`rounded-xl border-2 border-dashed p-6 text-center transition-all ${
-              isDragging
-                ? "border-primary bg-primary/5"
-                : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/50"
-            } ${uploadState.isUploading ? "pointer-events-none opacity-50" : ""}`}
-            onDragLeave={handleDragLeave}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-            <label className="group block cursor-pointer" htmlFor="photo-wall-upload">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted transition-colors group-hover:bg-muted/80">
-                <Image className="text-muted-foreground" size={20} />
-              </div>
-              <p className="text-foreground text-sm">点击或拖拽上传图片</p>
-              <p className="mt-1 text-muted-foreground text-xs">
-                支持 JPG、PNG、WEBP 等格式，单文件需要小于 20MB
-              </p>
-            </label>
-            <input
-              accept="image/*"
-              className="hidden"
-              disabled={uploadState.isUploading}
-              id="photo-wall-upload"
-              multiple
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              type="file"
-            />
-          </div>
-
-          {/* 预览网格 */}
-          {selectedFiles.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-muted-foreground text-sm">
-                  已选择 <span className="font-medium text-foreground">{selectedFiles.length}</span>{" "}
-                  张图片
-                </p>
-                {!uploadState.isUploading && (
-                  <Button
-                    className="text-muted-foreground"
-                    onClick={handleReset}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    清空
-                  </Button>
-                )}
-              </div>
-
-              <div className="max-h-[280px] overflow-y-auto rounded-lg border p-2">
-                <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
-                  {selectedFiles.map((file, index) => (
-                    <div
-                      className="group relative aspect-square overflow-hidden rounded-md bg-muted"
-                      key={`${file.file.name}-${index}`}
-                    >
-                      <img
-                        alt={file.file.name}
-                        className="h-full w-full object-cover"
-                        height={120}
-                        src={file.preview}
-                        width={120}
-                      />
-                      {/* GPS 标识 */}
-                      {file.hasGPS && (
-                        <div className="absolute bottom-1 left-1 rounded bg-black/50 px-1.5 py-0.5 text-[10px] text-white">
-                          GPS
-                        </div>
-                      )}
-                      {/* 删除按钮 */}
-                      {!uploadState.isUploading && (
-                        <button
-                          className="absolute top-1 right-1 rounded-full bg-black/50 p-1 opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
-                          onClick={() => handleRemoveFile(index)}
-                          type="button"
-                        >
-                          <X className="text-white" size={12} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          <MediaUploader
+            compressLargeFiles={true}
+            disabled={uploadState.isUploading}
+            onChange={setMediaItems}
+          />
 
           {/* 可见性设置 */}
           <div className="flex items-center justify-between rounded-lg border p-3">
@@ -313,11 +149,11 @@ export default function PhotoWallUploader({
               取消
             </Button>
             <Button
-              disabled={selectedFiles.length === 0 || uploadState.isUploading}
+              disabled={mediaItems.length === 0 || uploadState.isUploading}
               onClick={handleUpload}
             >
               <Upload className="mr-2" size={16} />
-              {uploadState.isUploading ? "上传中..." : `上传 ${selectedFiles.length} 张图片`}
+              {uploadState.isUploading ? "上传中..." : `上传 ${mediaItems.length} 个媒体`}
             </Button>
           </div>
         </div>

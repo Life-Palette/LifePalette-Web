@@ -10,7 +10,7 @@ export interface UserFileImage extends PostImage {
 }
 
 const transformFile = (f: any): UserFileImage => ({
-  id: f.sec_uid || f.id,
+  sec_uid: f.sec_uid || String(f.id),
   url: f.url,
   width: f.width || 0,
   height: f.height || 0,

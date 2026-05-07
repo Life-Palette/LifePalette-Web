@@ -35,7 +35,7 @@ interface TravelStats {
 
 interface TrackPageProps {
   isOwnProfile?: boolean;
-  userId?: number;
+  userId?: string;
 }
 
 const TrackPage: React.FC<TrackPageProps> = ({ userId: propUserId, isOwnProfile = false }) => {

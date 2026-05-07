@@ -40,7 +40,7 @@ const COLUMNS = 6;
 interface PhotoWallProps {
   isOwnProfile?: boolean; // 是否是自己的个人中心
   onImageClick?: (image: UserFileImage, index: number) => void;
-  userId?: number;
+  userId?: string;
 }
 
 export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }: PhotoWallProps) {
@@ -59,7 +59,6 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
   } = useInfiniteUserFiles(userId, {
     size: 30,
     sort: "created_at,desc",
-    filterEmptyLocation: false,
   });
 
   const updateVisibilityMutation = useUpdateFileVisibility();
@@ -87,7 +86,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
 
   // 监听滚动到底部，触发加载更多
   const virtualItems = virtualizer.getVirtualItems();
-  const lastItem = virtualItems.at(-1);
+  const [lastItem] = virtualItems.slice(-1);
 
   useEffect(() => {
     if (!lastItem) {
@@ -129,7 +128,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       e.stopPropagation();
       try {
         await updateVisibilityMutation.mutateAsync({
-          fileId: photo.id,
+          fileId: photo.sec_uid,
           isPrivate: !photo.isPrivate,
         });
         toast.success(photo.isPrivate ? "已设为公开" : "已设为仅自己可见");
@@ -146,7 +145,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       return;
     }
     try {
-      await deleteFileMutation.mutateAsync({ fileId: deleteTarget.id });
+      await deleteFileMutation.mutateAsync(deleteTarget.sec_uid);
       toast.success("删除成功");
       setDeleteTarget(null);
     } catch (_error) {
@@ -170,13 +169,31 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
 
   if (photos.length === 0) {
     return (
-      <LottieAnimation
-        emptyDescription="上传的照片将会在这里展示"
-        emptyTitle="还没有照片"
-        height={200}
-        type="empty"
-        width={200}
-      />
+      <>
+        <LottieAnimation
+          actionButton={
+            isOwnProfile ? (
+              <Button className="gap-1.5" onClick={() => setUploadDialogOpen(true)}>
+                <Plus size={16} />
+                上传图片
+              </Button>
+            ) : undefined
+          }
+          emptyDescription={isOwnProfile ? "上传的照片将会在这里展示" : "TA还没有上传照片"}
+          emptyTitle={isOwnProfile ? "还没有照片" : "TA还没有照片"}
+          height={200}
+          type="empty"
+          width={200}
+        />
+
+        {isOwnProfile && (
+          <PhotoWallUploader
+            onOpenChange={setUploadDialogOpen}
+            onUploadSuccess={handleUploadSuccess}
+            open={uploadDialogOpen}
+          />
+        )}
+      </>
     );
   }
 
@@ -245,11 +262,11 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
                 }}
               >
                 {rowPhotos.map((photo) => {
-                  const globalIndex = photos.findIndex((p) => p.id === photo.id);
+                  const globalIndex = photos.findIndex((p) => p.sec_uid === photo.sec_uid);
                   return (
                     <div
                       className="group relative aspect-square cursor-pointer overflow-hidden rounded-md bg-muted transition-all hover:z-10 hover:shadow-lg"
-                      key={photo.id}
+                      key={photo.sec_uid}
                       onClick={() => handleImageClick(photo, globalIndex)}
                     >
                       <OptimizedImage
