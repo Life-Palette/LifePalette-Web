@@ -189,13 +189,13 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         ? `${fileData.url}?x-oss-process=image/format,jpeg/quality,q_95`
         : fileData.url;
 
-      const cached = fileDetailCache.current.get(String(fileData.id));
+      const cached = fileDetailCache.current.get(fileData.sec_uid);
       const detail = cached || fileData;
 
       const viewer = new ViewerPro({
         images: [
           {
-            id: fileData.id,
+            id: fileData.sec_uid,
             src: mainSrc,
             thumbnail: `${fileData.url}?x-oss-process=image/resize,w_300,h_200,m_lfit/quality,q_80/format,webp`,
             title: detail.name || fileData.name,
@@ -240,7 +240,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       }
 
       const popupImgUrl = getThumbnailUrl(fileData.url, fileData.width, fileData.height, 400);
-      const photoIndex = filteredFiles.findIndex((f) => f.id === fileData.id);
+      const photoIndex = filteredFiles.findIndex((f) => f.sec_uid === fileData.sec_uid);
       const displayIndex = index || photoIndex + 1;
       const time = fileData.takenAt
         ? new Date(fileData.takenAt).toLocaleString("zh-CN")
@@ -282,7 +282,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   // 显示照片弹窗（统一入口：先展示 mini 数据，再异步拉详情刷新弹窗）
   const showPhotoPopup = useCallback(
     (coords: [number, number], fileData: FileData, index?: number) => {
-      const secUid = String(fileData.id);
+      const secUid = fileData.sec_uid;
 
       // 如果缓存中有详情，直接用
       const cached = fileDetailCache.current.get(secUid);
@@ -304,6 +304,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
           }
           const enriched: FileData = {
             ...fileData,
+            sec_uid: detail.sec_uid,
             name: detail.name || fileData.name,
             address: detail.address,
             deviceMake: detail.device_make,
@@ -349,11 +350,11 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       features: filteredFiles.map((file, index) => ({
         type: "Feature",
         properties: {
-          name: file.name || `照片 #${file.id || index + 1}`,
+          name: file.name || `照片 #${index + 1}`,
           time: file.takenAt ? new Date(file.takenAt).toLocaleString("zh-CN") : "未知时间",
           url: file.url,
           index: index + 1,
-          id: file.id,
+          sec_uid: file.sec_uid,
         },
         geometry: {
           type: "Point",

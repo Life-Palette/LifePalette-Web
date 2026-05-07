@@ -17,7 +17,7 @@ interface PhotoGalleryProps {
 
 // 工具函数：FileData转PostImage
 const fileToPostImage = (file: FileData): PostImage => ({
-  sec_uid: file.id,
+  sec_uid: file.sec_uid,
   url: file.url,
   width: file.width,
   height: file.height,
@@ -212,7 +212,7 @@ export default function PhotoGallery({
             >
               {virtualizer.getVirtualItems().map((virtualItem) => {
                 const file = displayPhotos[virtualItem.index];
-                const globalIndex = photos.findIndex((p) => p.id === file.id);
+                const globalIndex = photos.findIndex((p) => p.sec_uid === file.sec_uid);
 
                 return (
                   <div
@@ -256,7 +256,7 @@ export default function PhotoGallery({
                             isDark ? "text-gray-200" : "text-gray-800"
                           }`}
                         >
-                          {file.name || `照片 #${file.id}`}
+                          {file.name || `照片 #${globalIndex + 1}`}
                         </div>
                         <div
                           className={`mt-0.5 text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
@@ -357,7 +357,7 @@ export default function PhotoGallery({
           {/* 虚拟项 - 每个项独立绝对定位 */}
           {virtualizer.getVirtualItems().map((virtualItem) => {
             const file = displayPhotos[virtualItem.index];
-            const globalIndex = photos.findIndex((p) => p.id === file.id);
+            const globalIndex = photos.findIndex((p) => p.sec_uid === file.sec_uid);
 
             return (
               <div
@@ -411,7 +411,7 @@ export default function PhotoGallery({
                         isDark ? "text-gray-200" : "text-gray-800"
                       }`}
                     >
-                      {file.name || `照片 #${file.id}`}
+                      {file.name || `照片 #${globalIndex + 1}`}
                     </div>
                   </div>
                 </div>

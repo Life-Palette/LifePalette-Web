@@ -11,12 +11,12 @@ export interface FileData {
   focalLength?: string;
   fromIphone: boolean;
   height: number;
-  id: number;
   iso?: number;
   lat: number;
   lensModel?: string;
   lng: number;
   name: string;
+  sec_uid: string;
   takenAt?: string;
   type: string;
   updatedAt: string;
