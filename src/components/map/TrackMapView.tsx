@@ -58,10 +58,12 @@ const createPopupHTML = (
 `;
 
 interface TrackMapViewProps {
+  autoFitBounds?: boolean;
   customCenter?: [number, number]; // [lng, lat]
   customZoom?: number;
   isDark?: boolean;
-  onReady?: () => void; // 地图加载完成回调
+  minHeight?: React.CSSProperties["minHeight"];
+  onReady?: (map?: mapboxgl.Map) => void; // 地图加载完成回调
   onViewChange?: (center: [number, number], zoom: number) => void;
   secUid?: string;
   showGallery?: boolean;
@@ -74,8 +76,10 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   isDark = false,
   customCenter,
   customZoom,
+  minHeight,
   onViewChange,
   onReady,
+  autoFitBounds = true,
   showGallery = true,
 }) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -599,7 +603,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     registerEventHandler("mouseleave", setCursor(""), LAYER_NAMES.POINT);
 
     // 自动调整视图并在完成后更新 markers
-    if (pointsGeoJSON.features.length > 0) {
+    if (autoFitBounds && pointsGeoJSON.features.length > 0) {
       const bounds = new mapboxgl.LngLatBounds();
       pointsGeoJSON.features.forEach((point) => {
         bounds.extend((point.geometry as GeoJSON.Point).coordinates as [number, number]);
@@ -619,6 +623,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     showPhotoPopup,
     registerEventHandler,
     cleanupEventHandlers,
+    autoFitBounds,
   ]);
 
   // 存储事件监听器的引用，便于清理
@@ -751,7 +756,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
       addPhotoLayers();
       // 地图和数据都准备好后，延迟调用 onReady（等待瓦片加载）
       const timer = setTimeout(() => {
-        onReady?.();
+        onReady?.(map.current || undefined);
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -793,7 +798,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   if (!(userId || secUid) || filteredFiles.length === 0) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-gray-50 to-gray-100">
         <div className="mb-4 flex justify-center text-gray-300">
           <MapIcon className="h-16 w-16" strokeWidth={1} />
         </div>
@@ -810,7 +815,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   return (
     <div
       className="relative w-full"
-      style={{ height: "100%", minHeight: isMobile ? "100dvh" : "600px" }}
+      style={{ height: "100%", minHeight: minHeight ?? (isMobile ? "100dvh" : "600px") }}
     >
       {/* 地图容器 - 移动端全屏，桌面端留出侧边栏空间 */}
       <div

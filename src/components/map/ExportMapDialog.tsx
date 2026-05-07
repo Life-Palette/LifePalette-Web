@@ -1,5 +1,6 @@
-import { snapdom } from "@zumer/snapdom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Download, Eye } from "lucide-react";
+import type { Map as MapboxMap } from "mapbox-gl";
 import type React from "react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useIsAuthenticated } from "@/hooks/useAuth";
+import { queryClient } from "@/lib/query-client";
 
 interface CityData {
   city: string;
@@ -24,7 +26,7 @@ interface ExportMapDialogProps {
   open: boolean;
 }
 
-const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _cities }) => {
+const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange }) => {
   const { user } = useIsAuthenticated();
   const [isExporting, setIsExporting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -51,6 +53,128 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
     centerLat: 39.9042,
     zoom: 2,
   });
+  const editorMapFrameRef = useRef<HTMLDivElement>(null);
+
+  const createExportContainer = () => {
+    const exportContainer = document.createElement("div");
+    exportContainer.style.position = "fixed";
+    exportContainer.style.top = "0";
+    exportContainer.style.left = "0";
+    exportContainer.style.width = `${exportConfig.width}px`;
+    exportContainer.style.height = `${exportConfig.height}px`;
+    exportContainer.style.background = "white";
+    exportContainer.style.overflow = "hidden";
+    exportContainer.style.pointerEvents = "none";
+    exportContainer.style.zIndex = "-1";
+    document.body.appendChild(exportContainer);
+    return exportContainer;
+  };
+
+  const waitForMapRender = (mapInstance: MapboxMap) =>
+    new Promise<void>((resolve) => {
+      let resolved = false;
+      const finish = () => {
+        if (resolved) {
+          return;
+        }
+        resolved = true;
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      };
+
+      const timeout = window.setTimeout(finish, 3000);
+      mapInstance.resize();
+      mapInstance.triggerRepaint();
+      mapInstance.once("idle", () => {
+        window.clearTimeout(timeout);
+        finish();
+      });
+    });
+
+  const buildMapImage = (mapInstance: MapboxMap, scale: number) => {
+    const mapCanvas = mapInstance.getCanvas();
+    const outputCanvas = document.createElement("canvas");
+    outputCanvas.width = exportConfig.width * scale;
+    outputCanvas.height = exportConfig.height * scale;
+
+    const context = outputCanvas.getContext("2d");
+    if (!context) {
+      throw new Error("无法创建导出画布");
+    }
+
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+    context.drawImage(mapCanvas, 0, 0, outputCanvas.width, outputCanvas.height);
+
+    if (watermarkConfig.enabled && watermarkConfig.text) {
+      const paddingX = 12 * scale;
+      const paddingY = 8 * scale;
+      const margin = 20 * scale;
+      context.font = `${14 * scale}px sans-serif`;
+      context.textBaseline = "middle";
+
+      const metrics = context.measureText(watermarkConfig.text);
+      const boxWidth = metrics.width + paddingX * 2;
+      const boxHeight = 30 * scale;
+      const boxX = outputCanvas.width - boxWidth - margin;
+      const boxY = outputCanvas.height - boxHeight - margin;
+
+      context.fillStyle = "rgba(255, 255, 255, 0.8)";
+      context.fillRect(boxX, boxY, boxWidth, boxHeight);
+      context.fillStyle = "rgba(0, 0, 0, 0.3)";
+      context.fillText(watermarkConfig.text, boxX + paddingX, boxY + boxHeight / 2 + paddingY / 8);
+    }
+
+    return outputCanvas.toDataURL("image/png", 1);
+  };
+
+  const renderExportMap = async (scale: number) => {
+    const exportContainer = createExportContainer();
+    const editorMapWidth = editorMapFrameRef.current?.clientWidth || exportConfig.width;
+    const exportZoom = mapViewRef.current.zoom + Math.log2(exportConfig.width / editorMapWidth);
+    const { createRoot } = await import("react-dom/client");
+    const root = createRoot(exportContainer);
+
+    try {
+      const mapInstance = await new Promise<MapboxMap>((resolve, reject) => {
+        let resolved = false;
+        const timeout = window.setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            reject(new Error("地图加载超时"));
+          }
+        }, 15_000);
+
+        root.render(
+          <QueryClientProvider client={queryClient}>
+            <div style={{ width: "100%", height: "100%", position: "relative" }}>
+              <TrackMapView
+                autoFitBounds={false}
+                customCenter={[mapViewRef.current.centerLng, mapViewRef.current.centerLat]}
+                customZoom={exportZoom}
+                minHeight="100%"
+                onReady={(readyMap) => {
+                  if (resolved || !readyMap) {
+                    return;
+                  }
+                  resolved = true;
+                  window.clearTimeout(timeout);
+                  resolve(readyMap);
+                }}
+                secUid={user?.sec_uid}
+                showGallery={false}
+              />
+            </div>
+          </QueryClientProvider>
+        );
+      });
+
+      await waitForMapRender(mapInstance);
+      return buildMapImage(mapInstance, scale);
+    } finally {
+      root.unmount();
+      document.body.removeChild(exportContainer);
+    }
+  };
 
   // 处理尺寸输入变化
   const handleSizeChange = (type: "width" | "height", value: string) => {
@@ -61,27 +185,6 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
         [type]: value === "" ? 100 : Math.max(100, numValue),
       });
     }
-  };
-
-  // 添加水印到容器
-  const addWatermark = (container: HTMLDivElement) => {
-    if (!(watermarkConfig.enabled && watermarkConfig.text)) {
-      return;
-    }
-
-    const watermark = document.createElement("div");
-    watermark.style.position = "absolute";
-    watermark.style.bottom = "20px";
-    watermark.style.right = "20px";
-    watermark.style.color = "rgba(0, 0, 0, 0.3)";
-    watermark.style.fontSize = "14px";
-    watermark.style.fontWeight = "500";
-    watermark.style.padding = "8px 12px";
-    watermark.style.background = "rgba(255, 255, 255, 0.8)";
-    watermark.style.borderRadius = "4px";
-    watermark.style.zIndex = "1000";
-    watermark.textContent = watermarkConfig.text;
-    container.appendChild(watermark);
   };
 
   // 处理地图视图变化 - 使用 useCallback 稳定函数引用
@@ -105,72 +208,15 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
     setIsGeneratingPreview(true);
     toast.loading("正在生成预览...", { id: "generate-preview" });
 
-    // 创建临时容器
-    const exportContainer = document.createElement("div");
-    exportContainer.style.position = "fixed";
-    exportContainer.style.top = "-9999px";
-    exportContainer.style.left = "-9999px";
-    exportContainer.style.width = `${exportConfig.width}px`;
-    exportContainer.style.height = `${exportConfig.height}px`;
-    exportContainer.style.background = "white";
-    document.body.appendChild(exportContainer);
-
     try {
-      const { createRoot } = await import("react-dom/client");
-      const root = createRoot(exportContainer);
-
-      await new Promise<void>((resolve) => {
-        let resolved = false;
-        const timeout = setTimeout(() => {
-          if (!resolved) {
-            resolved = true;
-            addWatermark(exportContainer);
-            resolve();
-          }
-        }, 15_000); // 15秒超时保护
-
-        root.render(
-          <div style={{ width: "100%", height: "100%", position: "relative" }}>
-            <TrackMapView
-              customCenter={[mapViewRef.current.centerLng, mapViewRef.current.centerLat]}
-              customZoom={mapViewRef.current.zoom}
-              onReady={() => {
-                if (!resolved) {
-                  resolved = true;
-                  clearTimeout(timeout);
-                  addWatermark(exportContainer);
-                  resolve();
-                }
-              }}
-              showGallery={false}
-              secUid={user?.sec_uid}
-            />
-          </div>
-        );
-      });
-
-      // 使用 snapdom 生成图片
-      const result = await snapdom(exportContainer, {
-        scale: 1,
-        quality: 0.9,
-        embedFonts: true,
-      });
-
-      // 转换为 base64 图片
-      const imgElement = await result.toPng();
-      setPreviewImage(imgElement.src);
+      const imageUrl = await renderExportMap(1);
+      setPreviewImage(imageUrl);
       setShowPreview(true);
 
       toast.success("预览生成成功！", { id: "generate-preview" });
-
-      root.unmount();
-      document.body.removeChild(exportContainer);
     } catch (error) {
       console.error("预览生成失败:", error);
       toast.error("预览生成失败，请重试", { id: "generate-preview" });
-      if (document.body.contains(exportContainer)) {
-        document.body.removeChild(exportContainer);
-      }
     } finally {
       setIsGeneratingPreview(false);
     }
@@ -181,74 +227,18 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
     setIsExporting(true);
     toast.loading("正在生成海报...", { id: "export-poster" });
 
-    // 创建一个临时的大尺寸地图容器用于导出
-    const exportContainer = document.createElement("div");
-    exportContainer.style.position = "fixed";
-    exportContainer.style.top = "-9999px";
-    exportContainer.style.left = "-9999px";
-    exportContainer.style.width = `${exportConfig.width}px`;
-    exportContainer.style.height = `${exportConfig.height}px`;
-    exportContainer.style.background = "white";
-    document.body.appendChild(exportContainer);
-
     try {
-      // 动态导入并渲染地图组件
-      const { createRoot } = await import("react-dom/client");
-      const root = createRoot(exportContainer);
-
-      // 渲染大尺寸地图
-      await new Promise<void>((resolve) => {
-        let resolved = false;
-        const timeout = setTimeout(() => {
-          if (!resolved) {
-            resolved = true;
-            addWatermark(exportContainer);
-            resolve();
-          }
-        }, 15_000); // 15秒超时保护
-
-        root.render(
-          <div style={{ width: "100%", height: "100%", position: "relative" }}>
-            <TrackMapView
-              customCenter={[mapViewRef.current.centerLng, mapViewRef.current.centerLat]}
-              customZoom={mapViewRef.current.zoom}
-              onReady={() => {
-                if (!resolved) {
-                  resolved = true;
-                  clearTimeout(timeout);
-                  addWatermark(exportContainer);
-                  resolve();
-                }
-              }}
-              showGallery={false}
-              secUid={user?.sec_uid}
-            />
-          </div>
-        );
-      });
-
-      // 使用 snapdom 生成海报
-      await snapdom.download(exportContainer, {
-        format: "png",
-        filename: `足迹地图-${new Date().toLocaleDateString("zh-CN")}`,
-        scale: 2,
-        quality: 1,
-        embedFonts: true,
-      });
+      const imageUrl = await renderExportMap(2);
+      const link = document.createElement("a");
+      link.download = `足迹地图-${new Date().toLocaleDateString("zh-CN")}.png`;
+      link.href = imageUrl;
+      link.click();
 
       toast.success("海报生成成功！", { id: "export-poster" });
       onOpenChange(false);
-
-      // 清理临时容器
-      root.unmount();
-      document.body.removeChild(exportContainer);
     } catch (error) {
       console.error("海报生成失败:", error);
       toast.error("海报生成失败，请重试", { id: "export-poster" });
-      // 确保清理临时容器
-      if (document.body.contains(exportContainer)) {
-        document.body.removeChild(exportContainer);
-      }
     } finally {
       setIsExporting(false);
     }
@@ -256,14 +246,14 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent className="max-h-[90vh] max-w-5xl overflow-hidden">
+      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden sm:max-w-[calc(100%-2rem)] lg:max-w-5xl">
         <DialogHeader>
           <DialogTitle>导出地图海报</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-[320px_1fr] gap-6">
+        <div className="grid max-h-[calc(90vh-4.5rem)] grid-cols-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-6">
           {/* 左侧：配置选项 */}
-          <div className="flex flex-col space-y-3">
+          <div className="flex min-w-0 flex-col space-y-3">
             <div>
               <label className="mb-2 block font-medium text-sm">尺寸设置</label>
               <div className="grid grid-cols-2 gap-3">
@@ -363,7 +353,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
           </div>
 
           {/* 右侧：预览 */}
-          <div className="flex flex-col space-y-2">
+          <div className="flex min-w-0 flex-col space-y-2">
             <div className="flex items-center justify-between">
               <label className="block font-medium text-sm">
                 {showPreview ? "最终效果预览" : "地图视图调整"}
@@ -375,7 +365,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
 
             {showPreview && previewImage ? (
               /* 预览模式：显示实际生成的图片 */
-              <div className="flex flex-1 items-center justify-center overflow-auto rounded-lg border bg-muted/30 p-4">
+              <div className="flex min-h-80 flex-1 items-center justify-center overflow-auto rounded-lg border bg-muted/30 p-4">
                 <img
                   alt="地图预览"
                   className="max-h-full max-w-full rounded-lg shadow-2xl"
@@ -391,14 +381,17 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({ open, onOpenChange, _
               /* 编辑模式：可交互的地图 */
               <div
                 className="overflow-hidden rounded-lg border"
+                ref={editorMapFrameRef}
                 style={{
-                  height: "500px",
+                  aspectRatio: `${exportConfig.width} / ${exportConfig.height}`,
+                  maxHeight: "min(500px, 55vh)",
                 }}
               >
                 <TrackMapView
+                  minHeight="100%"
                   onViewChange={handleMapViewChange}
-                  showGallery={false}
                   secUid={user?.sec_uid}
+                  showGallery={false}
                 />
               </div>
             )}
