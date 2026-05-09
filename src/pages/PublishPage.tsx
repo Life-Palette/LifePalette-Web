@@ -4,12 +4,12 @@ import type { Value } from "platejs";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { UploadOverlay } from "@/components/common/UploadOverlay";
 import MarkdownRenderer from "@/components/editor/MarkdownRenderer";
 import { PlateEditor } from "@/components/editor/PlateEditor";
 import RichTextContent from "@/components/editor/RichTextContent";
 import PageLayout from "@/components/layout/PageLayout";
 import { MediaUploader, type UnifiedMediaItem } from "@/components/media/MediaUploader";
-import { UploadOverlay } from "@/components/common/UploadOverlay";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,17 +48,22 @@ export default function PublishPage() {
 
   // 上传完成后短暂显示完成状态，再自动消失
   useEffect(() => {
-    if (!uploadState.isUploading && uploadState.stage === "complete" && uploadState.progress === 100) {
+    if (
+      !uploadState.isUploading &&
+      uploadState.stage === "complete" &&
+      uploadState.progress === 100
+    ) {
       setShowUploadComplete(true);
       const timer = setTimeout(() => setShowUploadComplete(false), 1200);
       return () => clearTimeout(timer);
     }
   }, [uploadState.isUploading, uploadState.stage, uploadState.progress]);
 
-  if (!isAuthenticated) {
-    navigate({ to: "/" });
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate({ to: "/" });
+    }
+  }, [isAuthenticated, navigate]);
 
   const isContentEmpty = useCallback(() => {
     if (contentMode === "markdown") return !markdownContent.trim();
@@ -106,7 +111,7 @@ export default function PublishPage() {
         uploadedFiles = await uploadMultipleFiles(
           filesToUpload,
           { compress: isCompressMode, maxSizeMB: isCompressMode ? 20 : undefined },
-          locationMap.size > 0 ? locationMap : undefined,
+          locationMap.size > 0 ? locationMap : undefined
         );
       }
 
@@ -134,7 +139,10 @@ export default function PublishPage() {
 
       const postData: any = { title, content: finalContent, content_type: contentType };
       if (tags.trim()) {
-        postData.tags = tags.split(",").map((t) => t.trim()).filter(Boolean);
+        postData.tags = tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
       }
       if (fileSecUids.length > 0) postData.file_sec_uids = fileSecUids;
 
@@ -151,6 +159,10 @@ export default function PublishPage() {
 
   const getPreviewHtml = () => serializeToHtml(richContent);
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <PageLayout activeTab="publish">
       {/* 全屏上传进度遮罩 */}
@@ -161,7 +173,9 @@ export default function PublishPage() {
         stageText={uploadState.stageText}
       />
       <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className={`grid gap-6 ${showPreview ? "grid-cols-1 lg:grid-cols-2" : "mx-auto max-w-2xl grid-cols-1"}`}>
+        <div
+          className={`grid gap-6 ${showPreview ? "grid-cols-1 lg:grid-cols-2" : "mx-auto max-w-2xl grid-cols-1"}`}
+        >
           {/* 编辑区 */}
           <div className="rounded-xl border bg-card shadow-sm">
             {/* 卡片内顶部工具栏 */}
@@ -173,7 +187,7 @@ export default function PublishPage() {
                     富文本
                   </TabsTrigger>
                   <TabsTrigger className="gap-1.5 text-xs" value="markdown">
-                    <span className="font-mono font-bold text-xs">M↓</span>
+                    <span className="font-bold font-mono text-xs">M↓</span>
                     Markdown
                   </TabsTrigger>
                 </TabsList>
@@ -203,58 +217,77 @@ export default function PublishPage() {
 
             {/* 表单内容 */}
             <div className="space-y-5 p-5">
-            {/* 标题 */}
-            <div className="space-y-1.5">
-              <Label htmlFor="publish-title">
-                标题 <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="publish-title"
-                onChange={(e) => { setTitle(e.target.value); if (titleError) setTitleError(null); }}
-                placeholder="给你的动态起个吸引人的标题..."
-                value={title}
-              />
-              {titleError && <p className="text-destructive text-sm">{titleError}</p>}
-            </div>
-
-            {/* 内容编辑器 */}
-            <div className="space-y-1.5">
-              <Label>内容 <span className="text-destructive">*</span></Label>
-              {contentMode === "richtext" ? (
-                <PlateEditor
-                  onChange={setRichContent}
-                  placeholder="分享你的想法、感受或故事..."
-                  value={richContent}
-                />
-              ) : (
-                <textarea
-                  className="min-h-[300px] w-full resize-y rounded-xl border-0 bg-secondary/30 px-4 py-3 font-mono text-sm transition-all placeholder:text-muted-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring/20"
-                  onChange={(e) => setMarkdownContent(e.target.value)}
-                  placeholder="使用 Markdown 语法编写内容..."
-                  value={markdownContent}
-                />
-              )}
-            </div>
-
-            {/* 图片压缩 */}
-            <div className="flex items-center justify-between">
-              <Label className="font-medium text-sm">图片压缩</Label>
-              <div className="flex items-center gap-2">
-                <Switch checked={isCompressMode} id="publish-compress" onCheckedChange={setIsCompressMode} />
-                <Label className="cursor-pointer font-normal text-muted-foreground text-sm" htmlFor="publish-compress">
-                  启用图片压缩（压缩至 20MB 以下）
+              {/* 标题 */}
+              <div className="space-y-1.5">
+                <Label htmlFor="publish-title">
+                  标题 <span className="text-destructive">*</span>
                 </Label>
+                <Input
+                  id="publish-title"
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    if (titleError) setTitleError(null);
+                  }}
+                  placeholder="给你的动态起个吸引人的标题..."
+                  value={title}
+                />
+                {titleError && <p className="text-destructive text-sm">{titleError}</p>}
               </div>
-            </div>
 
-            {/* 媒体上传 */}
-            <MediaUploader compressLargeFiles={isCompressMode} disabled={uploadState.isUploading} onChange={setMediaItems} />
+              {/* 内容编辑器 */}
+              <div className="space-y-1.5">
+                <Label>
+                  内容 <span className="text-destructive">*</span>
+                </Label>
+                {contentMode === "richtext" ? (
+                  <PlateEditor
+                    onChange={setRichContent}
+                    placeholder="分享你的想法、感受或故事..."
+                    value={richContent}
+                  />
+                ) : (
+                  <textarea
+                    className="min-h-75 w-full resize-y rounded-xl border-0 bg-secondary/30 px-4 py-3 font-mono text-sm transition-all placeholder:text-muted-foreground focus:bg-background focus:outline-none focus:ring-2 focus:ring-ring/20"
+                    onChange={(e) => setMarkdownContent(e.target.value)}
+                    placeholder="使用 Markdown 语法编写内容..."
+                    value={markdownContent}
+                  />
+                )}
+              </div>
 
-            {/* 标签 */}
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5"><Hash size={14} />标签</Label>
-              <TagsInput disabled={uploadState.isUploading} onChange={setTags} value={tags} />
-            </div>
+              {/* 图片压缩 */}
+              <div className="flex items-center justify-between">
+                <Label className="font-medium text-sm">图片压缩</Label>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={isCompressMode}
+                    id="publish-compress"
+                    onCheckedChange={setIsCompressMode}
+                  />
+                  <Label
+                    className="cursor-pointer font-normal text-muted-foreground text-sm"
+                    htmlFor="publish-compress"
+                  >
+                    启用图片压缩（压缩至 20MB 以下）
+                  </Label>
+                </div>
+              </div>
+
+              {/* 媒体上传 */}
+              <MediaUploader
+                compressLargeFiles={isCompressMode}
+                disabled={uploadState.isUploading}
+                onChange={setMediaItems}
+              />
+
+              {/* 标签 */}
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5">
+                  <Hash size={14} />
+                  标签
+                </Label>
+                <TagsInput disabled={uploadState.isUploading} onChange={setTags} value={tags} />
+              </div>
             </div>
           </div>
 
@@ -268,30 +301,43 @@ export default function PublishPage() {
               <div className="max-h-[calc(100vh-220px)] overflow-y-auto p-5">
                 {title && <h2 className="mb-4 font-bold text-xl">{title}</h2>}
 
-                <div className="min-h-[200px]">
+                <div className="min-h-50">
                   {contentMode === "markdown" ? (
                     markdownContent ? (
                       <MarkdownRenderer content={markdownContent} />
                     ) : (
-                      <p className="text-muted-foreground italic">Markdown 内容预览将在这里显示...</p>
+                      <p className="text-muted-foreground italic">
+                        Markdown 内容预览将在这里显示...
+                      </p>
                     )
-                  ) : (() => {
-                    const html = getPreviewHtml();
-                    return html && html !== "<p></p>" ? (
-                      <RichTextContent content={html} />
-                    ) : (
-                      <p className="text-muted-foreground italic">富文本内容预览将在这里显示...</p>
-                    );
-                  })()}
+                  ) : (
+                    (() => {
+                      const html = getPreviewHtml();
+                      return html && html !== "<p></p>" ? (
+                        <RichTextContent content={html} />
+                      ) : (
+                        <p className="text-muted-foreground italic">
+                          富文本内容预览将在这里显示...
+                        </p>
+                      );
+                    })()
+                  )}
                 </div>
 
                 {tags.trim() && (
                   <div className="mt-4 flex flex-wrap gap-2 border-t pt-4">
-                    {tags.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
-                      <span className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground text-xs" key={tag}>
-                        #{tag}
-                      </span>
-                    ))}
+                    {tags
+                      .split(",")
+                      .map((t) => t.trim())
+                      .filter(Boolean)
+                      .map((tag) => (
+                        <span
+                          className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground text-xs"
+                          key={tag}
+                        >
+                          #{tag}
+                        </span>
+                      ))}
                   </div>
                 )}
               </div>

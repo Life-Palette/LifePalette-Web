@@ -6,7 +6,16 @@ import Header from "@/components/layout/Header";
 import { useIsAuthenticated } from "@/hooks/useAuth";
 
 interface PageLayoutProps {
-  activeTab: "home" | "trending" | "search" | "likes" | "saved" | "profile" | "chat" | "colors" | "publish";
+  activeTab:
+    | "home"
+    | "trending"
+    | "search"
+    | "likes"
+    | "saved"
+    | "profile"
+    | "chat"
+    | "colors"
+    | "publish";
   authFallback?: ReactNode;
   children: ReactNode;
   requireAuth?: boolean;
@@ -30,10 +39,7 @@ export default function PageLayout({
   if (requireAuth && !isAuthenticated && authFallback) {
     return (
       <>
-        <Header
-          activeTab={activeTab}
-          onLogin={() => setIsLoginModalOpen(true)}
-        />
+        <Header activeTab={activeTab} onLogin={() => setIsLoginModalOpen(true)} />
         <main className="min-h-screen pt-20 pb-24">
           <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">{authFallback}</div>
         </main>
@@ -49,10 +55,7 @@ export default function PageLayout({
 
   return (
     <>
-      <Header
-        activeTab={activeTab}
-        onLogin={() => setIsLoginModalOpen(true)}
-      />
+      <Header activeTab={activeTab} onLogin={() => setIsLoginModalOpen(true)} />
 
       <main className="min-h-screen pt-20 pb-24">{children}</main>
 

@@ -12,10 +12,7 @@ interface MarkdownRendererProps {
 export default function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
   return (
     <div className={`prose prose-sm dark:prose-invert max-w-none ${className}`}>
-      <ReactMarkdown
-        rehypePlugins={[rehypeRaw, rehypeHighlight]}
-        remarkPlugins={[remarkGfm]}
-      >
+      <ReactMarkdown rehypePlugins={[rehypeRaw, rehypeHighlight]} remarkPlugins={[remarkGfm]}>
         {content}
       </ReactMarkdown>
     </div>

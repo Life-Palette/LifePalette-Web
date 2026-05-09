@@ -11,15 +11,15 @@ export const Route = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-      <ErrorBoundary>
-        <AliveScope>
-          <div className="min-h-screen bg-background text-foreground">
-            <Outlet />
-          </div>
-          {/* 邮箱绑定检查弹窗 */}
-          <EmailBindChecker />
-        </AliveScope>
-      </ErrorBoundary>
+        <ErrorBoundary>
+          <AliveScope>
+            <div className="min-h-screen bg-background text-foreground">
+              <Outlet />
+            </div>
+            {/* 邮箱绑定检查弹窗 */}
+            <EmailBindChecker />
+          </AliveScope>
+        </ErrorBoundary>
       </TooltipProvider>
       {/* React Query DevTools - 仅在开发环境显示 */}
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}

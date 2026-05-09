@@ -104,25 +104,30 @@ export function useQRCodeLogin(options: UseQRCodeLoginOptions): UseQRCodeLoginRe
     await doGenerate();
   }, [clearPolling, doGenerate]);
 
+  const clearPollingRef = useRef(clearPolling);
+  const doGenerateRef = useRef(doGenerate);
+  clearPollingRef.current = clearPolling;
+  doGenerateRef.current = doGenerate;
+
   // Only trigger on `enabled` change, not on callback identity changes
   const initializedRef = useRef(false);
   useEffect(() => {
     if (enabled) {
       if (!initializedRef.current) {
         initializedRef.current = true;
-        doGenerate();
+        doGenerateRef.current();
       }
     } else {
       initializedRef.current = false;
-      clearPolling();
+      clearPollingRef.current();
       setQrImageUrl("");
       setQrStatus("pending");
       qrKeyRef.current = "";
     }
     return () => {
-      clearPolling();
+      clearPollingRef.current();
     };
-  }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   return {
     qrImageUrl,

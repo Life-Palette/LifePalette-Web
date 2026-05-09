@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 import { Loader2 } from "lucide-react";
+import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +47,12 @@ export default function ConfirmDialog({
   };
 
   return (
-    <AlertDialog onOpenChange={(v) => { if (!loading) onOpenChange(v); }} open={open}>
+    <AlertDialog
+      onOpenChange={(v) => {
+        if (!loading) onOpenChange(v);
+      }}
+      open={open}
+    >
       <AlertDialogPrimitive.Portal>
         <AlertDialogPrimitive.Overlay
           className={cn(
@@ -67,7 +72,9 @@ export default function ConfirmDialog({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>{cancelText}</AlertDialogCancel>
             <AlertDialogAction
-              className={variant === "destructive" ? "bg-destructive text-white hover:bg-destructive/90" : ""}
+              className={
+                variant === "destructive" ? "bg-destructive text-white hover:bg-destructive/90" : ""
+              }
               disabled={loading}
               onClick={handleConfirm}
             >

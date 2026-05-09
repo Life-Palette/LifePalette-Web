@@ -133,9 +133,7 @@ function CommentItem({
   const [replyingTo, setReplyingTo] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(
-    (comment.replies && comment.replies.length > 0) || false
-  );
+  const [isExpanded, setIsExpanded] = useState(comment.replies && comment.replies.length > 0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const replies = comment.replies || [];

@@ -10,10 +10,8 @@ export const Route = createFileRoute("/profile")({
       <ProfilePageWrapper />
     </Suspense>
   ),
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      userId: search.userId as string | undefined,
-      tab: search.tab as "posts" | "photos" | "track" | "liked" | "saved" | undefined,
-    };
-  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    userId: search.userId as string | undefined,
+    tab: search.tab as "posts" | "photos" | "track" | "liked" | "saved" | undefined,
+  }),
 });

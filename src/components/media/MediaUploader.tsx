@@ -364,8 +364,8 @@ export function MediaUploader({
           return null;
         })
       ).then((gpsResults) => {
-        setUnifiedMediaItems((prev) => {
-          return prev.map((item, idx) => {
+        setUnifiedMediaItems((prev) =>
+          prev.map((item, idx) => {
             if (item.type === "new" && idx >= prev.length - newItems.length) {
               const gpsData = gpsResults[idx - (prev.length - newItems.length)];
               return {
@@ -379,8 +379,8 @@ export function MediaUploader({
               };
             }
             return item;
-          });
-        });
+          })
+        );
       });
     }, 0);
   };

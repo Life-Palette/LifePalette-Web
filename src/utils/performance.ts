@@ -226,14 +226,13 @@ export const throttle = <T extends (...args: any[]) => any>(
 /**
  * 预加载图片
  */
-export const preloadImage = (src: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
+export const preloadImage = (src: string): Promise<void> =>
+  new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve();
     img.onerror = reject;
     img.src = src;
   });
-};
 
 /**
  * 批量预加载图片
@@ -287,8 +286,8 @@ export const getDeviceType = (): "mobile" | "tablet" | "desktop" => {
 /**
  * 检测是否支持 WebP 格式
  */
-export const supportsWebP = (): Promise<boolean> => {
-  return new Promise((resolve) => {
+export const supportsWebP = (): Promise<boolean> =>
+  new Promise((resolve) => {
     const webP = new Image();
     webP.onload = webP.onerror = () => {
       resolve(webP.height === 2);
@@ -296,4 +295,3 @@ export const supportsWebP = (): Promise<boolean> => {
     webP.src =
       "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA";
   });
-};

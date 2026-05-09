@@ -41,7 +41,7 @@ export default function ChatRoomList({ rooms, currentRoomId, onSelectRoom }: Cha
     if (room.type === "PRIVATE") {
       return room.otherUser?.avatarInfo?.blurhash;
     }
-    return undefined;
+    return;
   };
 
   return (

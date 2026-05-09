@@ -125,7 +125,7 @@ const MapCard: React.FC<MapCardProps> = ({ data = {}, isDark = false }) => {
       map.current.on("load", () => {
         addMarker(basePos.center, data, true);
       });
-    } catch (_error) {}
+    } catch {}
 
     return () => {
       if (map.current) {

@@ -23,8 +23,7 @@ function transformChangelog(raw: any): Changelog {
 export const useChangelogs = (params?: { pageSize?: number }) =>
   useInfiniteList<any, Changelog>(
     queryKeys.changelog.infinite(params),
-    (page) =>
-      changelogApi.list({ page, page_size: params?.pageSize || 10, status: "published" }),
+    (page) => changelogApi.list({ page, page_size: params?.pageSize || 10, status: "published" }),
     { transform: transformChangelog }
   );
 

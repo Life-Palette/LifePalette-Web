@@ -19,8 +19,8 @@ export const useNotifications = (params?: { type?: string; isRead?: boolean; pag
   );
 
 // 获取未读通知数量的hook
-export const useUnreadCount = () => {
-  return useQuery({
+export const useUnreadCount = () =>
+  useQuery({
     queryKey: queryKeys.notifications.unreadCount(),
     queryFn: async () => {
       try {
@@ -40,16 +40,13 @@ export const useUnreadCount = () => {
     refetchOnWindowFocus: true,
     refetchInterval: 5 * 60 * 1000,
   });
-};
 
 // 标记通知为已读的hook
 export const useMarkAsRead = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (notificationId: string) => {
-      return await notificationsApi.markAsRead(notificationId);
-    },
+    mutationFn: async (notificationId: string) => await notificationsApi.markAsRead(notificationId),
     onMutate: async (notificationId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.all });
 
@@ -96,9 +93,7 @@ export const useMarkAllAsRead = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
-      return await notificationsApi.markAllAsRead();
-    },
+    mutationFn: async () => await notificationsApi.markAllAsRead(),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.all });
 

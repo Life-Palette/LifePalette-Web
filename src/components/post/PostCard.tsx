@@ -60,7 +60,7 @@ export default function PostCard({ post, onLike, onSave, onClick }: PostCardProp
       className={`group relative w-full cursor-pointer overflow-hidden rounded-3xl border border-transparent transition-all duration-300 ${
         post.images.length === 0
           ? `bg-gradient-to-br ${gradientClass} shadow-sm hover:shadow-md`
-          : "bg-card gap-0 pt-0 ring-0 shadow-sm hover:translate-y-[-2px] hover:shadow-xl dark:border-white/10 dark:shadow-none dark:hover:shadow-white/5"
+          : "gap-0 bg-card pt-0 shadow-sm ring-0 hover:translate-y-[-2px] hover:shadow-xl dark:border-white/10 dark:shadow-none dark:hover:shadow-white/5"
       }`}
       onClick={(e) => onClick(post.id, e)}
     >
@@ -122,9 +122,11 @@ export default function PostCard({ post, onLike, onSave, onClick }: PostCardProp
           {post.title}
         </h3>
         {post.contentType === "markdown" ? (
-          <div className={`mb-4 text-muted-foreground leading-relaxed ${
-            post.images.length === 0 ? "text-base" : "text-sm"
-          } ${post.images.length === 0 ? "line-clamp-5" : "line-clamp-3"}`}>
+          <div
+            className={`mb-4 text-muted-foreground leading-relaxed ${
+              post.images.length === 0 ? "text-base" : "text-sm"
+            } ${post.images.length === 0 ? "line-clamp-5" : "line-clamp-3"}`}
+          >
             <MarkdownRenderer content={post.content} />
           </div>
         ) : (

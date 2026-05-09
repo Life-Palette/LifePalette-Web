@@ -3,13 +3,18 @@ import { CheckCircle2, Upload } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface UploadOverlayProps {
+  isComplete?: boolean;
   isUploading: boolean;
   progress: number;
   stageText: string;
-  isComplete?: boolean;
 }
 
-export function UploadOverlay({ isUploading, progress, stageText, isComplete }: UploadOverlayProps) {
+export function UploadOverlay({
+  isUploading,
+  progress,
+  stageText,
+  isComplete,
+}: UploadOverlayProps) {
   const show = isUploading || isComplete;
 
   return (
@@ -89,7 +94,7 @@ export function UploadOverlay({ isUploading, progress, stageText, isComplete }: 
                 <div className="flex flex-col items-center gap-1">
                   <motion.span
                     animate={{ opacity: 1 }}
-                    className="font-bold text-4xl tabular-nums text-zinc-800 dark:text-zinc-100"
+                    className="font-bold text-4xl text-zinc-800 tabular-nums dark:text-zinc-100"
                     initial={{ opacity: 0 }}
                     key={progress}
                   >

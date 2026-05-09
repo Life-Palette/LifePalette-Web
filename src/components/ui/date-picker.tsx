@@ -7,11 +7,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 
 interface DatePickerProps {
-  value?: Date;
+  className?: string;
+  disabled?: boolean;
   onChange?: (date: Date | undefined) => void;
   placeholder?: string;
-  disabled?: boolean;
-  className?: string;
+  value?: Date;
 }
 
 export function DatePicker({
@@ -28,7 +28,7 @@ export function DatePicker({
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
-            className,
+            className
           )}
           disabled={disabled}
           variant="outline"

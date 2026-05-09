@@ -132,7 +132,7 @@ const MapCardLarge: React.FC<MapCardLargeProps> = ({
       map.current.on("load", () => {
         addMarker(basePos.center, data, true);
       });
-    } catch (_error) {}
+    } catch {}
 
     return () => {
       if (map.current) {

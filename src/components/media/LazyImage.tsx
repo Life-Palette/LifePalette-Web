@@ -85,9 +85,10 @@ const LazyImage = memo(
     }, [width, height, image.width, image.height]);
 
     // 验证 blurhash
-    const validBlurhash = useMemo(() => {
-      return image.blurhash && isValidBlurhash(image.blurhash) ? image.blurhash : null;
-    }, [image.blurhash]);
+    const validBlurhash = useMemo(
+      () => (image.blurhash && isValidBlurhash(image.blurhash) ? image.blurhash : null),
+      [image.blurhash]
+    );
 
     return (
       <div
@@ -139,17 +140,14 @@ const LazyImage = memo(
     );
   },
   // 自定义比较函数，避免不必要的重渲染
-  (prevProps, nextProps) => {
-    return (
-      prevProps.image.sec_uid === nextProps.image.sec_uid &&
-      prevProps.image.url === nextProps.image.url &&
-      prevProps.width === nextProps.width &&
-      prevProps.height === nextProps.height &&
-      prevProps.className === nextProps.className &&
-      prevProps.quality === nextProps.quality &&
-      prevProps.priority === nextProps.priority
-    );
-  }
+  (prevProps, nextProps) =>
+    prevProps.image.sec_uid === nextProps.image.sec_uid &&
+    prevProps.image.url === nextProps.image.url &&
+    prevProps.width === nextProps.width &&
+    prevProps.height === nextProps.height &&
+    prevProps.className === nextProps.className &&
+    prevProps.quality === nextProps.quality &&
+    prevProps.priority === nextProps.priority
 );
 
 LazyImage.displayName = "LazyImage";

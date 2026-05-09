@@ -230,8 +230,8 @@ export default function CreatePostModal({
   }
 
   // 检查内容是否为空
-  const isContentEmpty = (value: Value) => {
-    return value.every((node) => {
+  const isContentEmpty = (value: Value) =>
+    value.every((node) => {
       if ("children" in node) {
         return node.children.every((child) => {
           if (typeof child === "object" && child !== null && "text" in child) {
@@ -242,7 +242,6 @@ export default function CreatePostModal({
       }
       return false;
     });
-  };
 
   return (
     <Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
@@ -273,7 +272,7 @@ export default function CreatePostModal({
                     if (!result.success) {
                       return result.error.issues[0].message;
                     }
-                    return undefined;
+                    return;
                   },
                 }}
               >

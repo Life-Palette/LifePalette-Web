@@ -189,7 +189,11 @@ export function createUploader(config: UploaderConfig) {
         spark.append(e.target!.result as ArrayBuffer);
         cur++;
         onProgress?.(Math.round((cur / chunks) * 100));
-        cur < chunks ? loadNext() : resolve(spark.end());
+        if (cur < chunks) {
+          loadNext();
+        } else {
+          resolve(spark.end());
+        }
       };
       function loadNext() {
         const start = cur * size;
@@ -352,7 +356,13 @@ export function createUploader(config: UploaderConfig) {
    * 完整流程: 压缩(可选) → MD5 → init(秒传) → OSS上传 → complete
    */
   async function upload(file: File, options: UploadOptions = {}): Promise<OSSFile> {
-    const { compress: shouldCompress = false, maxSizeMB, isPrivate, location, onProgress } = options;
+    const {
+      compress: shouldCompress = false,
+      maxSizeMB,
+      isPrivate,
+      location,
+      onProgress,
+    } = options;
     let processed = file;
 
     // 1. 压缩
@@ -369,8 +379,11 @@ export function createUploader(config: UploaderConfig) {
     // 3. 上传
     onProgress?.({ stage: "upload", percent: 0 });
     const fn = processed.size >= multipartThreshold ? multiUpload : simpleUpload;
-    const result = await fn(processed, md5, isPrivate, (pct) =>
-      onProgress?.({ stage: "upload", percent: pct }),
+    const result = await fn(
+      processed,
+      md5,
+      isPrivate,
+      (pct) => onProgress?.({ stage: "upload", percent: pct }),
       location
     );
 

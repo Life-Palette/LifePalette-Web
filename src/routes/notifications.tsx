@@ -49,7 +49,7 @@ function NotificationsPage() {
     try {
       await markAllAsReadMutation.mutateAsync();
       toast.success("已将所有通知标记为已读");
-    } catch (_error) {
+    } catch {
       toast.error("操作失败，请重试");
     }
   };

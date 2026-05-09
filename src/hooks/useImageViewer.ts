@@ -124,7 +124,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       images,
       loadingNode: initialOptions.loadingNode || createCustomLoadingNode(),
       renderNode: initialOptions.renderNode || createCustomRenderNode,
-      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => { }),
+      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => {}),
       infoRender: initialOptions.infoRender || createCustomInfoNode,
     };
 

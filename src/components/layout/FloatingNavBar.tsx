@@ -113,9 +113,9 @@ export default function FloatingNavBar({ activeTab, onLogin }: FloatingNavBarPro
 
           {/* 中间发布按钮 */}
           <button
-            className={`relative -my-1 mx-1 flex h-10 w-10 items-center justify-center rounded-full ring-4 ring-background transition-all duration-300 hover:scale-110 active:scale-95 ${
+            className={`relative mx-1 -my-1 flex h-10 w-10 items-center justify-center rounded-full ring-4 ring-background transition-all duration-300 hover:scale-110 active:scale-95 ${
               activeTab === "publish"
-                ? "bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/25"
+                ? "scale-110 bg-primary text-primary-foreground shadow-lg shadow-primary/25"
                 : "border border-border/60 bg-background text-muted-foreground hover:bg-accent hover:text-foreground"
             }`}
             onClick={() => {

@@ -13,10 +13,10 @@ export const useCurrentUser = () => {
           return null;
         }
         // 静默解析用户 IP 地理位置（页面刷新/首次加载时）
-        http.get("/common/ip").catch(() => { });
+        http.get("/common/ip").catch(() => {});
         // 统一 id 为 sec_uid
         return { ...res.result, id: res.result.sec_uid };
-      } catch (_error) {
+      } catch {
         return null;
       }
     },
@@ -53,7 +53,7 @@ export const useLogin = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
         queryClient.invalidateQueries({ queryKey: queryKeys.topics.all });
         // 静默解析用户 IP 地理位置
-        http.get("/common/ip").catch(() => { });
+        http.get("/common/ip").catch(() => {});
       }
     },
   });
@@ -77,15 +77,15 @@ export const useLoginByCode = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
         queryClient.invalidateQueries({ queryKey: queryKeys.topics.all });
         // 静默解析用户 IP 地理位置
-        http.get("/common/ip").catch(() => { });
+        http.get("/common/ip").catch(() => {});
       }
     },
   });
 };
 
 // 重置密码hook
-export const useResetPassword = () => {
-  return useMutation({
+export const useResetPassword = () =>
+  useMutation({
     mutationFn: async (data: {
       account: string;
       code: string;
@@ -93,7 +93,6 @@ export const useResetPassword = () => {
       password_confirm: string;
     }) => await authApi.resetPassword(data),
   });
-};
 
 // 注册hook
 export const useRegister = () => {
@@ -154,12 +153,11 @@ export const useUpdateUserEmail = () => {
 };
 
 // 发送邮箱验证码 hook
-export const useSendEmailCode = () => {
-  return useMutation({
+export const useSendEmailCode = () =>
+  useMutation({
     mutationFn: async ({ email, purpose = "register" }: { email: string; purpose?: string }) =>
       await authApi.sendEmailCode(email, purpose),
   });
-};
 
 // ============ 用户查询 ============
 

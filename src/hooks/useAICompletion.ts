@@ -138,16 +138,17 @@ ${text}
   }, []);
 
   // 清理
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   return {
     suggestion,

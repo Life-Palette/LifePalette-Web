@@ -115,7 +115,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         } else {
           map.current!.off(event as any, handler);
         }
-      } catch (_e) {
+      } catch {
         /* ignore */
       }
     });

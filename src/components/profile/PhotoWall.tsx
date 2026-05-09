@@ -132,7 +132,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
           isPrivate: !photo.isPrivate,
         });
         toast.success(photo.isPrivate ? "已设为公开" : "已设为仅自己可见");
-      } catch (_error) {
+      } catch {
         toast.error("操作失败，请重试");
       }
     },
@@ -148,7 +148,7 @@ export default function PhotoWall({ userId, isOwnProfile = false, onImageClick }
       await deleteFileMutation.mutateAsync(deleteTarget.sec_uid);
       toast.success("删除成功");
       setDeleteTarget(null);
-    } catch (_error) {
+    } catch {
       toast.error("删除失败，请重试");
     }
   }, [deleteTarget, deleteFileMutation]);

@@ -54,7 +54,7 @@ export default function ScrollRestoreContainer({
           timestamp: Date.now(),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
-      } catch (_error) {}
+      } catch {}
     }, 150);
   };
 

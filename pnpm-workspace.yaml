@@ -1,3 +1,4 @@
 allowBuilds:
   esbuild: false
   lefthook: false
+  msw: true

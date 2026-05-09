@@ -165,7 +165,7 @@ export default function ImageInfoPanel({ viewerItem }: { viewerItem: ViewerItem;
           .setLngLat([detail.lng!, detail.lat!])
           .addTo(mapRef.current!);
       });
-    } catch (_) {}
+    } catch {}
   }, [detail]);
 
   useEffect(() => {
