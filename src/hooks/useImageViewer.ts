@@ -1,3 +1,4 @@
+import { decode } from "blurhash";
 import { createElement, useCallback, useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { type ImageObj, type ViewerItem, ViewerPro, type ViewerProOptions } from "viewer-pro";
@@ -72,41 +73,147 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     return container;
   }, []);
 
-  // 自定义渲染节点
+  // 创建 blurhash canvas 占位图
+  const createBlurhashCanvas = useCallback((hash?: string): HTMLCanvasElement | null => {
+    if (!hash) return null;
+    const width = 32;
+    const height = 32;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.position = "absolute";
+    canvas.style.inset = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.objectFit = "cover";
+    canvas.style.transition = "opacity 240ms ease";
+    try {
+      const pixels = decode(hash, width, height);
+      const imageData = ctx.createImageData(width, height);
+      imageData.data.set(pixels);
+      ctx.putImageData(imageData, 0, 0);
+    } catch {
+      return null;
+    }
+    return canvas;
+  }, []);
+
+  // 根据图片宽高比计算 frame 尺寸
+  const applyImageFrameSize = useCallback((frame: HTMLElement, imgObj: ImageObj) => {
+    const w = Number(imgObj.width);
+    const h = Number(imgObj.height);
+    const ratio = w > 0 && h > 0 ? w / h : 1;
+    requestAnimationFrame(() => {
+      const parent = frame.parentElement;
+      if (!parent) return;
+      const maxWidth = parent.clientWidth * 0.9;
+      const maxHeight = parent.clientHeight * 0.9;
+      let frameWidth = maxWidth;
+      let frameHeight = frameWidth / ratio;
+      if (frameHeight > maxHeight) {
+        frameHeight = maxHeight;
+        frameWidth = frameHeight * ratio;
+      }
+      frame.style.width = `${frameWidth}px`;
+      frame.style.height = `${frameHeight}px`;
+    });
+  }, []);
+
+  // 自定义渲染节点（含 blurhash 占位）
   const createCustomRenderNode = useCallback((imgObj: ImageObj, idx: number) => {
     const box = document.createElement("div");
     box.id = `custom-render-${idx}`;
     box.style.display = "flex";
-    box.style.flexDirection = "column";
     box.style.alignItems = "center";
     box.style.justifyContent = "center";
     box.style.height = "100%";
     box.style.transformOrigin = "center center";
     box.style.willChange = "transform";
+
+    const contentLayer = document.createElement("div");
+    contentLayer.id = `custom-render-content-${idx}`;
+    contentLayer.style.position = "relative";
+    contentLayer.style.zIndex = "1";
+    contentLayer.style.display = "flex";
+    contentLayer.style.alignItems = "center";
+    contentLayer.style.justifyContent = "center";
+    contentLayer.style.width = "100%";
+    contentLayer.style.height = "100%";
+    contentLayer.style.transformOrigin = "center center";
+    contentLayer.style.willChange = "transform";
+
+    const createImageFrame = () => {
+      const imageFrame = document.createElement("div");
+      imageFrame.style.position = "relative";
+      imageFrame.style.flex = "0 0 auto";
+      const placeholder = createBlurhashCanvas((imgObj as any).blurhash);
+      if (placeholder) {
+        imageFrame.appendChild(placeholder);
+      }
+      applyImageFrameSize(imageFrame, imgObj);
+      return { imageFrame, placeholder };
+    };
+
     if (imgObj.type === "live-photo") {
-      box.innerHTML = `
-        <div id="live-photo-container-${idx}"></div>
-         `;
+      const { imageFrame, placeholder } = createImageFrame();
+      const livePhotoContainer = document.createElement("div");
+      livePhotoContainer.id = `live-photo-container-${idx}`;
+      livePhotoContainer.style.position = "absolute";
+      livePhotoContainer.style.inset = "0";
+      livePhotoContainer.style.width = "100%";
+      livePhotoContainer.style.height = "100%";
+      livePhotoContainer.style.zIndex = "1";
+      livePhotoContainer.dataset.placeholderId = `blurhash-placeholder-${idx}`;
+      if (placeholder) {
+        placeholder.id = `blurhash-placeholder-${idx}`;
+      }
+      imageFrame.appendChild(livePhotoContainer);
+      contentLayer.appendChild(imageFrame);
     } else if (imgObj.type === "video") {
-      box.innerHTML = `
-          <video 
-            src="${imgObj.videoSrc || imgObj.src}"
-            poster="${imgObj.thumbnail || ""}" 
-            controls 
-            style="max-width:90%;max-height:90%;"
-            preload="metadata"
-          >
-            您的浏览器不支持视频播放
-          </video>
-        `;
+      const { imageFrame, placeholder } = createImageFrame();
+      const video = document.createElement("video");
+      video.src = imgObj.videoSrc || imgObj.src;
+      video.poster = imgObj.thumbnail || "";
+      video.controls = true;
+      video.preload = "metadata";
+      video.style.width = "100%";
+      video.style.height = "100%";
+      video.style.objectFit = "contain";
+      video.style.position = "absolute";
+      video.style.inset = "0";
+      video.style.zIndex = "1";
+      video.textContent = "您的浏览器不支持视频播放";
+      video.addEventListener("loadeddata", () => {
+        if (placeholder) placeholder.remove();
+      }, { once: true });
+      imageFrame.appendChild(video);
+      contentLayer.appendChild(imageFrame);
     } else {
-      box.innerHTML = `
-          <img src="${imgObj.src}" style="max-width:90%;max-height:90%;">
-        `;
+      const { imageFrame, placeholder } = createImageFrame();
+      const image = document.createElement("img");
+      image.src = imgObj.src;
+      image.alt = (imgObj as any).title || "";
+      image.style.width = "100%";
+      image.style.height = "100%";
+      image.style.objectFit = "contain";
+      image.style.position = "absolute";
+      image.style.inset = "0";
+      image.style.zIndex = "1";
+      image.style.opacity = placeholder ? "0" : "1";
+      image.style.transition = "opacity 240ms ease";
+      image.addEventListener("load", () => {
+        image.style.opacity = "1";
+        if (placeholder) placeholder.remove();
+      }, { once: true });
+      imageFrame.appendChild(image);
+      contentLayer.appendChild(imageFrame);
     }
 
+    box.appendChild(contentLayer);
     return box;
-  }, []);
+  }, [createBlurhashCanvas, applyImageFrameSize]);
 
   // 初始化图片查看器
   const initViewer = useCallback(async () => {
@@ -124,7 +231,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       images,
       loadingNode: initialOptions.loadingNode || createCustomLoadingNode(),
       renderNode: initialOptions.renderNode || createCustomRenderNode,
-      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => {}),
+      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => { }),
       infoRender: initialOptions.infoRender || createCustomInfoNode,
     };
 

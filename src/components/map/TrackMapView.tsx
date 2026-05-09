@@ -3,9 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, Circle, Map as MapIcon } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import type React from "react";
-import { createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
-import ImageInfoPanel from "@/components/media/ImageInfoPanel";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ImagePreview from "@/components/media/ImagePreview";
 import { MAPBOX_TOKEN } from "@/config/mapbox";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { filesApi } from "@/services/api";
@@ -96,6 +95,10 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const filteredFilesRef = useRef<FileData[]>([]);
   const fileDetailCache = useRef<Map<string, FileData>>(new Map());
 
+  // 图片预览状态
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImages, setPreviewImages] = useState<any[]>([]);
+
   // 同步 ref 和 state
   useEffect(() => {
     selectModeRef.current = selectMode;
@@ -181,51 +184,28 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
   // 打开图片预览
   const openImagePreview = useCallback((fileData: FileData) => {
-    import("viewer-pro").then(({ ViewerPro }) => {
-      const needsFormatConversion =
-        fileData.url.includes("aliyuncs.com") && /\.(heic|heif|tiff?)$/i.test(fileData.name);
+    const needsFormatConversion =
+      fileData.url.includes("aliyuncs.com") && /\.(heic|heif|tiff?)$/i.test(fileData.name);
 
-      const mainSrc = needsFormatConversion
-        ? `${fileData.url}?x-oss-process=image/format,jpeg/quality,q_95`
-        : fileData.url;
+    const mainSrc = needsFormatConversion
+      ? `${fileData.url}?x-oss-process=image/format,jpeg/quality,q_95`
+      : fileData.url;
 
-      const cached = fileDetailCache.current.get(fileData.sec_uid);
-      const detail = cached || fileData;
-
-      const viewer = new ViewerPro({
-        images: [
-          {
-            id: fileData.sec_uid,
-            src: mainSrc,
-            thumbnail: `${fileData.url}?x-oss-process=image/resize,w_300,h_200,m_lfit/quality,q_80/format,webp`,
-            title: detail.name || fileData.name,
-            width: fileData.width,
-            height: fileData.height,
-            address: detail.address,
-            deviceMake: detail.deviceMake,
-            deviceModel: detail.deviceModel,
-            lensModel: detail.lensModel,
-            fNumber: detail.fNumber,
-            exposureTime: detail.exposureTime,
-            iso: detail.iso,
-            focalLength: detail.focalLength,
-            takenAt: detail.takenAt,
-            lng: fileData.lng,
-            lat: fileData.lat,
-          } as any,
-        ],
-        infoRender: (viewerItem: any, idx: number) => {
-          const container = document.createElement("div");
-          container.style.width = "100%";
-          container.style.height = "100%";
-          const root = createRoot(container);
-          root.render(createElement(ImageInfoPanel, { viewerItem, index: idx }));
-          return container;
-        },
-      });
-      viewer.init();
-      viewer.open(0);
-    });
+    setPreviewImages([
+      {
+        sec_uid: fileData.sec_uid,
+        url: mainSrc,
+        name: fileData.name,
+        width: fileData.width,
+        height: fileData.height,
+        type: fileData.type,
+        blurhash: fileData.blurhash,
+        lat: fileData.lat,
+        lng: fileData.lng,
+        videoSrc: fileData.videoSrc,
+      },
+    ]);
+    setPreviewOpen(true);
   }, []);
 
   // 渲染弹窗内容（纯渲染，不请求接口）
@@ -896,6 +876,14 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
           width={GALLERY_WIDTH}
         />
       )}
+
+      {/* 图片预览 */}
+      <ImagePreview
+        images={previewImages}
+        initialIndex={0}
+        isOpen={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+      />
     </div>
   );
 };

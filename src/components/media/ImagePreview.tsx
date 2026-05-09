@@ -15,7 +15,6 @@ export default function ImagePreview({ images, initialIndex, isOpen, onClose }: 
   const { initWithPostImages, openPreview, closePreview } = useImageViewer({
     onImageLoad: (_imgObj: ImageObj, _idx: number) => {
       if (_imgObj.type !== "live-photo") {
-        // 对于普通图片，loading 已经由 customLoading 控制
         return;
       }
 
@@ -30,24 +29,46 @@ export default function ImagePreview({ images, initialIndex, isOpen, onClose }: 
         return;
       }
 
+      const placeholderId = container.dataset.placeholderId;
+      const removePlaceholder = () => {
+        if (!placeholderId) return;
+        document.getElementById(placeholderId)?.remove();
+      };
+
+      const rect = container.getBoundingClientRect();
+      const width = rect.width || undefined;
+      const height = rect.height || 600;
+
       // 创建 LivePhotoViewer 实例
       new LivePhotoViewer({
         photoSrc: demoSource.photoSrc,
         videoSrc: demoSource.videoSrc,
         container,
-        // width: 300,
-        height: 600,
-        // autoplay: false,
-        borderRadius: "8px",
+        width,
+        height,
         imageCustomization: {
           styles: {
             objectFit: "cover",
           },
           attributes: {
-            alt: "Live Photo Demo",
+            alt: "Live Photo",
             loading: "lazy",
           },
         },
+      });
+
+      // 等待 live-photo 图片加载完成后移除 blurhash 占位
+      requestAnimationFrame(() => {
+        const image = container.querySelector("img");
+        if (!image) {
+          removePlaceholder();
+          return;
+        }
+        if (image.complete) {
+          removePlaceholder();
+          return;
+        }
+        image.addEventListener("load", removePlaceholder, { once: true });
       });
     },
   });
