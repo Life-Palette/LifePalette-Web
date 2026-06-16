@@ -35,40 +35,43 @@ export default function ImagePreview({ images, initialIndex, isOpen, onClose }: 
         document.getElementById(placeholderId)?.remove();
       };
 
-      const rect = container.getBoundingClientRect();
-      const width = rect.width || undefined;
-      const height = rect.height || 600;
-
-      // 创建 LivePhotoViewer 实例
-      new LivePhotoViewer({
-        photoSrc: demoSource.photoSrc,
-        videoSrc: demoSource.videoSrc,
-        container,
-        width,
-        height,
-        imageCustomization: {
-          styles: {
-            objectFit: "cover",
-          },
-          attributes: {
-            alt: "Live Photo",
-            loading: "lazy",
-          },
-        },
-      });
-
-      // 等待 live-photo 图片加载完成后移除 blurhash 占位
+      // 等待布局稳定后再获取尺寸并初始化 LivePhotoViewer
       requestAnimationFrame(() => {
-        const image = container.querySelector("img");
-        if (!image) {
-          removePlaceholder();
-          return;
-        }
-        if (image.complete) {
-          removePlaceholder();
-          return;
-        }
-        image.addEventListener("load", removePlaceholder, { once: true });
+        const rect = container.getBoundingClientRect();
+        const width = rect.width || undefined;
+        const height = rect.height || undefined;
+
+        // 创建 LivePhotoViewer 实例
+        new LivePhotoViewer({
+          photoSrc: demoSource.photoSrc,
+          videoSrc: demoSource.videoSrc,
+          container,
+          width,
+          height,
+          imageCustomization: {
+            styles: {
+              objectFit: "contain",
+            },
+            attributes: {
+              alt: "Live Photo",
+              loading: "lazy",
+            },
+          },
+        });
+
+        // 等待 live-photo 图片加载完成后移除 blurhash 占位
+        requestAnimationFrame(() => {
+          const image = container.querySelector("img");
+          if (!image) {
+            removePlaceholder();
+            return;
+          }
+          if (image.complete) {
+            removePlaceholder();
+            return;
+          }
+          image.addEventListener("load", removePlaceholder, { once: true });
+        });
       });
     },
   });

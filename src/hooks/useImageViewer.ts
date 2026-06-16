@@ -1,15 +1,25 @@
 import { decode } from "blurhash";
 import { createElement, useCallback, useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { type ImageObj, type ViewerItem, ViewerPro, type ViewerProOptions } from "viewer-pro";
+import {
+  type TransformChangeState,
+  type ViewerItem,
+  ViewerPro,
+  type ViewerProOptions,
+} from "viewer-pro";
 import ImageInfoPanel from "@/components/media/ImageInfoPanel";
 import type { PostImage } from "@/types";
 import { isVideo } from "@/utils/media";
 
-export type { ImageObj, ViewerProOptions } from "viewer-pro";
+export type { TransformChangeState, ViewerItem, ViewerProOptions } from "viewer-pro";
+
+/**
+ * @deprecated 使用 ViewerItem 代替，ImageObj 在 viewer-pro 0.2.0 中已被移除
+ */
+export type ImageObj = ViewerItem;
 
 export function useImageViewer(initialOptions: ViewerProOptions = {}) {
-  const [images, setImages] = useState<ImageObj[]>(initialOptions.images || []);
+  const [images, setImages] = useState<ViewerItem[]>(initialOptions.images || []);
   const viewerRef = useRef<ViewerPro | null>(null);
   const renderedContainers = useRef(new Map<number, HTMLElement>());
   const renderedRoots = useRef(new Map<number, Root>());
@@ -100,16 +110,23 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     return canvas;
   }, []);
 
-  // 根据图片宽高比计算 frame 尺寸
-  const applyImageFrameSize = useCallback((frame: HTMLElement, imgObj: ImageObj) => {
+  // 检测是否为移动端
+  const isMobile = useCallback(() => {
+    return window.innerWidth <= 768 || "ontouchstart" in window;
+  }, []);
+
+  // 根据图片宽高比计算 frame 尺寸（移动端使用更大的占比）
+  const applyImageFrameSize = useCallback((frame: HTMLElement, imgObj: ViewerItem) => {
     const w = Number(imgObj.width);
     const h = Number(imgObj.height);
     const ratio = w > 0 && h > 0 ? w / h : 1;
     requestAnimationFrame(() => {
       const parent = frame.parentElement;
       if (!parent) return;
-      const maxWidth = parent.clientWidth * 0.9;
-      const maxHeight = parent.clientHeight * 0.9;
+      const mobile = isMobile();
+      const fillRatio = mobile ? 0.95 : 0.9;
+      const maxWidth = parent.clientWidth * fillRatio;
+      const maxHeight = parent.clientHeight * fillRatio;
       let frameWidth = maxWidth;
       let frameHeight = frameWidth / ratio;
       if (frameHeight > maxHeight) {
@@ -119,10 +136,10 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       frame.style.width = `${frameWidth}px`;
       frame.style.height = `${frameHeight}px`;
     });
-  }, []);
+  }, [isMobile]);
 
   // 自定义渲染节点（含 blurhash 占位）
-  const createCustomRenderNode = useCallback((imgObj: ImageObj, idx: number) => {
+  const createCustomRenderNode = useCallback((imgObj: ViewerItem, idx: number) => {
     const box = document.createElement("div");
     box.id = `custom-render-${idx}`;
     box.style.display = "flex";
@@ -165,6 +182,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       livePhotoContainer.style.width = "100%";
       livePhotoContainer.style.height = "100%";
       livePhotoContainer.style.zIndex = "1";
+      livePhotoContainer.style.overflow = "hidden";
       livePhotoContainer.dataset.placeholderId = `blurhash-placeholder-${idx}`;
       if (placeholder) {
         placeholder.id = `blurhash-placeholder-${idx}`;
@@ -215,6 +233,15 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     return box;
   }, [createBlurhashCanvas, applyImageFrameSize]);
 
+  // 处理手势缩放/拖拽/旋转变换（移动端手势缩放必须同步到自定义渲染节点）
+  const handleTransformChange = useCallback((state: TransformChangeState) => {
+    const { scale, translateX, translateY, rotation, index } = state;
+    const contentLayer = document.getElementById(`custom-render-content-${index}`);
+    if (contentLayer) {
+      contentLayer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale}) rotate(${rotation}deg)`;
+    }
+  }, []);
+
   // 初始化图片查看器
   const initViewer = useCallback(async () => {
     if (images.length === 0) {
@@ -231,8 +258,21 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       images,
       loadingNode: initialOptions.loadingNode || createCustomLoadingNode(),
       renderNode: initialOptions.renderNode || createCustomRenderNode,
-      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ImageObj, _idx: number) => { }),
+      onImageLoad: initialOptions.onImageLoad || ((_imgObj: ViewerItem, _idx: number) => { }),
       infoRender: initialOptions.infoRender || createCustomInfoNode,
+      // 移动端适配配置
+      mobileSwipeToNavigate: initialOptions.mobileSwipeToNavigate ?? true,
+      mobileToolbar: initialOptions.mobileToolbar ?? ["zoomIn", "zoomOut", "reset", "thumbnails", "info"],
+      swipeConfig: initialOptions.swipeConfig ?? {
+        maxDistance: 120,
+        viewportRatio: 0.25,
+        axisLockRatio: 1.2,
+      },
+      // 自定义渲染节点时必须同步手势变换
+      onTransformChange: initialOptions.onTransformChange || handleTransformChange,
+      // 预加载相邻图片，移动端网络可能较慢，提前加载体验更好
+      preloadAdjacent: initialOptions.preloadAdjacent ?? true,
+      preloadCacheLimit: initialOptions.preloadCacheLimit ?? 3,
     };
 
     viewerRef.current = new ViewerPro(viewerOptions);
@@ -243,6 +283,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     createCustomLoadingNode,
     createCustomRenderNode,
     createCustomInfoNode,
+    handleTransformChange,
   ]);
 
   // 打开图片预览
@@ -263,7 +304,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
   }, []);
 
   // 添加图片
-  const addImages = useCallback((newImages: ImageObj[]) => {
+  const addImages = useCallback((newImages: ViewerItem[]) => {
     setImages((prev) => [...prev, ...newImages]);
     if (viewerRef.current) {
       viewerRef.current.addImages(newImages);
@@ -271,7 +312,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
   }, []);
 
   // 设置图片列表
-  const updateImages = useCallback((newImages: ImageObj[]) => {
+  const updateImages = useCallback((newImages: ViewerItem[]) => {
     setImages(newImages);
   }, []);
 
