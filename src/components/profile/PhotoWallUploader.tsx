@@ -143,6 +143,12 @@ export default function PhotoWallUploader({
             </div>
           )}
 
+          {uploadState.error && (
+            <p className="rounded-md bg-red-50 p-3 text-red-600 text-sm">
+              上传失败：{uploadState.error.message}
+            </p>
+          )}
+
           {/* 操作按钮 */}
           <div className="flex justify-end gap-2 pt-2">
             <Button disabled={uploadState.isUploading} onClick={handleClose} variant="outline">

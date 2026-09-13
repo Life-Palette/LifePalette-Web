@@ -1,4 +1,4 @@
-import exifr from "exifr";
+import initMetaprobe, { extractMetaFastSized } from "metaprobe";
 
 /**
  * GPS坐标信息
@@ -20,14 +20,20 @@ export async function extractGPSFromImage(file: File): Promise<GPSCoordinates | 
       return null;
     }
 
-    // 使用exifr读取GPS信息
-    const gps = await exifr.gps(file);
+    await initMetaprobe();
+    const metadata = extractMetaFastSized(
+      new Uint8Array(await file.arrayBuffer()),
+      file.name,
+      file.size
+    ) as { exif?: { latitude?: unknown; longitude?: unknown; GPSLatitude?: unknown; GPSLongitude?: unknown } };
+    const latitude = Number(metadata.exif?.latitude ?? metadata.exif?.GPSLatitude);
+    const longitude = Number(metadata.exif?.longitude ?? metadata.exif?.GPSLongitude);
 
     // 检查是否有有效的GPS坐标
-    if (gps && typeof gps.latitude === "number" && typeof gps.longitude === "number") {
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
       return {
-        lat: gps.latitude,
-        lng: gps.longitude,
+        lat: latitude,
+        lng: longitude,
       };
     }
 

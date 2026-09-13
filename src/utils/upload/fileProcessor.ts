@@ -1,5 +1,4 @@
 import { getFileType } from "@iceywu/utils";
-import { updateFileInfo } from "@/services/upload/ossService";
 import type { FileItem } from "@/types/upload";
 
 /**
@@ -105,31 +104,23 @@ export async function processLivePhotoFiles(uploadedFiles: FileItem[]): Promise<
         } else {
           // 新上传的文件，需要调用接口更新
           try {
-            const response = await updateFileInfo({
-              id: imageFile.id,
+            const updatedImageFile = {
+              ...imageFile,
               videoSrc: file.url,
-            });
+            };
 
-            if (response.code === 200 && response.result.videoSrc) {
-              // 创建更新后的文件对象
-              const updatedImageFile = {
-                ...imageFile,
-                videoSrc: response.result.videoSrc,
-              };
+            // 如果该图片已经被处理过，替换它
+            const existingIndex = processedFiles.findIndex(
+              (item) => item.id === updatedImageFile.id
+            );
 
-              // 如果该图片已经被处理过，替换它
-              const existingIndex = processedFiles.findIndex(
-                (item) => item.id === updatedImageFile.id
-              );
-
-              if (existingIndex === -1) {
-                processedFiles.push(updatedImageFile);
-              } else {
-                processedFiles[existingIndex] = updatedImageFile;
-              }
-
-              processedIds.add(imageFile.id);
+            if (existingIndex === -1) {
+              processedFiles.push(updatedImageFile);
+            } else {
+              processedFiles[existingIndex] = updatedImageFile;
             }
+
+            processedIds.add(imageFile.id);
           } catch (error) {
             console.error("更新视频源失败:", error);
             // 失败时添加原图片文件

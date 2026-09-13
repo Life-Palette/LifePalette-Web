@@ -48,3 +48,5 @@ minimumReleaseAgeExclude:
   - '@tanstack/react-virtual@3.14.3'
   - '@tanstack/virtual-core@3.17.1'
   - radix-ui@1.6.0
+  - '@life-palette/media@0.2.1'
+  - '@life-palette/uploader@0.2.1'

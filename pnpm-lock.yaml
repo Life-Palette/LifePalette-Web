@@ -27,8 +27,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@life-palette/uploader':
-        specifier: ^0.2.1
-        version: 0.2.1(browser-image-compression@2.0.2)
+        specifier: link:../packages/packages/uploader
+        version: link:../packages/packages/uploader
       '@mapbox/mapbox-gl-language':
         specifier: ^1.0.1
         version: 1.0.1(mapbox-gl@3.24.1)
@@ -596,17 +596,6 @@ packages:
 
   '@juggle/resize-observer@3.4.0':
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
-
-  '@life-palette/media@0.2.1':
-    resolution: {integrity: sha512-lplp13XAJ6+o2uyS5gHxZQtbdABtHshHj4otwu9eXrCtzkGZjeahHT+mq3FBkfMV5otTqsd3ZMd6OxEnAYJSHw==, tarball: https://registry.npmjs.org/@life-palette/media/-/media-0.2.1.tgz}
-
-  '@life-palette/uploader@0.2.1':
-    resolution: {integrity: sha512-6NSMzuuBmhnEgK3UBPpcLqse2peCl9sIAo9Fk+s30dphrKOx+K5oTIi5fmuokhUyCINM9Qm1gJvCWcjBlgLfkA==, tarball: https://registry.npmjs.org/@life-palette/uploader/-/uploader-0.2.1.tgz}
-    peerDependencies:
-      browser-image-compression: ^2.0.2
-    peerDependenciesMeta:
-      browser-image-compression:
-        optional: true
 
   '@mapbox/mapbox-gl-language@1.0.1':
     resolution: {integrity: sha512-gL58ojl7gaWLfbSISoB2QJEfTK3j+NKvPH9og0r+c3bd5BNqhY19Eb4OPfDc5+dGmjW03LhtZBc4n2b7Xn8kjA==}
@@ -1854,9 +1843,6 @@ packages:
   arraybuffer.prototype.slice@1.0.4:
     resolution: {integrity: sha512-BNoCY6SXXPQ7gF2opIP4GBE+Xw7U+pHMYKuzjgCN3GwiaIR09UUeKfheyIry77QtrCBlC0KK0q5/TER/tYh3PQ==}
     engines: {node: '>= 0.4'}
-
-  arthash@0.5.0:
-    resolution: {integrity: sha512-lUKLVkJf4Al5COQowyECl3wpyLtH57mypvlbcdauh1KdzqqFd8UfU1XnwmjrPKSGhwESk4hAJJXcTWwopQZELQ==}
 
   ast-types@0.16.1:
     resolution: {integrity: sha512-6t10qk83GOG8p0vKmaCr8eiilZwO171AvbROMtvvNiwrTly62t+7XkA8RdIIVbpMhCASAsxgAzdRSwh6nw/5Dg==}
@@ -4935,19 +4921,6 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
-  '@life-palette/media@0.2.1':
-    dependencies:
-      arthash: 0.5.0
-      blurhash: 2.0.5
-      metaprobe: 0.0.1
-      spark-md5: 3.0.2
-
-  '@life-palette/uploader@0.2.1(browser-image-compression@2.0.2)':
-    dependencies:
-      '@life-palette/media': 0.2.1
-    optionalDependencies:
-      browser-image-compression: 2.0.2
-
   '@mapbox/mapbox-gl-language@1.0.1(mapbox-gl@3.24.1)':
     dependencies:
       mapbox-gl: 3.24.1
@@ -6223,8 +6196,6 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       is-array-buffer: 3.0.5
-
-  arthash@0.5.0: {}
 
   ast-types@0.16.1:
     dependencies:

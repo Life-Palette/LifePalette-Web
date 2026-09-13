@@ -21,7 +21,7 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useCreateTopic } from "@/hooks/useTopics";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { serializeToHtml } from "@/lib/serializeHtml";
-import type { OSSFile } from "@/services/upload/ossService";
+import type { OSSFile } from "@/services/upload";
 
 type ContentMode = "richtext" | "markdown";
 

@@ -1,18 +1,16 @@
-/**
- * 上传服务 - 基于 oss-uploader 工具函数的项目实例
- */
 import { config } from "@/config/env";
-import { createUploader } from "@/utils/upload/oss-uploader";
+import { createOssUploader } from "@life-palette/uploader";
 
-export const uploader = createUploader({
+export const uploader = createOssUploader({
   apiBaseUrl: config.API_BASE_URL,
   getToken: () => localStorage.getItem("auth_token"),
+  // 与后端固定的 5MB 分片阈值保持一致。
+  multipartThreshold: 5 * 1024 * 1024,
 });
 
-// 重新导出类型
 export type {
   OSSFile,
   UploadOptions,
   UploadProgress,
   UploadStage,
-} from "@/utils/upload/oss-uploader";
+} from "@life-palette/uploader";

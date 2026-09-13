@@ -11,6 +11,7 @@ interface UploadState {
 
 const STAGE_TEXT: Record<UploadStage, string> = {
   compress: "压缩中...",
+  analyze: "分析媒体信息...",
   md5: "计算 MD5...",
   upload: "上传中...",
   complete: "完成...",
@@ -44,6 +45,7 @@ export function useFileUpload() {
         });
         const result = await uploader.upload(file, {
           ...options,
+          analyze: false,
           onProgress: (p: UploadProgress) => {
             setUploadState({
               isUploading: true,
@@ -64,6 +66,7 @@ export function useFileUpload() {
         return result;
       } catch (error) {
         const err = error as Error;
+        console.error("文件上传失败", err);
         setUploadState({ isUploading: false, progress: 0, stage: "", stageText: "", error: err });
         return null;
       }
@@ -95,6 +98,7 @@ export function useFileUpload() {
           const fileLocation = locationMap?.get(files[i]);
           const result = await uploader.upload(files[i], {
             ...options,
+            analyze: false,
             location: fileLocation,
             onProgress: (p: UploadProgress) => {
               const totalProgress = ((i + p.percent / 100) / total) * 100;
@@ -122,6 +126,7 @@ export function useFileUpload() {
         return results;
       } catch (error) {
         const err = error as Error;
+        console.error("批量文件上传失败", err);
         setUploadState({ isUploading: false, progress: 0, stage: "", stageText: "", error: err });
         throw err;
       }

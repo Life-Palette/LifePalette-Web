@@ -17,7 +17,7 @@ import { TagsInput } from "@/components/ui/tags-input";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { deserializeHtml, serializeToHtml } from "@/lib/serializeHtml";
-import type { OSSFile } from "@/services/upload/ossService";
+import type { OSSFile } from "@/services/upload";
 import type { Post, PostImage } from "@/types";
 
 type EditableTopicTag =
