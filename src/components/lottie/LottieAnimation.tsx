@@ -1,14 +1,10 @@
-import type { LottieRefCurrentProps } from "lottie-react";
-import LottieModule from "lottie-react";
+import { Lottie, type LottieHandle } from "lottie-react";
 
 import type React from "react";
 import { useEffect, useMemo, useRef } from "react";
 import emptyAnimation from "@/components/lottie/animations/empty.json";
 // 导入本地动画文件
 import loadingAnimation from "@/components/lottie/animations/loading.json";
-
-// Vite 8 (Rolldown) CJS/ESM 互操作：default 可能是模块对象而非组件
-const Lottie = (LottieModule as any).default || LottieModule;
 
 export type AnimationType = "loading" | "empty" | "custom";
 
@@ -47,7 +43,7 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
   emptyDescription = "这里空空如也，快去添加一些内容吧",
   actionButton,
 }) => {
-  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+  const lottieRef = useRef<LottieHandle | null>(null);
 
   // 根据 type 选择动画数据
   const animationData = useMemo(() => {
@@ -89,7 +85,7 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
       <div className={`flex flex-col items-center justify-center ${className}`}>
         <div onClick={onClick}>
           <Lottie
-            animationData={animationData}
+            src={animationData}
             autoplay={autoplay}
             loop={loop}
             lottieRef={lottieRef}
@@ -108,7 +104,7 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
       <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
         <div onClick={onClick}>
           <Lottie
-            animationData={animationData}
+            src={animationData}
             autoplay={autoplay}
             loop={loop}
             lottieRef={lottieRef}
@@ -134,7 +130,7 @@ const LottieAnimation: React.FC<LottieAnimationProps> = ({
   return (
     <div className={className} onClick={onClick}>
       <Lottie
-        animationData={animationData}
+        src={animationData}
         autoplay={autoplay}
         loop={loop}
         lottieRef={lottieRef}

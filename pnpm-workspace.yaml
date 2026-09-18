@@ -4,8 +4,8 @@ allowBuilds:
   msw: true
 minimumReleaseAgeExclude:
   - '@eosjs/ui@0.2.1'
-  - '@life-palette/media@0.2.3'
-  - '@life-palette/uploader@0.2.3'
+  - '@life-palette/media@0.2.1 || 0.2.2 || 0.2.3'
+  - '@life-palette/uploader@0.2.2 || 0.2.3'
   - '@radix-ui/react-accessible-icon@1.1.10'
   - '@radix-ui/react-accordion@1.2.14'
   - '@radix-ui/react-alert-dialog@1.1.17'
@@ -51,6 +51,4 @@ minimumReleaseAgeExclude:
   - '@tanstack/react-virtual@3.14.3'
   - '@tanstack/virtual-core@3.17.1'
   - radix-ui@1.6.0
-  - '@life-palette/media@0.2.1'
-  - '@life-palette/uploader@0.2.2'
-  - '@life-palette/media@0.2.2'
+  - lucide-react@1.47.0
