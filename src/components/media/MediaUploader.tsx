@@ -21,8 +21,8 @@ import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 import { LocationPicker } from "@/components/map/LocationPicker";
 import { filesApi } from "@/services/api";
+import { detectLivePhotoPairs } from "@/services/upload";
 import type { PostImage } from "@/types";
-import { detectLocalLivePhotos } from "@/utils/upload/fileProcessor";
 import { extractGPSFromImage } from "@/utils/upload/gpsExtractor";
 
 // 统一的 MediaItem 类型定义
@@ -326,19 +326,20 @@ export function MediaUploader({
     setSelectedFiles(newSelectedFiles);
 
     // Live Photo 配对
-    const livePhotoPairs = detectLocalLivePhotos(validFiles);
-    const livePhotoMap = new Map<number, File>();
+    const livePhotoPairs = detectLivePhotoPairs(validFiles);
+    const livePhotoMap = new Map<File, File>();
+    const pairedVideoFiles = new Set<File>();
     livePhotoPairs.forEach((pair) => {
-      livePhotoMap.set(pair.imageIndex, pair.videoFile);
+      livePhotoMap.set(pair.image, pair.video);
+      pairedVideoFiles.add(pair.video);
     });
-    const pairedVideoIndices = new Set(livePhotoPairs.map((pair) => pair.videoIndex));
-    const displayFiles = validFiles.filter((_, index) => !pairedVideoIndices.has(index));
+    const displayFiles = validFiles.filter((file) => !pairedVideoFiles.has(file));
 
     // 先生成预览，GPS信息设为null
     const newItems: NewMediaItem[] = displayFiles.map((file, displayIndex) => {
       const indexInValidFiles = validFiles.indexOf(file);
       const originalIndex = startIndex + indexInValidFiles;
-      const videoFile = livePhotoMap.get(indexInValidFiles);
+      const videoFile = livePhotoMap.get(file);
       return {
         id: `new-${Date.now()}-${displayIndex}`,
         type: "new",

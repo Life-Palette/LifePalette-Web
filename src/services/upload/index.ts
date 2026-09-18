@@ -8,6 +8,8 @@ export const uploader = createOssUploader({
   multipartThreshold: 5 * 1024 * 1024,
 });
 
+export { detectLivePhotoPairs } from "@life-palette/uploader";
+
 export type {
   OSSFile,
   UploadOptions,

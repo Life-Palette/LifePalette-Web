@@ -1,4 +1,4 @@
-import { decode } from "blurhash";
+import { registerComponents } from "@eosjs/ui";
 import { createElement, useCallback, useEffect, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import {
@@ -12,6 +12,8 @@ import type { PostImage } from "@/types";
 import { isVideo } from "@/utils/media";
 
 export type { TransformChangeState, ViewerItem, ViewerProOptions } from "viewer-pro";
+
+registerComponents();
 
 /**
  * @deprecated 使用 ViewerItem 代替，ImageObj 在 viewer-pro 0.2.0 中已被移除
@@ -83,33 +85,6 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     return container;
   }, []);
 
-  // 创建 blurhash canvas 占位图
-  const createBlurhashCanvas = useCallback((hash?: string): HTMLCanvasElement | null => {
-    if (!hash) return null;
-    const width = 32;
-    const height = 32;
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    canvas.width = width;
-    canvas.height = height;
-    canvas.style.position = "absolute";
-    canvas.style.inset = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.objectFit = "cover";
-    canvas.style.transition = "opacity 240ms ease";
-    try {
-      const pixels = decode(hash, width, height);
-      const imageData = ctx.createImageData(width, height);
-      imageData.data.set(pixels);
-      ctx.putImageData(imageData, 0, 0);
-    } catch {
-      return null;
-    }
-    return canvas;
-  }, []);
-
   // 检测是否为移动端
   const isMobile = useCallback(() => {
     return window.innerWidth <= 768 || "ontouchstart" in window;
@@ -138,7 +113,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     });
   }, [isMobile]);
 
-  // 自定义渲染节点（含 blurhash 占位）
+  // 自定义渲染节点
   const createCustomRenderNode = useCallback((imgObj: ViewerItem, idx: number) => {
     const box = document.createElement("div");
     box.id = `custom-render-${idx}`;
@@ -161,36 +136,52 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
     contentLayer.style.transformOrigin = "center center";
     contentLayer.style.willChange = "transform";
 
+    const createEosImage = (src: string) => {
+      const image = document.createElement("eos-image");
+      const imageWithMetadata = imgObj as ViewerItem & { blurhash?: string; title?: string };
+      image.setAttribute("alt", imageWithMetadata.title || "");
+      image.setAttribute("loading", "eager");
+      image.setAttribute("object-fit", "contain");
+      image.setAttribute("src", src);
+      image.style.position = "absolute";
+      image.style.inset = "0";
+      image.style.width = "100%";
+      image.style.height = "100%";
+      image.style.zIndex = "1";
+
+      if (imageWithMetadata.blurhash) {
+        image.setAttribute("placeholder", imageWithMetadata.blurhash);
+        image.setAttribute("placeholder-fill", "");
+        image.setAttribute("placeholder-type", "blurhash");
+      }
+
+      return image;
+    };
+
     const createImageFrame = () => {
       const imageFrame = document.createElement("div");
       imageFrame.style.position = "relative";
       imageFrame.style.flex = "0 0 auto";
-      const placeholder = createBlurhashCanvas((imgObj as any).blurhash);
-      if (placeholder) {
-        imageFrame.appendChild(placeholder);
-      }
       applyImageFrameSize(imageFrame, imgObj);
-      return { imageFrame, placeholder };
+      return imageFrame;
     };
 
     if (imgObj.type === "live-photo") {
-      const { imageFrame, placeholder } = createImageFrame();
+      const imageFrame = createImageFrame();
+      imageFrame.appendChild(createEosImage(imgObj.src));
       const livePhotoContainer = document.createElement("div");
       livePhotoContainer.id = `live-photo-container-${idx}`;
       livePhotoContainer.style.position = "absolute";
       livePhotoContainer.style.inset = "0";
       livePhotoContainer.style.width = "100%";
       livePhotoContainer.style.height = "100%";
-      livePhotoContainer.style.zIndex = "1";
+      livePhotoContainer.style.zIndex = "2";
       livePhotoContainer.style.overflow = "hidden";
-      livePhotoContainer.dataset.placeholderId = `blurhash-placeholder-${idx}`;
-      if (placeholder) {
-        placeholder.id = `blurhash-placeholder-${idx}`;
-      }
       imageFrame.appendChild(livePhotoContainer);
       contentLayer.appendChild(imageFrame);
     } else if (imgObj.type === "video") {
-      const { imageFrame, placeholder } = createImageFrame();
+      const imageFrame = createImageFrame();
+      imageFrame.appendChild(createEosImage(imgObj.thumbnail || imgObj.src));
       const video = document.createElement("video");
       video.src = imgObj.videoSrc || imgObj.src;
       video.poster = imgObj.thumbnail || "";
@@ -201,37 +192,19 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       video.style.objectFit = "contain";
       video.style.position = "absolute";
       video.style.inset = "0";
-      video.style.zIndex = "1";
+      video.style.zIndex = "2";
       video.textContent = "您的浏览器不支持视频播放";
-      video.addEventListener("loadeddata", () => {
-        if (placeholder) placeholder.remove();
-      }, { once: true });
       imageFrame.appendChild(video);
       contentLayer.appendChild(imageFrame);
     } else {
-      const { imageFrame, placeholder } = createImageFrame();
-      const image = document.createElement("img");
-      image.src = imgObj.src;
-      image.alt = (imgObj as any).title || "";
-      image.style.width = "100%";
-      image.style.height = "100%";
-      image.style.objectFit = "contain";
-      image.style.position = "absolute";
-      image.style.inset = "0";
-      image.style.zIndex = "1";
-      image.style.opacity = placeholder ? "0" : "1";
-      image.style.transition = "opacity 240ms ease";
-      image.addEventListener("load", () => {
-        image.style.opacity = "1";
-        if (placeholder) placeholder.remove();
-      }, { once: true });
-      imageFrame.appendChild(image);
+      const imageFrame = createImageFrame();
+      imageFrame.appendChild(createEosImage(imgObj.src));
       contentLayer.appendChild(imageFrame);
     }
 
     box.appendChild(contentLayer);
     return box;
-  }, [createBlurhashCanvas, applyImageFrameSize]);
+  }, [applyImageFrameSize]);
 
   // 处理手势缩放/拖拽/旋转变换（移动端手势缩放必须同步到自定义渲染节点）
   const handleTransformChange = useCallback((state: TransformChangeState) => {

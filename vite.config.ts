@@ -51,11 +51,11 @@ export default defineConfig({
             return "dnd";
           }
           // 图片处理
-          if (id.includes("blurhash") || id.includes("browser-image-compression") || id.includes("react-easy-crop")) {
+          if (id.includes("react-easy-crop")) {
             return "image";
           }
           // 工具库
-          if (id.includes("clsx") || id.includes("tailwind-merge") || id.includes("dompurify") || id.includes("spark-md5")) {
+          if (id.includes("clsx") || id.includes("tailwind-merge") || id.includes("dompurify")) {
             return "utils";
           }
         },
