@@ -27,8 +27,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@life-palette/uploader':
-        specifier: ^0.2.2
-        version: 0.2.2(browser-image-compression@2.0.2)
+        specifier: ^0.2.3
+        version: 0.2.3(browser-image-compression@2.0.2)
       '@mapbox/mapbox-gl-language':
         specifier: ^1.0.1
         version: 1.0.1(mapbox-gl@3.24.1)
@@ -540,7 +540,7 @@ packages:
     resolution: {integrity: sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==}
 
   '@eosjs/ui@0.2.1':
-    resolution: {integrity: sha512-6te4v3917XlzzyZhYyiVbCIV5cCIimgHf2sryeh2rcJrNTtvZwdgxL2Fr1BPhvumoi7pV/heJhYmAgT+UW9l+g==}
+    resolution: {integrity: sha512-6te4v3917XlzzyZhYyiVbCIV5cCIimgHf2sryeh2rcJrNTtvZwdgxL2Fr1BPhvumoi7pV/heJhYmAgT+UW9l+g==, tarball: https://registry.npmjs.org/@eosjs/ui/-/ui-0.2.1.tgz}
 
   '@eosjs/utils@0.1.5':
     resolution: {integrity: sha512-/OFCvrpd3seT6gpyTT3gAIjxYP7sYeqjw2rFqK5etWQ041hWaip4GWpba+5k80VYoWeOStsd8jZtjxzFRpGA5Q==}
@@ -597,11 +597,11 @@ packages:
   '@juggle/resize-observer@3.4.0':
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
 
-  '@life-palette/media@0.2.2':
-    resolution: {integrity: sha512-oWGKyUq36RfNkor8OozfPRkmuSx2JVYh13ubCgn2wGj6qN1bcSDjH07i8IRpMzZr5WtHfwkm42WkQgMydygRIw==}
+  '@life-palette/media@0.2.3':
+    resolution: {integrity: sha512-BfCxXm+Yq4MUVsGLtCB5TGSRz7Q7yV6StpKjKQWc8bTw95zsZqJznXCutioGAdVkE7gcNafekfvCrKv8vuuViw==}
 
-  '@life-palette/uploader@0.2.2':
-    resolution: {integrity: sha512-HHsnImdzmQW0Up4GfpgVw48Pn+ccMV1qh5+UPboE4u+jPHCNe47NZ6Il7IXrzZJgXju6bM3AqiMOsz5qnZmQhQ==}
+  '@life-palette/uploader@0.2.3':
+    resolution: {integrity: sha512-VuIJXxCi8oGgykOwqcR2yOoxubxZMF7MogCAqfiBOMsBkQ/LlGOr9crw+AwO8ffcKmFnvkGH4wJEZnjuqRXFqw==}
     peerDependencies:
       browser-image-compression: ^2.0.2
     peerDependenciesMeta:
@@ -4935,16 +4935,16 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
-  '@life-palette/media@0.2.2':
+  '@life-palette/media@0.2.3':
     dependencies:
       arthash: 0.5.0
       blurhash: 2.0.5
       metaprobe: 0.0.1
       spark-md5: 3.0.2
 
-  '@life-palette/uploader@0.2.2(browser-image-compression@2.0.2)':
+  '@life-palette/uploader@0.2.3(browser-image-compression@2.0.2)':
     dependencies:
-      '@life-palette/media': 0.2.2
+      '@life-palette/media': 0.2.3
     optionalDependencies:
       browser-image-compression: 2.0.2
 

@@ -22,6 +22,7 @@ import { Route as ProfileImport } from "./routes/profile";
 import { Route as PublishImport } from "./routes/publish";
 import { Route as SearchImport } from "./routes/search";
 import { Route as TestCarouselImport } from "./routes/test-carousel";
+import { Route as TestUploadImport } from "./routes/test-upload";
 
 // Create/Update Routes
 
@@ -42,6 +43,11 @@ const SearchRoute = SearchImport.update({
 
 const TestCarouselRoute = TestCarouselImport.update({
   path: "/test-carousel",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const TestUploadRoute = TestUploadImport.update({
+  path: "/test-upload",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -154,6 +160,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SearchImport;
       parentRoute: typeof rootRoute;
     };
+    "/test-upload": {
+      id: "/test-upload";
+      path: "/test-upload";
+      fullPath: "/test-upload";
+      preLoaderRoute: typeof TestUploadImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
@@ -171,6 +184,7 @@ export const routeTree = rootRoute.addChildren({
   PublishRoute,
   SearchRoute,
   TestCarouselRoute,
+  TestUploadRoute,
 });
 
 /* prettier-ignore-end */

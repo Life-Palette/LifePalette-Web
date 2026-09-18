@@ -8,6 +8,59 @@ export interface GPSCoordinates {
   lng: number;
 }
 
+interface ExifGPSValue {
+  GPSLatitude?: unknown;
+  GPSLatitudeRef?: unknown;
+  GPSLongitude?: unknown;
+  GPSLongitudeRef?: unknown;
+  latitude?: unknown;
+  longitude?: unknown;
+}
+
+/** 将 EXIF 常见的十进制、度分秒或数组格式统一成十进制度。 */
+function parseGPSCoordinate(value: unknown, reference: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    const parts = value.map(Number);
+    if (parts.length >= 3 && parts.slice(0, 3).every(Number.isFinite)) {
+      const [degrees, minutes, seconds] = parts;
+      const result = Math.abs(degrees) + minutes / 60 + seconds / 3600;
+      return String(reference).toUpperCase().startsWith("S") ||
+        String(reference).toUpperCase().startsWith("W")
+        ? -result
+        : result;
+    }
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const text = value.trim();
+  const dms = text.match(
+    /(-?\d+(?:\.\d+)?)\s*(?:deg|°)\s*(\d+(?:\.\d+)?)?\s*(?:['′’]|min)?\s*(\d+(?:\.\d+)?)?\s*(?:["″”]|sec)?\s*([NSEW])?/i
+  );
+  if (dms) {
+    const degrees = Number(dms[1]);
+    const minutes = Number(dms[2] || 0);
+    const seconds = Number(dms[3] || 0);
+    const result = Math.abs(degrees) + minutes / 60 + seconds / 3600;
+    const direction = (dms[4] || String(reference)).toUpperCase();
+    return direction.startsWith("S") || direction.startsWith("W") ? -result : result;
+  }
+
+  const decimal = Number.parseFloat(text);
+  if (Number.isFinite(decimal)) {
+    const direction = String(reference).toUpperCase();
+    return direction.startsWith("S") || direction.startsWith("W") ? -Math.abs(decimal) : decimal;
+  }
+
+  return null;
+}
+
 /**
  * 从图片文件中提取GPS坐标信息
  * @param file 图片文件
@@ -25,12 +78,18 @@ export async function extractGPSFromImage(file: File): Promise<GPSCoordinates | 
       new Uint8Array(await file.arrayBuffer()),
       file.name,
       file.size
-    ) as { exif?: { latitude?: unknown; longitude?: unknown; GPSLatitude?: unknown; GPSLongitude?: unknown } };
-    const latitude = Number(metadata.exif?.latitude ?? metadata.exif?.GPSLatitude);
-    const longitude = Number(metadata.exif?.longitude ?? metadata.exif?.GPSLongitude);
+    ) as { exif?: ExifGPSValue };
+    const latitude = parseGPSCoordinate(
+      metadata.exif?.latitude ?? metadata.exif?.GPSLatitude,
+      metadata.exif?.GPSLatitudeRef
+    );
+    const longitude = parseGPSCoordinate(
+      metadata.exif?.longitude ?? metadata.exif?.GPSLongitude,
+      metadata.exif?.GPSLongitudeRef
+    );
 
     // 检查是否有有效的GPS坐标
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    if (latitude !== null && longitude !== null) {
       return {
         lat: latitude,
         lng: longitude,

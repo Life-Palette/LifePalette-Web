@@ -33,7 +33,7 @@ export function useFileUpload() {
   const uploadSingleFile = useCallback(
     async (
       file: File,
-      options?: { compress?: boolean; maxSizeMB?: number; isPrivate?: boolean }
+      options?: { analyze?: boolean; compress?: boolean; maxSizeMB?: number; isPrivate?: boolean }
     ): Promise<OSSFile | null> => {
       try {
         setUploadState({
@@ -45,7 +45,7 @@ export function useFileUpload() {
         });
         const result = await uploader.upload(file, {
           ...options,
-          analyze: false,
+          analyze: options?.analyze ?? false,
           onProgress: (p: UploadProgress) => {
             setUploadState({
               isUploading: true,
@@ -77,7 +77,7 @@ export function useFileUpload() {
   const uploadMultipleFiles = useCallback(
     async (
       files: File[],
-      options?: { compress?: boolean; maxSizeMB?: number; isPrivate?: boolean },
+      options?: { analyze?: boolean; compress?: boolean; maxSizeMB?: number; isPrivate?: boolean },
       locationMap?: Map<File, { lat: number; lng: number }>
     ): Promise<OSSFile[]> => {
       if (files.length === 0) {
@@ -98,7 +98,7 @@ export function useFileUpload() {
           const fileLocation = locationMap?.get(files[i]);
           const result = await uploader.upload(files[i], {
             ...options,
-            analyze: false,
+            analyze: options?.analyze ?? false,
             location: fileLocation,
             onProgress: (p: UploadProgress) => {
               const totalProgress = ((i + p.percent / 100) / total) * 100;
