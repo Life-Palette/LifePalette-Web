@@ -1,4 +1,4 @@
-import { registerComponents } from "@eosjs/components";
+import { registerComponents } from "@eosjs/ui";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Edit, Heart, Trash2, User } from "lucide-react";

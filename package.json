@@ -50,7 +50,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@eosjs/components": "^0.1.5",
+    "@eosjs/ui": "^0.2.1",
     "@fontsource-variable/geist": "^5.2.9",
     "@iceywu/utils": "^0.1.0",
     "@mapbox/mapbox-gl-language": "^1.0.1",

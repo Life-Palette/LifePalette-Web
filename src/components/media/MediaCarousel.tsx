@@ -1,4 +1,4 @@
-import { registerComponents } from "@eosjs/components";
+import { registerComponents } from "@eosjs/ui";
 import { type Ref, useCallback, useImperativeHandle, useRef, useState } from "react";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import MediaPlayer from "@/components/media/MediaPlayer";

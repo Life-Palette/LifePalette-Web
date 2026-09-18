@@ -1,154 +1,116 @@
-import { useState } from "react";
-import OptimizedImage from "@/components/media/OptimizedImage";
-import { Badge } from "@/components/ui/badge";
+import { registerComponents } from "@eosjs/ui";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { PostImage } from "@/types";
+import {
+	generateOssImageParams,
+	getVideoThumbnailUrl,
+	isVideo,
+} from "@/utils/media";
+
+registerComponents();
 
 interface ImageGalleryProps {
-  className?: string;
-  images: PostImage[];
-  maxDisplay?: number;
-  onImageClick?: (index: number, e: React.MouseEvent) => void;
+	className?: string;
+	images: PostImage[];
+	maxDisplay?: number;
+	onImageClick?: (index: number, e: React.MouseEvent) => void;
+}
+
+type ImageGroupItem = {
+	alt: string;
+	loading: "eager" | "lazy";
+	objectFit: "cover";
+	placeholder?: string;
+	placeholderFill?: boolean;
+	placeholderType?: "blurhash";
+	src: string;
+};
+
+type ImageGroupElement = HTMLElement & {
+	items: ImageGroupItem[];
+	layout: "featured" | "grid" | "pair";
+	maxVisible: number;
+};
+
+type ImageGroupClickEvent = CustomEvent<{
+	index: number;
+	item: ImageGroupItem;
+}>;
+
+function getDisplayUrl(image: PostImage, noResize: boolean) {
+	if (isVideo(image)) {
+		return getVideoThumbnailUrl(image.url);
+	}
+
+	const isGif =
+		image.type === "image/gif" || image.url.toLowerCase().endsWith(".gif");
+	if (isGif) {
+		return image.url;
+	}
+
+	const targetWidth = noResize ? 1600 : 400;
+	return `${image.url}${generateOssImageParams(
+		image.width,
+		image.height,
+		targetWidth,
+	)}`;
 }
 
 export default function ImageGallery({
-  images,
-  maxDisplay = 9,
-  className = "",
-  onImageClick,
+	images,
+	maxDisplay = 9,
+	className = "",
+	onImageClick,
 }: ImageGalleryProps) {
-  const [showAll, setShowAll] = useState(false);
+	const groupRef = useRef<ImageGroupElement>(null);
 
-  if (images.length === 0) {
-    return null;
-  }
+	const items = useMemo<ImageGroupItem[]>(
+		() =>
+			images.map((image, index) => ({
+				alt: image.name,
+				loading: index === 0 ? "eager" : "lazy",
+				objectFit: "cover",
+				placeholder: image.blurhash || undefined,
+				placeholderFill: Boolean(image.blurhash),
+				placeholderType: image.blurhash ? "blurhash" : undefined,
+				src: getDisplayUrl(image, images.length === 1),
+			})),
+		[images],
+	);
 
-  const displayImages = showAll ? images : images.slice(0, maxDisplay);
-  const remainingCount = images.length - maxDisplay;
+	const handleImageClick = useCallback(
+		(event: Event) => {
+			event.stopPropagation();
+			const { index } = (event as ImageGroupClickEvent).detail;
+			onImageClick?.(index, event as unknown as React.MouseEvent);
+		},
+		[onImageClick],
+	);
 
-  // 根据图片数量决定布局
-  const getLayoutConfig = (count: number) => {
-    switch (count) {
-      case 1:
-        return {
-          containerClass: "grid grid-cols-1",
-          imageClass: "aspect-[4/3] w-full",
-        };
-      case 2:
-        return {
-          containerClass: "grid grid-cols-2 gap-1",
-          imageClass: "aspect-square w-full",
-        };
-      case 3:
-        return {
-          containerClass: "grid grid-cols-2 gap-1",
-          imageClass: (index: number) =>
-            index === 0 ? "col-span-2 aspect-[2/1] w-full" : "aspect-square w-full",
-        };
-      case 4:
-        return {
-          containerClass: "grid grid-cols-2 gap-1",
-          imageClass: "aspect-square w-full",
-        };
-      case 5:
-        return {
-          containerClass: "grid grid-cols-3 gap-1",
-          imageClass: (index: number) =>
-            index < 2
-              ? "aspect-square w-full"
-              : index === 2
-                ? "col-span-1 row-span-2 aspect-[1/2] w-full"
-                : "aspect-square w-full",
-        };
-      case 6:
-        return {
-          containerClass: "grid grid-cols-3 gap-1",
-          imageClass: "aspect-square w-full",
-        };
-      default:
-        return {
-          containerClass: "grid grid-cols-3 gap-1",
-          imageClass: "aspect-square w-full",
-        };
-    }
-  };
+	useEffect(() => {
+		const group = groupRef.current;
+		if (!group) return;
 
-  const layoutConfig = getLayoutConfig(Math.min(displayImages.length, maxDisplay));
+		group.addEventListener("image-click", handleImageClick);
+		return () => group.removeEventListener("image-click", handleImageClick);
+	}, [handleImageClick]);
 
-  return (
-    <div className={`relative w-full ${className}`}>
-      <div className={layoutConfig.containerClass}>
-        {displayImages.map((image, index) => {
-          const isLastInGrid = index === maxDisplay - 1 && remainingCount > 0;
-          const imageClass =
-            typeof layoutConfig.imageClass === "function"
-              ? layoutConfig.imageClass(index)
-              : layoutConfig.imageClass;
+	useEffect(() => {
+		const group = groupRef.current;
+		if (!group) return;
 
-          // 注意：避免 <button> 内再嵌套 <button> 导致的 hydration 报错。
-          // 结构：外层 div 容器；内部一个铺满的 button 处理图片点击；当为最后一张且有剩余时，再渲染一个覆盖层 button（兄弟节点）。
-          return (
-            <div className="relative overflow-hidden rounded-lg" key={`${image.sec_uid}-${index}`}>
-              {/* 基础图片点击区域 */}
-              <button
-                className={`block h-full w-full transition-opacity ${
-                  isLastInGrid && !showAll
-                    ? "pointer-events-none"
-                    : "cursor-pointer hover:opacity-90"
-                }`}
-                onClick={(e) => {
-                  if (onImageClick) {
-                    onImageClick(index, e);
-                  }
-                  // 如果没有 onImageClick，不阻止冒泡，让事件传递到父级卡片
-                }}
-                type="button"
-              >
-                <OptimizedImage
-                  className={`${imageClass} object-cover`}
-                  image={image}
-                  noResize={images.length === 1}
-                />
-              </button>
+		group.items = items;
+		group.layout = "grid";
+		group.maxVisible = maxDisplay;
+	}, [items, maxDisplay]);
 
-              {/* 显示剩余图片数量（覆盖层按钮，与上面按钮为兄弟关系，避免嵌套） */}
-              {isLastInGrid && !showAll && (
-                <button
-                  className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/60 transition-all hover:bg-black/70"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAll(true);
-                  }}
-                  onMouseEnter={(e) => {
-                    // 阻止鼠标事件穿透到底层图片按钮
-                    e.stopPropagation();
-                  }}
-                  type="button"
-                >
-                  <Badge className="rounded-full bg-white/90 px-4 py-2 font-semibold text-black text-lg hover:bg-white">
-                    +{remainingCount}
-                  </Badge>
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
+	if (images.length === 0) {
+		return null;
+	}
 
-      {/* 收起按钮 */}
-      {showAll && images.length > maxDisplay && (
-        <div className="mt-2 text-center">
-          <button
-            className="text-gray-500 text-sm transition-colors hover:text-gray-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowAll(false);
-            }}
-            type="button"
-          >
-            收起
-          </button>
-        </div>
-      )}
-    </div>
-  );
+	return (
+		<div className={`relative w-full ${className}`}>
+			<eos-image-group ref={groupRef} />
+		</div>
+	);
 }

@@ -1,4 +1,4 @@
-import { registerComponents } from "@eosjs/components";
+import { registerComponents } from "@eosjs/ui";
 import { Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PostImage } from "@/types";
