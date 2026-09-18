@@ -1,0 +1,155 @@
+import { Lottie, type LottieHandle, type LottieProps } from "lottie-react";
+
+import type React from "react";
+import { useEffect, useMemo, useRef } from "react";
+import emptyAnimation from "@/components/lottie/animations/empty.json";
+// 导入本地动画文件
+import loadingAnimation from "@/components/lottie/animations/loading.json";
+
+export type AnimationType = "loading" | "empty" | "custom";
+
+interface LottieAnimationProps {
+  actionButton?: React.ReactNode;
+  animationData?: LottieProps["src"]; // 仅在 type 为 'custom' 时需要
+  autoplay?: boolean;
+  className?: string;
+  emptyDescription?: string;
+  // 用于空状态的文字和按钮
+  emptyTitle?: string;
+  height?: number | string;
+  // 用于加载动画的文字
+  loadingText?: string;
+  loop?: boolean;
+  onClick?: () => void;
+  speed?: number;
+  style?: React.CSSProperties;
+  type?: AnimationType;
+  width?: number | string;
+}
+
+const LottieAnimation: React.FC<LottieAnimationProps> = ({
+  type = "loading",
+  animationData: customAnimationData,
+  width = 120,
+  height = 120,
+  loop = true,
+  autoplay = true,
+  className = "",
+  style,
+  speed = 1,
+  onClick,
+  loadingText = "加载中...",
+  emptyTitle = "暂无数据",
+  emptyDescription = "这里空空如也，快去添加一些内容吧",
+  actionButton,
+}) => {
+  const lottieRef = useRef<LottieHandle | null>(null);
+
+  // 根据 type 选择动画数据
+  const animationData = useMemo(() => {
+    switch (type) {
+      case "loading":
+        return loadingAnimation;
+      case "empty":
+        return emptyAnimation;
+      case "custom":
+        return customAnimationData;
+      default:
+        return loadingAnimation;
+    }
+  }, [type, customAnimationData]);
+
+  // 根据 type 调整默认尺寸
+  const defaultSize = useMemo(() => {
+    if (type === "empty") {
+      return { height: height || 200, width: width || 200 };
+    }
+    return { height, width };
+  }, [type, width, height]);
+
+  useEffect(() => {
+    if (lottieRef.current && speed !== 1) {
+      lottieRef.current.setSpeed(speed);
+    }
+  }, [speed]);
+
+  const defaultStyle: React.CSSProperties = {
+    height: defaultSize.height,
+    width: defaultSize.width,
+    ...style,
+  };
+
+  // 根据 type 渲染不同的布局
+  if (type === "loading") {
+    return (
+      <div className={`flex flex-col items-center justify-center ${className}`}>
+        <button
+          className="border-0 bg-transparent p-0"
+          onClick={onClick}
+          type="button"
+        >
+          <Lottie
+            autoplay={autoplay}
+            loop={loop}
+            lottieRef={lottieRef}
+            src={animationData}
+            style={defaultStyle}
+          />
+        </button>
+        {!!loadingText && (
+          <p className="mt-4 text-gray-500 text-sm dark:text-gray-400">
+            {loadingText}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (type === "empty") {
+    return (
+      <div
+        className={`flex flex-col items-center justify-center p-8 ${className}`}
+      >
+        <button
+          className="border-0 bg-transparent p-0"
+          onClick={onClick}
+          type="button"
+        >
+          <Lottie
+            autoplay={autoplay}
+            loop={loop}
+            lottieRef={lottieRef}
+            src={animationData}
+            style={defaultStyle}
+          />
+        </button>
+        {!!emptyTitle && (
+          <h3 className="mt-4 font-medium text-gray-900 text-lg dark:text-gray-100">
+            {emptyTitle}
+          </h3>
+        )}
+        {!!emptyDescription && (
+          <p className="mt-2 text-center text-gray-500 text-sm dark:text-gray-400">
+            {emptyDescription}
+          </p>
+        )}
+        {Boolean(actionButton) && <div className="mt-6">{actionButton}</div>}
+      </div>
+    );
+  }
+
+  // custom 或默认情况
+  return (
+    <button className={className} onClick={onClick} type="button">
+      <Lottie
+        autoplay={autoplay}
+        loop={loop}
+        lottieRef={lottieRef}
+        src={animationData}
+        style={defaultStyle}
+      />
+    </button>
+  );
+};
+
+export default LottieAnimation;

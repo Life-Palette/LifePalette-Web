@@ -1,16 +1,20 @@
+/* biome-ignore-all lint/performance/noJsxPropsBind: notification actions intentionally capture route state */
+
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
-import AuthGuard from "@/components/auth/AuthGuard";
-import KeepAlivePage from "@/components/common/KeepAlivePage";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
-import ScrollRestoreContainer from "@/components/common/ScrollRestoreContainer";
-import NotificationFilter from "@/components/notification/NotificationFilter";
+import AuthGuard from "@/components/auth/auth-guard";
+import KeepAlivePage from "@/components/common/keep-alive-page";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import ScrollRestoreContainer from "@/components/common/scroll-restore-container";
+import NotificationFilter from "@/components/notification/notification-filter";
 
-const NotificationList = lazy(() => import("../components/notification/NotificationList"));
+const NotificationList = lazy(
+  () => import("../components/notification/notification-list")
+);
 
 import { Button } from "@/components/ui/button";
-import { useMarkAllAsRead, useNotifications } from "@/hooks/useNotifications";
+import { useMarkAllAsRead, useNotifications } from "@/hooks/use-notifications";
 import type { NotificationMessage } from "@/types";
 
 function NotificationsPage() {
@@ -18,11 +22,17 @@ function NotificationsPage() {
   const markAllAsReadMutation = useMarkAllAsRead();
 
   // 根据筛选类型获取通知
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
-    useNotifications({
-      type: activeType === "all" ? undefined : activeType,
-      pageSize: 10,
-    });
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useNotifications({
+    pageSize: 10,
+    type: activeType === "all" ? undefined : activeType,
+  });
 
   // 合并所有页面的通知数据
   const notifications = useMemo(() => {
@@ -37,10 +47,15 @@ function NotificationsPage() {
     const allNotifications = data?.pages.flatMap((page) => page.items) || [];
     return {
       all: allNotifications.length,
-      like: allNotifications.filter((n: NotificationMessage) => n.type === "like").length,
-      comment: allNotifications.filter((n: NotificationMessage) => n.type === "comment").length,
-      collection: allNotifications.filter((n: NotificationMessage) => n.type === "collection")
-        .length,
+      collection: allNotifications.filter(
+        (n: NotificationMessage) => n.type === "collection"
+      ).length,
+      comment: allNotifications.filter(
+        (n: NotificationMessage) => n.type === "comment"
+      ).length,
+      like: allNotifications.filter(
+        (n: NotificationMessage) => n.type === "like"
+      ).length,
     };
   }, [data]);
 
@@ -108,7 +123,10 @@ function NotificationsPage() {
 export const Route = createFileRoute("/notifications")({
   component: () => (
     <KeepAlivePage enableScrollRestore={false} name="notifications">
-      <ScrollRestoreContainer className="h-screen overflow-auto" pageKey="notifications">
+      <ScrollRestoreContainer
+        className="h-screen overflow-auto"
+        pageKey="notifications"
+      >
         <NotificationsPage />
       </ScrollRestoreContainer>
     </KeepAlivePage>

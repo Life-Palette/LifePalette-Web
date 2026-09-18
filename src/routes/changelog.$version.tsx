@@ -1,3 +1,8 @@
+/* biome-ignore-all lint/suspicious/noAssignInExpressions: this existing integration requires the current implementation */
+/* biome-ignore-all lint/suspicious/noUnnecessaryConditions: this existing integration requires the current implementation */
+/* biome-ignore-all lint/style/useFilenamingConvention: TanStack Router route params require this filename */
+/* biome-ignore-all lint/performance/noJsxPropsBind: route actions intentionally capture route state */
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -13,13 +18,13 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { MarkdownPreview } from "@/components/changelog";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
+import MarkdownPreview from "@/components/changelog/markdown-preview";
+import LoadingSpinner from "@/components/common/loading-spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useChangelogByIdentifier, useChangelogs } from "@/hooks/useChangelog";
+import { useChangelogByIdentifier, useChangelogs } from "@/hooks/use-changelog";
 import { cn } from "@/lib/utils";
 import type { ChangelogType } from "@/types";
 
@@ -48,14 +53,20 @@ function extractHeadings(content: string): TocItem[] {
       .toLowerCase();
 
     if (text && level <= 4) {
-      headings.push({ id, text, level });
+      headings.push({ id, level, text });
     }
   }
   return headings;
 }
 
 // 大纲组件
-function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId: string }) {
+function TableOfContents({
+  headings,
+  activeId,
+}: {
+  headings: TocItem[];
+  activeId: string;
+}) {
   const handleClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -80,15 +91,19 @@ function TableOfContents({ headings, activeId }: { headings: TocItem[]; activeId
           const isNewSection = heading.level === 1 && index > 0;
           return (
             <div key={heading.id}>
-              {isNewSection && <div className="my-4 border-border/40 border-t" />}
+              {!!isNewSection && (
+                <div className="my-4 border-border/40 border-t" />
+              )}
               <button
                 className={cn(
                   "block w-full rounded px-2 py-1.5 text-left transition-colors",
                   // 层级缩进
-                  heading.level === 1 && "mt-3 mb-1 font-semibold text-foreground",
+                  heading.level === 1 &&
+                    "mt-3 mb-1 font-semibold text-foreground",
                   heading.level === 2 && "pl-4 font-medium",
                   heading.level === 3 && "pl-7 text-muted-foreground",
-                  heading.level === 4 && "pl-10 text-[13px] text-muted-foreground/80",
+                  heading.level === 4 &&
+                    "pl-10 text-[13px] text-muted-foreground/80",
                   // 激活状态
                   activeId === heading.id
                     ? "bg-primary/5 text-primary"
@@ -112,29 +127,32 @@ const typeConfig: Record<
   ChangelogType,
   { label: string; icon: React.ReactNode; className: string; bgClass: string }
 > = {
-  feature: {
-    label: "新功能",
-    icon: <Sparkles className="h-4 w-4" />,
-    className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-    bgClass: "from-emerald-500/5 to-emerald-500/0",
+  breaking: {
+    bgClass: "from-orange-500/5 to-orange-500/0",
+    className:
+      "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+    icon: <AlertTriangle className="h-4 w-4" />,
+    label: "破坏性变更",
   },
   bugfix: {
-    label: "Bug 修复",
-    icon: <Bug className="h-4 w-4" />,
-    className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
     bgClass: "from-red-500/5 to-red-500/0",
+    className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+    icon: <Bug className="h-4 w-4" />,
+    label: "Bug 修复",
+  },
+  feature: {
+    bgClass: "from-emerald-500/5 to-emerald-500/0",
+    className:
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    icon: <Sparkles className="h-4 w-4" />,
+    label: "新功能",
   },
   improvement: {
-    label: "优化改进",
-    icon: <Zap className="h-4 w-4" />,
-    className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
     bgClass: "from-blue-500/5 to-blue-500/0",
-  },
-  breaking: {
-    label: "破坏性变更",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
-    bgClass: "from-orange-500/5 to-orange-500/0",
+    className:
+      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+    icon: <Zap className="h-4 w-4" />,
+    label: "优化改进",
   },
 };
 
@@ -145,15 +163,19 @@ function formatDate(dateString: string | null): string {
   }
   const date = new Date(dateString);
   return date.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
     day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function ChangelogDetailPage() {
   const { version } = Route.useParams();
-  const { data: changelog, isLoading, error } = useChangelogByIdentifier(version);
+  const {
+    data: changelog,
+    isLoading,
+    error,
+  } = useChangelogByIdentifier(version);
   const [activeId, setActiveId] = useState("");
   const hasScrolledToHash = useRef(false);
 
@@ -162,9 +184,14 @@ function ChangelogDetailPage() {
   const allChangelogs = allLogs?.pages.flatMap((page) => page.items) || [];
 
   // 查找当前日志在列表中的索引
-  const currentIndex = allChangelogs.findIndex((log) => log.version === version);
+  const currentIndex = allChangelogs.findIndex(
+    (log) => log.version === version
+  );
   const prevLog = currentIndex > 0 ? allChangelogs[currentIndex - 1] : null;
-  const nextLog = currentIndex < allChangelogs.length - 1 ? allChangelogs[currentIndex + 1] : null;
+  const nextLog =
+    currentIndex < allChangelogs.length - 1
+      ? allChangelogs[currentIndex + 1]
+      : null;
 
   // 提取大纲
   const headings = useMemo(() => {
@@ -198,7 +225,7 @@ function ChangelogDetailPage() {
         setActiveId(decodedHash);
         hasScrolledToHash.current = true;
       } else if (attempts < maxAttempts) {
-        attempts++;
+        attempts += 1;
         requestAnimationFrame(checkElement);
       }
     };
@@ -212,7 +239,7 @@ function ChangelogDetailPage() {
         .map((h) => document.getElementById(h.id))
         .filter(Boolean) as HTMLElement[];
 
-      for (let i = headingElements.length - 1; i >= 0; i--) {
+      for (let i = headingElements.length - 1; i >= 0; i -= 1) {
         const el = headingElements[i];
         const rect = el.getBoundingClientRect();
         if (rect.top <= 100) {
@@ -237,8 +264,8 @@ function ChangelogDetailPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${changelog?.version} - ${changelog?.title}`,
           text: `查看 LifePalette ${changelog?.version} 更新日志`,
+          title: `${changelog?.version} - ${changelog?.title}`,
           url,
         });
       } catch {
@@ -264,8 +291,12 @@ function ChangelogDetailPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
         <div className="text-center">
-          <h2 className="mb-2 font-semibold text-2xl text-foreground">未找到该版本</h2>
-          <p className="mb-6 text-muted-foreground">版本 {version} 不存在或已被删除</p>
+          <h2 className="mb-2 font-semibold text-2xl text-foreground">
+            未找到该版本
+          </h2>
+          <p className="mb-6 text-muted-foreground">
+            版本 {version} 不存在或已被删除
+          </p>
           <Link to="/changelog">
             <Button>
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -292,7 +323,12 @@ function ChangelogDetailPage() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Button className="gap-2" onClick={handleShare} size="sm" variant="outline">
+            <Button
+              className="gap-2"
+              onClick={handleShare}
+              size="sm"
+              variant="outline"
+            >
               <Share2 className="h-4 w-4" />
               <span className="hidden sm:inline">分享</span>
             </Button>
@@ -306,13 +342,21 @@ function ChangelogDetailPage() {
           {/* 主内容区域 */}
           <main className="min-w-0 flex-1">
             {/* 版本信息头部 */}
-            <div className={cn("mb-8 rounded-2xl bg-gradient-to-b p-8", config.bgClass)}>
+            <div
+              className={cn(
+                "mb-8 rounded-2xl bg-gradient-to-b p-8",
+                config.bgClass
+              )}
+            >
               <div className="mb-4 flex flex-wrap items-center gap-3">
                 <h1 className="font-bold font-mono text-3xl text-foreground sm:text-4xl">
                   {changelog.version}
                 </h1>
                 <Badge
-                  className={cn("flex items-center gap-1.5 px-3 py-1", config.className)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1",
+                    config.className
+                  )}
                   variant="outline"
                 >
                   {config.icon}
@@ -324,7 +368,7 @@ function ChangelogDetailPage() {
                 {changelog.title}
               </h2>
 
-              {changelog.publishedAt && (
+              {!!changelog.publishedAt && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>发布于 {formatDate(changelog.publishedAt)}</span>

@@ -1,17 +1,24 @@
 import { Link } from "@tanstack/react-router";
 import { History, LogOut, Search, User } from "lucide-react";
+import { useCallback } from "react";
 import { ModeToggle } from "@/components/common/mode-toggle";
-import { GithubIcon as Github } from "@/components/icons/GithubIcon";
-import MobileSidebar from "@/components/layout/MobileSidebar";
+import { GithubIcon as Github } from "@/components/icons/github-icon";
+import MobileSidebar from "@/components/layout/mobile-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useIsAuthenticated, useLogout } from "@/hooks/useAuth";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useIsAuthenticated, useLogout } from "@/hooks/use-auth";
 import { getUserAvatar } from "@/utils/avatar";
 
-// import { useUnreadCount } from "@/hooks/useNotifications";
+// import { useUnreadCount } from "@/hooks/use-notifications";
+
+const noop = () => undefined;
 
 interface HeaderProps {
   activeTab: string;
@@ -19,9 +26,17 @@ interface HeaderProps {
   onTabChange?: (tab: string) => void;
 }
 
-export default function Header({ activeTab, onLogin, onTabChange }: HeaderProps) {
+export default function Header({
+  activeTab,
+  onLogin,
+  onTabChange,
+}: HeaderProps) {
   const { isAuthenticated, user } = useIsAuthenticated();
   const logoutMutation = useLogout();
+  const handleLogout = useCallback(
+    () => logoutMutation.mutate(),
+    [logoutMutation]
+  );
   // TODO: 暂时屏蔽通知功能
   // const { data: unreadCount = 0 } = useUnreadCount();
 
@@ -31,13 +46,22 @@ export default function Header({ activeTab, onLogin, onTabChange }: HeaderProps)
         <div className="flex items-center justify-between">
           {/* 移动端菜单 */}
           <div className="md:hidden">
-            <MobileSidebar activeTab={activeTab} onTabChange={onTabChange || (() => {})} />
+            <MobileSidebar
+              activeTab={activeTab}
+              onTabChange={onTabChange || noop}
+            />
           </div>
 
           {/* 简约Logo */}
-          <Link className="group flex cursor-pointer items-center gap-3" preload="intent" to="/">
+          <Link
+            className="group flex cursor-pointer items-center gap-3"
+            preload="intent"
+            to="/"
+          >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary shadow-sm transition-all duration-300 group-hover:rotate-[-10deg] group-hover:scale-110 group-hover:shadow-primary/25">
-              <span className="font-bold text-lg text-primary-foreground italic">L</span>
+              <span className="font-bold text-lg text-primary-foreground italic">
+                L
+              </span>
             </div>
             <h1 className="font-bold text-2xl text-foreground tracking-tight transition-colors group-hover:text-primary">
               Life
@@ -142,7 +166,7 @@ export default function Header({ activeTab, onLogin, onTabChange }: HeaderProps)
                     <Button
                       className="h-9 w-9 rounded-full text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive dark:hover:bg-white/10 dark:hover:text-red-400"
                       disabled={logoutMutation.isPending}
-                      onClick={() => logoutMutation.mutate()}
+                      onClick={handleLogout}
                       size="icon"
                       variant="ghost"
                     >
@@ -156,11 +180,22 @@ export default function Header({ activeTab, onLogin, onTabChange }: HeaderProps)
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link preload="intent" search={{ userId: undefined }} to="/profile">
+                    <Link
+                      preload="intent"
+                      search={{ userId: undefined }}
+                      to="/profile"
+                    >
                       <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-border transition-all duration-200 hover:scale-110 hover:ring-ring dark:ring-white/10 dark:hover:ring-primary/50">
-                        <AvatarImage alt={user?.name || "用户头像"} src={getUserAvatar(user)} />
+                        <AvatarImage
+                          alt={user?.name || "用户头像"}
+                          src={getUserAvatar(user)}
+                        />
                         <AvatarFallback className="bg-muted font-medium text-muted-foreground text-sm dark:bg-white/10">
-                          {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
+                          {user?.name ? (
+                            user.name.charAt(0).toUpperCase()
+                          ) : (
+                            <User size={16} />
+                          )}
                         </AvatarFallback>
                       </Avatar>
                     </Link>

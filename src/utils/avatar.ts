@@ -1,7 +1,7 @@
 // 默认头像路径
 export const DEFAULT_AVATAR = {
-  MALE: "/boy.png",
   FEMALE: "/girl.png",
+  MALE: "/boy.png",
 };
 
 /**

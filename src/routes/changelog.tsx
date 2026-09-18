@@ -1,11 +1,13 @@
+/* biome-ignore-all lint/performance/noJsxPropsBind: route actions intentionally capture route state */
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, History } from "lucide-react";
 import { useMemo } from "react";
-import { ChangelogList } from "@/components/changelog";
-import KeepAlivePage from "@/components/common/KeepAlivePage";
-import ScrollRestoreContainer from "@/components/common/ScrollRestoreContainer";
+import ChangelogList from "@/components/changelog/changelog-list";
+import KeepAlivePage from "@/components/common/keep-alive-page";
+import ScrollRestoreContainer from "@/components/common/scroll-restore-container";
 import { Button } from "@/components/ui/button";
-import { useChangelogs } from "@/hooks/useChangelog";
+import { useChangelogs } from "@/hooks/use-changelog";
 
 function ChangelogPage() {
   const { data, isLoading, hasNextPage, fetchNextPage } = useChangelogs({
@@ -53,7 +55,10 @@ function ChangelogPage() {
 export const Route = createFileRoute("/changelog")({
   component: () => (
     <KeepAlivePage enableScrollRestore={false} name="changelog">
-      <ScrollRestoreContainer className="h-screen overflow-auto" pageKey="changelog">
+      <ScrollRestoreContainer
+        className="h-screen overflow-auto"
+        pageKey="changelog"
+      >
         <ChangelogPage />
       </ScrollRestoreContainer>
     </KeepAlivePage>

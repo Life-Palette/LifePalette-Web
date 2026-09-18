@@ -5,6 +5,8 @@
  *   import { topicsApi, filesApi, adaptPage } from "@/services/api"
  */
 
+// biome-ignore-all lint/performance/noBarrelFile: API modules intentionally share one application entry point
+
 export type { ApiResponse, PageData } from "../http";
 // HTTP 工具
 export { adaptPage, http } from "../http";
@@ -16,7 +18,12 @@ export type { TopicParams } from "./content";
 export { commentsApi, tagsApi, topicsApi } from "./content";
 export type { FileListParams } from "./files";
 export { filesApi } from "./files";
-export { collectionsApi, followsApi, likesApi, notificationsApi } from "./social";
+export {
+  collectionsApi,
+  followsApi,
+  likesApi,
+  notificationsApi,
+} from "./social";
 // 类型
 export type { ApiFile, ApiTopic, ApiUser } from "./types";
 export { usersApi } from "./users";

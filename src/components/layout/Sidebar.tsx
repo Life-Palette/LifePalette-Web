@@ -1,4 +1,13 @@
-import { Bookmark, Heart, Home, Search, Settings, TrendingUp, Users } from "lucide-react";
+import {
+  Bookmark,
+  Heart,
+  Home,
+  Search,
+  Settings,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { type MouseEvent, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,36 +18,43 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+  const handleNavClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      onTabChange(event.currentTarget.dataset.tab ?? "");
+    },
+    [onTabChange]
+  );
+
   const navItems = [
     {
-      id: "home",
-      icon: Home,
-      label: "首页",
       color: "hover:bg-blue-50 hover:text-blue-600",
+      icon: Home,
+      id: "home",
+      label: "首页",
     },
     {
-      id: "search",
-      icon: Search,
-      label: "发现",
       color: "hover:bg-purple-50 hover:text-purple-600",
+      icon: Search,
+      id: "search",
+      label: "发现",
     },
     {
-      id: "likes",
-      icon: Heart,
-      label: "喜欢",
       color: "hover:bg-red-50 hover:text-red-600",
+      icon: Heart,
+      id: "likes",
+      label: "喜欢",
     },
     {
-      id: "saved",
-      icon: Bookmark,
-      label: "收藏",
       color: "hover:bg-yellow-50 hover:text-yellow-600",
+      icon: Bookmark,
+      id: "saved",
+      label: "收藏",
     },
     {
-      id: "trending",
-      icon: TrendingUp,
-      label: "热门",
       color: "hover:bg-green-50 hover:text-green-600",
+      icon: TrendingUp,
+      id: "trending",
+      label: "热门",
     },
   ];
 
@@ -60,8 +76,9 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                     ? "bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
                     : `text-muted-foreground hover:bg-accent/80 hover:text-foreground ${item.color}`
                 }`}
+                data-tab={item.id}
                 key={item.id}
-                onClick={() => onTabChange(item.id)}
+                onClick={handleNavClick}
                 variant={isActive ? "default" : "ghost"}
               >
                 <Icon size={22} />
@@ -110,10 +127,10 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             热门话题
           </h3>
           <div className="space-y-2">
-            {hotTopics.map((tag, index) => (
+            {hotTopics.map((tag) => (
               <Button
                 className="h-auto w-full justify-start rounded-2xl px-4 py-3 text-left font-medium text-muted-foreground transition-all duration-300 hover:bg-accent/80 hover:text-foreground"
-                key={index}
+                key={tag}
                 variant="ghost"
               >
                 <span className="mr-2 text-green-600">#</span>

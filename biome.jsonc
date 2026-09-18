@@ -1,19 +1,17 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/biome/core", "ultracite/biome/react"],
-  "files": { "includes": ["src/**"], "maxSize": 2097152 },
-  "formatter": { "lineWidth": 100 },
-  "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "always" } },
-  "css": { "parser": { "cssModules": false } },
-  "linter": {
-    "rules": {
-      "style": { "noNonNullAssertion": "off", "useFilenamingConvention": "off", "useNamingConvention": "off", "noNestedTernary": "off", "noEnum": "off", "noParameterProperties": "off", "useBlockStatements": "off", "useConsistentMemberAccessibility": "off", "useDefaultSwitchClause": "off", "useReadonlyClassProperties": "off", "noNamespace": "off" },
-      "suspicious": { "noExplicitAny": "off", "noArrayIndexKey": "off", "noImplicitAnyLet": "off", "noEvolvingTypes": "off", "useAwait": "off", "noEmptyBlockStatements": "off", "useIterableCallbackReturn": "off", "noAssignInExpressions": "off", "noShadowRestrictedNames": "off", "noAlert": "off" },
-      "complexity": { "noForEach": "off", "noExcessiveCognitiveComplexity": "off", "noUselessFragments": "warn" },
-      "a11y": { "useButtonType": "off", "noStaticElementInteractions": "off", "useKeyWithClickEvents": "off", "noNoninteractiveElementInteractions": "off", "noSvgWithoutTitle": "off", "noLabelWithoutControl": "off", "useMediaCaption": "off", "useSemanticElements": "off" },
-      "security": { "noDangerouslySetInnerHtml": "off" },
-      "correctness": { "useExhaustiveDependencies": "warn", "noNestedComponentDefinitions": "warn", "useImageSize": "warn", "noUnusedFunctionParameters": "warn", "noInvalidUseBeforeDeclaration": "off" },
-      "performance": { "noBarrelFile": "off", "useTopLevelRegex": "off", "noNamespaceImport": "off" }
-    }
+  "files": {
+    "includes": [
+      "!!**/dist",
+      "!!**/node_modules",
+      "!!**/.git",
+      "!!public",
+      "!!**/*.svg",
+      "!!src/routeTree.gen.ts",
+      "!!src/components/ui",
+      "!!components.json"
+    ],
+    "maxSize": 2097152
   }
 }

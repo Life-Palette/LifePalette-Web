@@ -14,7 +14,7 @@ export const DEFAULT_ZOOM = 12;
 
 // 地图样式
 export const MAP_STYLES = {
-  light: "mapbox://styles/mapbox/light-v11",
   dark: "mapbox://styles/mapbox/dark-v11",
+  light: "mapbox://styles/mapbox/light-v11",
   streets: "mapbox://styles/mapbox/streets-v12",
 } as const;

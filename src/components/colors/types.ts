@@ -1,5 +1,7 @@
 import type { PostImage } from "@/types";
 
+const HEX_COLOR_PATTERN = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+
 // 颜色项类型
 export interface ColorItem {
   count: number;
@@ -29,13 +31,16 @@ export function getLuminance(hex: string): number {
 }
 
 // hex转rgb
-export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: Number.parseInt(result[1], 16),
-        g: Number.parseInt(result[2], 16),
-        b: Number.parseInt(result[3], 16),
-      }
-    : null;
+export function hexToRgb(
+  hex: string
+): { r: number; g: number; b: number } | null {
+  const result = hex.match(HEX_COLOR_PATTERN);
+  if (!result) {
+    return null;
+  }
+  return {
+    b: Number.parseInt(result[3], 16),
+    g: Number.parseInt(result[2], 16),
+    r: Number.parseInt(result[1], 16),
+  };
 }

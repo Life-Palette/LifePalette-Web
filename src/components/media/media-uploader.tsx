@@ -1,0 +1,664 @@
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { LivePhotoViewer } from "live-photo";
+import { GripVertical, Image, MapPin, Video, X } from "lucide-react";
+import React, { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
+import { LocationPicker } from "@/components/map/location-picker";
+import { filesApi } from "@/services/api";
+import { detectLivePhotoPairs } from "@/services/upload";
+import type { PostImage } from "@/types";
+import { extractGPSFromImage } from "@/utils/upload/gps-extractor";
+
+// 统一的 MediaItem 类型定义
+type MediaItemType = "existing" | "new";
+
+interface BaseMediaItem {
+  id: string;
+  type: MediaItemType;
+}
+
+interface ExistingMediaItem extends BaseMediaItem {
+  data: PostImage;
+  type: "existing";
+}
+
+interface NewMediaItem extends BaseMediaItem {
+  data: {
+    file: File;
+    videoFile?: File;
+    originalIndex: number;
+    hasGPS?: boolean;
+    lat?: number;
+    lng?: number;
+  };
+  type: "new";
+}
+
+export type UnifiedMediaItem = ExistingMediaItem | NewMediaItem;
+
+// 统一的媒体项组件
+interface UnifiedSortableMediaItemProps {
+  item: UnifiedMediaItem;
+  onLocationAdd?: (
+    itemId: string,
+    location: { lat: number; lng: number }
+  ) => void;
+  onRemove: (itemId: string) => void;
+}
+
+function UnifiedSortableMediaItem({
+  item,
+  onRemove,
+  onLocationAdd,
+}: UnifiedSortableMediaItemProps) {
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: item.id,
+  });
+
+  const style = {
+    opacity: isDragging ? 0.5 : 1,
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const [preview, setPreview] = useState<string>("");
+  const [videoPreview, setVideoPreview] = useState<string>("");
+  const livePhotoRef = useRef<HTMLDivElement>(null);
+  const livePhotoViewerRef = useRef<LivePhotoViewer | null>(null);
+  const openLocationPicker = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setShowLocationPicker(true);
+    },
+    []
+  );
+  const closeLocationPicker = useCallback(() => {
+    setShowLocationPicker(false);
+  }, []);
+  const selectLocation = useCallback(
+    (location: { lat: number; lng: number }) => {
+      onLocationAdd?.(item.id, location);
+      setShowLocationPicker(false);
+    },
+    [item.id, onLocationAdd]
+  );
+  const removeItem = useCallback(() => {
+    onRemove(item.id);
+  }, [item.id, onRemove]);
+
+  // 判断是否有地理位置信息（注意：lat/lng 可能为 0，不能用 !! 判断）
+  const hasLocation =
+    item.data.lat !== undefined &&
+    item.data.lat !== null &&
+    item.data.lng !== undefined &&
+    item.data.lng !== null;
+
+  // 获取初始位置（如果有）
+  const initialLocation = hasLocation
+    ? { lat: item.data.lat ?? 0, lng: item.data.lng ?? 0 }
+    : undefined;
+
+  // 为新文件创建预览 URL
+  React.useEffect(() => {
+    if (item.type === "new") {
+      const url = URL.createObjectURL(item.data.file);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [item]);
+
+  React.useEffect(() => {
+    if (item.type === "new" && item.data.videoFile) {
+      const url = URL.createObjectURL(item.data.videoFile);
+      setVideoPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [item]);
+
+  // 判断媒体类型
+  const isLivePhoto =
+    item.type === "existing" ? !!item.data.videoSrc : !!item.data.videoFile;
+  const isVideo =
+    item.type === "existing"
+      ? item.data.type.startsWith("video/")
+      : item.data.file.type.startsWith("video/");
+
+  // 获取显示 URL
+  let imageUrl = preview;
+  if (item.type === "existing") {
+    imageUrl = isVideo
+      ? `${item.data.url}?x-oss-process=video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast`
+      : `${item.data.url}?x-oss-process=image/resize,w_300,h_200,m_lfit/quality,q_10/format,webp`;
+  }
+  const videoUrl = item.type === "existing" ? item.data.videoSrc : videoPreview;
+
+  // 初始化 Live Photo
+  React.useEffect(() => {
+    if (isLivePhoto && livePhotoRef.current && imageUrl && videoUrl) {
+      try {
+        livePhotoViewerRef.current = new LivePhotoViewer({
+          container: livePhotoRef.current,
+          height: "100%",
+          imageCustomization: {
+            styles: {
+              objectFit: "cover",
+            },
+          },
+          photoSrc: imageUrl,
+          videoSrc: videoUrl,
+          width: "100%",
+        });
+      } catch (error) {
+        console.error("Live Photo 初始化失败:", error);
+      }
+    }
+  }, [isLivePhoto, imageUrl, videoUrl]);
+
+  let mediaPreview: React.ReactNode = null;
+  if (isLivePhoto) {
+    mediaPreview = <div className="h-full w-full" ref={livePhotoRef} />;
+  } else if (isVideo && imageUrl) {
+    mediaPreview = (
+      <video className="h-full w-full object-cover" src={imageUrl}>
+        <track kind="captions" label="媒体预览" src="data:text/vtt,WEBVTT" />
+      </video>
+    );
+  } else if (imageUrl) {
+    mediaPreview = (
+      <img
+        alt={item.type === "existing" ? item.data.name : ""}
+        className="h-full w-full object-cover"
+        height={120}
+        src={imageUrl}
+        width={120}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100"
+      ref={setNodeRef}
+      style={style}
+    >
+      {/* 根据类型渲染内容 */}
+      {mediaPreview}
+
+      {/* 拖拽手柄 */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 left-2 cursor-grab rounded bg-black/50 p-1 opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100"
+      >
+        <GripVertical className="text-white" size={16} />
+      </div>
+
+      {/* 删除按钮 */}
+      <button
+        className="absolute top-2 right-2 rounded-full bg-black/50 p-1 opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
+        onClick={removeItem}
+        type="button"
+      >
+        <X className="text-white" size={16} />
+      </button>
+
+      {/* 视频标识 */}
+      {isVideo && !isLivePhoto && (
+        <div className="absolute right-2 bottom-2 rounded bg-black/50 px-2 py-1">
+          <Video className="text-white" size={12} />
+        </div>
+      )}
+
+      {/* 地理位置标识/添加按钮 */}
+      <div className="absolute bottom-2 left-2">
+        {hasLocation ? (
+          <button
+            className="flex cursor-pointer items-center gap-1 rounded bg-black/50 px-2 py-1 backdrop-blur-sm transition-colors hover:bg-black/70"
+            onClick={openLocationPicker}
+            title="包含地理位置信息，点击修改"
+            type="button"
+          >
+            <MapPin className="text-white" size={12} />
+          </button>
+        ) : (
+          <button
+            className="flex items-center gap-1 rounded bg-black/50 px-2 py-1 opacity-0 backdrop-blur-sm transition-colors hover:bg-black/70 group-hover:opacity-100"
+            onClick={openLocationPicker}
+            title="添加地理位置"
+            type="button"
+          >
+            <MapPin className="text-white/70" size={12} />
+            <span className="text-white/70 text-xs">添加位置</span>
+          </button>
+        )}
+      </div>
+
+      {/* 位置选择器 */}
+      {!!showLocationPicker && (
+        <LocationPicker
+          initialLocation={initialLocation}
+          isOpen={showLocationPicker}
+          onClose={closeLocationPicker}
+          onLocationSelect={selectLocation}
+        />
+      )}
+    </div>
+  );
+}
+
+// MediaUploader 组件 Props
+interface MediaUploaderProps {
+  /** 是否允许压缩大于 20MB 的图片 */
+  compressLargeFiles?: boolean;
+  disabled?: boolean;
+  initialImages?: PostImage[];
+  onChange?: (items: UnifiedMediaItem[]) => void;
+}
+
+export function MediaUploader({
+  initialImages = [],
+  disabled = false,
+  onChange,
+  compressLargeFiles = false,
+}: MediaUploaderProps) {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [unifiedMediaItems, setUnifiedMediaItems] = useState<
+    UnifiedMediaItem[]
+  >([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 拖拽排序传感器
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // 初始化已有图片
+  React.useEffect(() => {
+    if (initialImages.length > 0) {
+      const existingItems: ExistingMediaItem[] = initialImages.map((img) => ({
+        data: img,
+        id: `existing-${img.sec_uid}`,
+        type: "existing",
+      }));
+      setUnifiedMediaItems(existingItems);
+    }
+  }, [initialImages]);
+
+  // 通知父组件变化
+  React.useEffect(() => {
+    onChange?.(unifiedMediaItems);
+  }, [unifiedMediaItems, onChange]);
+
+  // 添加新文件到统一列表
+  const addFiles = useCallback(
+    (files: File[]) => {
+      if (files.length === 0) {
+        return;
+      }
+
+      // 文件大小限制：20MB
+      const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
+      const validFiles: File[] = [];
+      const oversizedFiles: string[] = [];
+
+      for (const file of files) {
+        const isLarge = file.size > MAX_FILE_SIZE;
+        const isImage = file.type.startsWith("image/");
+        if (isLarge && !(compressLargeFiles && isImage)) {
+          oversizedFiles.push(file.name);
+        } else {
+          validFiles.push(file);
+        }
+      }
+
+      if (oversizedFiles.length > 0) {
+        const isOnlyImages = oversizedFiles.every((name) => {
+          const file = files.find((f) => f.name === name);
+          return file?.type.startsWith("image/");
+        });
+        if (isOnlyImages && !compressLargeFiles) {
+          toast.error("包含大于 20MB 的图片，请开启「大图压缩」功能");
+        } else {
+          toast.error("文件大小超出限制 (20MB)", {
+            description: `以下文件过大：${oversizedFiles.join(", ")}`,
+          });
+        }
+      }
+      if (validFiles.length === 0) {
+        return;
+      }
+
+      const startIndex = selectedFiles.length;
+      const newSelectedFiles = [...selectedFiles, ...validFiles];
+      setSelectedFiles(newSelectedFiles);
+
+      // Live Photo 配对
+      const livePhotoPairs = detectLivePhotoPairs(validFiles);
+      const livePhotoMap = new Map<File, File>();
+      const pairedVideoFiles = new Set<File>();
+      for (const pair of livePhotoPairs) {
+        livePhotoMap.set(pair.image, pair.video);
+        pairedVideoFiles.add(pair.video);
+      }
+      const displayFiles = validFiles.filter(
+        (file) => !pairedVideoFiles.has(file)
+      );
+
+      // 先生成预览，GPS信息设为null
+      const newItems: NewMediaItem[] = displayFiles.map(
+        (file, displayIndex) => {
+          const indexInValidFiles = validFiles.indexOf(file);
+          const originalIndex = startIndex + indexInValidFiles;
+          const videoFile = livePhotoMap.get(file);
+          return {
+            data: {
+              file,
+              hasGPS: undefined,
+              lat: undefined,
+              lng: undefined,
+              originalIndex,
+              videoFile,
+            },
+            id: `new-${Date.now()}-${displayIndex}`,
+            type: "new",
+          };
+        }
+      );
+      setUnifiedMediaItems((prev) => [...prev, ...newItems]);
+
+      // 异步批量提取GPS，逐步补齐
+      setTimeout(() => {
+        Promise.all(
+          displayFiles.map(async (file) => {
+            if (file.type.startsWith("image/")) {
+              return await extractGPSFromImage(file);
+            }
+            return null;
+          })
+        ).then((gpsResults) => {
+          setUnifiedMediaItems((prev) =>
+            prev.map((item, idx) => {
+              if (item.type === "new" && idx >= prev.length - newItems.length) {
+                const gpsData =
+                  gpsResults[idx - (prev.length - newItems.length)];
+                return {
+                  ...item,
+                  data: {
+                    ...item.data,
+                    hasGPS: gpsData !== null,
+                    lat: gpsData?.lat,
+                    lng: gpsData?.lng,
+                  },
+                };
+              }
+              return item;
+            })
+          );
+        });
+      }, 0);
+    },
+    [compressLargeFiles, selectedFiles]
+  );
+
+  // 处理文件选择
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      addFiles(files);
+
+      // 清空文件输入
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    },
+    [addFiles]
+  );
+
+  // 处理拖拽
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+
+      const files = Array.from(e.dataTransfer.files).filter(
+        (file) =>
+          file.type.startsWith("image/") || file.type.startsWith("video/")
+      );
+
+      addFiles(files);
+    },
+    [addFiles]
+  );
+
+  // 统一的拖拽排序处理
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setUnifiedMediaItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  }, []);
+
+  // 统一的删除媒体项逻辑
+  const handleRemoveMediaItem = useCallback((itemId: string) => {
+    setUnifiedMediaItems((prev) => {
+      const item = prev.find((i) => i.id === itemId);
+      if (!item) {
+        return prev;
+      }
+
+      // 如果是新文件，从 selectedFiles 中移除
+      if (item.type === "new") {
+        const { videoFile, originalIndex } = item.data;
+        setSelectedFiles((files) => {
+          if (videoFile) {
+            // Live Photo: 同时删除图片和视频
+            const videoIndex = files.indexOf(videoFile);
+            return files.filter(
+              (_, i) => i !== originalIndex && i !== videoIndex
+            );
+          }
+          // 普通文件
+          return files.filter((_, i) => i !== originalIndex);
+        });
+      }
+
+      // 从统一列表中移除
+      return prev.filter((i) => i.id !== itemId);
+    });
+  }, []);
+
+  // 处理添加位置
+  const handleLocationAdd = useCallback(
+    async (itemId: string, location: { lat: number; lng: number }) => {
+      // 先找到对应的 item
+      const item = unifiedMediaItems.find((i) => i.id === itemId);
+      if (!item) {
+        return;
+      }
+
+      // 如果是已上传的图片，先调用API更新
+      if (item.type === "existing") {
+        try {
+          await filesApi.update(item.data.sec_uid, {
+            lat: location.lat,
+            lng: location.lng,
+          });
+        } catch (error) {
+          console.error("更新文件位置失败:", error);
+          return; // 如果更新失败，不更新本地状态
+        }
+      }
+
+      // API 更新成功后，再更新本地状态
+      setUnifiedMediaItems((prev) =>
+        prev.map((i) => {
+          if (i.id !== itemId) {
+            return i;
+          }
+
+          if (i.type === "existing") {
+            return {
+              ...i,
+              data: {
+                ...i.data,
+                lat: location.lat,
+                lng: location.lng,
+              },
+            } as ExistingMediaItem;
+          }
+
+          return {
+            ...i,
+            data: {
+              ...i.data,
+              lat: location.lat,
+              lng: location.lng,
+            },
+          } as NewMediaItem;
+        })
+      );
+    },
+    [unifiedMediaItems]
+  );
+
+  // 重置
+  const reset = () => {
+    setSelectedFiles([]);
+    setUnifiedMediaItems([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // 暴露重置方法
+  React.useImperativeHandle(React.useRef<{ reset: () => void }>(null), () => ({
+    reset,
+  }));
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="font-medium text-gray-700 text-sm">
+          图片/视频（可选）
+        </div>
+      </div>
+
+      {/* 上传区域 */}
+      <div
+        className={`rounded-xl border-2 border-dashed p-4 text-center transition-all ${
+          isDragging
+            ? "border-black bg-gray-100"
+            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/50"
+        } ${disabled ? "pointer-events-none opacity-50" : ""}`}
+      >
+        {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: drop events are intentionally handled by the file picker label */}
+        <label
+          className="group block cursor-pointer"
+          htmlFor="media-upload"
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <div className="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 transition-colors group-hover:bg-gray-200">
+            <Image className="text-gray-400" size={14} />
+          </div>
+          <p className="text-gray-600 text-xs">点击或拖拽上传图片/视频</p>
+          <p className="text-gray-400 text-xs">
+            支持 JPG、PNG、MP4 等格式，单文件需要小于 20MB
+          </p>
+        </label>
+        <input
+          accept="image/*,video/*"
+          className="hidden"
+          disabled={disabled}
+          id="media-upload"
+          multiple
+          onChange={handleFileChange}
+          ref={fileInputRef}
+          type="file"
+        />
+      </div>
+
+      {/* 媒体预览网格 */}
+      {unifiedMediaItems.length > 0 && (
+        <>
+          <div className="max-h-75 overflow-y-auto rounded-lg border border-gray-200 p-2">
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              sensors={sensors}
+            >
+              <SortableContext
+                items={unifiedMediaItems.map((item) => item.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid grid-cols-3 gap-2">
+                  {unifiedMediaItems.map((item) => (
+                    <UnifiedSortableMediaItem
+                      item={item}
+                      key={item.id}
+                      onLocationAdd={handleLocationAdd}
+                      onRemove={handleRemoveMediaItem}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+
+          {/* 地理位置说明 */}
+          <div className="mt-2 flex items-start gap-2 text-gray-500 text-xs">
+            <p>
+              <MapPin className="mx-0.5 -mt-0.5 inline" size={12} />
+              表示该图片已添加地理位置信息，点击可进行修改；如果图片没有添加地理位置信息，
+              可悬浮到对应图片上，点击“添加位置”进行编辑，相关信息会用于您的轨迹统计。
+            </p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

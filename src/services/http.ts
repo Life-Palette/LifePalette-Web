@@ -2,13 +2,13 @@ import { config } from "@/config/env";
 
 // ============ 类型 ============
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
   result: T;
 }
 
-export interface PageData<T = any> {
+export interface PageData<T = unknown> {
   list: T[];
   page: number;
   pageSize: number;
@@ -17,15 +17,15 @@ export interface PageData<T = any> {
 }
 
 export interface RequestOptions extends Omit<RequestInit, "body"> {
-  body?: any;
-  params?: Record<string, any>;
+  body?: unknown;
+  params?: Record<string, unknown>;
   skipAuth?: boolean;
 }
 
 // ============ 工具函数 ============
 
 /** 构建查询字符串，自动过滤 undefined/null */
-function buildQuery(params?: Record<string, any>): string {
+function buildQuery(params?: Record<string, unknown>): string {
   if (!params) {
     return "";
   }
@@ -40,20 +40,22 @@ function buildQuery(params?: Record<string, any>): string {
 }
 
 /** 适配 Go 后端分页响应为统一格式 */
-export function adaptPage<T>(raw: any): PageData<T> {
+export function adaptPage<T>(raw: unknown): PageData<T> {
+  const data =
+    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   return {
-    list: raw?.list || [],
-    page: raw?.page || 1,
-    pageSize: raw?.page_size || 10,
-    total: raw?.total || 0,
-    totalPages: raw?.total_pages || 1,
+    list: (data.list as T[] | undefined) || [],
+    page: (data.page as number | undefined) || 1,
+    pageSize: (data.page_size as number | undefined) || 10,
+    total: (data.total as number | undefined) || 0,
+    totalPages: (data.total_pages as number | undefined) || 1,
   };
 }
 
 // ============ HTTP 客户端 ============
 
 class Http {
-  private baseURL: string;
+  private readonly baseURL: string;
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
@@ -71,7 +73,10 @@ class Http {
     localStorage.removeItem("auth_token");
   }
 
-  async request<T = any>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
+  async request<T = unknown>(
+    endpoint: string,
+    options: RequestOptions = {}
+  ): Promise<ApiResponse<T>> {
     const { params, body, skipAuth, ...fetchOptions } = options;
     const url = `${this.baseURL}${endpoint}${buildQuery(params)}`;
 
@@ -89,13 +94,13 @@ class Http {
 
     const res = await fetch(url, {
       ...fetchOptions,
-      headers,
       body: body ? JSON.stringify(body) : undefined,
+      headers,
     });
 
     // 204 No Content
     if (res.status === 204) {
-      return { code: 200, message: "success", result: null as any };
+      return { code: 200, message: "success", result: null as T };
     }
 
     // 401 清 token
@@ -108,7 +113,7 @@ class Http {
 
     if (!res.ok || (data.code && data.code >= 400)) {
       const msg = Array.isArray(data.msg)
-        ? data.msg.map((e: any) => e.message).join(", ")
+        ? data.msg.map((e: { message?: string }) => e.message).join(", ")
         : data.msg || data.message || "请求失败";
       throw new Error(msg);
     }
@@ -121,19 +126,27 @@ class Http {
     };
   }
 
-  get<T = any>(endpoint: string, params?: Record<string, any>, options?: RequestOptions) {
+  get<T = unknown>(
+    endpoint: string,
+    params?: Record<string, unknown>,
+    options?: RequestOptions
+  ) {
     return this.request<T>(endpoint, { ...options, method: "GET", params });
   }
 
-  post<T = any>(endpoint: string, body?: any, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: "POST", body });
+  post<T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestOptions
+  ) {
+    return this.request<T>(endpoint, { ...options, body, method: "POST" });
   }
 
-  put<T = any>(endpoint: string, body?: any, options?: RequestOptions) {
-    return this.request<T>(endpoint, { ...options, method: "PUT", body });
+  put<T = unknown>(endpoint: string, body?: unknown, options?: RequestOptions) {
+    return this.request<T>(endpoint, { ...options, body, method: "PUT" });
   }
 
-  del<T = any>(endpoint: string, options?: RequestOptions) {
+  del<T = unknown>(endpoint: string, options?: RequestOptions) {
     return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 }

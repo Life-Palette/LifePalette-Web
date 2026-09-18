@@ -167,4 +167,5 @@ export interface Tag {
 }
 
 // 导出聊天相关类型
+// biome-ignore lint/performance/noBarrelFile: shared application types are intentionally exported from one entry point
 export * from "./chat";

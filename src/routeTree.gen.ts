@@ -27,63 +27,63 @@ import { Route as TestUploadImport } from "./routes/test-upload";
 // Create/Update Routes
 
 const ChangelogRoute = ChangelogImport.update({
-  path: "/changelog",
   getParentRoute: () => rootRoute,
+  path: "/changelog",
 } as any);
 
 const ChangelogVersionRoute = ChangelogVersionImport.update({
-  path: "/changelog/$version",
   getParentRoute: () => rootRoute,
+  path: "/changelog/$version",
 } as any);
 
 const SearchRoute = SearchImport.update({
-  path: "/search",
   getParentRoute: () => rootRoute,
+  path: "/search",
 } as any);
 
 const TestCarouselRoute = TestCarouselImport.update({
-  path: "/test-carousel",
   getParentRoute: () => rootRoute,
+  path: "/test-carousel",
 } as any);
 
 const TestUploadRoute = TestUploadImport.update({
-  path: "/test-upload",
   getParentRoute: () => rootRoute,
+  path: "/test-upload",
 } as any);
 
 const ProfileRoute = ProfileImport.update({
-  path: "/profile",
   getParentRoute: () => rootRoute,
+  path: "/profile",
 } as any);
 
 const PublishRoute = PublishImport.update({
-  path: "/publish",
   getParentRoute: () => rootRoute,
+  path: "/publish",
 } as any);
 
 const NotificationsRoute = NotificationsImport.update({
-  path: "/notifications",
   getParentRoute: () => rootRoute,
+  path: "/notifications",
 } as any);
 
 const ChatRoute = ChatImport.update({
-  path: "/chat",
   getParentRoute: () => rootRoute,
+  path: "/chat",
 } as any);
 
 const ColorsRoute = ColorsImport.update({
-  path: "/colors",
   getParentRoute: () => rootRoute,
+  path: "/colors",
 } as any);
 
 const IndexRoute = IndexImport.update({
-  path: "/",
   getParentRoute: () => rootRoute,
+  path: "/",
 } as any);
 
 const MapSecUidRoute = MapSecUidImport.update({
-  path: "/map/$secUid",
   getParentRoute: () => rootRoute,
+  path: "/map/$secUid",
 } as any);
 
 // Populate the FileRoutesByPath interface
@@ -173,11 +173,11 @@ declare module "@tanstack/react-router" {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren({
-  IndexRoute,
   ChangelogRoute,
   ChangelogVersionRoute,
   ChatRoute,
   ColorsRoute,
+  IndexRoute,
   MapSecUidRoute,
   NotificationsRoute,
   ProfileRoute,

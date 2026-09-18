@@ -1,3 +1,4 @@
+/* biome-ignore-all lint/suspicious/noUnnecessaryConditions: this existing integration requires the current implementation */
 /**
  * AI 服务配置
  * 支持多种 AI 服务提供商
@@ -15,18 +16,21 @@ export interface AIConfig {
 /**
  * AI 服务提供商配置
  */
-export const AI_PROVIDERS: Record<AIProvider, Omit<AIConfig, "temperature" | "maxTokens">> = {
+export const AI_PROVIDERS: Record<
+  AIProvider,
+  Omit<AIConfig, "temperature" | "maxTokens">
+> = {
   deepseek: {
     baseURL: "https://api.deepseek.com",
     model: "deepseek-chat",
   },
-  siliconflow: {
-    baseURL: "https://api.siliconflow.cn",
-    model: "Qwen/Qwen2.5-7B-Instruct",
-  },
   openai: {
     baseURL: "https://api.openai.com",
     model: "gpt-3.5-turbo",
+  },
+  siliconflow: {
+    baseURL: "https://api.siliconflow.cn",
+    model: "Qwen/Qwen2.5-7B-Instruct",
   },
   zhipu: {
     baseURL: "https://open.bigmodel.cn/api/paas/v4",
@@ -58,8 +62,8 @@ export function getAIConfig(overrides?: Partial<AIConfig>): AIConfig {
 
   return {
     ...providerConfig,
-    temperature: 0.7,
     maxTokens: 1024,
+    temperature: 0.7,
     ...overrides,
   };
 }

@@ -4,26 +4,18 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    react({
-      babel: {
-        plugins: ["react-activation/babel"],
-      },
-    }),
-  ],
-  resolve: {
-    alias: {
-      "@": path.resolve(import.meta.dirname, "./src"),
-    },
-  },
   build: {
+    // 提高 chunk 大小警告阈值
+    chunkSizeWarningLimit: 1000,
     // 代码分割优化
     rolldownOptions: {
       output: {
         manualChunks(id: string) {
           // React 核心库
-          if (id.includes("react-dom") || (id.includes("/react/") && !id.includes("react-"))) {
+          if (
+            id.includes("react-dom") ||
+            (id.includes("/react/") && !id.includes("react-"))
+          ) {
             return "react-vendor";
           }
           // 路由相关
@@ -43,7 +35,11 @@ export default defineConfig({
             return "map";
           }
           // 编辑器相关
-          if (id.includes("platejs") || id.includes("@platejs/") || id.includes("slate")) {
+          if (
+            id.includes("platejs") ||
+            id.includes("@platejs/") ||
+            id.includes("slate")
+          ) {
             return "editor";
           }
           // 拖拽相关
@@ -55,18 +51,33 @@ export default defineConfig({
             return "image";
           }
           // 工具库
-          if (id.includes("clsx") || id.includes("tailwind-merge") || id.includes("dompurify")) {
+          if (
+            id.includes("clsx") ||
+            id.includes("tailwind-merge") ||
+            id.includes("dompurify")
+          ) {
             return "utils";
           }
         },
       },
     },
-    // 提高 chunk 大小警告阈值
-    chunkSizeWarningLimit: 1000,
   },
   // 生产环境移除 console 和 debugger（Vite 8 使用 Oxc 替代 esbuild）
   oxc: {
     drop: ["console", "debugger"],
+  },
+  plugins: [
+    tailwindcss(),
+    react({
+      babel: {
+        plugins: ["react-activation/babel"],
+      },
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "./src"),
+    },
   },
   server: {
     port: 9595,

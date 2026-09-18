@@ -1,4 +1,5 @@
 import { Moon, Sun } from "lucide-react";
+import { useCallback } from "react";
 import { useTheme } from "@/components/common/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,9 @@ import {
 
 export function ModeToggle() {
   const { setTheme } = useTheme();
+  const setLightTheme = useCallback(() => setTheme("light"), [setTheme]);
+  const setDarkTheme = useCallback(() => setTheme("dark"), [setTheme]);
+  const setSystemTheme = useCallback(() => setTheme("system"), [setTheme]);
 
   return (
     <DropdownMenu>
@@ -21,9 +25,9 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>浅色</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>深色</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>跟随系统</DropdownMenuItem>
+        <DropdownMenuItem onClick={setLightTheme}>浅色</DropdownMenuItem>
+        <DropdownMenuItem onClick={setDarkTheme}>深色</DropdownMenuItem>
+        <DropdownMenuItem onClick={setSystemTheme}>跟随系统</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

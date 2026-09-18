@@ -7,6 +7,7 @@ import DOMPurify from "dompurify";
  */
 export function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html, {
+    ALLOWED_ATTR: ["href", "target", "rel"],
     ALLOWED_TAGS: [
       "p",
       "strong",
@@ -27,6 +28,5 @@ export function sanitizeHtml(html: string): string {
       "code",
       "pre",
     ],
-    ALLOWED_ATTR: ["href", "target", "rel"],
   });
 }

@@ -10,6 +10,25 @@ interface PerformanceMetrics {
   TTFB?: number; // Time to First Byte
 }
 
+interface NetworkInformationLike {
+  connection?: { downlink?: number; effectiveType?: string };
+  mozConnection?: { downlink?: number; effectiveType?: string };
+  webkitConnection?: { downlink?: number; effectiveType?: string };
+}
+
+interface LayoutShiftEntry extends PerformanceEntry {
+  hadRecentInput: boolean;
+  value: number;
+}
+
+interface FirstInputEntry extends PerformanceEntry {
+  processingStart: number;
+}
+
+interface LargestContentfulPaintEntry extends PerformanceEntry {
+  startTime: number;
+}
+
 class PerformanceMonitor {
   private readonly metrics: PerformanceMetrics = {};
   private observers: PerformanceObserver[] = [];
@@ -34,7 +53,9 @@ class PerformanceMonitor {
    * 停止监控
    */
   stop() {
-    for (const observer of this.observers) observer.disconnect();
+    for (const observer of this.observers) {
+      observer.disconnect();
+    }
     this.observers = [];
   }
 
@@ -75,7 +96,12 @@ class PerformanceMonitor {
   private measureLCP() {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries.at(-1) as any;
+      const lastEntry = entries.at(-1) as
+        | LargestContentfulPaintEntry
+        | undefined;
+      if (!lastEntry) {
+        return;
+      }
       this.metrics.LCP = Math.round(lastEntry.startTime);
       console.log(`LCP: ${this.metrics.LCP}ms`);
     });
@@ -89,7 +115,7 @@ class PerformanceMonitor {
    */
   private measureFID() {
     const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as any) {
+      for (const entry of list.getEntries() as FirstInputEntry[]) {
         const delay = entry.processingStart - entry.startTime;
         this.metrics.FID = Math.round(delay);
         console.log(`FID: ${this.metrics.FID}ms`);
@@ -106,7 +132,7 @@ class PerformanceMonitor {
   private measureCLS() {
     let clsValue = 0;
     const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as any) {
+      for (const entry of list.getEntries() as LayoutShiftEntry[]) {
         if (!entry.hadRecentInput) {
           clsValue += entry.value;
           this.metrics.CLS = Math.round(clsValue * 1000) / 1000;
@@ -123,9 +149,13 @@ class PerformanceMonitor {
    * 测量 Time to First Byte
    */
   private measureTTFB() {
-    const navigationEntry = performance.getEntriesByType("navigation")[0] as any;
+    const navigationEntry = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
     if (navigationEntry) {
-      this.metrics.TTFB = Math.round(navigationEntry.responseStart - navigationEntry.fetchStart);
+      this.metrics.TTFB = Math.round(
+        navigationEntry.responseStart - navigationEntry.fetchStart
+      );
       console.log(`TTFB: ${this.metrics.TTFB}ms`);
     }
   }
@@ -139,16 +169,16 @@ class PerformanceMonitor {
     // 只在生产环境发送
     if (import.meta.env.PROD && endpoint) {
       fetch(endpoint, {
-        method: "POST",
+        body: JSON.stringify({
+          metrics,
+          timestamp: new Date().toISOString(),
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+        }),
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          metrics,
-          url: window.location.href,
-          userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString(),
-        }),
+        method: "POST",
       }).catch((error) => {
         console.error("Failed to send performance metrics:", error);
       });
@@ -168,14 +198,15 @@ export const measureComponentPerformance = (componentName: string) => {
   const measureName = `${componentName}-render`;
 
   return {
-    start: () => performance.mark(startMark),
     end: () => {
       performance.mark(endMark);
       performance.measure(measureName, startMark, endMark);
 
-      const measure = performance.getEntriesByName(measureName)[0];
+      const [measure] = performance.getEntriesByName(measureName);
       if (measure) {
-        console.log(`${componentName} render time: ${Math.round(measure.duration)}ms`);
+        console.log(
+          `${componentName} render time: ${Math.round(measure.duration)}ms`
+        );
       }
 
       // 清理标记
@@ -183,13 +214,14 @@ export const measureComponentPerformance = (componentName: string) => {
       performance.clearMarks(endMark);
       performance.clearMeasures(measureName);
     },
+    start: () => performance.mark(startMark),
   };
 };
 
 /**
  * 防抖函数
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -206,7 +238,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 /**
  * 节流函数
  */
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: never[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {
@@ -245,10 +277,9 @@ export const preloadImages = async (srcs: string[]): Promise<void> => {
  * 检测是否为慢速网络
  */
 export const isSlowNetwork = (): boolean => {
+  const network = navigator as unknown as NetworkInformationLike;
   const connection =
-    (navigator as any).connection ||
-    (navigator as any).mozConnection ||
-    (navigator as any).webkitConnection;
+    network.connection || network.mozConnection || network.webkitConnection;
 
   if (!connection) {
     return false;
@@ -289,9 +320,11 @@ export const getDeviceType = (): "mobile" | "tablet" | "desktop" => {
 export const supportsWebP = (): Promise<boolean> =>
   new Promise((resolve) => {
     const webP = new Image();
-    webP.onload = webP.onerror = () => {
+    const handleLoad = () => {
       resolve(webP.height === 2);
     };
+    webP.onload = handleLoad;
+    webP.onerror = handleLoad;
     webP.src =
       "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA";
   });

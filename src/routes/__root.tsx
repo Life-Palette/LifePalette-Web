@@ -2,8 +2,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { AliveScope } from "react-activation";
-import EmailBindChecker from "@/components/auth/EmailBindChecker";
-import ErrorBoundary from "@/components/common/ErrorBoundary";
+import EmailBindChecker from "@/components/auth/email-bind-checker";
+import ErrorBoundary from "@/components/common/error-boundary";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/query-client";
 
@@ -22,7 +22,7 @@ export const Route = createRootRoute({
         </ErrorBoundary>
       </TooltipProvider>
       {/* React Query DevTools - 仅在开发环境显示 */}
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      {!!import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   ),
 });

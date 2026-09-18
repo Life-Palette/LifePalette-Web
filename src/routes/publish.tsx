@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
+import LoadingSpinner from "@/components/common/loading-spinner";
 
-const PublishPage = lazy(() => import("../pages/PublishPage"));
+const PublishPage = lazy(() => import("../pages/publish-page"));
 
 export const Route = createFileRoute("/publish")({
   component: () => (

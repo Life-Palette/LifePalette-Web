@@ -18,17 +18,17 @@ export async function generateQRCodeImage(data: {
     });
 
     const url = await QRCode.toDataURL(qrData, {
-      width: 300,
-      margin: 2,
       color: {
         dark: "#000000",
         light: "#FFFFFF",
       },
+      margin: 2,
+      width: 300,
     });
 
     return url;
   } catch (error) {
     console.error("QR Code generation failed:", error);
-    throw new Error("二维码生成失败");
+    throw new Error("二维码生成失败", { cause: error });
   }
 }
