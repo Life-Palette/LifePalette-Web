@@ -22,7 +22,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TagsInput } from "@/components/ui/tags-input";
 import { useIsAuthenticated } from "@/hooks/use-auth";
@@ -30,7 +29,7 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 import { useCreateTopic } from "@/hooks/use-topics";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { serializeToHtml } from "@/lib/serialize-html";
-import type { OSSFile } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, type OSSFile } from "@/services/upload";
 
 type ContentMode = "richtext" | "markdown";
 
@@ -53,7 +52,6 @@ export default function PublishPage() {
   const [markdownContent, setMarkdownContent] = useState("");
   const [tags, setTags] = useState("");
   const [mediaItems, setMediaItems] = useState<UnifiedMediaItem[]>([]);
-  const [isCompressMode, setIsCompressMode] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showUploadComplete, setShowUploadComplete] = useState(false);
@@ -133,10 +131,7 @@ export default function PublishPage() {
         });
         uploadedFiles = await uploadMultipleFiles(
           filesToUpload,
-          {
-            compress: isCompressMode,
-            maxSizeMB: isCompressMode ? 20 : undefined,
-          },
+          DEFAULT_UPLOAD_OPTIONS,
           locationMap.size > 0 ? locationMap : undefined
         );
       }
@@ -304,27 +299,9 @@ export default function PublishPage() {
                 )}
               </div>
 
-              {/* 图片压缩 */}
-              <div className="flex items-center justify-between">
-                <Label className="font-medium text-sm">图片压缩</Label>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={isCompressMode}
-                    id="publish-compress"
-                    onCheckedChange={setIsCompressMode}
-                  />
-                  <Label
-                    className="cursor-pointer font-normal text-muted-foreground text-sm"
-                    htmlFor="publish-compress"
-                  >
-                    启用图片压缩（压缩至 20MB 以下）
-                  </Label>
-                </div>
-              </div>
-
               {/* 媒体上传 */}
               <MediaUploader
-                compressLargeFiles={isCompressMode}
+                compressLargeFiles={true}
                 disabled={uploadState.isUploading}
                 onChange={setMediaItems}
               />

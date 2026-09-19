@@ -3,6 +3,7 @@ import {
   type OSSFile,
   type UploadProgress,
   type UploadStage,
+  DEFAULT_UPLOAD_OPTIONS,
   uploader,
 } from "@/services/upload";
 
@@ -60,8 +61,8 @@ export function useFileUpload() {
           stageText: "准备上传...",
         });
         const result = await uploader.upload(file, {
+          ...DEFAULT_UPLOAD_OPTIONS,
           ...options,
-          analyze: options?.analyze ?? false,
           onProgress: (p: UploadProgress) => {
             setUploadState({
               error: null,
@@ -125,8 +126,8 @@ export function useFileUpload() {
           const fileLocation = locationMap?.get(files[i]);
           // biome-ignore lint/performance/noAwaitInLoops: uploads are intentionally sequential to preserve progress order
           const result = await uploader.upload(files[i], {
+            ...DEFAULT_UPLOAD_OPTIONS,
             ...options,
-            analyze: options?.analyze ?? false,
             location: fileLocation,
             onProgress: (p: UploadProgress) => {
               const totalProgress = ((i + p.percent / 100) / total) * 100;

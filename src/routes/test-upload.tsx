@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { type ChangeEvent, type DragEvent, useMemo, useState } from "react";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import type { OSSFile } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, type OSSFile } from "@/services/upload";
 import {
   extractGPSFromImage,
   type GPSCoordinates,
@@ -90,7 +90,7 @@ function TestUploadPage() {
     setUploadedFiles([]);
     const results = await uploadMultipleFiles(
       selectedFiles.map((item) => item.file),
-      { analyze: true, compress: true, maxSizeMB: 4 },
+      DEFAULT_UPLOAD_OPTIONS,
       locationMap
     );
     setUploadedFiles(results);
@@ -113,7 +113,7 @@ function TestUploadPage() {
             上传组件测试
           </h1>
           <p className="mt-2 text-[#64748b] text-sm">
-            测试文件选择、图片压缩、EXIF GPS 读取和上传完成接口。
+            测试文件选择、媒体分析、EXIF GPS 读取和上传完成接口。
           </p>
         </header>
 
@@ -126,7 +126,7 @@ function TestUploadPage() {
               选择文件
             </h2>
             <p className="mt-1 text-[#64748b] text-sm">
-              支持 JPG、PNG、MP4、MOV，图片会在上传前压缩到 4MB 以内。
+              支持 JPG、PNG、MP4、MOV，图片超过 20MB 会自动压缩，视频需小于 20MB。
             </p>
           </div>
 

@@ -2,7 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { usersApi } from "@/services/api";
-import { uploader } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, uploader } from "@/services/upload";
 import type { UpdateProfileData } from "@/types";
 
 export const useUpdateProfile = () => {
@@ -15,16 +15,14 @@ export const useUpdateProfile = () => {
 
       if (data.avatarFile) {
         const uploaded = await uploader.upload(data.avatarFile, {
-          compress: true,
-          maxSizeMB: 1,
+          ...DEFAULT_UPLOAD_OPTIONS,
         });
         avatarSecUID = uploaded.sec_uid;
       }
 
       if (data.backgroundFile) {
         const uploaded = await uploader.upload(data.backgroundFile, {
-          compress: true,
-          maxSizeMB: 5,
+          ...DEFAULT_UPLOAD_OPTIONS,
         });
         backgroundSecUID = uploaded.sec_uid;
       }

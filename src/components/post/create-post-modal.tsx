@@ -31,12 +31,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Switch } from "@/components/ui/switch";
 import { TagsInput } from "@/components/ui/tags-input";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { deserializeHtml, serializeToHtml } from "@/lib/serialize-html";
-import type { OSSFile } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, type OSSFile } from "@/services/upload";
 import type { Post, PostImage } from "@/types";
 
 type EditableTopicTag =
@@ -104,7 +103,6 @@ export default function CreatePostModal({
 }: CreatePostModalProps) {
   const [content, setContent] = useState<Value>(initialValue);
   const [mediaItems, setMediaItems] = useState<UnifiedMediaItem[]>([]);
-  const [isCompressMode, setIsCompressMode] = useState(true);
 
   // 使用文件上传 Hook
   const { uploadState, uploadMultipleFiles } = useFileUpload();
@@ -151,10 +149,7 @@ export default function CreatePostModal({
 
           uploadedFiles = await uploadMultipleFiles(
             filesToUpload,
-            {
-              compress: isCompressMode,
-              maxSizeMB: isCompressMode ? 20 : undefined,
-            },
+            DEFAULT_UPLOAD_OPTIONS,
             locationMap.size > 0 ? locationMap : undefined
           );
         }
@@ -219,7 +214,6 @@ export default function CreatePostModal({
           form.reset();
           setContent(initialValue);
           setMediaItems([]);
-          setIsCompressMode(true);
         }
         onClose();
       } catch (error) {
@@ -251,7 +245,6 @@ export default function CreatePostModal({
       form.reset();
       setContent(initialValue);
       setMediaItems([]);
-      setIsCompressMode(true);
     }
   }, [
     isOpen,
@@ -366,26 +359,9 @@ export default function CreatePostModal({
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label className="font-medium text-sm">图片压缩</Label>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={isCompressMode}
-                    id="compress-mode"
-                    onCheckedChange={setIsCompressMode}
-                  />
-                  <Label
-                    className="cursor-pointer font-normal text-gray-500 text-sm"
-                    htmlFor="compress-mode"
-                  >
-                    启用图片压缩（压缩至 20MB 以下）
-                  </Label>
-                </div>
-              </div>
-
               {/* 媒体上传区域 */}
               <MediaUploader
-                compressLargeFiles={isCompressMode}
+                compressLargeFiles={true}
                 disabled={uploadState.isUploading}
                 initialImages={initialData?.images}
                 onChange={setMediaItems}

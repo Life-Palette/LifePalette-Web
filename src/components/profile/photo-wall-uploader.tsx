@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { useFileUpload } from "@/hooks/use-file-upload";
+import { DEFAULT_UPLOAD_OPTIONS } from "@/services/upload";
 
 interface PhotoWallUploaderProps {
   onOpenChange: (open: boolean) => void;
@@ -81,7 +82,7 @@ export default function PhotoWallUploader({
 
       await uploadMultipleFiles(
         filesToUpload,
-        { compress: true, isPrivate, maxSizeMB: 20 },
+        { ...DEFAULT_UPLOAD_OPTIONS, isPrivate },
         locationMap.size > 0 ? locationMap : undefined
       );
 
