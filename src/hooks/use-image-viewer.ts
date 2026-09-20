@@ -390,7 +390,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
         viewerRef.current = null;
       }
       // 清理所有渲染的 React 组件
-      for (const root of renderedRoots.current) {
+      for (const root of renderedRoots.current.values()) {
         root.unmount();
       }
       renderedRoots.current.clear();
