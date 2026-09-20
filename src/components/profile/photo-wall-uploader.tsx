@@ -119,7 +119,6 @@ export default function PhotoWallUploader({
 
         <div className="space-y-4">
           <MediaUploader
-            compressLargeFiles={true}
             disabled={uploadState.isUploading}
             onChange={setMediaItems}
           />

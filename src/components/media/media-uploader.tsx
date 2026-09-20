@@ -18,7 +18,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { LivePhotoViewer } from "live-photo";
 import { GripVertical, Image, MapPin, Video, X } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
-import { toast } from "sonner";
 import { LocationPicker } from "@/components/map/location-picker";
 import { filesApi } from "@/services/api";
 import { detectLivePhotoPairs } from "@/services/upload";
@@ -272,8 +271,6 @@ function UnifiedSortableMediaItem({
 
 // MediaUploader 组件 Props
 interface MediaUploaderProps {
-  /** 是否允许压缩大于 20MB 的图片 */
-  compressLargeFiles?: boolean;
   disabled?: boolean;
   initialImages?: PostImage[];
   onChange?: (items: UnifiedMediaItem[]) => void;
@@ -283,7 +280,6 @@ export function MediaUploader({
   initialImages = [],
   disabled = false,
   onChange,
-  compressLargeFiles = false,
 }: MediaUploaderProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [unifiedMediaItems, setUnifiedMediaItems] = useState<
@@ -324,37 +320,7 @@ export function MediaUploader({
         return;
       }
 
-      // 文件大小限制：20MB
-      const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
-      const validFiles: File[] = [];
-      const oversizedFiles: string[] = [];
-
-      for (const file of files) {
-        const isLarge = file.size > MAX_FILE_SIZE;
-        const isImage = file.type.startsWith("image/");
-        if (isLarge && !(compressLargeFiles && isImage)) {
-          oversizedFiles.push(file.name);
-        } else {
-          validFiles.push(file);
-        }
-      }
-
-      if (oversizedFiles.length > 0) {
-        const isOnlyImages = oversizedFiles.every((name) => {
-          const file = files.find((f) => f.name === name);
-          return file?.type.startsWith("image/");
-        });
-        if (isOnlyImages && !compressLargeFiles) {
-          toast.error("包含大于 20MB 的图片，请开启「大图压缩」功能");
-        } else {
-          toast.error("文件大小超出限制 (20MB)", {
-            description: `以下文件过大：${oversizedFiles.join(", ")}`,
-          });
-        }
-      }
-      if (validFiles.length === 0) {
-        return;
-      }
+      const validFiles = files;
 
       const startIndex = selectedFiles.length;
       const newSelectedFiles = [...selectedFiles, ...validFiles];
@@ -425,7 +391,7 @@ export function MediaUploader({
         });
       }, 0);
     },
-    [compressLargeFiles, selectedFiles]
+    [selectedFiles]
   );
 
   // 处理文件选择

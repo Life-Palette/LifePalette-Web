@@ -360,7 +360,6 @@ export default function CreatePostModal({
 
               {/* 媒体上传区域 */}
               <MediaUploader
-                compressLargeFiles={true}
                 disabled={uploadState.isUploading}
                 initialImages={initialData?.images}
                 onChange={setMediaItems}

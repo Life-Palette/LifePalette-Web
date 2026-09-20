@@ -301,7 +301,6 @@ export default function PublishPage() {
 
               {/* 媒体上传 */}
               <MediaUploader
-                compressLargeFiles={true}
                 disabled={uploadState.isUploading}
                 onChange={setMediaItems}
               />
