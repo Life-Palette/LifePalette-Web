@@ -126,7 +126,8 @@ function TestUploadPage() {
               选择文件
             </h2>
             <p className="mt-1 text-[#64748b] text-sm">
-              支持 JPG、PNG、MP4、MOV，图片超过 20MB 会自动压缩，视频需小于 20MB。
+              支持 JPG、PNG、MP4、MOV，图片超过 20MB 会自动压缩，视频需小于
+              20MB。
             </p>
           </div>
 

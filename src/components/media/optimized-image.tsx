@@ -34,9 +34,9 @@ interface OptimizedImageProps {
 }
 
 interface EosImageElement extends HTMLElement {
-  onimageerror: (() => void) | null;
-  onimageload: (() => void) | null;
-  onimageprogress: ((event: CustomEvent) => void) | null;
+  onerror: (() => void) | null;
+  onload: (() => void) | null;
+  onprogress: ((event: CustomEvent) => void) | null;
 }
 
 interface EosImageProps {
@@ -50,6 +50,7 @@ interface EosImageProps {
   ref?: React.Ref<EosImageElement>;
   "show-delay"?: number;
   src?: string;
+  style?: React.CSSProperties;
   width?: string | number;
 }
 
@@ -178,14 +179,14 @@ export default function OptimizedImage({
       return;
     }
 
-    element.onimageload = handleLoad;
-    element.onimageerror = handleError;
-    element.onimageprogress = handleProgress;
+    element.onload = handleLoad;
+    element.onerror = handleError;
+    element.onprogress = handleProgress;
 
     return () => {
-      element.onimageload = null;
-      element.onimageerror = null;
-      element.onimageprogress = null;
+      element.onload = null;
+      element.onerror = null;
+      element.onprogress = null;
     };
   }, [handleProgress, handleLoad, handleError]); // 依赖图片 URL，确保每次图片变化都重新绑定
 
@@ -234,6 +235,7 @@ export default function OptimizedImage({
             placeholder-type={placeholderType}
             ref={imageRef}
             src={optimizedUrl}
+            style={{ borderRadius: 0 }}
             width={imageWidth}
           />
 
@@ -257,6 +259,7 @@ export default function OptimizedImage({
           ref={imageRef}
           show-delay={showDelay}
           src={optimizedUrl}
+          style={{ borderRadius: 0 }}
           width={imageWidth}
         />
       )}

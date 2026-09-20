@@ -95,10 +95,10 @@ const TrackPage: React.FC<TrackPageProps> = ({
     queryKey: ["user-travel-stats", targetUserId],
   });
 
-  const travelStats = travelStatsResponse?.result as TravelStats;
+  const travelStats = travelStatsResponse?.result as TravelStats | undefined;
 
   // 直接从 travel-stats 获取城市列表，不需要单独的 cities 接口
-  const citiesData = travelStats.cities_visited;
+  const citiesData = travelStats?.cities_visited ?? [];
 
   const isLoading = statsLoading;
 
@@ -432,10 +432,7 @@ const TrackPage: React.FC<TrackPageProps> = ({
                 <Globe className="text-slate-600" size={24} />
               </div>
               <div className="mb-1 font-bold text-3xl text-slate-700">
-                {
-                  [...new Set(travelStats.cities_visited.map((c) => c.country))]
-                    .length
-                }
+                {[...new Set(citiesData.map((c) => c.country))].length}
               </div>
               <div className="text-muted-foreground text-sm">个国家</div>
             </div>

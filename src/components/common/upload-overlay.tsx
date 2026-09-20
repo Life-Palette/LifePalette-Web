@@ -22,7 +22,7 @@ export function UploadOverlay({
       {!!show && (
         <motion.div
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center"
           exit={{ opacity: 0 }}
           initial={{ opacity: 0 }}
           transition={{ duration: 0.2 }}

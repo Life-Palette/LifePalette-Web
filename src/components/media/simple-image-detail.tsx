@@ -75,6 +75,23 @@ export default function SimpleImageDetail({
   useHotkeys("left", () => prevImage(), { enabled: isOpen });
   useHotkeys("right", () => nextImage(), { enabled: isOpen });
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousScrollbarGutter =
+      document.documentElement.style.scrollbarGutter;
+
+    document.body.classList.add("detail-modal-open");
+    document.documentElement.style.scrollbarGutter = "auto";
+
+    return () => {
+      document.body.classList.remove("detail-modal-open");
+      document.documentElement.style.scrollbarGutter = previousScrollbarGutter;
+    };
+  }, [isOpen]);
+
   // 使用统一的点赞和收藏操作
   const handleLike = useCallback(() => {
     if (!(topic && isAuthenticated)) {

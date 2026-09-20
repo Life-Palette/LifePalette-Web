@@ -606,9 +606,6 @@ export function MediaUploader({
             <Image className="text-gray-400" size={14} />
           </div>
           <p className="text-gray-600 text-xs">点击或拖拽上传图片/视频</p>
-          <p className="text-gray-400 text-xs">
-            支持 JPG、PNG、MP4 等格式，图片超过 20MB 会自动压缩，视频需小于 20MB
-          </p>
         </label>
         <input
           accept="image/*,video/*"

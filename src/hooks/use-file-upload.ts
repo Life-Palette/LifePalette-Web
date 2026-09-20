@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import {
+  DEFAULT_UPLOAD_OPTIONS,
   type OSSFile,
   type UploadProgress,
   type UploadStage,
-  DEFAULT_UPLOAD_OPTIONS,
   uploader,
 } from "@/services/upload";
 

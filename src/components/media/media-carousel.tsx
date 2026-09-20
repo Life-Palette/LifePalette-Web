@@ -53,6 +53,7 @@ interface MediaCarouselProps {
 
 const MediaCarousel = ({
   images,
+  imageDuration = 3000,
   initialIndex = 0,
   loop = true,
   onIndexChange,
@@ -62,6 +63,32 @@ const MediaCarousel = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const carouselRef = useRef<CarouselElement>(null);
   const progressStartedForRef = useRef<string | number | null>(null);
+  const pendingMediaIdRef = useRef<string | number | null>(null);
+  const loadedImagesRef = useRef(new Set<string | number>());
+  const mediaDurationsRef = useRef(new Map<string | number, number>());
+
+  const startSlideProgress = useCallback(
+    (duration: number, mediaId: string | number) => {
+      if (images.length <= 1 || progressStartedForRef.current === mediaId) {
+        return;
+      }
+
+      const carousel = carouselRef.current;
+      if (!carousel) {
+        return;
+      }
+
+      progressStartedForRef.current = mediaId;
+      carousel.startSlideProgress({
+        duration,
+        onComplete: () => {
+          progressStartedForRef.current = null;
+          carousel.next();
+        },
+      });
+    },
+    [images.length]
+  );
 
   // 暴露控制方法
   useImperativeHandle(ref, () => ({
@@ -76,39 +103,80 @@ const MediaCarousel = ({
     stopProgress: () => carouselRef.current?.stopSlideProgress(),
   }));
 
-  // slide 切换后，根据媒体类型决定进度条策略
-  // [暂时禁用] 自动播放下一张逻辑
-  const onSlideReady = useCallback((_index: number) => {
-    // 暂时不自动播放
-  }, []);
-
-  const onSlideReadyRef = useRef(onSlideReady);
-  onSlideReadyRef.current = onSlideReady;
-
   const handleChange = useCallback(
     (e: Event) => {
       const idx = (e as CustomEvent).detail?.currentIndex ?? 0;
       setCurrentIndex(idx);
       progressStartedForRef.current = null;
-      onSlideReadyRef.current(idx);
       onIndexChange?.(idx);
     },
     [onIndexChange]
   );
 
-  // 图片加载完成
-  // [暂时禁用] 自动启动进度条
-  const handleImageLoad = useCallback((_mediaId: number | string) => {
-    // 暂时不自动播放
-  }, []);
+  const handleSlideActive = useCallback(
+    (e: CustomEvent) => {
+      const index = e.detail?.index as number | undefined;
+      const image = index === undefined ? undefined : images[index];
+      const carousel = carouselRef.current;
+      if (!(image && carousel)) {
+        return;
+      }
 
-  // 实况/视频时长回调
-  // [暂时禁用] 自动启动进度条
-  const handleDurationChange = useCallback(
-    (_mediaId: number | string, _duration: number) => {
-      // 暂时不自动播放
+      setCurrentIndex(index ?? 0);
+      carousel.stopSlideProgress();
+      progressStartedForRef.current = null;
+      pendingMediaIdRef.current = null;
+
+      if (checkIsVideo(image) || checkIsLivePhoto(image)) {
+        const duration = mediaDurationsRef.current.get(image.sec_uid);
+        if (duration) {
+          startSlideProgress(duration, image.sec_uid);
+          return;
+        }
+
+        pendingMediaIdRef.current = image.sec_uid;
+        return;
+      }
+
+      if (loadedImagesRef.current.has(image.sec_uid)) {
+        startSlideProgress(imageDuration, image.sec_uid);
+        return;
+      }
+
+      pendingMediaIdRef.current = image.sec_uid;
     },
-    []
+    [imageDuration, images, startSlideProgress]
+  );
+
+  const handleImageLoad = useCallback(
+    (mediaId: number | string) => {
+      loadedImagesRef.current.add(mediaId);
+      if (pendingMediaIdRef.current !== mediaId) {
+        return;
+      }
+
+      pendingMediaIdRef.current = null;
+      startSlideProgress(imageDuration, mediaId);
+    },
+    [imageDuration, startSlideProgress]
+  );
+
+  const handleDurationChange = useCallback(
+    (mediaId: number | string, duration: number) => {
+      if (!Number.isFinite(duration) || duration <= 0) {
+        return;
+      }
+
+      const durationInMilliseconds = duration * 1000;
+      mediaDurationsRef.current.set(mediaId, durationInMilliseconds);
+      if (pendingMediaIdRef.current !== mediaId) {
+        return;
+      }
+
+      pendingMediaIdRef.current = null;
+      startSlideProgress(durationInMilliseconds, mediaId);
+    },
+    [startSlideProgress]
   );
 
   const handleVideoEnded = useCallback(() => undefined, []);
@@ -145,12 +213,15 @@ const MediaCarousel = ({
     <ErrorBoundary>
       <eos-carousel
         autoplay={false}
+        indicator-position="bottom"
         indicator-style="tiktok"
         initial-index={initialIndex}
         loop={loop}
         onchange={handleChange}
+        onslide-active={handleSlideActive}
         onslide-click={onSlideClick ? handleSlideClick : undefined}
         ref={carouselRef}
+        show-navigation
         style={
           {
             "--carousel-height": "100%",

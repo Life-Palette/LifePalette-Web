@@ -346,6 +346,12 @@
     @apply h-full w-full;
   }
 
+  /* 详情弹层打开时，锁定页面级滚动容器，避免右侧滚动条露在遮罩外。 */
+  body.detail-modal-open .h-screen.overflow-auto,
+  body.detail-modal-open .h-screen.overflow-y-auto {
+    overflow: hidden !important;
+  }
+
   /* 全局滚动条样式 */
   ::-webkit-scrollbar {
     width: 8px;
