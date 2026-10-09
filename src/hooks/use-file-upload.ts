@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
 import {
   DEFAULT_UPLOAD_OPTIONS,
-  type OSSFile,
+  linkLivePhotoPairs,
+  type MediaUploadOptions,
+  type UploadedFile,
   type UploadProgress,
   type UploadStage,
-  uploader,
+  uploadMedia,
 } from "@/services/upload";
 
 interface UploadState {
@@ -18,9 +20,11 @@ interface UploadState {
 const STAGE_TEXT: Record<UploadStage, string> = {
   analyze: "分析媒体信息...",
   complete: "完成...",
-  compress: "压缩中...",
+  completing: "保存文件...",
+  compress: "压缩图片...",
+  initializing: "初始化上传...",
   md5: "计算 MD5...",
-  upload: "上传中...",
+  uploading: "上传中...",
 };
 
 export function useFileUpload() {
@@ -45,13 +49,8 @@ export function useFileUpload() {
   const uploadSingleFile = useCallback(
     async (
       file: File,
-      options?: {
-        analyze?: boolean;
-        compress?: boolean;
-        maxSizeMB?: number;
-        isPrivate?: boolean;
-      }
-    ): Promise<OSSFile | null> => {
+      options?: MediaUploadOptions
+    ): Promise<UploadedFile | null> => {
       try {
         setUploadState({
           error: null,
@@ -60,7 +59,7 @@ export function useFileUpload() {
           stage: "",
           stageText: "准备上传...",
         });
-        const result = await uploader.upload(file, {
+        const result = await uploadMedia(file, {
           ...DEFAULT_UPLOAD_OPTIONS,
           ...options,
           onProgress: (p: UploadProgress) => {
@@ -100,14 +99,9 @@ export function useFileUpload() {
   const uploadMultipleFiles = useCallback(
     async (
       files: File[],
-      options?: {
-        analyze?: boolean;
-        compress?: boolean;
-        maxSizeMB?: number;
-        isPrivate?: boolean;
-      },
+      options?: MediaUploadOptions,
       locationMap?: Map<File, { lat: number; lng: number }>
-    ): Promise<OSSFile[]> => {
+    ): Promise<UploadedFile[]> => {
       if (files.length === 0) {
         return [];
       }
@@ -119,13 +113,13 @@ export function useFileUpload() {
           stage: "",
           stageText: "准备上传...",
         });
-        const results: OSSFile[] = [];
+        const results: UploadedFile[] = [];
         const total = files.length;
 
         for (let i = 0; i < files.length; i += 1) {
           const fileLocation = locationMap?.get(files[i]);
           // biome-ignore lint/performance/noAwaitInLoops: uploads are intentionally sequential to preserve progress order
-          const result = await uploader.upload(files[i], {
+          const result = await uploadMedia(files[i], {
             ...DEFAULT_UPLOAD_OPTIONS,
             ...options,
             location: fileLocation,
@@ -143,6 +137,8 @@ export function useFileUpload() {
           results.push(result);
         }
 
+        // 两个文件保存完成后再按当前文件接口关联实况照片。
+        await linkLivePhotoPairs(results);
         setUploadState({
           error: null,
           isUploading: false,
@@ -150,8 +146,6 @@ export function useFileUpload() {
           stage: "complete",
           stageText: "全部上传完成",
         });
-        // 上传完成后自动关联实况照片
-        await uploader.associateLivePhotos(results);
         return results;
       } catch (error) {
         const err = error as Error;

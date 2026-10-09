@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { type ChangeEvent, type DragEvent, useMemo, useState } from "react";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { DEFAULT_UPLOAD_OPTIONS, type OSSFile } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, type UploadedFile } from "@/services/upload";
 import {
   extractGPSFromImage,
   type GPSCoordinates,
@@ -28,7 +28,7 @@ interface SelectedFile {
 
 function TestUploadPage() {
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<OSSFile[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const { uploadMultipleFiles, uploadState } = useFileUpload();
 
@@ -241,7 +241,7 @@ function TestUploadPage() {
           <div className="grid divide-y divide-[#e5e7eb] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             <Status label="进度" value={`${uploadState.progress}%`} />
             <Status label="阶段" value={uploadState.stageText || "等待选择"} />
-            <Status label="接口" value="/file/upload/complete" />
+            <Status label="接口" value="/uploads/{id}/complete" />
           </div>
 
           {!!uploadState.error && (
@@ -257,7 +257,7 @@ function TestUploadPage() {
             <div className="m-5 rounded-md border border-[#b7dec8] bg-[#f2fbf5] p-4">
               <p className="font-medium text-[#166534] text-sm">服务端返回</p>
               {uploadedFiles.map((file) => (
-                <div className="mt-3 flex gap-2 text-sm" key={file.sec_uid}>
+                <div className="mt-3 flex gap-2 text-sm" key={file.uid}>
                   <MapPin
                     aria-hidden="true"
                     className="mt-0.5 h-4 w-4 shrink-0 text-[#166534]"

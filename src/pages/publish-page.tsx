@@ -29,7 +29,7 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 import { useCreateTopic } from "@/hooks/use-topics";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { serializeToHtml } from "@/lib/serialize-html";
-import { DEFAULT_UPLOAD_OPTIONS, type OSSFile } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, type UploadedFile } from "@/services/upload";
 
 type ContentMode = "richtext" | "markdown";
 
@@ -108,7 +108,7 @@ export default function PublishPage() {
     setIsSubmitting(true);
     try {
       const newItems = mediaItems.filter((item) => item.type === "new");
-      let uploadedFiles: OSSFile[] = [];
+      let uploadedFiles: UploadedFile[] = [];
 
       if (newItems.length > 0) {
         const filesToUpload: File[] = [];
@@ -155,7 +155,7 @@ export default function PublishPage() {
           }
         } else {
           if (uploadedFiles[offset]) {
-            fileSecUids.push(uploadedFiles[offset].sec_uid);
+            fileSecUids.push(uploadedFiles[offset].uid);
           }
           offset += 1;
           if (item.data.videoFile) {

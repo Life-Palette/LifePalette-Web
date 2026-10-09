@@ -2,7 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { usersApi } from "@/services/api";
-import { DEFAULT_UPLOAD_OPTIONS, uploader } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, uploadMedia } from "@/services/upload";
 import type { UpdateProfileData } from "@/types";
 
 export const useUpdateProfile = () => {
@@ -10,21 +10,21 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      let avatarSecUID: string | undefined;
-      let backgroundSecUID: string | undefined;
+      let avatarUID: string | undefined;
+      let backgroundUID: string | undefined;
 
       if (data.avatarFile) {
-        const uploaded = await uploader.upload(data.avatarFile, {
+        const uploaded = await uploadMedia(data.avatarFile, {
           ...DEFAULT_UPLOAD_OPTIONS,
         });
-        avatarSecUID = uploaded.sec_uid;
+        avatarUID = uploaded.uid;
       }
 
       if (data.backgroundFile) {
-        const uploaded = await uploader.upload(data.backgroundFile, {
+        const uploaded = await uploadMedia(data.backgroundFile, {
           ...DEFAULT_UPLOAD_OPTIONS,
         });
-        backgroundSecUID = uploaded.sec_uid;
+        backgroundUID = uploaded.uid;
       }
 
       const updateData: Record<string, unknown> = {};
@@ -61,11 +61,11 @@ export const useUpdateProfile = () => {
       if (data.website !== undefined) {
         updateData.website = data.website;
       }
-      if (avatarSecUID) {
-        updateData.avatar_sec_uid = avatarSecUID;
+      if (avatarUID) {
+        updateData.avatar_uid = avatarUID;
       }
-      if (backgroundSecUID) {
-        updateData.background_sec_uid = backgroundSecUID;
+      if (backgroundUID) {
+        updateData.background_uid = backgroundUID;
       }
 
       const res = await usersApi.updateMe(updateData);

@@ -6,7 +6,7 @@ const HEX_COLOR_PATTERN = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 export interface ColorItem {
   count: number;
   hex: string;
-  id: number;
+  id: string;
   isPrimary?: boolean;
   percentage?: number;
   // 代表图片（用于卡片背景）
@@ -18,7 +18,9 @@ export interface ColorItem {
 }
 
 // 文件项类型 - 与 PostImage 兼容
-export interface FileItem extends PostImage {}
+export interface FileItem extends PostImage {
+  id: string;
+}
 
 // 计算颜色亮度
 export function getLuminance(hex: string): number {

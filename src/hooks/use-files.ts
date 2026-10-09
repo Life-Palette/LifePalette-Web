@@ -17,7 +17,7 @@ const transformFile = (f: Record<string, unknown>): UserFileImage => ({
   lat: f.lat || 0,
   lng: f.lng || 0,
   name: f.name || "",
-  sec_uid: f.sec_uid || String(f.id),
+  sec_uid: f.uid,
   type: f.type || "image/jpeg",
   url: f.url,
   videoSrc: f.live_photo_video?.url || null,
@@ -41,7 +41,7 @@ export const useInfiniteUserFiles = (
         page_size: params?.size || 20,
         preset: params?.preset,
         sort: params?.sort,
-        user_sec_uid: userSecUid,
+        user_uid: userSecUid,
       }),
     {
       enabled: !!userSecUid,

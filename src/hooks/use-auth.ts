@@ -15,14 +15,15 @@ export const useCurrentUser = () => {
         http.get("/common/ip").catch((error: unknown) => {
           console.error("解析用户 IP 失败:", error);
         });
-        // 统一 id 为 sec_uid
-        return { ...res.result, id: res.result.sec_uid };
+        return res.result;
       } catch {
         return null;
       }
     },
     queryKey: queryKeys.users.me(),
     retry: false,
+    // 同时适配已有查询缓存，避免热更新后继续沿用旧 id。
+    select: (user) => (user ? { ...user, id: user.uid } : null),
     staleTime: 10 * 60 * 1000,
   });
 };

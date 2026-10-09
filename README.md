@@ -92,7 +92,7 @@
 <details>
 <summary><b>🖼️ 媒体管理</b></summary>
 
-- 智能图片压缩
+- 浏览器端媒体元数据与颜色分析
 - Blurhash 优雅加载
 - Live Photo 播放
 - EXIF 元数据提取
@@ -215,6 +215,25 @@ src/
 ├── services/           # API 服务
 ├── types/              # TypeScript 类型
 └── utils/              # 工具函数
+```
+
+## 文件上传
+
+用户端与 admin 均使用 `@life-palette/uploader` 的 `createUploader`。
+依赖使用 npm 发布版本：`@life-palette/uploader@2.0.0` 与 `@life-palette/media@0.2.3`。
+JPEG、PNG、WebP 压缩保留原始 EXIF 数据；动画和其他格式保留原文件。
+
+上传前默认使用包内 `compressImage` 压缩图片（目标 1 MB，可通过 `compress: false` 关闭），
+再使用 `analyzeMedia` 提取实际上传文件的 MD5、尺寸、EXIF、颜色和预览信息，处理后的文件通过
+`POST /api/v1/uploads` 初始化、预签名 URL 上传、
+`POST /api/v1/uploads/{id}/complete` 保存。头像和背景更新使用返回的 `uid`。
+照片墙的隐私设置、手动选择的 GPS 和实况照片关联沿用当前后端契约。
+旧 `/file/upload/*` 已移除，`createUploader` 仅采用当前预签名上传协议。
+
+运行上传契约验证（模拟服务端和对象存储，不写入真实数据）：
+
+```bash
+node scripts/test-upload.mjs
 ```
 
 ## 📄 License

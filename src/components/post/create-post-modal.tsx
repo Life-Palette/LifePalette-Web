@@ -34,7 +34,7 @@ import { TagsInput } from "@/components/ui/tags-input";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { deserializeHtml, serializeToHtml } from "@/lib/serialize-html";
-import { DEFAULT_UPLOAD_OPTIONS, type OSSFile } from "@/services/upload";
+import { DEFAULT_UPLOAD_OPTIONS, type UploadedFile } from "@/services/upload";
 import type { Post, PostImage } from "@/types";
 
 type EditableTopicTag =
@@ -122,7 +122,7 @@ export default function CreatePostModal({
       try {
         // 1. 上传新文件
         const newItems = mediaItems.filter((item) => item.type === "new");
-        let uploadedFiles: OSSFile[] = [];
+        let uploadedFiles: UploadedFile[] = [];
 
         if (newItems.length > 0) {
           const filesToUpload: File[] = [];
@@ -187,7 +187,7 @@ export default function CreatePostModal({
             }
           } else {
             if (uploadedFiles[uploadedFileOffset]) {
-              fileSecUids.push(uploadedFiles[uploadedFileOffset].sec_uid);
+              fileSecUids.push(uploadedFiles[uploadedFileOffset].uid);
             }
             // 跳过图片，如果有配对的视频文件也跳过
             uploadedFileOffset += 1;

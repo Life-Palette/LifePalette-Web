@@ -28,10 +28,12 @@ export default function ColorPalettePage() {
   // 获取颜色统计数据 - 使用无限滚动
   const {
     data: colorStatsData,
+    error: colorStatsError,
     isLoading: isLoadingStats,
     fetchNextPage: fetchNextColors,
     hasNextPage: hasMoreColors,
     isFetchingNextPage: isFetchingMoreColors,
+    refetch: refetchColors,
   } = useInfiniteQuery({
     enabled: !!user?.id,
     getNextPageParam: (lastPage) => {
@@ -89,7 +91,7 @@ export default function ColorPalettePage() {
         allItems.push({
           count: item.file_count || 0,
           hex: item.hex,
-          id: item.color_id,
+          id: item.hex,
           isPrimary: false,
           percentage: item.percentage,
           representativeImage,
@@ -103,7 +105,7 @@ export default function ColorPalettePage() {
 
   // 总颜色数和图片数
   const totalColors =
-    colorStatsData?.pages?.[0]?.result?.pagination?.total || colors.length;
+    colorStatsData?.pages?.[0]?.result?.total ?? colors.length;
   const totalImages = colors.reduce((acc, c) => acc + c.count, 0);
 
   // 相关文件 - Go 后端返回格式: { sec_uid, name, url, type, width, height, blurhash, created_at }
@@ -117,8 +119,9 @@ export default function ColorPalettePage() {
         allFiles.push({
           blurhash: item.blurhash || "",
           height: item.height || 400,
-          id: item.sec_uid || item.id,
+          id: item.uid,
           name: item.name || "",
+          sec_uid: item.uid,
           type: item.type || "image/jpeg",
           url: item.url,
           width: item.width || 400,
@@ -226,6 +229,15 @@ export default function ColorPalettePage() {
         <div className="relative mx-auto max-w-6xl px-4 py-6">
           {isLoading ? (
             <ColorPaletteSkeleton viewMode={viewMode} />
+          ) : colorStatsError ? (
+            <div className="flex flex-col items-center gap-4 py-24">
+              <p className="text-muted-foreground">
+                色彩数据加载失败：{colorStatsError.message}
+              </p>
+              <Button onClick={() => refetchColors()} variant="outline">
+                重试
+              </Button>
+            </div>
           ) : colors.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24">
               <div className="relative">
