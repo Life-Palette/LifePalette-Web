@@ -48,7 +48,7 @@ export const useInfiniteTopics = (params?: {
         search: params?.keywords,
         sort: params?.sort,
         tag_id: params?.tagId,
-        user_sec_uid: params?.userSecUid,
+        user_uid: params?.userSecUid,
       }),
     { transform: transformTopic }
   );

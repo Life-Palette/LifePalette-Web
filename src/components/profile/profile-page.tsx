@@ -165,7 +165,11 @@ export default function ProfilePage({
   const collectMutation = useCollectTopic();
 
   // 获取用户统计数据
-  const { data: userStats } = useUserStats(targetUserId);
+  const {
+    data: userStats,
+    error: statsError,
+    refetch: refetchStats,
+  } = useUserStats(targetUserId);
 
   // 获取目标用户信息（如果查看其他用户）
   const { data: targetUserData, isLoading: isLoadingTargetUser } =
@@ -275,14 +279,14 @@ export default function ProfilePage({
 
   // 统计数据
   const stats = [
-    { label: "动态", value: userStats?.topic_count?.toString() || "0" },
+    { label: "动态", value: userStats?.topic_count?.toString() ?? "—" },
     {
       label: "关注",
-      value: userStats?.following_count?.toString() || "0",
+      value: userStats?.following_count?.toString() ?? "—",
     },
     {
       label: "粉丝",
-      value: userStats?.follower_count?.toString() || "0",
+      value: userStats?.follower_count?.toString() ?? "—",
     },
   ];
 
@@ -564,6 +568,14 @@ export default function ProfilePage({
               </div>
             ))}
           </div>
+          {!!statsError && (
+            <div className="mt-3 flex items-center gap-2 text-muted-foreground text-sm">
+              <span>统计数据加载失败</span>
+              <Button onClick={() => refetchStats()} size="sm" variant="ghost">
+                重试
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

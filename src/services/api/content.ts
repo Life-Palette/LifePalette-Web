@@ -9,7 +9,7 @@ export interface TopicParams {
   search?: string;
   sort?: string;
   tag_id?: number;
-  user_sec_uid?: string;
+  user_uid?: string;
 }
 
 export const topicsApi = {
