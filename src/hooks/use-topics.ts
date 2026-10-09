@@ -60,8 +60,7 @@ export const useInfiniteLikedTopics = (userSecUid?: string) =>
     (page) => usersApi.getLikes(userSecUid ?? "", { page, page_size: 20 }),
     {
       enabled: !!userSecUid,
-      transform: (item: Record<string, unknown>) =>
-        transformTopic((item.topic as Record<string, unknown>) || item),
+      transform: transformTopic,
     }
   );
 
@@ -73,8 +72,7 @@ export const useInfiniteCollectedTopics = (userSecUid?: string) =>
       usersApi.getCollections(userSecUid ?? "", { page, page_size: 20 }),
     {
       enabled: !!userSecUid,
-      transform: (item: Record<string, unknown>) =>
-        transformTopic((item.topic as Record<string, unknown>) || item),
+      transform: transformTopic,
     }
   );
 

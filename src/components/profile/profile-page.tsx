@@ -317,7 +317,7 @@ export default function ProfilePage({
   return (
     <div className="space-y-6">
       {/* 个人信息区域 - 使用 shadcn Card */}
-      <Card className="group relative overflow-hidden border-border/50 transition-all hover:border-border">
+      <Card className="group relative overflow-hidden border-border/50 pt-0 transition-all hover:border-border">
         {/* 背景图片区域 - 带视差效果 */}
         <div className="relative h-52 w-full overflow-hidden rounded-t-xl">
           {displayUser.background_file?.url ? (
