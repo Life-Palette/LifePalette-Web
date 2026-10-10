@@ -217,7 +217,9 @@ export default function CreatePostModal({
         onClose();
       } catch (error) {
         console.error(editMode ? "更新失败:" : "提交失败:", error);
-        toast.error(editMode ? "更新失败，请重试" : "提交失败，请重试");
+        toast.error(editMode ? "更新失败" : "提交失败", {
+          description: error instanceof Error ? error.message : "请稍后重试",
+        });
       }
     },
   });
@@ -384,6 +386,15 @@ export default function CreatePostModal({
                   </div>
                   <Progress className="h-2" value={uploadState.progress} />
                 </div>
+              )}
+
+              {!!uploadState.error && (
+                <p
+                  className="rounded-md bg-red-50 p-3 text-red-600 text-sm"
+                  role="alert"
+                >
+                  {uploadState.error.message}
+                </p>
               )}
 
               {/* 标签 */}

@@ -185,7 +185,9 @@ export default function PublishPage() {
       });
     } catch (error) {
       console.error("提交失败:", error);
-      toast.error("提交失败，请重试");
+      toast.error("提交失败", {
+        description: error instanceof Error ? error.message : "请稍后重试",
+      });
       setIsSubmitting(false);
     }
   };
@@ -304,6 +306,15 @@ export default function PublishPage() {
                 disabled={uploadState.isUploading}
                 onChange={setMediaItems}
               />
+
+              {!!uploadState.error && (
+                <p
+                  className="rounded-md bg-red-50 p-3 text-red-600 text-sm"
+                  role="alert"
+                >
+                  {uploadState.error.message}
+                </p>
+              )}
 
               {/* 标签 */}
               <div className="space-y-1.5">

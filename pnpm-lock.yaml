@@ -185,11 +185,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@life-palette/media':
-        specifier: 0.2.3
-        version: 0.2.3
+        specifier: 0.2.4
+        version: 0.2.4
       '@life-palette/uploader':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.0.1
+        version: 2.0.1
       '@mapbox/mapbox-gl-language':
         specifier: ^1.0.1
         version: 1.0.1(mapbox-gl@3.30.0)
@@ -726,11 +726,11 @@ packages:
     peerDependencies:
       solid-js: ^1.8.8
 
-  '@life-palette/media@0.2.3':
-    resolution: {integrity: sha512-BfCxXm+Yq4MUVsGLtCB5TGSRz7Q7yV6StpKjKQWc8bTw95zsZqJznXCutioGAdVkE7gcNafekfvCrKv8vuuViw==}
+  '@life-palette/media@0.2.4':
+    resolution: {integrity: sha512-VnDjhmXohfVyzCOBcehMSj08v/CjEUoZzkwiTDNLi2w9hVCGYhqkmk/SJmZju0dwJN/tTwRcbRamAoSnQIXvJQ==}
 
-  '@life-palette/uploader@2.0.0':
-    resolution: {integrity: sha512-SezmD6y/fTgcJsgaaK9QfXVXIUYwostJ9D3To58mclwMZ/NUEvkaDAPtwzXt7jlr1Yy6eH2+d6jS4fiHt0UECw==}
+  '@life-palette/uploader@2.0.1':
+    resolution: {integrity: sha512-hnV02gPaWSmpxL3FMk1lws8MaORtuzjkZY6tZ8QOYWECKLRBlMcBz9BUC1wC+cQRkjANQ4hUwLICeZPA96kdtQ==}
 
   '@manypkg/find-root@3.1.0':
     resolution: {integrity: sha512-BcSqCyKhBVZ5YkSzOiheMCV41kqAFptW6xGqYSTjkVTl9XQpr+pqHhwgGCOHQtjDCv7Is6EFyA14Sm5GVbVABA==}
@@ -5215,16 +5215,16 @@ snapshots:
       '@solid-primitives/utils': 6.4.1(solid-js@1.9.15)
       solid-js: 1.9.15
 
-  '@life-palette/media@0.2.3':
+  '@life-palette/media@0.2.4':
     dependencies:
       arthash: 0.5.0
       blurhash: 2.0.5
       metaprobe: 0.0.1
       spark-md5: 3.0.2
 
-  '@life-palette/uploader@2.0.0':
+  '@life-palette/uploader@2.0.1':
     dependencies:
-      '@life-palette/media': 0.2.3
+      '@life-palette/media': 0.2.4
       browser-image-compression: 2.0.2
 
   '@manypkg/find-root@3.1.0':

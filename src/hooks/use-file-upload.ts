@@ -105,6 +105,9 @@ export function useFileUpload() {
       if (files.length === 0) {
         return [];
       }
+      let currentFileIndex = 0;
+      let currentStage = "准备上传";
+      let currentProgress = 0;
       try {
         setUploadState({
           error: null,
@@ -117,6 +120,8 @@ export function useFileUpload() {
         const total = files.length;
 
         for (let i = 0; i < files.length; i += 1) {
+          currentFileIndex = i;
+          currentStage = "准备上传";
           const fileLocation = locationMap?.get(files[i]);
           // biome-ignore lint/performance/noAwaitInLoops: uploads are intentionally sequential to preserve progress order
           const result = await uploadMedia(files[i], {
@@ -125,6 +130,8 @@ export function useFileUpload() {
             location: fileLocation,
             onProgress: (p: UploadProgress) => {
               const totalProgress = ((i + p.percent / 100) / total) * 100;
+              currentProgress = Math.round(totalProgress);
+              currentStage = STAGE_TEXT[p.stage];
               setUploadState({
                 error: null,
                 isUploading: true,
@@ -138,6 +145,7 @@ export function useFileUpload() {
         }
 
         // 两个文件保存完成后再按当前文件接口关联实况照片。
+        currentStage = "关联实况照片";
         await linkLivePhotoPairs(results);
         setUploadState({
           error: null,
@@ -148,12 +156,22 @@ export function useFileUpload() {
         });
         return results;
       } catch (error) {
-        const err = error as Error;
+        const reason = error instanceof Error ? error.message : String(error);
+        const status =
+          error instanceof Error &&
+          "status" in error &&
+          typeof error.status === "number"
+            ? `（HTTP ${error.status}）`
+            : "";
+        const err = new Error(
+          `第 ${currentFileIndex + 1}/${files.length} 个文件「${files[currentFileIndex].name}」在${currentStage}阶段失败${status}：${reason}`,
+          { cause: error }
+        );
         console.error("批量文件上传失败", err);
         setUploadState({
           error: err,
           isUploading: false,
-          progress: 0,
+          progress: currentProgress,
           stage: "",
           stageText: "",
         });
