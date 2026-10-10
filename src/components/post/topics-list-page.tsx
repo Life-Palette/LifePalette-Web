@@ -33,7 +33,7 @@ type EditableTopicTag =
 
 export default function TopicsListPage({
   activeTab,
-  sortBy = "created_at,desc",
+  sortBy,
   title,
   icon,
   emptyMessage = "暂无内容",
