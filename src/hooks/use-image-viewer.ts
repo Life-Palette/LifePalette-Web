@@ -264,6 +264,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
         "thumbnails",
         "info",
       ],
+      onClose: initialOptions.onClose,
       onImageLoad:
         initialOptions.onImageLoad ||
         ((_imgObj: ViewerItem, _idx: number) => undefined),

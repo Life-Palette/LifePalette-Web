@@ -189,6 +189,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
   const selectModeRef = useRef(selectMode);
   const filteredFilesRef = useRef<FileData[]>([]);
   const fileDetailCache = useRef<Map<string, FileData>>(new Map());
+  const pendingFileDetails = useRef(new Map<string, Promise<FileData>>());
 
   // 图片预览状态
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -265,7 +266,7 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         page_size: -1,
         preset: "mini",
         sort: "taken_at,desc",
-        user_sec_uid: secUid,
+        user_uid: secUid,
       });
       return response;
     },
@@ -278,7 +279,31 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     if (!filesData?.result?.list) {
       return [];
     }
-    return filesData.result.list.filter((file) => file.lng && file.lat);
+    return filesData.result.list
+      .filter(
+        (file) =>
+          typeof file.lng === "number" &&
+          Number.isFinite(file.lng) &&
+          typeof file.lat === "number" &&
+          Number.isFinite(file.lat)
+      )
+      .map((file) => ({
+        ...file,
+        blurhash: file.blurhash || "",
+        createdAt: file.created_at,
+        deviceMake: file.device_make,
+        deviceModel: file.device_model,
+        exposureTime: file.exposure_time,
+        fNumber: file.f_number,
+        focalLength: file.focal_length,
+        height: file.height || 0,
+        lensModel: file.lens_model,
+        sec_uid: file.uid,
+        takenAt: file.taken_at,
+        updatedAt: file.updated_at,
+        videoSrc: null,
+        width: file.width || 0,
+      }));
   }, [filesData]);
 
   // 同步 filteredFiles 到 ref
@@ -286,32 +311,85 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
     filteredFilesRef.current = filteredFiles;
   }, [filteredFiles]);
 
-  // 打开图片预览
-  const openImagePreview = useCallback((fileData: FileData) => {
-    const needsFormatConversion =
-      fileData.url.includes("aliyuncs.com") &&
-      CONVERTIBLE_IMAGE_PATTERN.test(fileData.name);
+  const loadFileDetail = useCallback(
+    (fileData: FileData): Promise<FileData> => {
+      const uid = fileData.sec_uid;
+      const cached = fileDetailCache.current.get(uid);
+      if (cached) {
+        return Promise.resolve(cached);
+      }
+      const pending = pendingFileDetails.current.get(uid);
+      if (pending) {
+        return pending;
+      }
+      const request = filesApi
+        .getBySecUid(uid)
+        .then((res) => {
+          const detail = res.result;
+          if (!detail) {
+            throw new Error("文件详情为空");
+          }
+          const enriched: FileData = {
+            ...fileData,
+            address: detail.address,
+            deviceMake: detail.device_make,
+            deviceModel: detail.device_model,
+            exposureTime: detail.exposure_time,
+            fNumber: detail.f_number,
+            focalLength: detail.focal_length,
+            iso: detail.iso,
+            lensModel: detail.lens_model,
+            name: detail.name,
+            sec_uid: detail.uid,
+            takenAt: detail.taken_at,
+            videoSrc: detail.live_photo_video?.url || null,
+          };
+          fileDetailCache.current.set(uid, enriched);
+          return enriched;
+        })
+        .finally(() => pendingFileDetails.current.delete(uid));
+      pendingFileDetails.current.set(uid, request);
+      return request;
+    },
+    []
+  );
 
-    const mainSrc = needsFormatConversion
-      ? `${fileData.url}?x-oss-process=image/format,jpeg/quality,q_95`
-      : fileData.url;
+  // 预览前按需读取详情，实况视频地址不进入地图列表。
+  const openImagePreview = useCallback(
+    async (file: FileData) => {
+      let fileData: FileData;
+      try {
+        fileData = await loadFileDetail(file);
+      } catch (error) {
+        console.error("读取预览详情失败:", error);
+        return;
+      }
+      const needsFormatConversion =
+        fileData.url.includes("aliyuncs.com") &&
+        CONVERTIBLE_IMAGE_PATTERN.test(fileData.name);
 
-    setPreviewImages([
-      {
-        blurhash: fileData.blurhash,
-        height: fileData.height,
-        lat: fileData.lat,
-        lng: fileData.lng,
-        name: fileData.name,
-        sec_uid: fileData.sec_uid,
-        type: fileData.type,
-        url: mainSrc,
-        videoSrc: fileData.videoSrc,
-        width: fileData.width,
-      },
-    ]);
-    setPreviewOpen(true);
-  }, []);
+      const mainSrc = needsFormatConversion
+        ? `${fileData.url}?x-oss-process=image/format,jpeg/quality,q_95`
+        : fileData.url;
+
+      setPreviewImages([
+        {
+          blurhash: fileData.blurhash,
+          height: fileData.height,
+          lat: fileData.lat,
+          lng: fileData.lng,
+          name: fileData.name,
+          sec_uid: fileData.sec_uid,
+          type: fileData.type,
+          url: mainSrc,
+          videoSrc: fileData.videoSrc,
+          width: fileData.width,
+        },
+      ]);
+      setPreviewOpen(true);
+    },
+    [loadFileDetail]
+  );
 
   // 渲染弹窗内容（纯渲染，不请求接口）
   const renderPopup = useCallback(
@@ -371,16 +449,13 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
         )
         .addTo(map.current);
 
-      const popup = currentPopup.current;
-      setTimeout(() => {
-        const img = popup
-          .getElement()
-          ?.querySelector(".popup-preview-image") as HTMLElement;
-        if (img && photoIndex !== -1) {
-          img.style.cursor = "pointer";
-          img.addEventListener("click", () => openImagePreview(fileData));
-        }
-      }, 50);
+      const img = currentPopup.current
+        .getElement()
+        ?.querySelector<HTMLElement>(".popup-preview-image");
+      if (img) {
+        img.style.cursor = "pointer";
+        img.addEventListener("click", () => openImagePreview(fileData));
+      }
     },
     [filteredFiles, getThumbnailUrl, openImagePreview]
   );
@@ -399,37 +474,18 @@ const TrackMapView: React.FC<TrackMapViewProps> = ({
 
       // 先用现有数据立即展示弹窗
       renderPopup(coords, fileData, index);
+      const popup = currentPopup.current;
 
       // 异步拉详情，拿到后缓存并刷新弹窗
-      filesApi
-        .getBySecUid(fileSecUid)
-        .then((res) => {
-          const detail = res.result;
-          if (!detail) {
-            return;
-          }
-          const enriched: FileData = {
-            ...fileData,
-            address: detail.address,
-            deviceMake: detail.device_make,
-            deviceModel: detail.device_model,
-            exposureTime: detail.exposure_time,
-            fNumber: detail.f_number,
-            focalLength: detail.focal_length,
-            iso: detail.iso,
-            lensModel: detail.lens_model,
-            name: detail.name || fileData.name,
-            sec_uid: detail.sec_uid,
-            takenAt: detail.taken_at || fileData.takenAt,
-          };
-          fileDetailCache.current.set(fileSecUid, enriched);
-          if (currentPopup.current) {
+      loadFileDetail(fileData)
+        .then((enriched) => {
+          if (currentPopup.current === popup && popup?.isOpen()) {
             renderPopup(coords, enriched, index);
           }
         })
         .catch(() => undefined);
     },
-    [renderPopup]
+    [loadFileDetail, renderPopup]
   );
 
   // 飞到指定位置

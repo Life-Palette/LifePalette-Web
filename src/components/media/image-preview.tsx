@@ -1,5 +1,6 @@
 import { LivePhotoViewer } from "live-photo";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type { ViewerProOptions } from "viewer-pro";
 import type { ImageObj } from "@/hooks/use-image-viewer";
 import { useImageViewer } from "@/hooks/use-image-viewer";
 import type { PostImage } from "@/types";
@@ -18,74 +19,82 @@ export default function ImagePreview({
   onClose,
 }: ImagePreviewProps) {
   const livePhotoViewersRef = useRef(new Map<number, LivePhotoViewer>());
-  const { initWithPostImages, openPreview, closePreview } = useImageViewer({
-    onImageLoad: (_imgObj: ImageObj, _idx: number) => {
-      if (_imgObj.type !== "live-photo") {
-        return;
-      }
-
-      // 对于 live-photo，创建 LivePhotoViewer 实例
-      const demoSource = {
-        photoSrc: _imgObj.src || "",
-        videoSrc: _imgObj.videoSrc || "",
-      };
-      const container = document.getElementById(`live-photo-container-${_idx}`);
-
-      if (!container) {
-        return;
-      }
-
-      const { placeholderId } = container.dataset;
-      const removePlaceholder = () => {
-        if (!placeholderId) {
+  const viewerOptions = useMemo<ViewerProOptions>(
+    () => ({
+      onClose,
+      onImageLoad: (_imgObj: ImageObj, _idx: number) => {
+        if (_imgObj.type !== "live-photo") {
           return;
         }
-        document.getElementById(placeholderId)?.remove();
-      };
 
-      // 等待布局稳定后再获取尺寸并初始化 LivePhotoViewer
-      requestAnimationFrame(() => {
-        const rect = container.getBoundingClientRect();
-        const width = rect.width || undefined;
-        const height = rect.height || undefined;
-
-        // 创建 LivePhotoViewer 实例
-        livePhotoViewersRef.current.set(
-          _idx,
-          new LivePhotoViewer({
-            container,
-            height,
-            imageCustomization: {
-              attributes: {
-                alt: "Live Photo",
-                loading: "lazy",
-              },
-              styles: {
-                objectFit: "contain",
-              },
-            },
-            photoSrc: demoSource.photoSrc,
-            videoSrc: demoSource.videoSrc,
-            width,
-          })
+        // 对于 live-photo，创建 LivePhotoViewer 实例
+        const demoSource = {
+          photoSrc: _imgObj.src || "",
+          videoSrc: _imgObj.videoSrc || "",
+        };
+        const container = document.getElementById(
+          `live-photo-container-${_idx}`
         );
 
-        // 等待 live-photo 图片加载完成后移除 blurhash 占位
+        if (!container) {
+          return;
+        }
+
+        const { placeholderId } = container.dataset;
+        const removePlaceholder = () => {
+          if (!placeholderId) {
+            return;
+          }
+          document.getElementById(placeholderId)?.remove();
+        };
+
+        // 等待布局稳定后再获取尺寸并初始化 LivePhotoViewer
         requestAnimationFrame(() => {
-          const image = container.querySelector("img");
-          if (!image) {
-            removePlaceholder();
-            return;
-          }
-          if (image.complete) {
-            removePlaceholder();
-            return;
-          }
-          image.addEventListener("load", removePlaceholder, { once: true });
+          const rect = container.getBoundingClientRect();
+          const width = rect.width || undefined;
+          const height = rect.height || undefined;
+
+          // 创建 LivePhotoViewer 实例
+          livePhotoViewersRef.current.set(
+            _idx,
+            new LivePhotoViewer({
+              container,
+              height,
+              imageCustomization: {
+                attributes: {
+                  alt: "Live Photo",
+                  loading: "lazy",
+                },
+                styles: {
+                  objectFit: "contain",
+                },
+              },
+              photoSrc: demoSource.photoSrc,
+              videoSrc: demoSource.videoSrc,
+              width,
+            })
+          );
+
+          // 等待 live-photo 图片加载完成后移除 blurhash 占位
+          requestAnimationFrame(() => {
+            const image = container.querySelector("img");
+            if (!image) {
+              removePlaceholder();
+              return;
+            }
+            if (image.complete) {
+              removePlaceholder();
+              return;
+            }
+            image.addEventListener("load", removePlaceholder, { once: true });
+          });
         });
-      });
-    },
-  });
+      },
+    }),
+    [onClose]
+  );
+  const { initWithPostImages, openPreview, closePreview } =
+    useImageViewer(viewerOptions);
 
   // 当图片列表变化时更新viewer
   useEffect(() => {
@@ -106,7 +115,7 @@ export default function ImagePreview({
     if (!isOpen) {
       closePreview();
     }
-  }, [isOpen, initialIndex, images.length, openPreview, closePreview]);
+  }, [isOpen, initialIndex, images, openPreview, closePreview]);
 
   // 监听viewer的关闭事件
   useEffect(() => {
