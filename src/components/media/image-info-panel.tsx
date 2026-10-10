@@ -150,7 +150,7 @@ export default function ImageInfoPanel({
           lng: d.lng,
           name: d.name || "",
           province: d.province,
-          secUid: d.sec_uid,
+          secUid: d.uid,
           size: d.size || 0,
           takenAt: d.taken_at,
           type: d.type || "",

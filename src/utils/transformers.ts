@@ -11,7 +11,7 @@ export function transformTopic(t: any): Post {
       blurhash: f.blurhash || "",
       height: f.height || 0,
       name: f.name || "",
-      sec_uid: f.sec_uid || f.id,
+      sec_uid: f.uid,
       type: f.type || "image/jpeg",
       url: f.url,
       videoSrc: f.live_photo_video?.url || null,
