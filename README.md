@@ -17,6 +17,12 @@
 
 </div>
 
+## Versioned releases and deployment
+
+The frontend uses Changesets to manage releases. Before merging an application change, run `pnpm changeset`, select `lifepalette-web`, choose `patch`, `minor`, or `major`, and commit the generated changeset file. Changesets opens or updates a `chore: release` PR against `main`; merging that PR creates a GitHub release and triggers a GHCR image build with version, `latest`, and commit-SHA tags.
+
+To enable automatic Dokploy deployment, add the HTTPS Dokploy panel URL as the `DOKPLOY_URL` Actions variable and add `DOKPLOY_API_KEY` as an Actions secret. The image is still published when these values are absent, but deployment is skipped. In repository Settings → Actions → General, allow GitHub Actions to create and approve pull requests.
+
 ---
 
 ## 关于拾色

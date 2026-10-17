@@ -1,57 +1,95 @@
-name: Publish frontend container
+name: Publish and deploy frontend release
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
-  workflow_dispatch:
-
-concurrency:
-  group: frontend-container-${{ github.ref }}
-  cancel-in-progress: true
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: frontend-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'changeset-release/')
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Check out released source
         uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Read release version and commit
+        id: release
+        run: |
+          version=$(node -p "require('./package.json').version")
+          commit=$(git rev-parse HEAD)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate image tags and labels
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/life-palette/lifepalette-web
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-
-
       - name: Build and publish image
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          tags: |
+            ghcr.io/life-palette/lifepalette-web:${{ steps.release.outputs.tag }}
+            ghcr.io/life-palette/lifepalette-web:latest
+            ghcr.io/life-palette/lifepalette-web:sha-${{ steps.release.outputs.commit }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/Life-Palette/LifePalette-Web
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.release.outputs.commit }}
           build-args: |
             VITE_API_BASE_URL=https://api.lpalette.cn/api/v1
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Update and deploy in Dokploy
+        env:
+          DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOCKER_IMAGE: ghcr.io/life-palette/lifepalette-web:${{ steps.release.outputs.tag }}
+        run: |
+          if [[ -z "$DOKPLOY_URL" || -z "$DOKPLOY_API_KEY" ]]; then
+            echo "Image published. Automatic Dokploy deployment was skipped because DOKPLOY_URL or DOKPLOY_API_KEY is not configured." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [[ "$DOKPLOY_URL" != https://* ]]; then
+            echo "DOKPLOY_URL must use HTTPS; refusing to send the API key over an unencrypted connection." >&2
+            exit 1
+          fi
+
+          base_url="${DOKPLOY_URL%/}"
+          update_response=$(curl --fail-with-body --silent --show-error \
+            --request POST "$base_url/api/application.update" \
+            --header "x-api-key: $DOKPLOY_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data "{\"applicationId\":\"x9DH8vh8D6GrgwkwiVgEq\",\"dockerImage\":\"$DOCKER_IMAGE\",\"registryUrl\":\"ghcr.io\"}")
+          printf '%s' "$update_response" | jq -e 'if type == "object" and has("success") then .success == true else true end' >/dev/null
+
+          deploy_response=$(curl --fail-with-body --silent --show-error \
+            --request POST "$base_url/api/application.deploy" \
+            --header "x-api-key: $DOKPLOY_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data '{"applicationId":"x9DH8vh8D6GrgwkwiVgEq"}')
+          printf '%s' "$deploy_response" | jq -e 'if type == "object" and has("success") then .success == true else true end' >/dev/null
+          echo "Dokploy deployment was triggered for $DOCKER_IMAGE." >> "$GITHUB_STEP_SUMMARY"
