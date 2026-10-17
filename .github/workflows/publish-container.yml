@@ -60,7 +60,7 @@ jobs:
           build-args: |
             VITE_API_BASE_URL=https://api.lpalette.cn/api/v1
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max,ignore-error=true
 
       - name: Update and deploy in Dokploy
         env:
@@ -84,12 +84,16 @@ jobs:
             --header "x-api-key: $DOKPLOY_API_KEY" \
             --header "Content-Type: application/json" \
             --data "{\"applicationId\":\"x9DH8vh8D6GrgwkwiVgEq\",\"dockerImage\":\"$DOCKER_IMAGE\",\"registryUrl\":\"ghcr.io\"}")
-          printf '%s' "$update_response" | jq -e 'if type == "object" and has("success") then .success == true else true end' >/dev/null
+          if [[ -n "$update_response" ]]; then
+            printf '%s' "$update_response" | jq -e 'if type == "object" and has("success") then .success == true else true end' >/dev/null
+          fi
 
           deploy_response=$(curl --fail-with-body --silent --show-error \
             --request POST "$base_url/api/application.deploy" \
             --header "x-api-key: $DOKPLOY_API_KEY" \
             --header "Content-Type: application/json" \
             --data '{"applicationId":"x9DH8vh8D6GrgwkwiVgEq"}')
-          printf '%s' "$deploy_response" | jq -e 'if type == "object" and has("success") then .success == true else true end' >/dev/null
+          if [[ -n "$deploy_response" ]]; then
+            printf '%s' "$deploy_response" | jq -e 'if type == "object" and has("success") then .success == true else true end' >/dev/null
+          fi
           echo "Dokploy deployment was triggered for $DOCKER_IMAGE." >> "$GITHUB_STEP_SUMMARY"
