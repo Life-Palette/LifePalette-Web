@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useState } from "react";
 import LoginModal from "@/components/auth/login-modal";
 import BackToTop from "@/components/common/back-to-top";
 import FloatingNavBar from "@/components/layout/floating-nav-bar";
-import Header from "@/components/layout/Header";
+import Header from "@/components/layout/header";
 import { useIsAuthenticated } from "@/hooks/use-auth";
 
 interface PageLayoutProps {
