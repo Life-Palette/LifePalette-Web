@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 1343fb9: Publish the frontend container and deploy it only after a Changesets release.
+
 
 ## ...main
 
