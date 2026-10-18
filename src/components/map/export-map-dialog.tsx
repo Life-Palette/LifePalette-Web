@@ -1,10 +1,10 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Download, Eye } from "lucide-react";
-import type { Map as MapboxMap } from "mapbox-gl";
 import type React from "react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import TrackMapView from "@/components/map/track-map-view";
+import type { MapHandle } from "@/components/map/map-embed";
+import TrackMapView from "@/components/map/map-embed";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,11 +29,13 @@ interface ExportMapDialogProps {
   cities: CityData[];
   onOpenChange: (open: boolean) => void;
   open: boolean;
+  secUid?: string;
 }
 
 const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
   open,
   onOpenChange,
+  secUid,
 }) => {
   const { user } = useIsAuthenticated();
   const [isExporting, setIsExporting] = useState(false);
@@ -46,7 +48,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
   });
   const [watermarkConfig, setWatermarkConfig] = useState({
     enabled: true,
-    text: user?.name || user?.email || "我的足迹",
+    text:
+      user && "name" in user && typeof user.name === "string"
+        ? user.name
+        : "我的足迹",
   });
 
   // 使用 ref 存储地图视图状态，避免触发重渲染
@@ -63,10 +68,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
   });
   const editorMapFrameRef = useRef<HTMLDivElement>(null);
   const mapReadyHandlerRef = useRef<
-    ((readyMap: MapboxMap | null) => void) | null
+    ((readyMap: MapHandle | null) => void) | null
   >(null);
 
-  const handleMapReady = useCallback((readyMap: MapboxMap | null) => {
+  const handleMapReady = useCallback((readyMap: MapHandle | null) => {
     mapReadyHandlerRef.current?.(readyMap);
   }, []);
 
@@ -85,32 +90,11 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
     return exportContainer;
   }, [exportConfig.height, exportConfig.width]);
 
-  const waitForMapRender = useCallback(
-    (mapInstance: MapboxMap) =>
-      new Promise<void>((resolve) => {
-        let resolved = false;
-        const finish = () => {
-          if (resolved) {
-            return;
-          }
-          resolved = true;
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-        };
-
-        const timeout = window.setTimeout(finish, 3000);
-        mapInstance.resize();
-        mapInstance.triggerRepaint();
-        mapInstance.once("idle", () => {
-          window.clearTimeout(timeout);
-          finish();
-        });
-      }),
-    []
-  );
-
   const buildMapImage = useCallback(
-    (mapInstance: MapboxMap, scale: number) => {
-      const mapCanvas = mapInstance.getCanvas();
+    async (mapInstance: MapHandle, scale: number) => {
+      const mapCanvas = new Image();
+      mapCanvas.src = await mapInstance.exportImage(scale);
+      await mapCanvas.decode();
       const outputCanvas = document.createElement("canvas");
       outputCanvas.width = exportConfig.width * scale;
       outputCanvas.height = exportConfig.height * scale;
@@ -170,14 +154,14 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
       const root = createRoot(exportContainer);
 
       try {
-        const mapInstance = await new Promise<MapboxMap>((resolve, reject) => {
+        const mapInstance = await new Promise<MapHandle>((resolve, reject) => {
           let resolved = false;
           const timeout = window.setTimeout(() => {
             if (!resolved) {
               resolved = true;
               reject(new Error("地图加载超时"));
             }
-          }, 15_000);
+          }, 60_000);
 
           mapReadyHandlerRef.current = (readyMap) => {
             if (resolved || !readyMap) {
@@ -202,7 +186,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
                   customZoom={exportZoom}
                   minHeight="100%"
                   onReady={handleMapReady}
-                  secUid={user?.sec_uid}
+                  secUid={secUid}
                   showGallery={false}
                 />
               </div>
@@ -210,8 +194,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
           );
         });
 
-        await waitForMapRender(mapInstance);
-        return buildMapImage(mapInstance, scale);
+        return await buildMapImage(mapInstance, scale);
       } finally {
         mapReadyHandlerRef.current = null;
         root.unmount();
@@ -223,8 +206,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
       createExportContainer,
       exportConfig.width,
       handleMapReady,
-      user?.sec_uid,
-      waitForMapRender,
+      secUid,
     ]
   );
 
@@ -235,7 +217,10 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
       if (numValue >= 100 || value === "") {
         setExportConfig((current) => ({
           ...current,
-          [type]: value === "" ? 100 : Math.max(100, numValue),
+          [type]:
+            value === ""
+              ? 100
+              : Math.min(4096, Math.max(100, Math.round(numValue))),
         }));
       }
     },
@@ -510,7 +495,7 @@ const ExportMapDialog: React.FC<ExportMapDialogProps> = ({
                 <TrackMapView
                   minHeight="100%"
                   onViewChange={handleMapViewChange}
-                  secUid={user?.sec_uid}
+                  secUid={secUid}
                   showGallery={false}
                 />
               </div>

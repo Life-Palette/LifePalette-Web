@@ -16,7 +16,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { useTheme } from "@/components/common/theme-provider";
 import LottieAnimation from "@/components/lottie/lottie-animation";
 import ExportMapDialog from "@/components/map/export-map-dialog";
-import TrackMapView from "@/components/map/track-map-view";
+import TrackMapView from "@/components/map/map-embed";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +72,7 @@ const TrackPage: React.FC<TrackPageProps> = ({
   }, [theme]);
 
   // 如果传入了 userId，则查看其他用户的轨迹；否则查看当前用户的
-  const targetUserId = propUserId || user?.sec_uid;
+  const targetUserId = propUserId || user?.id;
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [sortBy, setSortBy] = useState<
     "photoCount" | "lastVisitAt" | "firstVisitAt"
@@ -109,7 +109,7 @@ const TrackPage: React.FC<TrackPageProps> = ({
 
   // 复制分享链接
   const handleCopyShareLink = useCallback(() => {
-    const secUid = user?.sec_uid;
+    const secUid = targetUserId;
     if (!secUid) {
       toast.error("无法生成链接，请稍后再试");
       return;
@@ -123,7 +123,7 @@ const TrackPage: React.FC<TrackPageProps> = ({
       .catch(() => {
         toast.error("复制失败，请手动复制链接");
       });
-  }, [user?.sec_uid]);
+  }, [targetUserId]);
 
   const _formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("zh-CN", {
@@ -637,6 +637,7 @@ const TrackPage: React.FC<TrackPageProps> = ({
         cities={citiesWithCoords}
         onOpenChange={setShowExportDialog}
         open={showExportDialog}
+        secUid={targetUserId}
       />
 
       {/* 选中城市的详细信息弹窗 */}

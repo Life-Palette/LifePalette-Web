@@ -190,9 +190,6 @@ importers:
       '@life-palette/uploader':
         specifier: 2.0.1
         version: 2.0.1
-      '@mapbox/mapbox-gl-language':
-        specifier: ^1.0.1
-        version: 1.0.1(mapbox-gl@3.30.0)
       '@platejs/basic-nodes':
         specifier: ^53.0.0
         version: 53.0.0(platejs@53.3.11(@types/react@19.3.0)(immer@10.2.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)(use-sync-external-store@1.6.0(react@19.3.0)))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -244,9 +241,6 @@ importers:
       lucide-react:
         specifier: ^1.47.0
         version: 1.47.0(react@19.3.0)
-      mapbox-gl:
-        specifier: ^3.30.0
-        version: 3.30.0
       metaprobe:
         specifier: ^0.0.1
         version: 0.0.1
@@ -743,11 +737,6 @@ packages:
   '@manypkg/tools@2.1.2':
     resolution: {integrity: sha512-6QEf6yqFbETdwGITKq57aYoPfX/3K8XFNwsAlx0C1M7o8cb79sv1M3w+tWuWvIcSbNqrLF7OD7YpZMVVz335hQ==}
     engines: {node: '>=20.0.0'}
-
-  '@mapbox/mapbox-gl-language@1.0.1':
-    resolution: {integrity: sha512-gL58ojl7gaWLfbSISoB2QJEfTK3j+NKvPH9og0r+c3bd5BNqhY19Eb4OPfDc5+dGmjW03LhtZBc4n2b7Xn8kjA==}
-    peerDependencies:
-      mapbox-gl: '>=0.29.0'
 
   '@modelcontextprotocol/sdk@1.29.0':
     resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
@@ -3422,9 +3411,6 @@ packages:
   magicast@0.5.5:
     resolution: {integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==}
 
-  mapbox-gl@3.30.0:
-    resolution: {integrity: sha512-26m0CSBszLkvbdVWf2oIZ3SjqCuResxJKEbupwwSyNwbwJAcgnMhDy2Yl5cSgtUxeamUJ1UeXRqpBmGEUVaAeQ==}
-
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
@@ -5241,10 +5227,6 @@ snapshots:
       jju: 1.4.0
       tinyglobby: 0.2.17
       yaml: 2.9.0
-
-  '@mapbox/mapbox-gl-language@1.0.1(mapbox-gl@3.30.0)':
-    dependencies:
-      mapbox-gl: 3.30.0
 
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:
@@ -7867,8 +7849,6 @@ snapshots:
       '@babel/parser': 7.29.7
       '@babel/types': 7.29.7
       source-map-js: 1.2.1
-
-  mapbox-gl@3.30.0: {}
 
   markdown-table@3.0.4: {}
 

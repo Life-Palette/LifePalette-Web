@@ -1,4 +1,3 @@
-import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import {
   Aperture,
   Calendar,
@@ -12,12 +11,10 @@ import {
   Ruler,
   Timer,
 } from "lucide-react";
-import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ViewerItem } from "viewer-pro";
-import { MAPBOX_TOKEN } from "@/config/mapbox";
+import MapEmbed from "@/components/map/map-embed";
 import { filesApi } from "@/services/api";
-import "mapbox-gl/dist/mapbox-gl.css";
 
 interface FileDetail {
   address?: string;
@@ -115,8 +112,6 @@ export default function ImageInfoPanel({
 }) {
   const [detail, setDetail] = useState<FileDetail | null>(null);
   const [loading, setLoading] = useState(false);
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
 
   useEffect(() => {
     const secUid = viewerItem.id;
@@ -163,54 +158,6 @@ export default function ImageInfoPanel({
       .finally(() => setLoading(false));
   }, [viewerItem]);
 
-  const initMap = useCallback(() => {
-    if (!(detail?.lng && detail?.lat && mapContainer.current)) {
-      return;
-    }
-    if (mapRef.current) {
-      mapRef.current.remove();
-      mapRef.current = null;
-    }
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    try {
-      mapRef.current = new mapboxgl.Map({
-        attributionControl: false,
-        center: [detail.lng, detail.lat],
-        container: mapContainer.current,
-        interactive: false,
-        style: "mapbox://styles/mapbox/dark-v11",
-        zoom: 12,
-      });
-      mapRef.current.addControl(
-        new MapboxLanguage({ defaultLanguage: "zh-Hans" })
-      );
-      mapRef.current.on("load", () => {
-        const map = mapRef.current;
-        if (!map) {
-          return;
-        }
-        new mapboxgl.Marker({ color: "#60a5fa" })
-          .setLngLat([detail.lng ?? 0, detail.lat ?? 0])
-          .addTo(map);
-      });
-    } catch (error: unknown) {
-      console.error("初始化地图失败:", error);
-      mapRef.current = null;
-    }
-  }, [detail]);
-
-  useEffect(() => {
-    if (detail?.lng && detail?.lat) {
-      setTimeout(initMap, 100);
-    }
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, [detail, initMap]);
-
   const device = useMemo(() => {
     if (!detail) {
       return null;
@@ -233,7 +180,11 @@ export default function ImageInfoPanel({
 
   const hasParams =
     detail.fNumber || detail.exposureTime || detail.iso || detail.focalLength;
-  const hasLocation = detail.lng && detail.lat;
+  const hasLocation =
+    typeof detail.lng === "number" &&
+    Number.isFinite(detail.lng) &&
+    typeof detail.lat === "number" &&
+    Number.isFinite(detail.lat);
   const locationText =
     detail.address ||
     [detail.city, detail.province, detail.country].filter(Boolean).join(", ");
@@ -371,7 +322,12 @@ export default function ImageInfoPanel({
               </div>
             )}
             <div className="h-40 overflow-hidden rounded-[10px] border border-white/[0.08]">
-              <div className="size-full" ref={mapContainer} />
+              <MapEmbed
+                interactive={false}
+                isDark
+                location={{ lat: detail.lat ?? 0, lng: detail.lng ?? 0 }}
+                mode="point"
+              />
             </div>
             <div className="mt-1.5 text-center font-mono text-[10px] text-slate-600">
               {detail.lat?.toFixed(6)}, {detail.lng?.toFixed(6)}

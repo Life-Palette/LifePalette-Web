@@ -2,7 +2,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { MapPinOff } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { ThemeProvider, useTheme } from "@/components/common/theme-provider";
-import TrackMapView from "@/components/map/track-map-view";
+import TrackMapView from "@/components/map/map-embed";
 
 const routeApi = getRouteApi("/map/$secUid");
 
