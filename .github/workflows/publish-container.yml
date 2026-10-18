@@ -59,6 +59,7 @@ jobs:
             org.opencontainers.image.revision=${{ steps.release.outputs.commit }}
           build-args: |
             VITE_API_BASE_URL=https://api.lpalette.cn/api/v1
+            VITE_MAP_BASE_URL=${{ vars.VITE_MAP_BASE_URL || 'https://map.lpalette.cn' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max,ignore-error=true
 

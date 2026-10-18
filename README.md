@@ -150,7 +150,7 @@ To enable automatic Dokploy deployment, add the HTTPS Dokploy panel URL as the `
 | **路由状态** | [@tanstack/react-router](https://tanstack.com/router) · [@tanstack/react-query](https://tanstack.com/query) · [@tanstack/react-form](https://tanstack.com/form) · [@tanstack/react-virtual](https://tanstack.com/virtual)                                                                                                       |
 | **UI 样式**  | [TailwindCSS](https://tailwindcss.com/) · [Radix UI](https://www.radix-ui.com/) · [Lucide React](https://lucide.dev/) · [Framer Motion](https://www.framer.com/motion/) · [sonner](https://sonner.emilkowal.ski/)                                                                                                               |
 | **富文本**   | [Plate.js](https://platejs.org/) · [Slate](https://docs.slatejs.org/)                                                                                                                                                                                                                                                           |
-| **地图服务** | [Mapbox GL](https://docs.mapbox.com/mapbox-gl-js/) · [@mapbox/mapbox-gl-language](https://github.com/mapbox/mapbox-gl-language)                                                                                                                                                                                                 |
+| **地图服务** | 独立地图应用（iframe + postMessage；Mapbox SDK 由 map 工程维护）                                                                                                                                                                                                 |
 | **实时通讯** | [Socket.io Client](https://socket.io/)                                                                                                                                                                                                                                                                                          |
 | **媒体处理** | [react-easy-crop](https://github.com/ricardo-ch/react-easy-crop) · [live-photo](https://www.npmjs.com/package/live-photo)                                |
 | **拖拽排序** | [@dnd-kit/core](https://dndkit.com/) · [@dnd-kit/sortable](https://dndkit.com/)                                                                                                                                                                                                                                                 |
@@ -251,3 +251,17 @@ MIT License © 2025 LifePalette
 <p align="center">
   Made with ❤️ by the LifePalette Team
 </p>
+
+
+## 独立地图接入
+
+所有地图通过 `src/components/map/map-embed.tsx` 嵌入相邻的 map 工程。开发时同时运行 Web（9595）和 map（9596）。Web 不需要 Mapbox token。
+
+- `VITE_MAP_BASE_URL`：开发默认 `http://localhost:9596`，生产默认 `https://map.lpalette.cn`。
+- `VITE_API_BASE_URL`：默认 `https://api.lpalette.cn/api/v1`，本地和预发可按需覆盖。
+- 用 `.env.development.local` / `.env.production.local` 覆盖环境配置；Mapbox token 和宿主白名单配置在 map 工程。
+- Docker 支持 `VITE_MAP_BASE_URL` build arg，发布工作流读取同名 Actions variable；修改构建环境变量后需重新构建。
+- `/map/{uid}` 保留为主站分享入口。个人足迹、海报导出、上传选址、照片信息面板和地图卡片均使用同一 iframe 协议。
+- 通过宿主 API 客户端桥接文件列表和详情，不向 iframe 传递登录 token。
+
+完整消息协议见 map 工程 README。

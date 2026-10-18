@@ -9,6 +9,8 @@ RUN pnpm install --frozen-lockfile --registry=https://registry.npmjs.org
 COPY . .
 ARG VITE_API_BASE_URL=https://api.lpalette.cn/api/v1
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ARG VITE_MAP_BASE_URL=https://map.lpalette.cn
+ENV VITE_MAP_BASE_URL=${VITE_MAP_BASE_URL}
 RUN pnpm run build
 
 FROM nginx:alpine

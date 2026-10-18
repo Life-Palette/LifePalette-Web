@@ -30,10 +30,6 @@ export default defineConfig({
           if (id.includes("radix-ui") || id.includes("@radix-ui/")) {
             return "radix-ui";
           }
-          // 地图相关
-          if (id.includes("mapbox-gl") || id.includes("@mapbox/")) {
-            return "map";
-          }
           // 编辑器相关
           if (
             id.includes("platejs") ||
