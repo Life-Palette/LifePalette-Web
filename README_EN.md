@@ -13,8 +13,6 @@
 
 <br>
 
-<!-- ![Preview](https://lpalette.oss-accelerate.aliyuncs.com/prod/32/1764831234905.png?x-oss-process=image/resize,w_1600,m_lfit/format,webp) -->
-
 </div>
 
 ---
@@ -75,7 +73,7 @@ Life is a canvas, and you are the only artist.
 <details>
 <summary><b>🗺️ Map & Track</b></summary>
 
-- Mapbox integration
+- Interactive maps and travel footprints
 - Auto-tag photo locations
 - Track recording and export
 - Generate beautiful footprint posters
@@ -92,7 +90,7 @@ Life is a canvas, and you are the only artist.
 <details>
 <summary><b>🖼️ Media Management</b></summary>
 
-- Smart image compression
+- Browser-based media metadata and color analysis
 - Blurhash elegant loading
 - Live Photo playback
 - EXIF metadata extraction
@@ -144,7 +142,7 @@ Life is a canvas, and you are the only artist.
 | **Routing & State** | [@tanstack/react-router](https://tanstack.com/router) · [@tanstack/react-query](https://tanstack.com/query) · [@tanstack/react-form](https://tanstack.com/form) · [@tanstack/react-virtual](https://tanstack.com/virtual)                                                                                                       |
 | **UI & Styling**    | [TailwindCSS](https://tailwindcss.com/) · [Radix UI](https://www.radix-ui.com/) · [Lucide React](https://lucide.dev/) · [Framer Motion](https://www.framer.com/motion/) · [sonner](https://sonner.emilkowal.ski/)                                                                                                               |
 | **Rich Text**       | [Plate.js](https://platejs.org/) · [Slate](https://docs.slatejs.org/)                                                                                                                                                                                                                                                           |
-| **Map**             | 独立地图应用（iframe + postMessage；Mapbox SDK 由 map 工程维护）                                                                                                                                                                                                 |
+| **Maps**            | Interactive maps, photo locations, and travel footprints |
 | **Real-time**       | [Socket.io Client](https://socket.io/)                                                                                                                                                                                                                                                                                          |
 | **Media**           | [react-easy-crop](https://github.com/ricardo-ch/react-easy-crop) · [live-photo](https://www.npmjs.com/package/live-photo)                                |
 | **Drag & Drop**     | [@dnd-kit/core](https://dndkit.com/) · [@dnd-kit/sortable](https://dndkit.com/)                                                                                                                                                                                                                                                 |
@@ -155,25 +153,29 @@ Life is a canvas, and you are the only artist.
 
 ### Requirements
 
-- Node.js >= 18
-- pnpm >= 8
+- Node.js 24 (matching the project's development environment)
+- pnpm 12.4.2 (see `packageManager` in `package.json`)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/lifepalette.git
-cd lifepalette
+git clone https://github.com/Life-Palette/LifePalette-Web.git
+cd LifePalette-Web
 
 # Install dependencies
 pnpm install
 
 # Copy environment variables
-cp .env.example .env
+cp .env.example .env.local
 
 # Start development server
 pnpm dev
 ```
+
+Fill in your own service settings in `.env.local` before starting. The frontend requires a compatible API service; map features also require a configured map application. Starting the dev server does not start these services.
+
+In PowerShell, use `Copy-Item .env.example .env.local` to copy the configuration file.
 
 ### Available Scripts
 
@@ -182,7 +184,7 @@ pnpm dev          # Start dev server
 pnpm build        # Build for production
 pnpm preview      # Preview production build
 pnpm lint         # Code linting
-pnpm format       # Code formatting
+pnpm lint:fix     # Automatically fix code style issues
 pnpm ui:add       # Add shadcn/ui components
 ```
 
@@ -207,7 +209,6 @@ src/
 │   └── ui/             # UI primitives
 ├── config/             # Configuration
 ├── constants/          # Constants
-├── data/               # Mock data
 ├── hooks/              # Custom hooks
 ├── lib/                # Utilities
 ├── pages/              # Page components

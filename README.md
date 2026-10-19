@@ -13,15 +13,7 @@
 
 <br>
 
-<!-- ![首页预览](https://lpalette.oss-accelerate.aliyuncs.com/prod/32/1764831234905.png?x-oss-process=image/resize,w_1600,m_lfit/format,webp) -->
-
 </div>
-
-## Versioned releases and deployment
-
-The frontend uses Changesets to manage releases. Before merging an application change, run `pnpm changeset`, select `lifepalette-web`, choose `patch`, `minor`, or `major`, and commit the generated changeset file. Changesets opens or updates a `chore: release` PR against `main`; merging that PR creates a GitHub release and triggers a GHCR image build with version, `latest`, and commit-SHA tags.
-
-To enable automatic Dokploy deployment, add the HTTPS Dokploy panel URL as the `DOKPLOY_URL` Actions variable and add `DOKPLOY_API_KEY` as an Actions secret. The image is still published when these values are absent, but deployment is skipped. In repository Settings → Actions → General, allow GitHub Actions to create and approve pull requests.
 
 ---
 
@@ -81,7 +73,7 @@ To enable automatic Dokploy deployment, add the HTTPS Dokploy panel URL as the `
 <details>
 <summary><b>🗺️ 地图轨迹</b></summary>
 
-- Mapbox 地图集成
+- 交互式地图与足迹展示
 - 照片自动定位标记
 - 轨迹记录与导出
 - 生成精美足迹海报
@@ -150,7 +142,7 @@ To enable automatic Dokploy deployment, add the HTTPS Dokploy panel URL as the `
 | **路由状态** | [@tanstack/react-router](https://tanstack.com/router) · [@tanstack/react-query](https://tanstack.com/query) · [@tanstack/react-form](https://tanstack.com/form) · [@tanstack/react-virtual](https://tanstack.com/virtual)                                                                                                       |
 | **UI 样式**  | [TailwindCSS](https://tailwindcss.com/) · [Radix UI](https://www.radix-ui.com/) · [Lucide React](https://lucide.dev/) · [Framer Motion](https://www.framer.com/motion/) · [sonner](https://sonner.emilkowal.ski/)                                                                                                               |
 | **富文本**   | [Plate.js](https://platejs.org/) · [Slate](https://docs.slatejs.org/)                                                                                                                                                                                                                                                           |
-| **地图服务** | 独立地图应用（iframe + postMessage；Mapbox SDK 由 map 工程维护）                                                                                                                                                                                                 |
+| **地图展示** | 交互式地图、照片定位与旅行足迹 |
 | **实时通讯** | [Socket.io Client](https://socket.io/)                                                                                                                                                                                                                                                                                          |
 | **媒体处理** | [react-easy-crop](https://github.com/ricardo-ch/react-easy-crop) · [live-photo](https://www.npmjs.com/package/live-photo)                                |
 | **拖拽排序** | [@dnd-kit/core](https://dndkit.com/) · [@dnd-kit/sortable](https://dndkit.com/)                                                                                                                                                                                                                                                 |
@@ -161,25 +153,29 @@ To enable automatic Dokploy deployment, add the HTTPS Dokploy panel URL as the `
 
 ### 环境要求
 
-- Node.js >= 18
-- pnpm >= 8
+- Node.js 24（与项目开发环境一致）
+- pnpm 12.4.2（见 `package.json` 的 `packageManager`）
 
 ### 安装步骤
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/lifepalette.git
-cd lifepalette
+git clone https://github.com/Life-Palette/LifePalette-Web.git
+cd LifePalette-Web
 
 # 安装依赖
 pnpm install
 
 # 复制环境变量配置
-cp .env.example .env
+cp .env.example .env.local
 
 # 启动开发服务器
 pnpm dev
 ```
+
+启动前，请在 `.env.local` 中填写自己的服务配置。前端需要配套 API 服务；地图功能还需配置可用的地图应用地址。页面启动不代表这些服务已就绪。
+
+PowerShell 用户可用 `Copy-Item .env.example .env.local` 复制配置文件。
 
 ### 可用脚本
 
@@ -188,7 +184,7 @@ pnpm dev          # 启动开发服务器
 pnpm build        # 构建生产版本
 pnpm preview      # 预览生产构建
 pnpm lint         # 代码检查
-pnpm format       # 代码格式化
+pnpm lint:fix     # 自动修复代码规范问题
 pnpm ui:add       # 添加 shadcn/ui 组件
 ```
 
@@ -213,7 +209,6 @@ src/
 │   └── ui/             # UI 基础组件
 ├── config/             # 配置文件
 ├── constants/          # 常量定义
-├── data/               # 模拟数据
 ├── hooks/              # 自定义 Hooks
 ├── lib/                # 工具库
 ├── pages/              # 页面组件
@@ -221,25 +216,6 @@ src/
 ├── services/           # API 服务
 ├── types/              # TypeScript 类型
 └── utils/              # 工具函数
-```
-
-## 文件上传
-
-用户端与 admin 均使用 `@life-palette/uploader` 的 `createUploader`。
-依赖使用 npm 发布版本：`@life-palette/uploader@2.0.0` 与 `@life-palette/media@0.2.3`。
-JPEG、PNG、WebP 压缩保留原始 EXIF 数据；动画和其他格式保留原文件。
-
-上传前默认使用包内 `compressImage` 压缩图片（目标 1 MB，可通过 `compress: false` 关闭），
-再使用 `analyzeMedia` 提取实际上传文件的 MD5、尺寸、EXIF、颜色和预览信息，处理后的文件通过
-`POST /api/v1/uploads` 初始化、预签名 URL 上传、
-`POST /api/v1/uploads/{id}/complete` 保存。头像和背景更新使用返回的 `uid`。
-照片墙的隐私设置、手动选择的 GPS 和实况照片关联沿用当前后端契约。
-旧 `/file/upload/*` 已移除，`createUploader` 仅采用当前预签名上传协议。
-
-运行上传契约验证（模拟服务端和对象存储，不写入真实数据）：
-
-```bash
-node scripts/test-upload.mjs
 ```
 
 ## 📄 License
@@ -251,17 +227,3 @@ MIT License © 2025 LifePalette
 <p align="center">
   Made with ❤️ by the LifePalette Team
 </p>
-
-
-## 独立地图接入
-
-所有地图通过 `src/components/map/map-embed.tsx` 嵌入相邻的 map 工程。开发时同时运行 Web（9595）和 map（9596）。Web 不需要 Mapbox token。
-
-- `VITE_MAP_BASE_URL`：开发默认 `http://localhost:9596`，生产默认 `https://map.lpalette.cn`。
-- `VITE_API_BASE_URL`：默认 `https://api.lpalette.cn/api/v1`，本地和预发可按需覆盖。
-- 用 `.env.development.local` / `.env.production.local` 覆盖环境配置；Mapbox token 和宿主白名单配置在 map 工程。
-- Docker 支持 `VITE_MAP_BASE_URL` build arg，发布工作流读取同名 Actions variable；修改构建环境变量后需重新构建。
-- `/map/{uid}` 保留为主站分享入口。个人足迹、海报导出、上传选址、照片信息面板和地图卡片均使用同一 iframe 协议。
-- 通过宿主 API 客户端桥接文件列表和详情，不向 iframe 传递登录 token。
-
-完整消息协议见 map 工程 README。
