@@ -74,8 +74,8 @@ jobs:
             exit 0
           fi
 
-          if [[ "$DOKPLOY_URL" != https://* ]]; then
-            echo "DOKPLOY_URL must use HTTPS; refusing to send the API key over an unencrypted connection." >&2
+          if [[ "$DOKPLOY_URL" != https://* && "$DOKPLOY_URL" != "http://8.137.127.2:3000" ]]; then
+            echo "DOKPLOY_URL must use HTTPS or the explicitly configured Dokploy IP endpoint." >&2
             exit 1
           fi
 
