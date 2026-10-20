@@ -65,7 +65,8 @@ jobs:
 
       - name: Update and deploy in Dokploy
         env:
-          DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_ALLOW_HTTP: ${{ vars.DOKPLOY_ALLOW_HTTP }}
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
           DOCKER_IMAGE: ghcr.io/life-palette/lifepalette-web:${{ steps.release.outputs.tag }}
         run: |
@@ -74,8 +75,8 @@ jobs:
             exit 0
           fi
 
-          if [[ "$DOKPLOY_URL" != https://* && "$DOKPLOY_URL" != "http://8.137.127.2:3000" ]]; then
-            echo "DOKPLOY_URL must use HTTPS or the explicitly configured Dokploy IP endpoint." >&2
+          if [[ "$DOKPLOY_URL" != https://* && ( "$DOKPLOY_URL" != http://* || "$DOKPLOY_ALLOW_HTTP" != "true" ) ]]; then
+            echo "DOKPLOY_URL must use HTTPS unless DOKPLOY_ALLOW_HTTP is explicitly enabled." >&2
             exit 1
           fi
 
