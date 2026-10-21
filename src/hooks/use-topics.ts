@@ -18,9 +18,9 @@ export const useTopics = (params?: {
   useQuery({
     queryFn: async () => {
       const res = await topicsApi.list({
+        content_preview: true,
         page: params?.page,
         page_size: params?.size,
-        content_preview: true,
         search: params?.keywords,
         sort: params?.sort,
         tag_id: params?.tagId,
@@ -44,9 +44,9 @@ export const useInfiniteTopics = (params?: {
     queryKeys.topics.infinite(params),
     (page) =>
       topicsApi.list({
+        content_preview: true,
         page,
         page_size: params?.size || 20,
-        content_preview: true,
         search: params?.keywords,
         sort: params?.sort,
         tag_id: params?.tagId,

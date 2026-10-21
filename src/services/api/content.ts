@@ -3,10 +3,10 @@ import { http } from "../http";
 // ============ 话题 ============
 
 export interface TopicParams {
+  content_preview?: boolean;
   is_pinned?: boolean;
   page?: number;
   page_size?: number;
-  content_preview?: boolean;
   search?: string;
   sort?: string;
   tag_id?: number;
