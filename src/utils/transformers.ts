@@ -37,7 +37,7 @@ export function transformTopic(t: any): Post {
       name: user.username || "未知用户",
     },
     comments: t.comments_count || t.commentsCount || 0,
-    content: t.content || "",
+    content: t.content_preview || t.content || "",
     contentType: t.content_type || "html",
     createdAt: t.created_at || t.createdAt,
     id: t.sec_uid || String(t.id),

@@ -20,6 +20,7 @@ export const useTopics = (params?: {
       const res = await topicsApi.list({
         page: params?.page,
         page_size: params?.size,
+        content_preview: true,
         search: params?.keywords,
         sort: params?.sort,
         tag_id: params?.tagId,
@@ -45,6 +46,7 @@ export const useInfiniteTopics = (params?: {
       topicsApi.list({
         page,
         page_size: params?.size || 20,
+        content_preview: true,
         search: params?.keywords,
         sort: params?.sort,
         tag_id: params?.tagId,
