@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+### Patch Changes
+
+- 36086d4: Request bounded content previews in topic lists so the server can omit full article bodies from list responses.
+
 ## 1.1.0
 
 ### Minor Changes
