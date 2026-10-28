@@ -3,7 +3,7 @@ import { http } from "../http";
 export const changelogApi = {
   /** 根据标识获取更新日志 */
   getByIdentifier: (identifier: string) =>
-    http.get(`/changelogs/${identifier}`),
+    http.get(`/changelogs/version/${encodeURIComponent(identifier)}`),
 
   /** 获取最新发布的更新日志 */
   getLatest: () => http.get("/changelogs/latest"),
