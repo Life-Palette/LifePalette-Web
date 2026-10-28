@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2
+
+### Patch Changes
+
+- 6ae0e6b: Fix changelog detail pages by fetching entries through the version-specific API route.
+
 ## 1.1.1
 
 ### Patch Changes
