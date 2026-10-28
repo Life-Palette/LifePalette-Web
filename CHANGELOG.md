@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+### Patch Changes
+
+- a7667d5: Update local development ports and map service defaults.
+
 ## 1.1.0
 
 ### Minor Changes
