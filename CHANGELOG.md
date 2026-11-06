@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3
+
+### Patch Changes
+
+- bb1c922: Improve feed and media loading performance with smaller initial pages, responsive image variants, and early API/CDN connections.
+
 ## 1.1.2
 
 ### Patch Changes
