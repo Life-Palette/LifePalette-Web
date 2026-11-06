@@ -5,7 +5,7 @@ import {
   compressImage,
   createUploader,
   detectLivePhotoPairs,
-} from "@life-palette/uploader";
+} from "@life-palette/uploader/web";
 import { config } from "@/config/env";
 import { filesApi } from "@/services/api";
 
@@ -115,4 +115,4 @@ export async function linkLivePhotoPairs(files: UploadedFile[]) {
 }
 
 // biome-ignore lint/performance/noBarrelFile: exposes the package pairing utility used by the media picker
-export { detectLivePhotoPairs } from "@life-palette/uploader";
+export { detectLivePhotoPairs } from "@life-palette/uploader/web";

@@ -26,6 +26,7 @@ interface PostCardProps {
   ) => void;
   onLike: (postId: string) => void;
   onSave: (postId: string) => void;
+  prioritizeImage?: boolean;
   post: Post;
 }
 
@@ -44,6 +45,7 @@ export default function PostCard({
   onLike,
   onSave,
   onClick,
+  prioritizeImage = false,
 }: PostCardProps) {
   const navigate = useNavigate();
 
@@ -96,6 +98,7 @@ export default function PostCard({
               images={post.images}
               maxDisplay={9}
               onImageClick={handleImageClick}
+              prioritizeFirstImage={prioritizeImage}
             />
           </ErrorBoundary>
           {/* 渐变遮罩，让文字更清晰 */}

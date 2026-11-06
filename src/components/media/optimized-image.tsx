@@ -27,7 +27,7 @@ interface OptimizedImageProps {
   }) => void; // 图片加载进度回调
   placeholderFill?: boolean;
   placeholderType?: "blurhash" | "color" | "none";
-  quality?: number; // 图片质量 1-100，默认 10
+  quality?: number; // 图片质量 1-100，默认 70
   showDelay?: number;
   showProgress?: boolean; // 是否显示进度指示器
   width?: number;
@@ -104,7 +104,7 @@ export default function OptimizedImage({
   loading = "lazy",
   showDelay = 500,
   placeholderFill = true,
-  quality = 10,
+  quality = 70,
   noResize = false,
   onLoad,
   onProgress,
@@ -141,7 +141,12 @@ export default function OptimizedImage({
   } else if (isGif) {
     optimizedUrl = image.url;
   } else if (noResize) {
-    optimizedUrl = `${image.url}?x-oss-process=image/resize,w_1600,m_lfit/format,webp`;
+    optimizedUrl += generateOssImageParams(
+      image.width,
+      image.height,
+      1600,
+      quality
+    );
   } else {
     optimizedUrl += generateOssImageParams(
       image.width,

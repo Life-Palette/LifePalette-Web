@@ -14,6 +14,7 @@ interface ImageGalleryProps {
   images: PostImage[];
   maxDisplay?: number;
   onImageClick?: (index: number, e: React.MouseEvent) => void;
+  prioritizeFirstImage?: boolean;
 }
 
 interface ImageGroupItem {
@@ -37,7 +38,7 @@ type ImageGroupClickEvent = CustomEvent<{
   item: ImageGroupItem;
 }>;
 
-function getDisplayUrl(image: PostImage, noResize: boolean) {
+function getDisplayUrl(image: PostImage) {
   if (isVideo(image)) {
     return getVideoThumbnailUrl(image.url);
   }
@@ -48,8 +49,7 @@ function getDisplayUrl(image: PostImage, noResize: boolean) {
     return image.url;
   }
 
-  const targetWidth = noResize ? 1600 : 400;
-  return `${image.url}${generateOssImageParams(image.width, image.height, targetWidth)}`;
+  return `${image.url}${generateOssImageParams(image.width, image.height, 400, 60)}`;
 }
 
 export default function ImageGallery({
@@ -57,6 +57,7 @@ export default function ImageGallery({
   maxDisplay = 9,
   className = "",
   onImageClick,
+  prioritizeFirstImage = false,
 }: ImageGalleryProps) {
   const groupRef = useRef<ImageGroupElement>(null);
 
@@ -64,14 +65,14 @@ export default function ImageGallery({
     () =>
       images.map((image, index) => ({
         alt: image.name,
-        loading: index === 0 ? "eager" : "lazy",
+        loading: index === 0 && prioritizeFirstImage ? "eager" : "lazy",
         objectFit: "cover",
         placeholder: image.blurhash || undefined,
         placeholderFill: Boolean(image.blurhash),
         placeholderType: image.blurhash ? "blurhash" : undefined,
-        src: getDisplayUrl(image, images.length === 1),
+        src: getDisplayUrl(image),
       })),
-    [images]
+    [images, prioritizeFirstImage]
   );
 
   const handleImageClick = useCallback(

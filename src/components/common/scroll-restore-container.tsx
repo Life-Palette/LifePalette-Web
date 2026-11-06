@@ -43,14 +43,19 @@ export default function ScrollRestoreContainer({
       return;
     }
 
-    const scrollX = containerRef.current.scrollLeft;
-    const scrollY = containerRef.current.scrollTop;
-
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
     debounceRef.current = setTimeout(() => {
+      const container = containerRef.current;
+      if (isRestoringRef.current || !container) {
+        return;
+      }
+
+      const scrollX = container.scrollLeft;
+      const scrollY = container.scrollTop;
+
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         const positions = stored ? JSON.parse(stored) : {};

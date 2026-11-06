@@ -10,7 +10,7 @@ import {
 } from "viewer-pro";
 import ImageInfoPanel from "@/components/media/image-info-panel";
 import type { PostImage } from "@/types";
-import { isVideo } from "@/utils/media";
+import { generateOssImageParams, isVideo } from "@/utils/media";
 
 export type {
   TransformChangeState,
@@ -157,6 +157,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
         const image = document.createElement("eos-image");
         const imageWithMetadata = imgObj as ViewerItem & {
           blurhash?: string;
+          displaySrc?: string;
           title?: string;
         };
         image.setAttribute("alt", imageWithMetadata.title || "");
@@ -188,7 +189,9 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
 
       if (imgObj.type === "live-photo") {
         const imageFrame = createImageFrame();
-        imageFrame.appendChild(createEosImage(imgObj.src));
+        imageFrame.appendChild(
+          createEosImage((imgObj as ViewerItem & { displaySrc?: string }).displaySrc || imgObj.src)
+        );
         const livePhotoContainer = document.createElement("div");
         livePhotoContainer.id = `live-photo-container-${idx}`;
         livePhotoContainer.style.position = "absolute";
@@ -218,7 +221,9 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
         contentLayer.appendChild(imageFrame);
       } else {
         const imageFrame = createImageFrame();
-        imageFrame.appendChild(createEosImage(imgObj.src));
+        imageFrame.appendChild(
+          createEosImage((imgObj as ViewerItem & { displaySrc?: string }).displaySrc || imgObj.src)
+        );
         contentLayer.appendChild(imageFrame);
       }
 
@@ -271,7 +276,7 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       // 自定义渲染节点时必须同步手势变换
       onTransformChange:
         initialOptions.onTransformChange || handleTransformChange,
-      // 预加载相邻图片，移动端网络可能较慢，提前加载体验更好
+      // 邻接图已预先转换为适合查看的 AVIF/WebP 尺寸，保留翻页预加载。
       preloadAdjacent: initialOptions.preloadAdjacent ?? true,
       preloadCacheLimit: initialOptions.preloadCacheLimit ?? 3,
       renderNode: initialOptions.renderNode || createCustomRenderNode,
@@ -346,14 +351,19 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       return postImages.map((file) => {
         // 检测是否为视频文件
         const isVideoFile = isVideo(file);
+        const displaySrc = isVideoFile
+          ? file.url
+          : `${file.url}${generateOssImageParams(file.width, file.height, 1600, 80)}`;
 
         return {
           ...file,
           id: file.sec_uid,
           src: file.url,
+          displaySrc,
+          photoSrc: displaySrc,
           thumbnail: isVideoFile
             ? `${file.url}?x-oss-process=video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast`
-            : `${file.url}?x-oss-process=image/resize,w_300,h_200,m_lfit/quality,q_10/format,webp`,
+            : `${file.url}${generateOssImageParams(file.width, file.height, 300, 55)}`,
           title: file.name,
           type: isVideoFile
             ? "video"

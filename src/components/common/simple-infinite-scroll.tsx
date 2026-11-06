@@ -63,13 +63,14 @@ export default function SimpleInfiniteScroll({
   return (
     <div className={className}>
       <ResponsiveMasonry gap={20}>
-        {posts.map((post) => (
+        {posts.map((post, index) => (
           <PostCard
             key={post.id}
             onClick={onPostClick}
             onLike={onLike}
             onSave={onSave}
             post={post}
+            prioritizeImage={index < 4}
           />
         ))}
       </ResponsiveMasonry>

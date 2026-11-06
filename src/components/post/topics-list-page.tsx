@@ -60,7 +60,7 @@ export default function TopicsListPage({
     isFetchingNextPage,
     refetch,
   } = useInfiniteTopics({
-    size: 20,
+    size: 8,
     sort: sortBy,
   });
 

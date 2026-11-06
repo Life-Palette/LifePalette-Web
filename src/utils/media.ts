@@ -56,11 +56,24 @@ export function generateOssImageParams(
   targetWidth: number,
   quality = 10
 ): string {
+  const resizeWidth =
+    originalWidth > 0 ? Math.min(originalWidth, targetWidth) : targetWidth;
+  const supportsAvif =
+    typeof globalThis !== "undefined" && "ImageDecoder" in globalThis;
+
   if (!(originalWidth && originalHeight)) {
-    return `?x-oss-process=image/resize,w_${targetWidth},m_lfit/quality,q_${quality}/format,webp`;
+    const format = supportsAvif && resizeWidth <= 1600 ? "avif" : "webp";
+    return `?x-oss-process=image/resize,w_${resizeWidth},m_lfit/quality,q_${quality}/format,${format}`;
   }
-  const targetHeight = Math.round(
-    (originalHeight / originalWidth) * targetWidth
+  const resizeHeight = Math.round(
+    (originalHeight / originalWidth) * resizeWidth
   );
-  return `?x-oss-process=image/resize,w_${targetWidth},h_${targetHeight},m_lfit/quality,q_${quality}/format,webp`;
+  const canUseAvif =
+    supportsAvif &&
+    resizeWidth <= 4096 &&
+    (!originalWidth || !originalHeight ||
+      (resizeHeight <= 4096 && resizeWidth * resizeHeight <= 9_437_184));
+  const format = canUseAvif ? "avif" : "webp";
+
+  return `?x-oss-process=image/resize,w_${resizeWidth},h_${resizeHeight},m_lfit/quality,q_${quality}/format,${format}`;
 }

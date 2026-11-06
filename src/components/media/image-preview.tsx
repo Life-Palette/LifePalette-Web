@@ -28,8 +28,9 @@ export default function ImagePreview({
         }
 
         // 对于 live-photo，创建 LivePhotoViewer 实例
+        const displaySrc = (_imgObj as ImageObj & { displaySrc?: string }).displaySrc;
         const demoSource = {
-          photoSrc: _imgObj.src || "",
+          photoSrc: displaySrc || _imgObj.src || "",
           videoSrc: _imgObj.videoSrc || "",
         };
         const container = document.getElementById(
