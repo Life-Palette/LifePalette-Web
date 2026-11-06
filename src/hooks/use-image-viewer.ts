@@ -190,7 +190,10 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       if (imgObj.type === "live-photo") {
         const imageFrame = createImageFrame();
         imageFrame.appendChild(
-          createEosImage((imgObj as ViewerItem & { displaySrc?: string }).displaySrc || imgObj.src)
+          createEosImage(
+            (imgObj as ViewerItem & { displaySrc?: string }).displaySrc ||
+              imgObj.src
+          )
         );
         const livePhotoContainer = document.createElement("div");
         livePhotoContainer.id = `live-photo-container-${idx}`;
@@ -222,7 +225,10 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
       } else {
         const imageFrame = createImageFrame();
         imageFrame.appendChild(
-          createEosImage((imgObj as ViewerItem & { displaySrc?: string }).displaySrc || imgObj.src)
+          createEosImage(
+            (imgObj as ViewerItem & { displaySrc?: string }).displaySrc ||
+              imgObj.src
+          )
         );
         contentLayer.appendChild(imageFrame);
       }
@@ -357,10 +363,10 @@ export function useImageViewer(initialOptions: ViewerProOptions = {}) {
 
         return {
           ...file,
-          id: file.sec_uid,
-          src: file.url,
           displaySrc,
+          id: file.sec_uid,
           photoSrc: displaySrc,
+          src: file.url,
           thumbnail: isVideoFile
             ? `${file.url}?x-oss-process=video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast`
             : `${file.url}${generateOssImageParams(file.width, file.height, 300, 55)}`,

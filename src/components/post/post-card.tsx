@@ -26,8 +26,8 @@ interface PostCardProps {
   ) => void;
   onLike: (postId: string) => void;
   onSave: (postId: string) => void;
-  prioritizeImage?: boolean;
   post: Post;
+  prioritizeImage?: boolean;
 }
 
 // 预设的柔和渐变背景组合

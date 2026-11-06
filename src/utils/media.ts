@@ -71,7 +71,7 @@ export function generateOssImageParams(
   const canUseAvif =
     supportsAvif &&
     resizeWidth <= 4096 &&
-    (!originalWidth || !originalHeight ||
+    (!(originalWidth && originalHeight) ||
       (resizeHeight <= 4096 && resizeWidth * resizeHeight <= 9_437_184));
   const format = canUseAvif ? "avif" : "webp";
 
