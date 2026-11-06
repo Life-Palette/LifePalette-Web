@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.4
+
+### Patch Changes
+
+- 24219ef: Add the missing image compression dependency required by the uploader.
+
 ## 1.1.3
 
 ### Patch Changes
