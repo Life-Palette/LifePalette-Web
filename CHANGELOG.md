@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.5
+
+### Patch Changes
+
+- cc3d614: Preserve upload GPS coordinates and manual location changes across publishing and photo wall uploads, including asynchronous media selection.
+
 ## 1.1.4
 
 ### Patch Changes
