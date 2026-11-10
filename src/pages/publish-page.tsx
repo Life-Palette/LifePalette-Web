@@ -30,6 +30,7 @@ import { useCreateTopic } from "@/hooks/use-topics";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { serializeToHtml } from "@/lib/serialize-html";
 import { DEFAULT_UPLOAD_OPTIONS, type UploadedFile } from "@/services/upload";
+import { isValidUploadLocation } from "@/utils/upload/location";
 
 type ContentMode = "richtext" | "markdown";
 
@@ -115,11 +116,7 @@ export default function PublishPage() {
         const locationMap = new Map<File, { lat: number; lng: number }>();
         newItems.forEach((item) => {
           filesToUpload.push(item.data.file);
-          if (
-            !item.data.hasGPS &&
-            item.data.lat !== null &&
-            item.data.lng !== null
-          ) {
+          if (isValidUploadLocation(item.data)) {
             locationMap.set(item.data.file, {
               lat: item.data.lat,
               lng: item.data.lng,

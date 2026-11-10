@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { DEFAULT_UPLOAD_OPTIONS } from "@/services/upload";
+import { isValidUploadLocation } from "@/utils/upload/location";
 
 interface PhotoWallUploaderProps {
   onOpenChange: (open: boolean) => void;
@@ -65,11 +66,7 @@ export default function PhotoWallUploader({
 
       newItems.forEach((item) => {
         filesToUpload.push(item.data.file);
-        if (
-          !item.data.hasGPS &&
-          item.data.lat !== null &&
-          item.data.lng !== null
-        ) {
+        if (isValidUploadLocation(item.data)) {
           locationMap.set(item.data.file, {
             lat: item.data.lat,
             lng: item.data.lng,
