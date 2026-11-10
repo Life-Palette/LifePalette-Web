@@ -36,6 +36,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { deserializeHtml, serializeToHtml } from "@/lib/serialize-html";
 import { DEFAULT_UPLOAD_OPTIONS, type UploadedFile } from "@/services/upload";
 import type { Post, PostImage } from "@/types";
+import { isValidUploadLocation } from "@/utils/upload/location";
 
 type EditableTopicTag =
   | {
@@ -130,12 +131,8 @@ export default function CreatePostModal({
 
           newItems.forEach((item) => {
             filesToUpload.push(item.data.file);
-            // 仅当 EXIF 中没有 GPS 且用户手动设置了位置时，才传给后端
-            if (
-              !item.data.hasGPS &&
-              item.data.lat !== null &&
-              item.data.lng !== null
-            ) {
+            // 采用预览中确认的位置，包括对原有 GPS 的手动修改。
+            if (isValidUploadLocation(item.data)) {
               locationMap.set(item.data.file, {
                 lat: item.data.lat,
                 lng: item.data.lng,

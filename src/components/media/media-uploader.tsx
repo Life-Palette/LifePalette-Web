@@ -23,6 +23,7 @@ import { filesApi } from "@/services/api";
 import { detectLivePhotoPairs } from "@/services/upload";
 import type { PostImage } from "@/types";
 import { extractGPSFromImage } from "@/utils/upload/gps-extractor";
+import { isValidUploadLocation } from "@/utils/upload/location";
 
 // 统一的 MediaItem 类型定义
 type MediaItemType = "existing" | "new";
@@ -41,7 +42,6 @@ interface NewMediaItem extends BaseMediaItem {
   data: {
     file: File;
     videoFile?: File;
-    originalIndex: number;
     hasGPS?: boolean;
     lat?: number;
     lng?: number;
@@ -110,11 +110,7 @@ function UnifiedSortableMediaItem({
   }, [item.id, onRemove]);
 
   // 判断是否有地理位置信息（注意：lat/lng 可能为 0，不能用 !! 判断）
-  const hasLocation =
-    item.data.lat !== undefined &&
-    item.data.lat !== null &&
-    item.data.lng !== undefined &&
-    item.data.lng !== null;
+  const hasLocation = isValidUploadLocation(item.data);
 
   // 获取初始位置（如果有）
   const initialLocation = hasLocation
@@ -281,12 +277,12 @@ export function MediaUploader({
   disabled = false,
   onChange,
 }: MediaUploaderProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [unifiedMediaItems, setUnifiedMediaItems] = useState<
     UnifiedMediaItem[]
   >([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const nextMediaId = useRef(0);
 
   // 拖拽排序传感器
   const sensors = useSensors(
@@ -314,85 +310,65 @@ export function MediaUploader({
   }, [unifiedMediaItems, onChange]);
 
   // 添加新文件到统一列表
-  const addFiles = useCallback(
-    (files: File[]) => {
-      if (files.length === 0) {
-        return;
-      }
+  const addFiles = useCallback((files: File[]) => {
+    if (files.length === 0) {
+      return;
+    }
 
-      const validFiles = files;
+    const validFiles = files;
 
-      const startIndex = selectedFiles.length;
-      const newSelectedFiles = [...selectedFiles, ...validFiles];
-      setSelectedFiles(newSelectedFiles);
+    // Live Photo 配对
+    const livePhotoPairs = detectLivePhotoPairs(validFiles);
+    const livePhotoMap = new Map<File, File>();
+    const pairedVideoFiles = new Set<File>();
+    for (const pair of livePhotoPairs) {
+      livePhotoMap.set(pair.image, pair.video);
+      pairedVideoFiles.add(pair.video);
+    }
+    const displayFiles = validFiles.filter(
+      (file) => !pairedVideoFiles.has(file)
+    );
 
-      // Live Photo 配对
-      const livePhotoPairs = detectLivePhotoPairs(validFiles);
-      const livePhotoMap = new Map<File, File>();
-      const pairedVideoFiles = new Set<File>();
-      for (const pair of livePhotoPairs) {
-        livePhotoMap.set(pair.image, pair.video);
-        pairedVideoFiles.add(pair.video);
-      }
-      const displayFiles = validFiles.filter(
-        (file) => !pairedVideoFiles.has(file)
-      );
+    // 先生成预览；每项 ID 在排序、删除和追加批次后保持不变。
+    const newItems: NewMediaItem[] = displayFiles.map((file) => {
+      const id = `new-${nextMediaId.current}`;
+      nextMediaId.current += 1;
+      return {
+        data: { file, videoFile: livePhotoMap.get(file) },
+        id,
+        type: "new",
+      };
+    });
+    setUnifiedMediaItems((prev) => [...prev, ...newItems]);
 
-      // 先生成预览，GPS信息设为null
-      const newItems: NewMediaItem[] = displayFiles.map(
-        (file, displayIndex) => {
-          const indexInValidFiles = validFiles.indexOf(file);
-          const originalIndex = startIndex + indexInValidFiles;
-          const videoFile = livePhotoMap.get(file);
+    // 按 ID 回填当前仍存在的项，保留解析期间手动选择的位置。
+    Promise.all(
+      newItems.map(async ({ id, data }) => ({
+        gps: await extractGPSFromImage(data.file),
+        id,
+      }))
+    ).then((results) => {
+      const gpsById = new Map(results.map(({ id, gps }) => [id, gps]));
+      setUnifiedMediaItems((prev) =>
+        prev.map((item) => {
+          if (item.type !== "new" || !gpsById.has(item.id)) {
+            return item;
+          }
+          const gps = gpsById.get(item.id);
+          const location = isValidUploadLocation(item.data) ? item.data : gps;
           return {
+            ...item,
             data: {
-              file,
-              hasGPS: undefined,
-              lat: undefined,
-              lng: undefined,
-              originalIndex,
-              videoFile,
+              ...item.data,
+              hasGPS: isValidUploadLocation(gps),
+              lat: location?.lat,
+              lng: location?.lng,
             },
-            id: `new-${Date.now()}-${displayIndex}`,
-            type: "new",
           };
-        }
+        })
       );
-      setUnifiedMediaItems((prev) => [...prev, ...newItems]);
-
-      // 异步批量提取GPS，逐步补齐
-      setTimeout(() => {
-        Promise.all(
-          displayFiles.map(async (file) => {
-            if (file.type.startsWith("image/")) {
-              return await extractGPSFromImage(file);
-            }
-            return null;
-          })
-        ).then((gpsResults) => {
-          setUnifiedMediaItems((prev) =>
-            prev.map((item, idx) => {
-              if (item.type === "new" && idx >= prev.length - newItems.length) {
-                const gpsData =
-                  gpsResults[idx - (prev.length - newItems.length)];
-                return {
-                  ...item,
-                  data: {
-                    ...item.data,
-                    hasGPS: gpsData !== null,
-                    lat: gpsData?.lat,
-                    lng: gpsData?.lng,
-                  },
-                };
-              }
-              return item;
-            })
-          );
-        });
-      }, 0);
-    },
-    [selectedFiles]
-  );
+    });
+  }, []);
 
   // 处理文件选择
   const handleFileChange = useCallback(
@@ -449,31 +425,7 @@ export function MediaUploader({
 
   // 统一的删除媒体项逻辑
   const handleRemoveMediaItem = useCallback((itemId: string) => {
-    setUnifiedMediaItems((prev) => {
-      const item = prev.find((i) => i.id === itemId);
-      if (!item) {
-        return prev;
-      }
-
-      // 如果是新文件，从 selectedFiles 中移除
-      if (item.type === "new") {
-        const { videoFile, originalIndex } = item.data;
-        setSelectedFiles((files) => {
-          if (videoFile) {
-            // Live Photo: 同时删除图片和视频
-            const videoIndex = files.indexOf(videoFile);
-            return files.filter(
-              (_, i) => i !== originalIndex && i !== videoIndex
-            );
-          }
-          // 普通文件
-          return files.filter((_, i) => i !== originalIndex);
-        });
-      }
-
-      // 从统一列表中移除
-      return prev.filter((i) => i.id !== itemId);
-    });
+    setUnifiedMediaItems((prev) => prev.filter((item) => item.id !== itemId));
   }, []);
 
   // 处理添加位置
@@ -532,7 +484,6 @@ export function MediaUploader({
 
   // 重置
   const reset = () => {
-    setSelectedFiles([]);
     setUnifiedMediaItems([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";

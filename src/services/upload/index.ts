@@ -8,6 +8,10 @@ import {
 } from "@life-palette/uploader/web";
 import { config } from "@/config/env";
 import { filesApi } from "@/services/api";
+import {
+  isValidUploadLocation,
+  type UploadLocation,
+} from "@/utils/upload/location";
 
 export const uploader = createUploader({
   apiBaseUrl: config.API_BASE_URL,
@@ -33,7 +37,7 @@ export interface UploadProgress {
 export interface MediaUploadOptions {
   compress?: boolean;
   isPrivate?: boolean;
-  location?: { lat: number; lng: number };
+  location?: UploadLocation;
   maxSizeMB?: number;
   onProgress?: (progress: UploadProgress) => void;
 }
@@ -80,11 +84,12 @@ export async function uploadMedia(
       });
     },
   });
-  if (options.location) {
+  if (isValidUploadLocation(options.location)) {
+    const location = { lat: options.location.lat, lng: options.location.lng };
     if (metadata.image) {
-      Object.assign(metadata.image.exif, options.location);
+      metadata.image.exif = { ...metadata.image.exif, ...location };
     } else if (metadata.video) {
-      metadata.video.exif = { ...metadata.video.exif, ...options.location };
+      metadata.video.exif = { ...metadata.video.exif, ...location };
     }
   }
   const ranges = {
